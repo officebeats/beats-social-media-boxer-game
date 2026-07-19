@@ -543,105 +543,81 @@ function panel(x0,y0,x1,y1,edge,fill)
 end
 
 function warehouse(y0,y1)
- rectfill(0,y0,127,y1,1)
- rectfill(0,y0,127,y0+3,0)
- for x=4,124,16 do pset(x,y0+1,5) end
- for y=y0,y1,7 do
-  line(0,y,127,y,0)
-  local off=(flr((y-y0)/7)%2)*7
-  for x=-7+off,127,14 do line(x,y,x,y+7,5) end
+ rectfill(0,y0,127,y1,0)
+ for y=y0+5,y1,8 do line(0,y,127,y,1) end
+ for x=4,124,13 do
+  local h=9+(x%5)
+  line(x,y0,x,y0+h,5)
+  line(x+1,y0,x+1,y0+h,1)
  end
- for i=0,2 do
-  local x=23+i*41
-  line(x,y0,x,y0+6,5)
-  rectfill(x-4,y0+6,x+4,y0+8,5)
-  line(x-6,y0+9,x+6,y0+9,7)
-  pset(x,y0+10,10)
- end
- line(63,y0+9,63,y0+21,5)
- rectfill(58,y0+21,68,y0+38,8)
- rectfill(58,y0+28,68,y0+31,0)
- line(14,y0+34,24,y0+22,2)
- line(24,y0+22,35,y0+34,2)
- line(17,y0+24,32,y0+36,13)
- circfill(25,y0+32,5,2)
- circfill(25,y0+32,2,0)
- line(82,y0+9,82,y0+20,5)
- rectfill(78,y0+20,86,y0+39,1)
- rect(78,y0+20,86,y0+39,5)
- rectfill(79,y0+28,85,y0+30,0)
- rectfill(92,y0+16,105,y0+39,4)
- rect(92,y0+16,105,y0+39,5)
- circfill(99,y0+23,3,0)
- line(99,y0+26,96,y0+35,0)
- line(99,y0+27,103,y0+34,0)
- line(111,y0+9,111,y0+20,5)
- rectfill(108,y0+20,115,y0+39,1)
- rect(108,y0+20,115,y0+39,5)
- rect(39,y0+25,51,y0+37,5)
- line(39,y0+37,36,y0+42,5)
- line(51,y0+37,54,y0+42,5)
- circfill(45,y0+28,2,0)
- rectfill(43,y0+30,47,y0+32,0)
- for i=0,15 do
-  local x=1+i*8
-  local y=y1-8-(i%4)
-  local sk=i%3==0 and 4 or i%3==1 and 9 or 15
-  circfill(x,y,3,0)
-  rectfill(x-3,y+3,x+3,y1,0)
-  pset(x+1,y-1,sk)
-  if i%4==1 then
-   line(x+2,y+1,x+4,y-4,sk)
-   rectfill(x+3,y-7,x+5,y-4,7)
-   pset(x+4,y-8,6)
-  elseif i%5==0 then
-   line(x-2,y+2,x-5,y-2,sk)
+ rectfill(44,y0,83,y1,1)
+ rectfill(48,y0+3,79,y1-3,0)
+ rect(47,y0+2,80,y1-2,5)
+ line(63,y0+3,63,y1-3,5)
+ rectfill(43,y1-5,84,y1-3,5)
+ rectfill(39,y1-2,88,y1,1)
+ line(20,y0,20,y0+9,5)
+ rectfill(16,y0+9,24,y0+28,8)
+ rectfill(17,y0+17,23,y0+20,0)
+ line(100,y0,100,y0+8,5)
+ rectfill(94,y0+8,106,y0+27,4)
+ rect(94,y0+8,106,y0+27,5)
+ circfill(100,y0+14,3,0)
+ line(100,y0+17,96,y0+25,0)
+ line(100,y0+18,104,y0+25,0)
+ for row=0,1 do
+  for i=0,12 do
+   local x=2+i*10+(row%2)*4
+   local y=y1-10+row*5-(i%3)
+   local sk=i%3==0 and 4 or i%3==1 and 9 or 15
+   circfill(x,y,2,sk)
+   rectfill(x-3,y+2,x+3,y+7,1)
+   pset(x+1,y-1,7)
+   if (i+row)%4==0 then
+    rectfill(x+3,y-5,x+5,y-2,7)
+    pset(x+4,y-5,10)
+   end
   end
  end
 end
 
 function ring_bg()
  cls(0)
- warehouse(22,68)
- rectfill(0,69,127,127,1)
- rectfill(0,116,127,127,5)
- rectfill(0,119,127,127,1)
- line(0,127,47,69,1)
- line(127,127,80,69,1)
- line(32,127,56,69,6)
- line(96,127,72,69,6)
- for y=78,126,12 do line(0,y,127,y,5) end
- for x=12,116,26 do line(x,120,x+2,127,5) end
- circ(64,108,15,5)
- rect(58,102,70,114,5)
- rectfill(4,61,12,113,0)
- rectfill(115,61,123,113,0)
- rectfill(6,63,10,111,2)
- rectfill(117,63,121,111,3)
- line(0,61,6,65,8)
- line(121,65,127,61,8)
- line(0,85,7,81,7)
- line(120,81,127,85,7)
- line(0,101,7,97,12)
- line(120,97,127,101,12)
- rectfill(7,65,120,67,8)
- line(7,81,120,81,7)
- line(7,82,120,82,6)
- rectfill(7,96,120,98,12)
- rectfill(4,60,13,66,13)
- rectfill(114,60,123,66,11)
- pset(8,64,7) pset(119,64,7)
+ warehouse(0,51)
+ for y=52,107 do
+  local i=flr((107-y)*20/55)
+  rectfill(i,y,127-i,y,6)
+  if y%3==0 then
+   for x=i+(y%6),127-i,8 do pset(x,y,13) end
+  end
+ end
+ line(20,52,0,107,8)
+ line(107,52,127,107,8)
+ line(22,55,2,107,7)
+ line(105,55,125,107,7)
+ line(24,58,4,107,12)
+ line(103,58,123,107,12)
+ rectfill(20,48,27,66,0)
+ rectfill(100,48,107,66,0)
+ rectfill(22,49,25,64,7)
+ rectfill(102,49,105,64,7)
+ rect(21,48,26,65,6)
+ rect(101,48,106,65,6)
+ rectfill(24,51,103,53,8)
+ rectfill(24,56,103,57,7)
+ rectfill(24,60,103,62,12)
+ line(0,107,127,107,5)
+ circ(64,88,6,5)
+ rectfill(57,90,71,101,5)
+ rectfill(59,92,69,99,10)
+ rectfill(63,94,65,98,0)
+ pset(64,93,7)
 end
 
 function ring_front()
- line(7,109,120,109,1)
- line(7,110,120,110,6)
- rectfill(4,105,12,114,0)
- rectfill(115,105,123,114,0)
- rectfill(6,105,10,112,2)
- rectfill(117,105,121,112,3)
- pset(8,106,13)
- pset(119,106,11)
+ line(0,106,127,106,0)
+ line(0,107,127,107,7)
+ line(0,108,127,108,6)
 end
 
 function portrait(id,x,y)
@@ -688,7 +664,7 @@ function draw_glove(x,y,r,c,h,d)
  rectfill(x-r+1,y-r,x+r-1,y+r,0)
  rectfill(x-r+1,y-r+1,x+r-1,y+r-1,c)
  rectfill(x-r+2,y-r+1,x+r-2,y-r+1,h)
- pset(x+d*(r-2),y-r+2,h)
+ line(x-d*(r-2),y-r+2,x+d,y-r+2,h)
 end
 
 function draw_boxer(id,x,y,dir,guard,wind,rec,atk,down,sl,shake,mv,stun,bl,bi,ds,inside)
@@ -803,60 +779,59 @@ function draw_boxer(id,x,y,dir,guard,wind,rec,atk,down,sl,shake,mv,stun,bl,bi,ds
     line(px-dir*9,py+2,px-dir*3,py+2,glove)
    end
   end
- local gr=ext==1 and (atk==5 and 5 or 4) or 3
- local r1=rear and gr or 3
- local r2=rear and 3 or gr
+ local gr=ext==1 and 5 or 4
+ local r1=rear and gr or 4
+ local r2=rear and 4 or gr
  draw_glove(g1x,g1y,r1,glove,ghi,dir)
  draw_glove(g2x,g2y,r2,glove,ghi,dir)
 end
 
 function draw_f(f)
  if f.ds>0 then
-  line(f.x-f.dd*18,94,f.x-f.dd*8,94,5)
-  line(f.x-f.dd*15,101,f.x-f.dd*6,101,6)
-  line(f.x-f.dd*14,117,f.x-f.dd*7,117,6)
-  line(f.x-f.dd*11,120,f.x-f.dd*5,120,5)
-  circfill(f.x-f.dd*12,119,1,7)
-  pset(f.x-f.dd*17,117,6) pset(f.x-f.dd*7,121,5)
+  line(f.x-f.dd*18,83,f.x-f.dd*8,83,5)
+  line(f.x-f.dd*15,90,f.x-f.dd*6,90,6)
+  line(f.x-f.dd*14,104,f.x-f.dd*7,104,6)
+  line(f.x-f.dd*11,106,f.x-f.dd*5,106,5)
+  circfill(f.x-f.dd*12,105,1,7)
  end
  local inside=p and o and abs(p.x-o.x)<30
- draw_boxer(f.id,f.x,116,-f.sd,f.guard,f.wind,f.rec,f.atk,f.down,f.sl,f.shake,f.mv,f.stun,f.bl,f.bi,f.ds,inside)
+ draw_boxer(f.id,f.x,105,-f.sd,f.guard,f.wind,f.rec,f.atk,f.down,f.sl,f.shake,f.mv,f.stun,f.bl,f.bi,f.ds,inside)
  if f.shake>0 then
   local sx=f.x-f.sd*8
-  local sy=116-(f.bh and 28 or 42)
+  local sy=105-(f.bh and 28 or 42)
   circfill(sx,sy,2,7) circ(sx,sy,4,10)
   line(sx-7,sy,sx-3,sy,7) line(sx+3,sy,sx+7,sy,7)
   line(sx,sy-7,sx,sy-3,7) line(sx,sy+3,sx,sy+7,7)
   pset(sx-5,sy-4,10) pset(sx+5,sy+4,10)
  end
- if f.bi>0 then circ(f.x-f.sd*10,116-(f.bh and 28 or 40),3,f.ca==3 and 10 or 7) end
+ if f.bi>0 then circ(f.x-f.sd*10,105-(f.bh and 28 or 40),3,f.ca==3 and 10 or 7) end
 end
 
 function hud()
- rectfill(0,0,127,22,0)
- line(0,22,127,22,5)
+ rectfill(0,109,127,127,0)
+ line(0,109,127,109,7)
+ line(0,110,127,110,5)
  if not p then return end
- portrait(p.id,0,2)
- portrait(o.id,111,2)
- print(p.ab,18,0,defs[p.id].ed)
- print(o.ab,102,0,defs[o.id].ed)
- meter(18,5,32,p.hp,p.hm,8,false)
- meter(77,5,32,o.hp,o.hm,8,true)
- meter(18,11,32,p.st,p.sm,12,false)
- meter(77,11,32,o.st,o.sm,12,true)
- meter(18,17,32,p.g,p.gm,10,false)
- meter(77,17,32,o.g,o.gm,10,true)
- panel(53,1,74,21,5,1)
- print("r"..(round or 0),58,3,10)
+ portrait(p.id,1,110)
+ portrait(o.id,110,110)
+ print(p.ab,18,112,defs[p.id].ed)
+ print(o.ab,100,112,defs[o.id].ed)
+ meter(30,111,19,p.g,p.gm,10,false)
+ meter(78,111,19,o.g,o.gm,10,true)
+ meter(18,117,31,p.hp,p.hm,8,false)
+ meter(78,117,31,o.hp,o.hm,8,true)
+ meter(18,123,31,p.st,p.sm,12,false)
+ meter(78,123,31,o.st,o.sm,12,true)
+ panel(53,111,74,127,10,1)
+ print("r"..(round or 0),58,112,10)
  local sec=max(0,flr((rt or 0)/30))
- print(sec<10 and "0"..sec or sec,58,10,7)
- print("h"..flr(p.hy/10),58,17,10)
+ print(sec<10 and "0"..sec or sec,58,120,7)
 end
 
 function draw_title()
  ring_bg()
- draw_boxer(1,33,113,1,1,0,0,0,0,0,0)
- draw_boxer(2,94,113,-1,1,0,0,0,0,0,0)
+ draw_boxer(1,33,105,1,1,0,0,0,0,0,0)
+ draw_boxer(2,94,105,-1,1,0,0,0,0,0,0)
  ring_front()
  panel(13,4,114,48,2,0)
  rectfill(17,7,110,9,8)
@@ -903,10 +878,10 @@ function draw_fight()
  end
  hud()
  if bell>0 then panel(49,43,78,55,10,0) btxt("ding!",54,47,10) end
- if p.cnt>0 then btxt(p.ca==3 and "perfect return!" or "counter!",6,116,10)
- elseif p.bl>0 then btxt("lean block",8,116,6) end
- if p.chain>1 and fr-p.ct<30 then btxt(p.chain.." hit",95,116,10) end
- if p.g<=0 and p.stun>0 then btxt("guard break",39,116,8) end
+ if p.cnt>0 then btxt(p.ca==3 and "perfect return!" or "counter!",6,27,10)
+ elseif p.bl>0 then btxt("lean block",8,27,6) end
+ if p.chain>1 and fr-p.ct<30 then btxt(p.chain.." hit",95,27,10) end
+ if p.g<=0 and p.stun>0 then btxt("guard break",39,34,8) end
  if ht>0 then btxt(htxt,64-#htxt*2,24,10) end
 end
 

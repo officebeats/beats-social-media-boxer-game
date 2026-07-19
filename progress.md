@@ -206,6 +206,17 @@ Atlas-pass verification:
 - Desktop movement, five punch poses, four-hit combo, lean/perfect blocks, committed counters, both full-bout paths, rematch, six-fighter roster, portrait touch, landscape touch, cartridge export, release checks, and public-name scan all pass with no browser errors.
 - Final fixed-seed balance is `52-48` over 100 bouts. The exported cartridge is `24,007` bytes and the source cart is `58,963` bytes.
 
+## Ready 2 Rumble GBC Presentation Pass
+
+- Studied captured gameplay from the separate Game Boy Color adaptation for high-angle ring staging, dither density, thick tri-color ropes, flat crowd bands, oversized glove readability, and a portrait-led bottom HUD.
+- Rebuilt the ring as a widening trapezoid so the canvas owns the action area while the fighters retain the approved lean anatomy, split boxing trunks, and distinct A.B./D. Great face silhouettes.
+- Recompressed the lock-in warehouse into a dark loading door, red heavy bag, boxer poster, two phone-lit spectator rows, and an original yellow lock mark rather than copying the reference game's arena art or branding.
+- Moved health and stamina to the bottom HUD and retained compact yellow guard strips so blocking and counter decisions remain readable on a PICO handheld or phone.
+- Increased glove cluster size and highlight definition without changing the contact-authoritative reach model.
+- Visual verdict reached `93/100` against GBC gameplay frames and the canonical original art reference after desktop contact and portrait-mobile screenshot inspection.
+- Final verification passed release/static checks, all five move poses, four walk frames, quick-step distance, hit-stop and buffered attacks, normal/lean/body/perfect blocks, a `16`-damage committed counter, desktop UI, portrait and landscape touch layouts, a natural-speed result/restart, and zero browser errors.
+- Fixed-seed balance remains `52-48` over 100 bouts. The revised source cart is `58,075` bytes and the exported cartridge is `23,630` bytes.
+
 ## Next Polish Priorities
 
 - Replace existing procedural pose code with authored transition frames for every punch, block, slip, knockdown, and corner idle without expanding the cartridge token count.
