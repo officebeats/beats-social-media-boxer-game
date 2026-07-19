@@ -236,6 +236,15 @@ Atlas-pass verification:
 - Strict screenshot review reached `92/100` across desktop neutral, straight windup, uppercut contact, perfect block, counter impact, portrait mobile, and landscape mobile frames.
 - Final release, movement, animation, combo, defense, mobile, natural-bout, restart, and balance checks pass with zero browser errors. Balance remains `51-49`; the source cart is `58,499` bytes and the exported cartridge is `24,402` bytes.
 
+## Athletic Arcade Anatomy Correction
+
+- Replaced the broad rib-to-waist envelopes with narrower V-shaped torsos while preserving the higher-detail A.B. and D. Great face clusters.
+- Shortened both fighters' trunks above the knee, deepened the center split, and retained tailored waistbands so the clothing reads as boxing trunks instead of a single rounded lower-body block.
+- Rebuilt neutral and movement legs around separate thigh, knee, calf, ankle, sock, and boot masses. Thighs carry the stance, knees break the silhouette, calves taper, and longer toe boxes keep each pose planted.
+- Applied the same lower-body construction to all four walking frames, quick steps, punch windups, contact poses, blocks, and counters without changing glove endpoints, the `28`-pixel body boundary, or hit detection.
+- Strict reference review passed at `91/100` after desktop neutral, straight windup, counter impact, and portrait-mobile screenshot inspection.
+- Release, move, animation, combo, defense, mobile, natural-bout, restart, and 100-bout balance checks pass with zero browser errors. Balance remains `51-49`; the source cart is `58,499` bytes and the exported cartridge is `24,436` bytes.
+
 ## Next Polish Priorities
 
 - Replace existing procedural pose code with authored transition frames for every punch, block, slip, knockdown, and corner idle without expanding the cartridge token count.
