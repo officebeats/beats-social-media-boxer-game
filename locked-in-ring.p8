@@ -54,6 +54,7 @@ end
 
 function title_mode()
  mode=0
+ cam=0 fl=0
  p=nil
  o=nil
  rescode=0
@@ -233,6 +234,7 @@ function knock(d,a)
  d.wind=0 d.rec=0 d.stun=0 d.guard=0 d.sl=0 d.bl=0 d.bi=0 d.bs=0 d.cnt=0 d.ca=0 d.cp=0 d.ds=0
  a.wind=0
  a.rec=18
+ cam=7 fl=3
  sfx(4)
  if d.kd>=3 then
   finish(a==p and 1 or 2,"tko")
@@ -272,11 +274,12 @@ function hit(a,d)
   d.rdef+=pg and 3 or lean and 2 or 1
   d.g-=m.gd*(pg and .25 or lean and .6 or 1)
   a.hy=min(100,a.hy+2)
-  if pg then
+   if pg then
    d.cnt=16+d.pg
    d.ca=3
    d.hy=min(100,d.hy+5)
-   a.stun=3
+    a.stun=3
+    cam=3 fl=2
    d.g=min(d.gm,d.g+1)
    if d==p then htxt="perfect block" ht=24 end
    sfx(5)
@@ -297,6 +300,7 @@ function hit(a,d)
   return
  end
  local mult=1
+ local fin=a.co>0 and a.atk==5 and a.chain>=2
  local cp=a.cp
  if cp>0 then
   mult=1.12+cp*.09
@@ -309,6 +313,7 @@ function hit(a,d)
  end
  if a.fe>0 then mult+=.15 a.fe=0 end
  if a.co>0 then mult+=.1 end
+ if fin then mult+=.18 end
  mult*=.8+.2*a.st/a.sm
  a.hy=min(100,a.hy+m.hy*a.hmul)
  if a.chain>=2 and fr-a.ct<40 and a.hy>=100 then mult+=.2 a.hy=0 end
@@ -319,17 +324,20 @@ function hit(a,d)
   d.st=max(0,d.st-gdm)
  end
  d.hp-=dmg
- d.stun=5+(a.atk>1 and 1 or 0)+cp
+ d.stun=5+(a.atk>1 and 1 or 0)+cp+(fin and 3 or 0)
  a.rcl+=1
  a.rdm+=dmg
  if fr-a.ct<40 then a.chain+=1 else a.chain=1 end
  a.ct=fr
  a.la=a.atk
  a.link=a.atk<5 and 20 or 0
- d.shake=3+cp
- hs=3+(a.atk>1 and 2 or 0)+(cp>1 and 1 or 0)
+ d.shake=(fin and 7 or 3)+cp
+ hs=fin and 7 or 3+(a.atk>1 and 2 or 0)+(cp>1 and 1 or 0)
+ cam=fin and 7 or a.atk>1 and 4 or 2
+ fl=fin and 3 or a.atk>1 and 2 or 0
+ if fin and a==p then htxt="combo finish" ht=24 end
  d.bh=m.ln==0
- if a.atk>=2 and m.ln==1 then d.x=clamp(d.x+d.sd*4,18,110) end
+ if a.atk>=2 and m.ln==1 then d.x=clamp(d.x+d.sd*(fin and 8 or 4),18,110) end
  sfx(a.atk>=2 and 2 or 1)
  if d.hp<=0 or (a.atk>=2 and d.hp<14 and d.kd<2) then
   knock(d,a)
@@ -412,7 +420,7 @@ end
 function move_box(f,mv,lo,hi)
  local burst=0
  if f.ds>0 and f.wind+f.rec+f.stun==0 then
-  burst=f.dd*1.25 f.ds-=1
+  burst=f.dd*1.45 f.ds-=1
  else f.ds=0 end
  local t=f.wind+f.rec+f.stun==0 and mv+burst or 0
  local grip=.3+.24*f.st/f.sm+.04*f.spd
@@ -426,6 +434,8 @@ function move_box(f,mv,lo,hi)
 end
 
 function fight_tick()
+ if cam>0 then cam-=1 end
+ if fl>0 then fl-=1 end
  if bell>0 then bell-=1 end
  if ht>0 then ht-=1 end
  if p.down>0 or o.down>0 then
@@ -534,6 +544,8 @@ end
 
 function warehouse(y0,y1)
  rectfill(0,y0,127,y1,1)
+ rectfill(0,y0,127,y0+3,0)
+ for x=4,124,16 do pset(x,y0+1,5) end
  for y=y0,y1,7 do
   line(0,y,127,y,0)
   local off=(flr((y-y0)/7)%2)*7
@@ -566,12 +578,25 @@ function warehouse(y0,y1)
  line(111,y0+9,111,y0+20,5)
  rectfill(108,y0+20,115,y0+39,1)
  rect(108,y0+20,115,y0+39,5)
- for i=0,11 do
-  local x=3+i*11
-  local y=y1-8-(i%3)
+ rect(39,y0+25,51,y0+37,5)
+ line(39,y0+37,36,y0+42,5)
+ line(51,y0+37,54,y0+42,5)
+ circfill(45,y0+28,2,0)
+ rectfill(43,y0+30,47,y0+32,0)
+ for i=0,15 do
+  local x=1+i*8
+  local y=y1-8-(i%4)
+  local sk=i%3==0 and 4 or i%3==1 and 9 or 15
   circfill(x,y,3,0)
   rectfill(x-3,y+3,x+3,y1,0)
-  if i%3==1 then pset(x+2,y-1,7) end
+  pset(x+1,y-1,sk)
+  if i%4==1 then
+   line(x+2,y+1,x+4,y-4,sk)
+   rectfill(x+3,y-7,x+5,y-4,7)
+   pset(x+4,y-8,6)
+  elseif i%5==0 then
+   line(x-2,y+2,x-5,y-2,sk)
+  end
  end
 end
 
@@ -579,26 +604,40 @@ function ring_bg()
  cls(0)
  warehouse(22,68)
  rectfill(0,69,127,127,1)
+ rectfill(0,116,127,127,5)
+ rectfill(0,119,127,127,1)
  line(0,127,47,69,1)
  line(127,127,80,69,1)
  line(32,127,56,69,6)
  line(96,127,72,69,6)
  for y=78,126,12 do line(0,y,127,y,5) end
+ for x=12,116,26 do line(x,120,x+2,127,5) end
  circ(64,108,15,5)
  rect(58,102,70,114,5)
- rectfill(6,63,10,109,2)
- rectfill(117,63,121,109,3)
+ rectfill(4,61,12,113,0)
+ rectfill(115,61,123,113,0)
+ rectfill(6,63,10,111,2)
+ rectfill(117,63,121,111,3)
+ line(0,61,6,65,8)
+ line(121,65,127,61,8)
+ line(0,85,7,81,7)
+ line(120,81,127,85,7)
+ line(0,101,7,97,12)
+ line(120,97,127,101,12)
  rectfill(7,65,120,67,8)
  line(7,81,120,81,7)
  line(7,82,120,82,6)
  rectfill(7,96,120,98,12)
- rectfill(5,61,12,65,13)
- rectfill(115,61,122,65,11)
+ rectfill(4,60,13,66,13)
+ rectfill(114,60,123,66,11)
+ pset(8,64,7) pset(119,64,7)
 end
 
 function ring_front()
  line(7,109,120,109,1)
  line(7,110,120,110,6)
+ rectfill(4,105,12,114,0)
+ rectfill(115,105,123,114,0)
  rectfill(6,105,10,112,2)
  rectfill(117,105,121,112,3)
  pset(8,106,13)
@@ -639,19 +678,33 @@ function joint(x1,y1,x2,y2,c,b)
  mx+=b
  limb(x1,y1,mx,my,c)
  limb(mx,my,x2,y2,c)
- circfill(mx,my,2,0) circfill(mx,my,1,c)
+ rectfill(mx-2,my-1,mx+2,my+1,0)
+ rectfill(mx-1,my-2,mx+1,my+2,0)
+ rectfill(mx-1,my-1,mx+1,my+1,c)
 end
 
-function draw_boxer(id,x,y,dir,guard,wind,rec,atk,down,sl,shake,mv,stun,bl,bi,ds)
+function draw_glove(x,y,r,c,h,d)
+ rectfill(x-r,y-r+1,x+r,y+r-1,0)
+ rectfill(x-r+1,y-r,x+r-1,y+r,0)
+ rectfill(x-r+1,y-r+1,x+r-1,y+r-1,c)
+ rectfill(x-r+2,y-r+1,x+r-2,y-r+1,h)
+ pset(x+d*(r-2),y-r+2,h)
+end
+
+function draw_boxer(id,x,y,dir,guard,wind,rec,atk,down,sl,shake,mv,stun,bl,bi,ds,inside)
  local d=defs[id]
  local dash=ds and ds>0
  local walk=mv and mv~=0 or dash
  local step=walk and flr(fr/(dash and 1 or 2))%4 or 0
  local bob=wind+rec==0 and (walk and step%2 or flr(fr/10)%2) or 0
- local lean=sl>0 and -dir*7 or stun and stun>0 and -dir*(2+min(2,stun)) or 0
+ local lean=sl>0 and -dir*7 or stun and stun>0 and -dir*(3+min(4,stun)) or 0
  local crouch=sl>0 and 3 or 0
  local rear=atk==2 or atk==4 or atk==5
- if dash then lean+=mv*2 crouch=1 end
+ if dash then lean+=mv*3 crouch=1 end
+ if inside and wind+rec==0 and sl==0 then
+  lean-=dir
+  crouch=max(crouch,1)
+ end
  if guard>0 then
   lean-=dir*(bl and bl>0 and 4 or 1)
   if guard==2 then crouch=max(crouch,2) end
@@ -661,10 +714,10 @@ function draw_boxer(id,x,y,dir,guard,wind,rec,atk,down,sl,shake,mv,stun,bl,bi,ds
   if rec>0 and atk>0 and atk<6 then
    local rm=mvs[atk].re
    ext=rec>=rm-2 and 1 or max(.18,(rec-1)/(rm-3))
-   lean+=dir*flr(ext*(atk==2 and 5 or atk==5 and 4 or rear and 3 or 2))
+   lean+=dir*flr(ext*(atk==2 and 7 or atk==5 and 5 or rear and 4 or 3))
   elseif wind>0 and atk>0 then
-   lean-=dir*(atk==2 and 2 or 1)
-   if atk==4 then crouch=2 elseif atk==5 then crouch=3 end
+   lean-=dir*(atk==2 and 3 or atk==4 and 2 or 1)
+   if atk==4 then crouch=2 elseif atk==5 then crouch=4 end
  end
  x+=shake>0 and shake%2*dir or 0
  y+=bob
@@ -672,7 +725,8 @@ function draw_boxer(id,x,y,dir,guard,wind,rec,atk,down,sl,shake,mv,stun,bl,bi,ds
  local trunks=d.tr
  local glove=d.gl
  local ghi=d.hi
- rectfill(x-10,y+2,x+10,y+4,1)
+ rectfill(x-10,y+1,x+10,y+3,0)
+ line(x-12,y+2,x+12,y+2,0)
  if down>0 then
   rectfill(x-11,y-5,x+7,y+1,0)
   rectfill(x-9,y-4,x+3,y,trunks)
@@ -684,12 +738,12 @@ function draw_boxer(id,x,y,dir,guard,wind,rec,atk,down,sl,shake,mv,stun,bl,bi,ds
  if d.art==1 then pal(2,d.tr) pal(13,d.gl)
  else pal(3,d.tr) pal(11,d.hi) end
  palt(14,true) palt(0,false)
- sspr((d.art-1)*40,0,40,30,x-20+lean,y-54+crouch,40,30,dir<0)
+ sspr((d.art-1)*40,0,40,30,x-18+lean,y-54+crouch,36,30,dir<0)
  local pivot=rear and atk>1 and wind+rec>0
  local alt=step==2 or pivot
  local lx=alt and 80 or (d.art-1)*40
  local ly=alt and 60+(d.art-1)*28 or step%2==1 and 80 or 28
- sspr(lx,ly,40,28,x-20,y-26,40,28,dir<0)
+ sspr(lx,ly,40,28,x-18,y-26,36,28,dir<0)
  palt() pal()
  local ux=x+lean
  local uy=y+crouch
@@ -698,6 +752,10 @@ function draw_boxer(id,x,y,dir,guard,wind,rec,atk,down,sl,shake,mv,stun,bl,bi,ds
  local g1y=uy-34
  local g2x=ux+dir*9
  local g2y=uy-32
+ if inside and guard==0 and wind+rec==0 then
+  g1x=ux-dir*2 g1y=uy-35
+  g2x=ux+dir*6 g2y=uy-34
+ end
  if guard==0 and wind+rec==0 then g1y-=flr(fr/5)%2 g2y+=flr(fr/5)%2 end
  if guard==1 then
   g1x=ux-dir*4 g1y=uy-35
@@ -729,8 +787,8 @@ function draw_boxer(id,x,y,dir,guard,wind,rec,atk,down,sl,shake,mv,stun,bl,bi,ds
   local bend=atk==4 and -dir*(4+flr(3*ext)) or atk==5 and dir*(3+flr(3*ext)) or -dir*flr(3*(1-ext))
   if rear then b1=bend else b2=bend end
  elseif wind>0 and atk==5 then b1=dir*6 end
- local s1x=ux-dir*5+(rear and dir*flr(ext*(atk==2 and 5 or 3)) or 0)
- local s2x=ux+dir*5+(not rear and dir*flr(ext*2) or -dir*flr(ext*2))
+ local s1x=ux-dir*4+(rear and dir*flr(ext*(atk==2 and 5 or 3)) or 0)
+ local s2x=ux+dir*4+(not rear and dir*flr(ext*2) or -dir*flr(ext*2))
  local s1y=sy-(atk==5 and flr(ext*4) or 0)
  joint(s1x,s1y,g1x,g1y,skin,b1)
  joint(s2x,sy,g2x,g2y,skin,b2)
@@ -740,28 +798,36 @@ function draw_boxer(id,x,y,dir,guard,wind,rec,atk,down,sl,shake,mv,stun,bl,bi,ds
   if atk==5 then
    line(px,py+9,px,py+4,ghi)
    line(px-dir*2,py+7,px-dir*2,py+3,glove)
-  else
-   line(px-dir*9,py,px-dir*4,py,ghi)
-   if atk>1 then line(px-dir*7,py+2,px-dir*3,py+2,glove) end
+   else
+    line(px-dir*(atk==2 and 13 or 10),py,px-dir*4,py,ghi)
+    line(px-dir*9,py+2,px-dir*3,py+2,glove)
+   end
   end
- end
- circfill(g1x,g1y,4,0) circfill(g2x,g2y,4,0)
- circfill(g1x,g1y,3,glove) circfill(g2x,g2y,3,glove)
- pset(g1x+dir,g1y-1,ghi) pset(g2x+dir,g2y-1,ghi)
+ local gr=ext==1 and (atk==5 and 5 or 4) or 3
+ local r1=rear and gr or 3
+ local r2=rear and 3 or gr
+ draw_glove(g1x,g1y,r1,glove,ghi,dir)
+ draw_glove(g2x,g2y,r2,glove,ghi,dir)
 end
 
 function draw_f(f)
- draw_boxer(f.id,f.x,116,-f.sd,f.guard,f.wind,f.rec,f.atk,f.down,f.sl,f.shake,f.mv,f.stun,f.bl,f.bi,f.ds)
  if f.ds>0 then
+  line(f.x-f.dd*18,94,f.x-f.dd*8,94,5)
+  line(f.x-f.dd*15,101,f.x-f.dd*6,101,6)
   line(f.x-f.dd*14,117,f.x-f.dd*7,117,6)
   line(f.x-f.dd*11,120,f.x-f.dd*5,120,5)
+  circfill(f.x-f.dd*12,119,1,7)
+  pset(f.x-f.dd*17,117,6) pset(f.x-f.dd*7,121,5)
  end
+ local inside=p and o and abs(p.x-o.x)<30
+ draw_boxer(f.id,f.x,116,-f.sd,f.guard,f.wind,f.rec,f.atk,f.down,f.sl,f.shake,f.mv,f.stun,f.bl,f.bi,f.ds,inside)
  if f.shake>0 then
   local sx=f.x-f.sd*8
   local sy=116-(f.bh and 28 or 42)
-  circ(sx,sy,3,10)
-  line(sx-5,sy,sx-3,sy,7) line(sx+3,sy,sx+5,sy,7)
-  line(sx,sy-5,sx,sy-3,7) line(sx,sy+3,sx,sy+5,7)
+  circfill(sx,sy,2,7) circ(sx,sy,4,10)
+  line(sx-7,sy,sx-3,sy,7) line(sx+3,sy,sx+7,sy,7)
+  line(sx,sy-7,sx,sy-3,7) line(sx,sy+3,sx,sy+7,7)
+  pset(sx-5,sy-4,10) pset(sx+5,sy+4,10)
  end
  if f.bi>0 then circ(f.x-f.sd*10,116-(f.bh and 28 or 40),3,f.ca==3 and 10 or 7) end
 end
@@ -821,10 +887,20 @@ function draw_select()
 end
 
 function draw_fight()
+ local cx=cam>0 and (cam%2*2-1)*(cam>4 and 2 or 1) or 0
+ local cy=cam>4 and (flr(cam/2)%2*2-1) or 0
+ camera(cx,cy)
  ring_bg()
  draw_f(p)
  draw_f(o)
  ring_front()
+ camera()
+ if fl>0 then
+  local fy=28+fl*3
+  line(0,fy,127,fy,7)
+  line(8,fy+29,119,fy+29,7)
+  if fl>1 then line(0,fy+58,127,fy+58,6) end
+ end
  hud()
  if bell>0 then panel(49,43,78,55,10,0) btxt("ding!",54,47,10) end
  if p.cnt>0 then btxt(p.ca==3 and "perfect return!" or "counter!",6,116,10)
@@ -885,12 +961,12 @@ eeeeeeeeeeeeeee000044444400000eeeeeeeeeeeeeeeee50ee50ee004044404440000eeeeeeeeee
 eeeeeeeeeeeee0000005444000000eeeeeeeeeeeeeeeeee0eeee00000044440444000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
 eeeeeeeeee0000010000000004500eeeeeeeeeeeeeeeeeeeee0000040004440499999eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
 eeeeeeeeee00111100000500f0000eeeeeeeeeeeeeeeeeeeee044444000000000000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-eeeeeeeee001111111000000500000eeeeeeeeeeeeeeeeeee04444444400000000444eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-eeeeeeee1111111111000000000110eeeeeeeeeeeeeeeeee044444f4440000004f4444eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-eeeeeee011111151111111111111110eeeeeeeeeeeeeeee004444444444444444444444eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-eeeeeee0111111111111111111111110eeeeeeeeeeeeeee0044444444444444444994440eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-eeeeeee0111111111111111111111110eeeeeeeeeeeeeee0044449994444444999444440eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-eeeeeee011111111111111111d111110eeeeeeeeeeeeeee0044444449990499444444400eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+eeeeeeeee001111111000000500000eeeeeeeeeeeeeeeeeee44444444400000000440eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+eeeeeeee1111111111000000000110eeeeeeeeeeeeeeeeee044444f4440000004f4440eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+eeeeeee011111151111111111111110eeeeeeeeeeeeeeee004444444444444444444440eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+eeeeeee0111111111111111111111110eeeeeeeeeeeeeee0044444444444444444994400eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+eeeeeee0111111111111111111111110eeeeeeeeeeeeeee0044449994444444999444400eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+eeeeeee011111111111111111d111110eeeeeeeeeeeeeee0044444449990499444444000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
 eeeeeee1111111111111111111111110eeeeeeeeeeeeeee0044444444440444444444000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
 eeeeeee0011111111111111111111110eeeeeeeeeeeeeee0044444444440444444444000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
 eeeeeee011111111111111111111100eeeeeeeeeeeeeeee044444440000000000444400eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
@@ -898,22 +974,22 @@ eeeeee0001111111111111111111000eeeeeeeeeeeeeee0004444444444044444444000eeeeeeeee
 eeeeeee001111111111111111111000eeeeeeeeeeeeeeee004444444944044444444000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
 eeeeeeee0011555555555555551100eeeeeeeeeeeeeeeeee0044444444404449444400eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
 eeeeeeee0011111111111111111100eeeeeeeeeeeeeeeeee0044444444404444444400eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-eeeeeeee0005555555555555111000eeeeeeeeeeeeeeeeee00044444444044444440000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-eeeeeeee0000000000000000000000eeeeeeeeeeeeeeeeee000000000000000000000a0eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-eeeeeeee00000000000000000000d00eeeeeeeeeeeeeeeee00000000000000000000aa00eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-eeeeeeee00222222222222222272000eeeeeeeeeeeeeeeee0033333333333333333a3000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-eeeeeeee00222222222222222272000eeeeeeeeeeeeeeeee0033333333b33333b33a3000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-eeeeeeee00222222222222222272000eeeeeeeeeeeeeeeee003333333333333333a33000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-eeeeeeee0022222222222222227000eeeeeeeeeeeeeeeeee003333333333333333a3000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-eeeeeeee0022222222002222272000eeeeeeeeeeeeeeeeee0033333333003b3333a3000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-eeeeeeee0027722220000222272000eeeeeeeeeeeeeeeeee003aa333300003333a3000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-eeeeeeee0000077700ee0000070000eeeeeeeeeeeeeeeeee00000aaa00ee00333a30000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-eeeeeeee000000000eeee0000000000eeeeeeeeeeeeeeee0000000000eeee00000000400eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-eeeeeee004440000eeeeeee004449400eeeeeeeeeeeeeee004490000eeeeee0000000900eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-eeeeeee00444900eeeeeeeee00444900eeeeeeeeeeeeee00444900eeeeeeeeeee00449400eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-eeeeeee0044900eeeeeeeeeee00449400eeeeeeeeeeeee00449400eeeeeeeeeee004449400eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-eeeeee00449400eeeeeeeeeee004449400eeeeeeeeeee00444900eeeeeeeeeeeee004449400eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-eeeee004449400eeeeeeeeeeee00444400eeeeeeeeeee00449400eeeeeeeeeeeeee00444400eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+eeeeeeeee005555555555555111000eeeeeeeeeeeeeeeeeee0044444444044444440000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+eeeeeeeee000000000000000000000eeeeeeeeeeeeeeeeeee0000000000000000000000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+eeeeeeeee000000000000000000000eeeeeeeeeeeeeeeeeee0000000000000000000300eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+eeeeeeeee007222222222222222700eeeeeeeeeeeeeeeeeee00a3333333333333333a00eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+eeeeeeeee007222222222222222700eeeeeeeeeeeeeeeeeee00a3333333333333333a00eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+eeeeeeeee007222222202222222700eeeeeeeeeeeeeeeeeee00a3333333033333333a00eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+eeeeeeeee007222222202222222700eeeeeeeeeeeeeeeeeee00a333333303333333a300eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+eeeeeeeee007222222202222222700eeeeeeeeeeeeeeeeeee00a333333303333333a00eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+eeeeeeeee072222222000222227000eeeeeeeeeeeeeeeeeee0a3333333003333333a00eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+eeeeeeeee072222222000222227000eeeeeeeeeeeeeeeeee00a3333333000333333a000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+eeeeeeee00722222200000222270000eeeeeeeeeeeeeeee000a3333330000333333a0000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+eeeeeee00072222220e0e02222700400eeeeeeeeeeeeeee000a3333330e0e03333a00000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+eeeeeee00072222200e0e00d22700900eeeeeeeeeeeeee0040a3333300e0e03333a009400eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+eeeeeee00022222d00e0ee00000009400eeeeeeeeeeeee004033333b00e0e00b33a0049400eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+eeeeee00400000000eeeee000000049400eeeeeeeeeee004400000000ee0ee0000000449400eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+eeeee004000000000eeeeeeeee00444400eeeeeeeeeee004000000000eeeee0000000444400eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
 eeeee00444400eeeeeeeeeeeeee0044400eeeeeeeeee00444400eeeeeeeeeeeeeeee00444400eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
 eeeee0044400eeeeeeeeeeeeeee00444400eeeeeeee004444400eeeeeeeeeeeeeeee00444400eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
 eeee00444400eeeeeeeeeeeeeee004466660eeeeeee00444400eeeeeeeeeeeeeeeeee00444400eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee

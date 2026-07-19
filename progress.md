@@ -193,6 +193,18 @@ Atlas-pass verification:
 - Added `tools/combo-check.cjs` and expanded fighter-select QA to cycle every roster slot and verify guest opponent pairing.
 - Final verification: four-hit route reduced the frozen opponent from `100` to `58` HP, desktop and normal-speed matches reached results, portrait/landscape touch layouts passed, no browser errors were reported, and fixed-seed balance finished `52-48` across 100 bouts.
 
+## Backstreet And Bruisers Visual Pass
+
+- Studied the public Backstreet Warriors showcase for metasprite construction, compressed windups, oversized active fists, sharp contact poses, impact hold, screen kick, and finisher knockback without copying assets or animation frames.
+- Added a four-hit combo finisher with stronger hit-stop, camera shake, concentrated hit sparks, restrained full-composition streaks, recoil, and knockback. The verified route now reduces the frozen opponent from `100` to `56` HP.
+- Studied the official Bruisers 2D Boxing screenshots for long arm readability, planted lead/rear weight, compact infighting posture, side-broadcast ring framing, and layered audience depth.
+- Added a distance-driven close-range stance with compressed knees and cheek-level gloves, heavier outlined posts, perspective rope returns, a worn raised-canvas edge, and a denser phone-lit warehouse crowd.
+- Reworked the fighters after screenshot review: narrowed both atlas layers, tightened shoulder anchors, replaced circular gloves and elbows with clipped pixel clusters, sharpened D. Great's bare-shoulder planes, and changed oval foot shadows to hard-edged stance shadows.
+- Replaced the blocky trunk shapes with one-pixel waistbands, longer separate leg panels, deep center splits, side piping, and small belt details so both outfits read as boxing shorts at native and phone scale.
+- Preserved the lock-in venue identity with brick, beams, heavy bags, camera equipment, gym poster art, purple wall graphics, and the purple/teal fighter split.
+- Desktop movement, five punch poses, four-hit combo, lean/perfect blocks, committed counters, both full-bout paths, rematch, six-fighter roster, portrait touch, landscape touch, cartridge export, release checks, and public-name scan all pass with no browser errors.
+- Final fixed-seed balance is `52-48` over 100 bouts. The exported cartridge is `23,965` bytes and the source cart is `58,963` bytes.
+
 ## Next Polish Priorities
 
 - Replace existing procedural pose code with authored transition frames for every punch, block, slip, knockdown, and corner idle without expanding the cartridge token count.

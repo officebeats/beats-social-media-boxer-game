@@ -39,7 +39,8 @@ async function reachFight(page) {
 async function waitReady(page) {
   await page.waitForFunction(() => {
     const s = JSON.parse(window.render_game_to_text());
-    return s.mode === "fight" && s.playerWindup === 0 && s.playerRecovery === 0;
+    return s.mode === "fight" && s.playerWindup === 0 && s.playerRecovery === 0
+      && s.playerStun === 0 && s.playerDodge === 0;
   }, null, { timeout: 10000 });
 }
 
