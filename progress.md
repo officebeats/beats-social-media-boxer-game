@@ -217,6 +217,15 @@ Atlas-pass verification:
 - Final verification passed release/static checks, all five move poses, four walk frames, quick-step distance, hit-stop and buffered attacks, normal/lean/body/perfect blocks, a `16`-damage committed counter, desktop UI, portrait and landscape touch layouts, a natural-speed result/restart, and zero browser errors.
 - Fixed-seed balance remains `52-48` over 100 bouts. The revised source cart is `58,075` bytes and the exported cartridge is `23,630` bytes.
 
+## One-Second Counter Slowdown
+
+- A whiff, slip, normal block, lean block, or perfect block now puts the exposed attacker into a symmetric `30`-frame counter slowdown.
+- The slowed fighter's startup and recovery clocks advance at half speed while footwork target speed drops to `35%`, giving the defender a reliable one-second opening without changing punch reach or damage.
+- Attack inputs received on skipped slowdown frames are buffered and start on the next eligible frame rather than being lost.
+- Browser diagnostics export both slowdown timers. Defense QA asserts all `30` frames, counter tier commitment, zero perfect-block chip, and a landed `16`-damage counter.
+- Raised the veteran counterpuncher's defensive-read rating from `56` to `64` after the first balance pass shifted to `41-59`; final fixed-seed balance is `51-49` across 100 bouts with zero browser errors.
+- The final source cart is `58,286` bytes and the exported cartridge is `24,173` bytes.
+
 ## Next Polish Priorities
 
 - Replace existing procedural pose code with authored transition frames for every punch, block, slip, knockdown, and corner idle without expanding the cartridge token count.

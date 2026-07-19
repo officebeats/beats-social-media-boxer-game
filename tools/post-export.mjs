@@ -86,6 +86,8 @@ const bridge = `
     playerChain: pin(32),
     playerFighter: pin(33),
     opponentFighter: pin(34),
+    playerCounterSlow: pin(35),
+    opponentCounterSlow: pin(36),
     viewport: {
       width: window.innerWidth,
       height: window.innerHeight,

@@ -2,7 +2,7 @@ pico-8 cartridge // http://www.pico-8.com
 version 42
 __lua__
 defs={
- {ab="ab",nm="a.b. problem",rl="counter",art=1,ed=13,tr=2,gl=13,hi=7,hm=100,sm=100,gm=40,lk=56,spd=0,ag=1,pdw=1,dm=0,rg=.92},
+ {ab="ab",nm="a.b. problem",rl="counter",art=1,ed=13,tr=2,gl=13,hi=7,hm=100,sm=100,gm=40,lk=64,spd=0,ag=1,pdw=1,dm=0,rg=.92},
  {ab="dg",nm="d. great",rl="speed",art=2,ed=11,tr=3,gl=3,hi=11,hm=100,sm=100,gm=40,lk=56,spd=1,ag=1,pdw=0,dm=.16,rg=1.06},
  {ab="ck",nm="callout king",rl="pressure",art=2,ed=8,tr=8,gl=8,hi=10,hm=98,sm=104,gm=38,lk=55,spd=1,ag=1.03,pdw=0,dm=.1,rg=1.04},
  {ab="sg",nm="studio guest",rl="wildcard",art=1,ed=12,tr=12,gl=12,hi=6,hm=96,sm=102,gm=38,lk=53,spd=1,ag=1.02,pdw=0,dm=.08,rg=1.05},
@@ -29,7 +29,7 @@ function mkb(i,sd,ai)
    acc=0,dm=d.dm,rg=d.rg,hmul=1,bres=0,brs=0,sh=0,
   hy=0,kd=0,pts=0,ct=0,
   wind=0,rec=0,atk=0,aln=0,gt=9,guard=0,sl=0,cnt=0,stun=0,down=0,q=0,fe=0,link=0,vx=0,mv=0,
-   bl=0,bi=0,bs=0,ca=0,cp=0,la=0,co=0,
+   bl=0,bi=0,bs=0,ca=0,cp=0,la=0,co=0,tz=0,
    rdm=0,rcl=0,rdef=0,rkd=0,chain=0,shake=0,bh=false,ds=0,dd=0
  }
 end
@@ -83,7 +83,7 @@ end
 
 function round_reset(f,x)
  f.x=x f.vx=0 f.mv=0
- f.wind=0 f.rec=0 f.stun=0 f.sl=0 f.cnt=0 f.guard=0 f.gt=9 f.down=0 f.atk=0 f.q=0 f.fe=0 f.link=0 f.la=0 f.co=0 f.bl=0 f.bi=0 f.bs=0 f.ca=0 f.cp=0 f.ds=0 f.dd=0
+ f.wind=0 f.rec=0 f.stun=0 f.sl=0 f.cnt=0 f.guard=0 f.gt=9 f.down=0 f.atk=0 f.q=0 f.fe=0 f.link=0 f.la=0 f.co=0 f.bl=0 f.bi=0 f.bs=0 f.ca=0 f.cp=0 f.ds=0 f.dd=0 f.tz=0
  f.rdm=0 f.rcl=0 f.rdef=0 f.rkd=0
 end
 
@@ -231,8 +231,8 @@ function knock(d,a)
  a.rkd+=1
  a.hy=min(100,a.hy+18)
  d.down=75
- d.wind=0 d.rec=0 d.stun=0 d.guard=0 d.sl=0 d.bl=0 d.bi=0 d.bs=0 d.cnt=0 d.ca=0 d.cp=0 d.ds=0
- a.wind=0
+ d.wind=0 d.rec=0 d.stun=0 d.guard=0 d.sl=0 d.bl=0 d.bi=0 d.bs=0 d.cnt=0 d.ca=0 d.cp=0 d.ds=0 d.tz=0
+ a.wind=0 a.tz=0
  a.rec=18
  cam=7 fl=3
  sfx(4)
@@ -248,6 +248,7 @@ function hit(a,d)
  if abs(a.x-d.x)>rch[a.atk]+11 then
   d.cnt=max(d.cnt,8)
   d.ca=max(d.ca,1)
+  a.tz=30
   a.cp=0 a.co=0 a.link=0 a.la=0
   sfx(3)
   return
@@ -255,6 +256,7 @@ function hit(a,d)
  if d.sl>0 and m.ln==1 then
   d.cnt=14+d.pg
   d.ca=2
+  a.tz=30
   d.hy=min(100,d.hy+4)
   d.rdef+=2
   a.st=max(0,a.st-1)
@@ -274,12 +276,13 @@ function hit(a,d)
   d.rdef+=pg and 3 or lean and 2 or 1
   d.g-=m.gd*(pg and .25 or lean and .6 or 1)
   a.hy=min(100,a.hy+2)
-   if pg then
-   d.cnt=16+d.pg
-   d.ca=3
+  if pg then
+    d.cnt=16+d.pg
+    d.ca=3
+    a.tz=30
    d.hy=min(100,d.hy+5)
-    a.stun=3
-    cam=3 fl=2
+   a.stun=3
+   cam=3 fl=2
    d.g=min(d.gm,d.g+1)
    if d==p then htxt="perfect block" ht=24 end
    sfx(5)
@@ -287,6 +290,7 @@ function hit(a,d)
    d.hp-=(lean and .1 or .22)*m.d
    d.cnt=max(d.cnt,lean and 9 or 6)
    d.ca=max(d.ca,1)
+   a.tz=30
    if d==p then htxt=lean and "lean block" or "blocked" ht=18 end
    sfx(3)
   end
@@ -368,6 +372,10 @@ function step_box(f,e,mv,g,a)
   end
   return mv
  end
+ if f.tz>0 and f.tz%2==1 then
+  if a>0 then f.q=a end
+  return 0
+ end
  local ng=f.wind+f.rec+f.stun>0 and 0 or g
  if ng~=f.guard then
   f.guard=ng
@@ -422,7 +430,7 @@ function move_box(f,mv,lo,hi)
  if f.ds>0 and f.wind+f.rec+f.stun==0 then
   burst=f.dd*1.45 f.ds-=1
  else f.ds=0 end
- local t=f.wind+f.rec+f.stun==0 and mv+burst or 0
+ local t=f.wind+f.rec+f.stun==0 and (mv+burst)*(f.tz>0 and .35 or 1) or 0
  local grip=.3+.24*f.st/f.sm+.04*f.spd
  f.vx+=(t-f.vx)*grip
  if t==0 then f.vx*=.55 end
@@ -444,6 +452,8 @@ function fight_tick()
   return
  end
  fr+=1
+ if p.tz>0 then p.tz-=1 end
+ if o.tz>0 then o.tz-=1 end
  local pm,pg,pa=human_ctl()
  if hs>0 then
   if pa>0 then p.q=pa end
@@ -511,7 +521,7 @@ function gpio()
   p and flr(p.x) or 0,o and flr(o.x) or 0,p and p.guard or 0,p and p.gt or 0,
   p and p.bl or 0,p and p.bi or 0,p and (p.ca==3 and 3 or p.bl>0 and 2 or p.bi>0 and 1 or 0) or 0,p and p.cnt or 0,p and p.ca or 0,
   p and p.cp or 0,p and flr(p.g) or 0,p and p.bs or 0,o and o.rec or 0,p and p.stun or 0,hs or 0,p and p.ds or 0,
-  p and p.co or 0,p and p.chain or 0,p and p.id or 0,o and o.id or 0
+  p and p.co or 0,p and p.chain or 0,p and p.id or 0,o and o.id or 0,p and p.tz or 0,o and o.tz or 0
  }
  for i=1,#q do poke(0x5f7f+i,q[i]) end
 end

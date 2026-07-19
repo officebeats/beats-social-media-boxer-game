@@ -40,9 +40,17 @@ async function waitIdle(page) {
 }
 
 async function forceAttack(page, attack) {
-  await page.evaluate((value) => { window.pico8_gpio[117] = value; }, attack);
-  await page.waitForFunction(() => JSON.parse(window.render_game_to_text()).opponentWindup > 0,
-    null, { timeout: 3000 });
+  const injected = await page.evaluate((value) => {
+    window.pico8_gpio[117] = value;
+    return window.pico8_gpio[117];
+  }, attack);
+  try {
+    await page.waitForFunction(() => JSON.parse(window.render_game_to_text()).opponentWindup > 0,
+      null, { timeout: 3000 });
+  } catch (error) {
+    const pending = await page.evaluate(() => window.pico8_gpio[117]);
+    throw new Error(`forced attack did not start: ${JSON.stringify({ injected, pending, state: await state(page) })}`);
+  }
 }
 
 async function waitBlock(page, type) {
@@ -149,7 +157,7 @@ async function waitBlock(page, type) {
       throw new Error(`lean block did not improve protection: ${JSON.stringify({ normalHpLoss, leanHpLoss, normalGuardLoss, leanGuardLoss })}`);
     }
     if (perfect.playerHp !== beforePerfect.playerHp || perfect.playerCounterTier !== 3 ||
-        perfect.playerCounterWindow <= 0) {
+        perfect.playerCounterWindow <= 0 || perfect.opponentCounterSlow < 28) {
       throw new Error(`perfect block state invalid: ${JSON.stringify({ beforePerfect, perfect })}`);
     }
 
@@ -187,7 +195,8 @@ async function waitBlock(page, type) {
       perfect: {
         hpLoss: beforePerfect.playerHp - perfect.playerHp,
         counterTier: perfect.playerCounterTier,
-        counterWindow: perfect.playerCounterWindow
+        counterWindow: perfect.playerCounterWindow,
+        opponentSlowFrames: perfect.opponentCounterSlow
       },
       counter: {
         opponentHpLoss: targetHp - counterHit.opponentHp
