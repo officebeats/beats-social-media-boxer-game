@@ -24,7 +24,8 @@ $requiredFiles = @(
     (Join-Path $projectRoot 'tools\combo-check.cjs'),
     (Join-Path $projectRoot 'tools\ui-check.cjs'),
     (Join-Path $projectRoot 'tools\mobile-check.cjs'),
-    (Join-Path $projectRoot 'tools\balance-check.cjs')
+    (Join-Path $projectRoot 'tools\balance-check.cjs'),
+    (Join-Path $projectRoot 'tools\arcade-feel-check.cjs')
 )
 
 $rows = foreach ($file in $requiredFiles) {

@@ -77,7 +77,7 @@ function fight_init()
  round=1
  bell=18
  ht=0 hs=0
- tapd=0 tapt=-20
+ tapd=0 tapt=-20 held=0 fresh=0
  set_round(1)
 end
 
@@ -131,13 +131,17 @@ end
 function human_ctl()
  local mv=0
  if btn(1) then mv=1 elseif btn(0) then mv=-1 end
- local dp=btnp(0) and -1 or btnp(1) and 1 or 0
+ local dp=mv!=0 and mv!=held and mv or 0
+ held=mv fresh=dp
  if dp!=0 then
   if tapd==dp and fr-tapt<9 and p.st>=3 then p.ds=5 p.dd=dp p.st-=3 end
   tapd=dp tapt=fr
  end
  local g=0
- if btn(2) then g=1 elseif btn(3) then g=2 end
+ if btn(2) then g=1
+ elseif btn(0) and btn(3) then g=2
+ elseif btn(0) and o and o.wind>0 and fresh==0 and p.sl==0 then g=1
+ elseif btn(3) then g=2 end
  local a=0
  if btnp(4) then
   if btn(2) then a=6 elseif btn(3) then a=3 else a=1 end
@@ -272,7 +276,7 @@ function hit(a,d)
   d.bi=5
   hs=pg and 4 or lean and 3 or 2
   d.bh=m.ln==0
-  d.bs=pg and 1 or lean and 2 or 3
+  d.bs=pg and 1 or lean and 3 or 4+(a.atk>1 and 2 or 0)
   d.rdef+=pg and 3 or lean and 2 or 1
   d.g-=m.gd*(pg and .25 or lean and .6 or 1)
   a.hy=min(100,a.hy+2)
@@ -296,6 +300,8 @@ function hit(a,d)
   end
   a.cp=0
   a.la=a.atk a.link=16
+  local pb=a.atk>1 and 1 or .5
+  d.x=clamp(d.x+d.sd*pb,18,110)
   if d.g<=0 then
    d.g=0
    d.stun=8
@@ -304,8 +310,15 @@ function hit(a,d)
   return
  end
  local mult=1
+ local ch=d.wind>0
  local fin=a.co>0 and a.atk==5 and a.chain>=2
  local cp=a.cp
+ if ch then
+  mult+=.18
+  d.wind=0 d.atk=0
+  a.hy=min(100,a.hy+5)
+  if a==p then htxt="counter hit" ht=22 end
+ end
  if cp>0 then
   mult=1.12+cp*.09
   a.cp=0
@@ -328,7 +341,7 @@ function hit(a,d)
   d.st=max(0,d.st-gdm)
  end
  d.hp-=dmg
- d.stun=5+(a.atk>1 and 1 or 0)+cp+(fin and 3 or 0)
+ d.stun=m.re+2+cp+(fin and 3 or 0)+(ch and 2 or 0)
  a.rcl+=1
  a.rdm+=dmg
  if fr-a.ct<40 then a.chain+=1 else a.chain=1 end
@@ -341,7 +354,10 @@ function hit(a,d)
  fl=fin and 3 or a.atk>1 and 2 or 0
  if fin and a==p then htxt="combo finish" ht=24 end
  d.bh=m.ln==0
- if a.atk>=2 and m.ln==1 then d.x=clamp(d.x+d.sd*(fin and 8 or 4),18,110) end
+ local pb=(a.atk==1 or a.atk==3) and 1 or a.atk==5 and 6 or 4
+ if a.co>0 then pb=max(1,pb-2) end
+ d.x=clamp(d.x+d.sd*(fin and 8 or pb),18,110)
+ if a.atk>1 and a.co==0 then a.x=clamp(a.x+a.sd,18,110) end
  sfx(a.atk>=2 and 2 or 1)
  if d.hp<=0 or (a.atk>=2 and d.hp<14 and d.kd<2) then
   knock(d,a)
@@ -409,7 +425,7 @@ function step_box(f,e,mv,g,a)
    end
   end
  end
- if e.wind>0 and (btnp(0) or btnp(1)) and f==p and f.guard==0 and rng>0 then
+ if e.wind>0 and fresh~=0 and f==p and f.guard==0 and rng>0 then
   f.sl=8 mv=0
   htxt="dodge" ht=18
  end
@@ -430,7 +446,8 @@ function move_box(f,mv,lo,hi)
  if f.ds>0 and f.wind+f.rec+f.stun==0 then
   burst=f.dd*1.45 f.ds-=1
  else f.ds=0 end
- local t=f.wind+f.rec+f.stun==0 and (mv+burst)*(f.tz>0 and .35 or 1) or 0
+ local pace=mv==-f.sd and 1 or .84
+ local t=f.wind+f.rec+f.stun==0 and (mv*pace+burst)*(f.tz>0 and .35 or 1) or 0
  local grip=.3+.24*f.st/f.sm+.04*f.spd
  f.vx+=(t-f.vx)*grip
  if t==0 then f.vx*=.55 end
@@ -552,82 +569,56 @@ function panel(x0,y0,x1,y1,edge,fill)
  rect(x0,y0,x1,y1,edge)
 end
 
-function warehouse(y0,y1)
- rectfill(0,y0,127,y1,0)
- for y=y0+5,y1,8 do line(0,y,127,y,1) end
- for x=4,124,13 do
-  local h=9+(x%5)
-  line(x,y0,x,y0+h,5)
-  line(x+1,y0,x+1,y0+h,1)
- end
- rectfill(44,y0,83,y1,1)
- rectfill(48,y0+3,79,y1-3,0)
- rect(47,y0+2,80,y1-2,5)
- line(63,y0+3,63,y1-3,5)
- rectfill(43,y1-5,84,y1-3,5)
- rectfill(39,y1-2,88,y1,1)
- line(20,y0,20,y0+9,5)
- rectfill(16,y0+9,24,y0+28,8)
- rectfill(17,y0+17,23,y0+20,0)
- line(100,y0,100,y0+8,5)
- rectfill(94,y0+8,106,y0+27,4)
- rect(94,y0+8,106,y0+27,5)
- circfill(100,y0+14,3,0)
- line(100,y0+17,96,y0+25,0)
- line(100,y0+18,104,y0+25,0)
- for row=0,1 do
-  for i=0,12 do
-   local x=2+i*10+(row%2)*4
-   local y=y1-10+row*5-(i%3)
-   local sk=i%3==0 and 4 or i%3==1 and 9 or 15
-   circfill(x,y,2,sk)
-   rectfill(x-3,y+2,x+3,y+7,1)
-   pset(x+1,y-1,7)
-   if (i+row)%4==0 then
-    rectfill(x+3,y-5,x+5,y-2,7)
-    pset(x+4,y-5,10)
-   end
-  end
- end
-end
-
 function ring_bg()
  cls(0)
- warehouse(0,51)
- for y=52,107 do
-  local i=flr((107-y)*20/55)
-  rectfill(i,y,127-i,y,6)
-  if y%3==0 then
-   for x=i+(y%6),127-i,8 do pset(x,y,13) end
+ rectfill(0,20,127,80,1)
+ for y=24,76,8 do line(0,y,127,y,5) end
+ for x=5,124,13 do line(x,20,x,48,5) end
+ rectfill(39,21,88,76,0)
+ rect(38,20,89,77,5)
+ for x=44,84,8 do line(x,23,x,74,1) end
+ line(63,21,63,76,5)
+ rectfill(8,22,21,47,0)
+ rectfill(10,25,19,44,8)
+ rectfill(108,22,120,47,0)
+ rectfill(110,25,118,44,4)
+ for x=12,116,52 do
+  line(x,20,x,27,5)
+  circfill(x,29,3,7)
+  line(x-7,32,x+7,32,6)
+ end
+ for row=0,2 do
+  for i=0,15 do
+   local x=-2+i*9+(row%2)*4
+   local y=52+row*7-(i%3)
+   local sk=(i+row)%3==0 and 4 or (i+row)%3==1 and 9 or 15
+   circfill(x,y,2,sk)
+   rectfill(x-3,y+2,x+3,y+6,row==0 and 1 or 5)
+   if (i+row)%5==0 then pset(x+2,y-3,7) end
   end
  end
- line(20,52,0,107,8)
- line(107,52,127,107,8)
- line(22,55,2,107,7)
- line(105,55,125,107,7)
- line(24,58,4,107,12)
- line(103,58,123,107,12)
- rectfill(20,48,27,66,0)
- rectfill(100,48,107,66,0)
- rectfill(22,49,25,64,7)
- rectfill(102,49,105,64,7)
- rect(21,48,26,65,6)
- rect(101,48,106,65,6)
- rectfill(24,51,103,53,8)
- rectfill(24,56,103,57,7)
- rectfill(24,60,103,62,12)
- line(0,107,127,107,5)
- circ(64,88,6,5)
- rectfill(57,90,71,101,5)
- rectfill(59,92,69,99,10)
- rectfill(63,94,65,98,0)
- pset(64,93,7)
+ rectfill(0,79,127,108,5)
+ for y=82,106,6 do line(0,y,127,y,6) end
+ for x=8,120,16 do line(64,79,x,108,6) end
+ rectfill(2,48,6,105,0)
+ rectfill(3,49,5,104,7)
+ rectfill(121,48,125,105,0)
+ rectfill(122,49,124,104,7)
+ for j=0,2 do
+  local y=56+j*12
+  line(4,y,123,y,0)
+  line(5,y,122,y,j==0 and 8 or j==1 and 7 or 12)
+ end
+ circ(64,94,8,6)
+ line(56,94,72,94,6)
+ line(64,86,64,102,6)
 end
 
 function ring_front()
- line(0,106,127,106,0)
- line(0,107,127,107,7)
- line(0,108,127,108,6)
+ line(0,105,127,105,0)
+ rectfill(0,106,127,108,1)
+ line(0,106,127,106,7)
+ line(0,108,127,108,5)
 end
 
 function portrait(id,x,y)
@@ -820,24 +811,23 @@ function draw_f(f)
 end
 
 function hud()
- rectfill(0,109,127,127,0)
- line(0,109,127,109,7)
- line(0,110,127,110,5)
+ rectfill(0,0,127,20,0)
+ line(0,20,127,20,5)
  if not p then return end
- portrait(p.id,1,110)
- portrait(o.id,110,110)
- print(p.ab,18,112,defs[p.id].ed)
- print(o.ab,100,112,defs[o.id].ed)
- meter(30,111,19,p.g,p.gm,10,false)
- meter(78,111,19,o.g,o.gm,10,true)
- meter(18,117,31,p.hp,p.hm,8,false)
- meter(78,117,31,o.hp,o.hm,8,true)
- meter(18,123,31,p.st,p.sm,12,false)
- meter(78,123,31,o.st,o.sm,12,true)
- panel(53,111,74,127,10,1)
- print("r"..(round or 0),58,112,10)
+ portrait(p.id,0,1)
+ portrait(o.id,110,1)
+ print(p.ab,18,1,defs[p.id].ed)
+ print(o.ab,100,1,defs[o.id].ed)
+ meter(18,6,36,p.hp,p.hm,8,false)
+ meter(73,6,36,o.hp,o.hm,8,true)
+ meter(18,12,36,p.st,p.sm,12,false)
+ meter(73,12,36,o.st,o.sm,12,true)
+ meter(18,17,36,p.g,p.gm,10,false)
+ meter(73,17,36,o.g,o.gm,10,true)
+ panel(56,1,71,19,10,1)
+ print("r"..(round or 0),60,3,10)
  local sec=max(0,flr((rt or 0)/30))
- print(sec<10 and "0"..sec or sec,58,120,7)
+ print(sec<10 and "0"..sec or sec,60,11,7)
 end
 
 function draw_title()
@@ -869,7 +859,7 @@ function draw_select()
  panel(11,89,116,110,d.ed,0)
  btxt(d.nm,64-#d.nm*2,92,d.ed)
  print("combo jab>straight>body>upper",6,101,10)
- print("up/down block  back+block lean",2,113,6)
+ print("back block down+back body",15,113,6)
  print("left/right select o fight x back",0,121,7)
 end
 
@@ -889,7 +879,7 @@ function draw_fight()
   if fl>1 then line(0,fy+58,127,fy+58,6) end
  end
  hud()
- if bell>0 then panel(49,43,78,55,10,0) btxt("ding!",54,47,10) end
+ if bell>0 then panel(49,43,78,55,10,0) btxt("fight!",52,47,10) end
  if p.cnt>0 then btxt(p.ca==3 and "perfect return!" or "counter!",6,27,10)
  elseif p.bl>0 then btxt("lean block",8,27,6) end
  if p.chain>1 and fr-p.ct<30 then btxt(p.chain.." hit",95,27,10) end

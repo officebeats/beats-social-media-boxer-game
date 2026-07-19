@@ -254,6 +254,16 @@ Atlas-pass verification:
 - Desktop neutral, straight windup, lean block, and portrait-mobile screenshot review passed at `92/100`.
 - Release, movement, combo, defense, mobile, natural-bout, restart, and 100-bout balance checks pass with zero browser errors. Balance remains `51-49`; the source cart is `58,500` bytes and the exported cartridge is `24,428` bytes.
 
+## Side-View Arcade Fight Overhaul
+
+- Replaced the rejected high-angle ring and bottom status band with a flat side-view warehouse stage, horizontal ropes, perspective floor, layered crowd, foreground apron, and top portrait/life HUD.
+- Deleted the obsolete warehouse renderer to keep the cartridge below PICO-8's ceiling after the new stage and combat rules were added.
+- Added positive hit advantage, weight-based blockstun and pushback, startup counter-hits, slightly faster forward pressure, and combo-aware spacing so landed punches create deliberate follow-up decisions.
+- Replaced repeating `btnp()` direction handling with edge-tracked input. Held directions no longer cause involuntary quick-steps; fresh taps dodge, deliberate double taps dash, held back blocks high, and down-back protects the body.
+- Added `arcade-feel-check.cjs` to verify that hold-back blocking reduces damage and startup counter-hits interrupt cleanly without trading.
+- Desktop neutral, straight contact, lean block, and portrait-mobile screenshot review passed at `90/100` for the side-view arcade-fighter category.
+- Release, movement, animation, combo, defense, arcade-feel, UI, mobile, natural-bout, restart, and 100-bout balance checks pass with zero browser errors. Balance is `52-48`; the source cart is `58,355` bytes and the exported cartridge is `24,010` bytes.
+
 ## Next Polish Priorities
 
 - Replace existing procedural pose code with authored transition frames for every punch, block, slip, knockdown, and corner idle without expanding the cartridge token count.
