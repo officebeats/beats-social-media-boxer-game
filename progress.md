@@ -245,6 +245,15 @@ Atlas-pass verification:
 - Strict reference review passed at `91/100` after desktop neutral, straight windup, counter impact, and portrait-mobile screenshot inspection.
 - Release, move, animation, combo, defense, mobile, natural-bout, restart, and 100-bout balance checks pass with zero browser errors. Balance remains `51-49`; the source cart is `58,499` bytes and the exported cartridge is `24,436` bytes.
 
+## Side-On Boxing Stance Pass
+
+- Rotated both base silhouettes into a three-quarter side-on guard by compressing the far shoulder and rear hip while retaining the lead-side chest and leg mass.
+- Raised the rear glove onto the cheek line, extended the lead glove slightly into range, and narrowed the shoulder anchors so the arms no longer read as a frontal mirrored pose.
+- Shifted the rear thigh inward, kept the lead leg forward, and angled the waistbands and movement trunks to reinforce staggered hips and feet throughout neutral and walking frames.
+- Preserved punch reach, body collision, contact-authoritative damage, block geometry, and counter timing; the stance change is visual and positional only.
+- Desktop neutral, straight windup, lean block, and portrait-mobile screenshot review passed at `92/100`.
+- Release, movement, combo, defense, mobile, natural-bout, restart, and 100-bout balance checks pass with zero browser errors. Balance remains `51-49`; the source cart is `58,500` bytes and the exported cartridge is `24,428` bytes.
+
 ## Next Polish Priorities
 
 - Replace existing procedural pose code with authored transition frames for every punch, block, slip, knockdown, and corner idle without expanding the cartridge token count.
