@@ -226,6 +226,16 @@ Atlas-pass verification:
 - Raised the veteran counterpuncher's defensive-read rating from `56` to `64` after the first balance pass shifted to `41-59`; final fixed-seed balance is `51-49` across 100 bouts with zero browser errors.
 - The final source cart is `58,286` bytes and the exported cartridge is `24,173` bytes.
 
+## Native-Scale Fighter Polish Pass
+
+- Removed the runtime `40`-to-`36` pixel downscale so authored body and face pixels now render at native atlas width.
+- Raised the upper-body layer by two pixels for taller proportions while preserving feet, glove endpoints, contact reach, and the `28`-pixel body boundary.
+- Redrew A.B.'s fight head with an explicit eye and ear, shorter nose profile, cheek highlights, separated beard planes, neck transition, tailored shirt shoulders, sleeve seams, and chest folds.
+- Redrew D. Great's fight head and torso with separated braid strands, explicit eye and ear, tapered jaw, small goatee, collarbones, pectorals, sternum, ribs, and abdominal shadows.
+- Replaced cross-shaped elbows with rounded three-tone joints, added glove cuffs, and deepened both lower-body atlases with layered waistbands, side panels, hem highlights, inner seams, thigh shading, socks, and boot tops.
+- Strict screenshot review reached `92/100` across desktop neutral, straight windup, uppercut contact, perfect block, counter impact, portrait mobile, and landscape mobile frames.
+- Final release, movement, animation, combo, defense, mobile, natural-bout, restart, and balance checks pass with zero browser errors. Balance remains `51-49`; the source cart is `58,499` bytes and the exported cartridge is `24,402` bytes.
+
 ## Next Polish Priorities
 
 - Replace existing procedural pose code with authored transition frames for every punch, block, slip, knockdown, and corner idle without expanding the cartridge token count.
