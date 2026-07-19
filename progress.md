@@ -270,3 +270,14 @@ Atlas-pass verification:
 - Build a stronger audio mix: distinct glove/body/block impacts, crowd rises, bell tails, corner ambience, and restrained mobile haptics in the HTML wrapper.
 - Add a short optional sparring tutorial, pause/control reference, remappable mobile layout, reduced-flash option, and clearer color-independent meter markers.
 - Add round cards with damage, accuracy, defense, and knockdown summaries so decisions and training consequences are easier to understand.
+
+## Original Arcade Rivals Sprite Pass
+
+User request: replace the disliked lead sprites with temporary original boxer archetypes that carry the immediate visual contrast of Ryu and Ken without copying Capcom art, names, or animation frames.
+
+- Generated and preserved `reference/arcade-rivals-sprite-direction.png` as the new lead-fighter sprite reference.
+- Rebuilt both 40x56 atlas silhouettes and 16x16 portraits with sharper side-profile faces, lean bare torsos, longer athletic legs, boxing trunks, real boot shapes, and distinct hair masses.
+- The counter fighter now uses black upswept hair, a red headband with trailing ties, white/red equipment, and a darker skin ramp. The rival uses swept blond hair, red/gold trunks, dark gloves, black boots, and a lighter skin ramp.
+- Added per-fighter skin palette remapping so atlas bodies, procedural punch arms, knockdown poses, and HUD portraits remain visually consistent.
+- Strict visual verdict reached `93/100` after direct inspection of desktop straight-contact, lean-block, and portrait-mobile screenshots against the generated reference.
+- Release, movement, five-move animation, combo, defense, arcade-feel, six-fighter UI, portrait/landscape mobile, full-bout restart, and 100-bout balance checks all pass with zero browser errors. Balance remains `52-48`; the source cart is `58,513` bytes and the exported cartridge is `24,096` bytes.
