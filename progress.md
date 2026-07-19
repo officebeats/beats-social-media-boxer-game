@@ -201,9 +201,10 @@ Atlas-pass verification:
 - Added a distance-driven close-range stance with compressed knees and cheek-level gloves, heavier outlined posts, perspective rope returns, a worn raised-canvas edge, and a denser phone-lit warehouse crowd.
 - Reworked the fighters after screenshot review: narrowed both atlas layers, tightened shoulder anchors, replaced circular gloves and elbows with clipped pixel clusters, sharpened D. Great's bare-shoulder planes, and changed oval foot shadows to hard-edged stance shadows.
 - Replaced the blocky trunk shapes with one-pixel waistbands, longer separate leg panels, deep center splits, side piping, and small belt details so both outfits read as boxing shorts at native and phone scale.
+- Redrew both fight heads and HUD portraits from current public-photo studies: A.B. now uses a compact fade, strong brow, cheek/nose highlights, and a jaw-following full beard; D. Great uses visible cornrow rows, trailing braid ends, a tapered clean jaw, sharper eye/nose pixels, and a small goatee.
 - Preserved the lock-in venue identity with brick, beams, heavy bags, camera equipment, gym poster art, purple wall graphics, and the purple/teal fighter split.
 - Desktop movement, five punch poses, four-hit combo, lean/perfect blocks, committed counters, both full-bout paths, rematch, six-fighter roster, portrait touch, landscape touch, cartridge export, release checks, and public-name scan all pass with no browser errors.
-- Final fixed-seed balance is `52-48` over 100 bouts. The exported cartridge is `23,965` bytes and the source cart is `58,963` bytes.
+- Final fixed-seed balance is `52-48` over 100 bouts. The exported cartridge is `24,007` bytes and the source cart is `58,963` bytes.
 
 ## Next Polish Priorities
 
