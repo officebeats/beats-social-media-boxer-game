@@ -283,6 +283,17 @@ Atlas-pass verification:
 - Add a short optional sparring tutorial, pause/control reference, remappable mobile layout, reduced-flash option, and clearer color-independent meter markers.
 - Add round cards with damage, accuracy, defense, and knockdown summaries so decisions and training consequences are easier to understand.
 
+## Tactical Exchange Pass
+
+- Added per-punch preferred distances. A deterministic jab check now deals `6` damage at optimal range and `4` when crowded, while strikes beyond rendered glove reach still miss completely.
+- Added rope consequences: clean pressure shots gain a modest damage bonus, and stamina regeneration drops while a fighter is pinned near either boundary.
+- Replaced the universal counter slowdown with a readable skill ladder: normal block `12` frames, planted lean block `18`, slip `24`, and perfect catch-and-shoot `30`.
+- Made the CPU react to repeated landed punches, choose the matching head/body guard when hurt, retreat unless trapped, pressure opponents near the ropes, and mix lead hooks and overhands into range-specific offense.
+- Consolidated repeated fighter-state initialization and reset assignments into one compact helper after the first pass exceeded the native PICO-8 ceiling at `9346 / 8192` tokens. The revised cart boots natively without removing art, moves, or roster slots.
+- Added `tools/range-check.cjs`, strengthened defense QA to assert the `12 < 18 < 30` slowdown hierarchy, and corrected the arcade-feel setup so backing blocks are tested at contact distance.
+- Verified all move families, the four-punch combination, normal/lean/body/perfect defense, committed counters, deterministic range quality, portrait and landscape touch layouts, and a complete three-round iPhone touch bout with zero browser errors.
+- Fixed-seed balance is `56-44` across 100 bouts. The exported cartridge is `25,077` bytes.
+
 ## Original Arcade Rivals Sprite Pass
 
 User request: replace the disliked lead sprites with temporary original boxer archetypes that carry the immediate visual contrast of Ryu and Ken without copying Capcom art, names, or animation frames.

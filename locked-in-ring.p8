@@ -20,6 +20,7 @@ mvs={
  [8]={ln=1,wd=9,re=14,st=8,d=14,gd=11,hy=16,sk=9}
 }
 rch={29,32,29,23,19,0,25,30}
+opt={35,36,34,29,28,0,30,36}
 anm={"jab","straight","body jab","body hook","uppercut","feint","lead hook","overhand"}
 rr={0,1,0,1,1,0,0,1}
 wx={5,-8,3,-5,-5,13,-2,-9}
@@ -27,18 +28,21 @@ wy={39,32,25,25,22,34,35,56}
 ry={49,48,27,27,51,34,47,45}
 cmb={[12]=1,[13]=1,[17]=1,[32]=1,[37]=1,[24]=1,[27]=1,[72]=1,[74]=1,[78]=1,[45]=1,[48]=1}
 
+function z(f,s)
+ for k in all(split(s)) do f[k]=0 end
+end
+
 function mkb(i,sd,ai)
  local d=defs[i]
- return {
+ local f={
   id=i,ab=d.ab,sd=sd,ai=ai,
-  hm=d.hm,hp=d.hm,sm=d.sm,st=d.sm,gm=d.gm,g=d.gm,
+  hm=d.hm,sm=d.sm,gm=d.gm,
   lk=d.lk,spd=d.spd,ag=d.ag,pg=d.pdw,
-   acc=0,dm=d.dm,rg=d.rg,hmul=1,bres=0,brs=0,sh=0,
-  hy=0,kd=0,pts=0,ct=0,
-  wind=0,rec=0,atk=0,aln=0,gt=9,guard=0,sl=0,cnt=0,stun=0,down=0,q=0,fe=0,link=0,vx=0,mv=0,
-   bl=0,bi=0,bs=0,ca=0,cp=0,la=0,co=0,tz=0,
-   rdm=0,rcl=0,rdef=0,rkd=0,chain=0,shake=0,bh=false,ds=0,dd=0
+  dm=d.dm,rg=d.rg,hmul=1
  }
+ z(f,"acc,bres,brs,sh,hy,kd,pts,ct,wind,rec,atk,aln,guard,sl,cnt,stun,down,q,fe,link,vx,mv,bl,bi,bs,ca,cp,la,co,tz,rdm,rcl,rdef,rkd,chain,shake,ds,dd")
+ f.hp=f.hm f.st=f.sm f.g=f.gm f.gt=9 f.bh=false
+ return f
 end
 
 function clamp(v,a,b)
@@ -89,9 +93,8 @@ function fight_init()
 end
 
 function round_reset(f,x)
- f.x=x f.vx=0 f.mv=0
- f.wind=0 f.rec=0 f.stun=0 f.sl=0 f.cnt=0 f.guard=0 f.gt=9 f.down=0 f.atk=0 f.q=0 f.fe=0 f.link=0 f.la=0 f.co=0 f.bl=0 f.bi=0 f.bs=0 f.ca=0 f.cp=0 f.ds=0 f.dd=0 f.tz=0
- f.rdm=0 f.rcl=0 f.rdef=0 f.rkd=0
+ f.x=x f.gt=9 f.bh=false
+ z(f,"vx,mv,wind,rec,stun,sl,cnt,guard,down,atk,q,fe,link,la,co,bl,bi,bs,ca,cp,ds,dd,tz,rdm,rcl,rdef,rkd,shake")
 end
 
 function set_round(n)
@@ -159,18 +162,24 @@ function ai_ctl(f,e)
  local mv=0
  local g=0
  local a=0
+ local read=e.atk==e.la and .22 or 0
  if e.wind>0 and rng>0 then
-  if rnd()<(.18+f.lk/180) then
+  if rnd()<(.18+f.lk/180+read) then
    g=e.aln==1 and 1 or 2
    if rnd()<.45 then mv=-1 end
   elseif rnd()<.35 then
    mv=rnd()<.5 and -1 or 1
-  end
+ end
  elseif f.stun<=0 and f.rec<=0 and f.wind<=0 then
-  if f.cnt>0 and rng>0 and f.st>5 and rnd()<.7 then
+  if f.hp<30 and rng>0 then
+   g=(e.la==3 or e.la==4) and 2 or 1
+   mv=f.x>103 and 1 or -1
+  elseif f.cnt>0 and rng>0 and f.st>5 and rnd()<.7 then
    a=rng==2 and (rnd()<.35 and 5 or 2) or 1
   elseif f.st<20 and rnd()<.55 then
    mv=-1
+  elseif e.x<25 and f.st>20 then
+   mv=1
   elseif rng==0 and rnd()<.7 then
    mv=1
   elseif rng==2 and rnd()<.3 then
@@ -183,9 +192,9 @@ function ai_ctl(f,e)
    elseif rng==0 then
     a=r<.6 and 1 or 3
    elseif rng==1 then
-    if r<.34 then a=1 elseif r<.66 then a=2 else a=3 end
+    if r<.28 then a=1 elseif r<.52 then a=2 elseif r<.72 then a=3 else a=7 end
    else
-    if r<.3 then a=2 elseif r<.62 then a=4 else a=5 end
+    if r<.25 then a=2 elseif r<.5 then a=4 elseif r<.72 then a=5 elseif r<.88 then a=7 else a=8 end
    end
   end
  end
@@ -237,7 +246,7 @@ function knock(d,a)
  a.rkd+=1
  a.hy=min(100,a.hy+18)
  d.down=75
- d.wind=0 d.rec=0 d.stun=0 d.guard=0 d.sl=0 d.bl=0 d.bi=0 d.bs=0 d.cnt=0 d.ca=0 d.cp=0 d.ds=0 d.tz=0
+ z(d,"wind,rec,stun,guard,sl,bl,bi,bs,cnt,ca,cp,ds,tz")
  a.wind=0 a.tz=0
  a.rec=18
  cam=7 fl=3
@@ -251,10 +260,11 @@ function hit(a,d)
  if a.atk==6 then return end
  local m=mvs[a.atk]
  if not m then return end
- if abs(a.x-d.x)>rch[a.atk]+9 then
+ local gap=abs(a.x-d.x)
+ if gap>rch[a.atk]+9 then
   d.cnt=max(d.cnt,8)
   d.ca=max(d.ca,1)
-  a.tz=30
+  a.tz=18
   a.cp=0 a.co=0 a.link=0 a.la=0
   sfx(3)
   return
@@ -262,7 +272,7 @@ function hit(a,d)
  if d.sl>0 and m.ln==1 then
   d.cnt=14+d.pg
   d.ca=2
-  a.tz=30
+  a.tz=24
   d.hy=min(100,d.hy+4)
   d.rdef+=2
   a.st=max(0,a.st-1)
@@ -296,7 +306,7 @@ function hit(a,d)
    d.hp-=(lean and .1 or .22)*m.d
    d.cnt=max(d.cnt,lean and 9 or 6)
    d.ca=max(d.ca,1)
-   a.tz=30
+   a.tz=lean and 18 or 12
    if d==p then htxt=lean and "lean block" or "blocked" ht=18 end
    sfx(3)
   end
@@ -333,6 +343,8 @@ function hit(a,d)
  if a.fe>0 then mult+=.15 a.fe=0 end
  if a.co>0 then mult+=.1 end
  if fin then mult+=.18 end
+ mult*=max(.6,1-abs(gap-opt[a.atk])*.07)
+ if d.x<25 or d.x>103 then mult+=.12 end
  mult*=.8+.2*a.st/a.sm
  a.hy=min(100,a.hy+m.hy*a.hmul)
  if a.chain>=2 and fr-a.ct<40 and a.hy>=100 then mult+=.2 a.hy=0 end
@@ -438,6 +450,7 @@ function step_box(f,e,mv,g,a)
  if rng==0 then regen+=.18 end
  if f.guard>0 then regen+=.12 end
  regen*=f.rg
+ if f.x<25 or f.x>103 then regen*=.75 end
  f.st=min(f.sm,f.st+regen)
  f.g=min(f.gm,f.g+.05+(f.guard>0 and .12 or .03))
  return mv

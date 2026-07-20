@@ -166,6 +166,14 @@ async function waitBlock(page, type) {
         perfect.playerCounterWindow <= 0 || perfect.opponentCounterSlow < 28) {
       throw new Error(`perfect block state invalid: ${JSON.stringify({ beforePerfect, perfect })}`);
     }
+    if (!(normal.opponentCounterSlow < lean.opponentCounterSlow &&
+        lean.opponentCounterSlow < perfect.opponentCounterSlow)) {
+      throw new Error(`counter slowdown hierarchy invalid: ${JSON.stringify({
+        normal: normal.opponentCounterSlow,
+        lean: lean.opponentCounterSlow,
+        perfect: perfect.opponentCounterSlow
+      })}`);
+    }
 
     await page.waitForFunction(() => JSON.parse(window.render_game_to_text()).playerBlockStun === 0);
     const targetHp = perfect.opponentHp;
@@ -188,11 +196,13 @@ async function waitBlock(page, type) {
     const result = {
       normal: {
         hpLoss: normalHpLoss,
-        guardLoss: normalGuardLoss
+        guardLoss: normalGuardLoss,
+        opponentSlowFrames: normal.opponentCounterSlow
       },
       lean: {
         hpLoss: leanHpLoss,
-        guardLoss: leanGuardLoss
+        guardLoss: leanGuardLoss,
+        opponentSlowFrames: lean.opponentCounterSlow
       },
       bodyLean: {
         hpLoss: beforeBodyLean.playerHp - bodyLean.playerHp,

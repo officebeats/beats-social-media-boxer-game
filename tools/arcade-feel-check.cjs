@@ -51,6 +51,11 @@ async function forceAttack(page, attack) {
 
     const beforeBlock = await state(page);
     await page.keyboard.down("ArrowLeft");
+    await page.keyboard.down("ArrowUp");
+    await page.waitForFunction(() => {
+      const s = JSON.parse(window.render_game_to_text());
+      return s.playerGuard === 1 && s.playerBlockLean === 1;
+    });
     await forceAttack(page, 2);
     try {
       await page.waitForFunction(() => {
@@ -61,6 +66,7 @@ async function forceAttack(page, attack) {
       throw new Error(`back block did not resolve: ${JSON.stringify(await state(page))}`);
     }
     const backBlock = await state(page);
+    await page.keyboard.up("ArrowUp");
     await page.keyboard.up("ArrowLeft");
 
     await page.waitForFunction(() => {

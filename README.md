@@ -26,7 +26,9 @@ Clean contact opens short boxing-combo links. The primary route is `O` jab, `X` 
 
 Fighters accelerate into steps, brake firmly on release, and become more flat-footed as stamina falls. Edge-tracked directional input prevents held directions from creating accidental repeated dashes. Forward pressure is slightly faster than retreat, while deliberate double taps create short boxing quick-steps that can flow into committed punches. A four-beat planted shuffle shifts weight through compressed knees and a lifted heel while slips, blocks, and punches move the torso over that base. Lead jabs and body jabs use the front glove; rear straights, hooks, and uppercuts rotate the shoulder line and pivot the stance. Punches interpolate through anticipation, contact, impact hold, and recovery; power shots add stronger hit-stop without dropping buffered follow-up input.
 
-Clean hits now produce positive frame advantage, allowing confirmed links without making whiffed punches safe. Interrupting an opponent during startup creates a counter-hit, cancels the incoming punch, and adds hitstun. Weight-based pushback separates isolated power shots while confirmed combo routes retain enough range to continue. A held matching block absorbs the shot, a planted lean block reduces chip and guard wear, and a late matching block creates a stronger perfect-return window. A whiff, slip, or successful block slows the exposed attacker to half-speed action timing and reduced foot speed for one second. Starting a punch during that counter window commits its tier through startup so the advantage cannot expire before contact. Damage only resolves when the rendered glove reaches the opponent.
+Clean hits now produce positive frame advantage, allowing confirmed links without making whiffed punches safe. Interrupting an opponent during startup creates a counter-hit, cancels the incoming punch, and adds hitstun. Weight-based pushback separates isolated power shots while confirmed combo routes retain enough range to continue. A held matching block absorbs the shot, a planted lean block reduces chip and guard wear, and a late matching block creates a stronger perfect-return window. Counter opportunity scales with defensive skill: ordinary blocks slow the attacker for 12 frames, lean blocks for 18, slips for 24, and a perfect catch for the full 30-frame second. Starting a punch during that counter window commits its tier through startup so the advantage cannot expire before contact.
+
+Damage only resolves when the rendered glove reaches the opponent, and every punch has a preferred distance. Clean shots at that distance deal full damage; crowded or reaching shots are weaker, so stepping into range matters without making contact feel arbitrary. Pressure near the ropes adds a modest damage bonus, while a fighter resting on the ropes regenerates stamina more slowly. The opponent also adjusts its guard against repeated landed punches, covers up and retreats when hurt, pressures a trapped fighter, and mixes lead hooks and overhands into its range-specific offense.
 
 The fight HUD uses a fixed broadcast order for both corners: red health, blue stamina, then yellow guard. The center stack shows round, clock, and the player's compact hype value.
 
@@ -61,6 +63,7 @@ node .\tools\ui-check.cjs http://127.0.0.1:4173 .\output\ui
 node .\tools\playthrough.cjs http://127.0.0.1:4173 .\output\normal --normal
 node .\tools\mobile-check.cjs http://127.0.0.1:4173 .\output\mobile
 node .\tools\arcade-feel-check.cjs http://127.0.0.1:4173
+node .\tools\range-check.cjs http://127.0.0.1:4173 .\output\range
 .\tools\run-balance-check.ps1
 ```
 
