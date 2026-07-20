@@ -81,14 +81,14 @@ def draw_ab(ox=0):
     rect(ox + 3, 48, ox + 9, 52, 0)
     rect(ox + 4, 48, ox + 8, 50, 6)
     pset(ox + 5, 49, 7)
-    poly(offset([(0, 51), (8, 50), (12, 52), (11, 55), (0, 55)], ox), 0)
-    poly(offset([(2, 52), (8, 51), (10, 53), (9, 54), (2, 54)], ox), 2)
+    poly(offset([(1, 51), (8, 50), (11, 52), (10, 55), (1, 55)], ox), 0)
+    poly(offset([(3, 52), (8, 51), (9, 53), (8, 54), (3, 54)], ox), 2)
     pset(ox + 8, 52, 13)
     rect(ox + 30, 48, ox + 35, 51, 0)
     rect(ox + 31, 47, ox + 34, 49, 6)
     pset(ox + 32, 48, 7)
-    poly(offset([(29, 50), (35, 49), (39, 52), (39, 55), (29, 55)], ox), 0)
-    poly(offset([(31, 51), (35, 50), (38, 52), (37, 54), (31, 54)], ox), 2)
+    poly(offset([(30, 50), (35, 49), (38, 52), (38, 55), (30, 55)], ox), 0)
+    poly(offset([(31, 51), (35, 50), (37, 52), (36, 54), (31, 54)], ox), 2)
     pset(ox + 36, 51, 13)
 
     # Tailored trunks stop above the knee and split clearly between the thighs.
@@ -108,60 +108,52 @@ def draw_ab(ox=0):
     pset(ox + 15, 38, 13)
     pset(ox + 23, 38, 13)
 
-    # Lean bare torso with an arcade V-shape and readable rib planes.
+    # A.B.: fitted black training shirt with a narrow athletic shoulder line.
     poly(offset([(11, 31), (10, 25), (12, 20), (17, 17), (20, 15),
                  (27, 15), (32, 18), (35, 24), (32, 31)], ox), 0)
     poly(offset([(14, 30), (13, 24), (17, 20), (21, 17), (26, 17),
-                 (30, 20), (32, 25), (29, 30)], ox), 4)
-    poly(offset([(13, 21), (17, 18), (20, 19), (18, 23), (14, 25)], ox), 4)
-    poly(offset([(27, 18), (31, 20), (33, 24), (31, 26), (28, 23)], ox), 4)
-    line(ox + 14, 21, ox + 18, 22, 15)
-    line(ox + 29, 20, ox + 32, 23, 15)
-    line(ox + 17, 23, ox + 22, 22, 9)
-    line(ox + 24, 22, ox + 29, 23, 9)
-    line(ox + 22, 21, ox + 22, 29, 5)
-    line(ox + 17, 26, ox + 20, 27, 9)
-    line(ox + 25, 27, ox + 29, 26, 9)
-    pset(ox + 14, 27, 15)
-    pset(ox + 30, 28, 5)
+                 (30, 20), (32, 25), (29, 30)], ox), 1)
+    poly(offset([(13, 21), (17, 18), (20, 19), (18, 23), (14, 25)], ox), 1)
+    poly(offset([(27, 18), (31, 20), (33, 24), (31, 26), (28, 23)], ox), 1)
+    line(ox + 14, 21, ox + 18, 22, 5)
+    line(ox + 29, 20, ox + 32, 23, 5)
+    line(ox + 18, 21, ox + 28, 20, 5)
+    line(ox + 22, 21, ox + 22, 29, 0)
+    line(ox + 16, 27, ox + 21, 28, 5)
+    line(ox + 24, 28, ox + 29, 27, 5)
+    pset(ox + 15, 23, 6)
+    pset(ox + 29, 22, 6)
 
-    # Narrow neck and sharp side-profile head.
-    poly(offset([(19, 17), (20, 11), (27, 11), (29, 17), (27, 21), (19, 20)], ox), 0)
-    poly(offset([(21, 16), (22, 12), (26, 12), (27, 17), (25, 19), (21, 18)], ox), 4)
+    # A.B. uses a narrow adult profile: vertical brow, one-pixel nose, recessed mouth.
+    poly(offset([(20, 18), (21, 11), (27, 11), (29, 18), (27, 21), (20, 20)], ox), 0)
+    poly(offset([(22, 17), (22, 12), (26, 12), (27, 17), (25, 19), (22, 18)], ox), 4)
     line(ox + 22, 13, ox + 22, 17, 15)
-    line(ox + 26, 13, ox + 27, 17, 9)
-    poly(offset([(14, 7), (16, 3), (19, 2), (21, 0), (24, 2), (27, 0),
-                 (29, 3), (33, 4), (32, 7), (34, 9), (36, 10),
-                 (35, 13), (32, 14), (31, 17), (28, 19), (22, 19),
-                 (18, 17), (15, 14)], ox), 0)
-    poly(offset([(17, 7), (19, 5), (25, 4), (29, 5), (31, 8), (32, 10),
-                 (34, 10), (33, 12), (30, 13), (29, 16), (26, 18),
-                 (22, 17), (19, 15), (17, 12)], ox), 4)
-    # Spiked black hair and a red headband with trailing ties.
-    poly(offset([(14, 7), (16, 3), (19, 3), (21, 0), (23, 3), (27, 0),
-                 (27, 3), (32, 2), (30, 6), (33, 6), (30, 8),
-                 (24, 6), (19, 7), (16, 9)], ox), 0)
-    pset(ox + 19, 3, 5)
-    pset(ox + 25, 3, 5)
-    pset(ox + 29, 4, 5)
-    line(ox + 15, 7, ox + 31, 7, 8, 2)
-    line(ox + 16, 7, ox + 9, 10, 8, 2)
-    line(ox + 14, 8, ox + 8, 13, 8)
-    pset(ox + 19, 7, 14)
-    pset(ox + 28, 7, 14)
-    # Ear, eye, nose, cheek, and set jaw remain readable at native scale.
-    disc(ox + 17, 11, 2, 9)
-    pset(ox + 17, 11, 4)
-    pset(ox + 18, 10, 15)
-    line(ox + 24, 9, ox + 30, 9, 0)
-    pset(ox + 28, 10, 7)
-    pset(ox + 29, 10, 0)
-    line(ox + 31, 10, ox + 34, 11, 9)
-    pset(ox + 34, 12, 15)
-    line(ox + 30, 13, ox + 33, 13, 5)
-    line(ox + 28, 15, ox + 31, 15, 0)
-    pset(ox + 27, 17, 9)
-    pset(ox + 22, 16, 15)
+    line(ox + 26, 13, ox + 27, 18, 9)
+    poly(offset([(18, 6), (20, 3), (23, 2), (27, 3), (29, 5),
+                 (29, 10), (29, 12),
+                 (28, 12), (28, 14), (26, 17), (22, 16), (19, 14),
+                 (18, 10)], ox), 0)
+    poly(offset([(20, 6), (21, 4), (24, 3), (27, 4), (28, 6),
+                 (28, 10), (28, 11),
+                 (27, 12), (27, 14), (25, 15), (22, 15), (20, 13),
+                 (19, 10), (19, 7)], ox), 4)
+    poly(offset([(18, 6), (20, 3), (23, 2), (27, 3), (29, 5),
+                 (28, 6), (25, 5), (22, 5), (20, 7)], ox), 0)
+    line(ox + 21, 3, ox + 26, 3, 5)
+    pset(ox + 23, 3, 6)
+    rect(ox + 19, 8, ox + 20, 10, 9)
+    pset(ox + 20, 8, 15)
+    line(ox + 25, 6, ox + 27, 6, 5)
+    pset(ox + 26, 7, 7)
+    pset(ox + 27, 7, 0)
+    pset(ox + 28, 9, 9)
+    pset(ox + 28, 10, 0)
+    pset(ox + 27, 12, 9)
+    # Beard follows the underside of the jaw and never projects past the mouth.
+    poly(offset([(20, 11), (22, 12), (24, 13), (26, 12), (28, 13),
+                 (27, 15), (25, 17), (22, 16), (20, 14)], ox), 0)
+    pset(ox + 27, 12, 4)
+    line(ox + 22, 14, ox + 25, 15, 5)
 
 
 def draw_dg(ox=40):
@@ -184,14 +176,14 @@ def draw_dg(ox=40):
     rect(ox + 2, 48, ox + 8, 52, 0)
     rect(ox + 3, 48, ox + 7, 50, 0)
     pset(ox + 4, 49, 10)
-    poly(offset([(0, 51), (8, 50), (12, 52), (11, 55), (0, 55)], ox), 0)
-    poly(offset([(2, 52), (8, 51), (10, 53), (9, 54), (2, 54)], ox), 0)
+    poly(offset([(1, 51), (8, 50), (11, 52), (10, 55), (1, 55)], ox), 0)
+    poly(offset([(3, 52), (8, 51), (9, 53), (8, 54), (3, 54)], ox), 0)
     pset(ox + 7, 52, 10)
     rect(ox + 32, 48, ox + 37, 52, 0)
     rect(ox + 33, 48, ox + 36, 50, 0)
     pset(ox + 34, 49, 10)
-    poly(offset([(30, 50), (36, 49), (39, 52), (39, 55), (30, 55)], ox), 0)
-    poly(offset([(32, 51), (36, 50), (38, 52), (37, 54), (32, 54)], ox), 0)
+    poly(offset([(30, 50), (36, 49), (38, 52), (38, 55), (30, 55)], ox), 0)
+    poly(offset([(32, 51), (36, 50), (37, 52), (36, 54), (32, 54)], ox), 0)
     pset(ox + 36, 51, 10)
 
     poly(offset([(12, 28), (30, 28), (31, 31), (27, 40), (22, 40),
@@ -227,87 +219,90 @@ def draw_dg(ox=40):
     pset(ox + 15, 29, 9)
     pset(ox + 25, 30, 9)
 
-    # Long neck and a narrower, cockier rival profile.
-    poly(offset([(19, 17), (20, 10), (27, 11), (29, 17), (26, 21), (19, 20)], ox), 0)
-    poly(offset([(21, 16), (22, 11), (26, 12), (27, 17), (25, 19), (21, 18)], ox), 4)
+    # Deen shares the human profile but keeps the jaw visible and braids rearward.
+    poly(offset([(20, 18), (21, 11), (27, 11), (29, 18), (27, 21), (20, 20)], ox), 0)
+    poly(offset([(22, 17), (22, 12), (26, 12), (27, 17), (25, 19), (22, 18)], ox), 4)
     line(ox + 22, 13, ox + 22, 17, 15)
-    line(ox + 26, 13, ox + 27, 17, 9)
-    poly(offset([(14, 7), (16, 4), (20, 2), (26, 2), (30, 4), (32, 7),
-                 (32, 10), (35, 11), (34, 14), (31, 14), (30, 18),
-                 (27, 20), (21, 19), (17, 17), (15, 14)], ox), 0)
-    poly(offset([(17, 7), (19, 5), (25, 4), (29, 5), (30, 8), (30, 10),
-                 (33, 11), (32, 13), (29, 13), (28, 17), (25, 18),
-                 (21, 17), (18, 15), (16, 11)], ox), 4)
-    # Swept blond mass uses clustered highlights instead of braid lines.
-    poly(offset([(13, 7), (16, 3), (19, 3), (21, 0), (23, 2), (27, 0),
-                 (27, 2), (33, 1), (31, 4), (36, 3), (33, 7),
-                 (29, 8), (24, 6), (18, 8), (15, 10)], ox), 9)
-    poly(offset([(16, 5), (19, 2), (21, 3), (23, 1), (25, 4), (29, 2),
-                 (28, 5), (33, 3), (31, 6), (26, 6), (22, 5), (18, 7)], ox), 10)
-    line(ox + 17, 4, ox + 21, 2, 7)
-    line(ox + 24, 3, ox + 27, 2, 7)
-    line(ox + 29, 4, ox + 32, 3, 7)
-    pset(ox + 19, 6, 15)
-    pset(ox + 27, 5, 15)
-    disc(ox + 17, 11, 2, 9)
-    pset(ox + 17, 11, 4)
-    pset(ox + 18, 10, 15)
-    line(ox + 24, 9, ox + 30, 9, 0)
-    pset(ox + 28, 10, 7)
-    pset(ox + 29, 10, 0)
-    line(ox + 31, 10, ox + 34, 11, 9)
-    pset(ox + 34, 12, 15)
-    line(ox + 30, 13, ox + 33, 13, 5)
-    line(ox + 28, 15, ox + 32, 15, 0)
-    pset(ox + 27, 17, 15)
-    pset(ox + 22, 16, 15)
+    line(ox + 26, 13, ox + 27, 18, 9)
+    poly(offset([(18, 6), (20, 3), (23, 2), (27, 3), (29, 5),
+                 (29, 10), (29, 12),
+                 (28, 14), (26, 16), (22, 16), (19, 14), (18, 10)], ox), 0)
+    poly(offset([(20, 6), (21, 4), (24, 3), (27, 4), (28, 6),
+                 (28, 10), (28, 12),
+                 (27, 13), (26, 15), (22, 15), (20, 13), (19, 10),
+                 (19, 7)], ox), 4)
+    poly(offset([(18, 6), (20, 3), (23, 2), (27, 3), (29, 5),
+                 (28, 6), (25, 5), (22, 5), (20, 7)], ox), 0)
+    line(ox + 21, 3, ox + 26, 4, 5)
+    line(ox + 19, 5, ox + 15, 12, 0)
+    line(ox + 21, 4, ox + 18, 15, 0)
+    line(ox + 23, 4, ox + 22, 17, 0)
+    line(ox + 19, 5, ox + 16, 12, 5)
+    line(ox + 21, 5, ox + 19, 15, 5)
+    line(ox + 23, 5, ox + 23, 17, 5)
+    pset(ox + 16, 12, 6)
+    pset(ox + 19, 15, 6)
+    pset(ox + 23, 17, 6)
+    rect(ox + 19, 8, ox + 20, 10, 9)
+    pset(ox + 20, 8, 15)
+    line(ox + 25, 6, ox + 27, 6, 5)
+    pset(ox + 26, 7, 7)
+    pset(ox + 27, 7, 0)
+    pset(ox + 28, 9, 9)
+    pset(ox + 28, 10, 0)
+    pset(ox + 27, 12, 9)
+    pset(ox + 27, 14, 5)
 
 
 def portrait_ab(ox=0, oy=64):
-    poly(offset([(0, 15), (2, 12), (6, 11), (10, 11), (14, 13), (15, 15)], ox, oy), 0)
-    poly(offset([(2, 15), (4, 13), (7, 12), (11, 13), (14, 15)], ox, oy), 4)
-    line(ox + 3, oy + 14, ox + 7, oy + 13, 15)
-    poly(offset([(2, 5), (4, 2), (7, 1), (11, 2), (13, 4), (13, 6),
-                 (15, 7), (14, 9), (12, 10), (11, 13), (7, 13),
-                 (4, 11), (2, 9)], ox, oy), 0)
-    poly(offset([(4, 5), (6, 3), (10, 3), (12, 5), (12, 7), (14, 7),
-                 (13, 9), (11, 9), (10, 12), (7, 12), (4, 10), (3, 7)], ox, oy), 4)
-    poly(offset([(2, 5), (4, 2), (6, 2), (7, 0), (9, 2), (12, 1),
-                 (11, 4), (13, 4), (11, 6), (7, 5), (4, 6)], ox, oy), 0)
-    line(ox + 2, oy + 5, ox + 12, oy + 5, 8, 2)
-    line(ox + 3, oy + 5, ox, oy + 8, 8)
-    pset(ox + 4, oy + 4, 14)
-    pset(ox + 5, oy + 8, 15)
-    line(ox + 8, oy + 7, ox + 11, oy + 7, 0)
-    pset(ox + 10, oy + 8, 7)
-    pset(ox + 12, oy + 8, 9)
-    pset(ox + 13, oy + 9, 15)
-    line(ox + 10, oy + 10, ox + 12, oy + 10, 0)
-    pset(ox + 8, oy + 11, 15)
+    poly(offset([(1, 15), (3, 12), (6, 11), (11, 11), (14, 15)], ox, oy), 1)
+    rect(ox + 6, oy + 11, ox + 10, oy + 15, 4)
+    poly(offset([(3, 5), (5, 2), (9, 2), (12, 4), (12, 8),
+                 (12, 10), (10, 12), (6, 12),
+                 (3, 9)], ox, oy), 0)
+    poly(offset([(5, 5), (6, 3), (9, 3), (11, 5), (11, 7),
+                 (11, 8), (11, 10), (9, 11), (6, 10),
+                 (4, 8)], ox, oy), 4)
+    poly(offset([(3, 5), (5, 2), (9, 2), (12, 4), (11, 5),
+                 (8, 4), (5, 4), (4, 6)], ox, oy), 0)
+    line(ox + 6, oy + 2, ox + 10, oy + 3, 5)
+    pset(ox + 5, oy + 7, 9)
+    pset(ox + 6, oy + 6, 15)
+    pset(ox + 7, oy + 6, 0)
+    pset(ox + 9, oy + 6, 15)
+    pset(ox + 10, oy + 6, 0)
+    pset(ox + 11, oy + 9, 0)
+    poly(offset([(4, 9), (6, 9), (8, 10), (10, 9), (11, 10),
+                 (10, 13), (7, 13), (5, 11)], ox, oy), 0)
+    pset(ox + 10, oy + 9, 4)
+    line(ox + 6, oy + 11, ox + 9, oy + 12, 5)
 
 
 def portrait_dg(ox=16, oy=64):
-    poly(offset([(0, 15), (2, 12), (6, 11), (10, 11), (14, 13), (15, 15)], ox, oy), 0)
-    poly(offset([(2, 15), (4, 13), (7, 12), (11, 13), (14, 15)], ox, oy), 4)
-    line(ox + 4, oy + 14, ox + 8, oy + 13, 15)
-    poly(offset([(2, 5), (4, 2), (8, 1), (11, 2), (13, 4), (13, 6),
-                 (15, 7), (14, 9), (12, 10), (11, 13), (7, 13),
-                 (4, 11), (2, 9)], ox, oy), 0)
-    poly(offset([(4, 5), (6, 3), (10, 3), (12, 5), (12, 7), (14, 7),
-                 (13, 9), (11, 9), (10, 12), (7, 12), (4, 10), (3, 7)], ox, oy), 4)
-    poly(offset([(2, 5), (4, 2), (6, 2), (7, 0), (9, 2), (13, 1),
-                 (11, 4), (15, 3), (12, 6), (8, 5), (4, 7)], ox, oy), 9)
-    poly(offset([(3, 4), (5, 1), (7, 2), (8, 0), (10, 3), (13, 2),
-                 (11, 5), (7, 4), (4, 6)], ox, oy), 10)
-    pset(ox + 5, oy + 2, 7)
-    pset(ox + 9, oy + 2, 7)
-    pset(ox + 5, oy + 8, 15)
-    line(ox + 8, oy + 7, ox + 11, oy + 7, 0)
-    pset(ox + 10, oy + 8, 7)
-    pset(ox + 12, oy + 8, 9)
-    pset(ox + 13, oy + 9, 15)
-    line(ox + 10, oy + 10, ox + 13, oy + 10, 0)
-    pset(ox + 8, oy + 11, 15)
+    poly(offset([(1, 15), (3, 12), (6, 11), (11, 11), (14, 15)], ox, oy), 4)
+    rect(ox + 6, oy + 11, ox + 10, oy + 15, 4)
+    poly(offset([(3, 5), (5, 2), (9, 2), (12, 4), (12, 8),
+                 (12, 10), (10, 12), (6, 12),
+                 (3, 9)], ox, oy), 0)
+    poly(offset([(5, 5), (6, 3), (9, 3), (11, 5), (11, 7),
+                 (11, 8), (11, 10), (9, 11), (6, 10),
+                 (4, 8)], ox, oy), 4)
+    poly(offset([(3, 5), (5, 2), (9, 2), (12, 4), (11, 5),
+                 (8, 4), (5, 4), (4, 6)], ox, oy), 0)
+    line(ox + 6, oy + 2, ox + 10, oy + 3, 5)
+    line(ox + 4, oy + 3, ox + 1, oy + 10, 0)
+    line(ox + 6, oy + 3, ox + 3, oy + 13, 0)
+    line(ox + 8, oy + 3, ox + 7, oy + 14, 0)
+    line(ox + 4, oy + 4, ox + 2, oy + 10, 5)
+    line(ox + 6, oy + 4, ox + 4, oy + 13, 5)
+    line(ox + 8, oy + 4, ox + 8, oy + 14, 5)
+    pset(ox + 5, oy + 7, 9)
+    pset(ox + 6, oy + 6, 15)
+    pset(ox + 7, oy + 6, 0)
+    pset(ox + 9, oy + 6, 15)
+    pset(ox + 10, oy + 6, 0)
+    pset(ox + 11, oy + 9, 0)
+    pset(ox + 10, oy + 11, 5)
 
 
 def draw_step(ox, oy, trunks, trim, boot, sock, hi):
@@ -334,12 +329,12 @@ def draw_step(ox, oy, trunks, trim, boot, sock, hi):
     line(ox + 26, oy + 12, ox + 29, oy + 17, hi)
     rect(ox + 5, oy + 21, ox + 11, oy + 25, 0)
     rect(ox + 6, oy + 21, ox + 10, oy + 23, sock)
-    poly(offset([(2, 24), (10, 23), (14, 25), (13, 27), (2, 27)], ox, oy), 0)
-    poly(offset([(4, 25), (10, 24), (12, 26), (4, 26)], ox, oy), boot)
+    poly(offset([(3, 24), (10, 23), (12, 25), (11, 27), (3, 27)], ox, oy), 0)
+    poly(offset([(4, 25), (9, 24), (11, 26), (4, 26)], ox, oy), boot)
     rect(ox + 30, oy + 21, ox + 35, oy + 25, 0)
     rect(ox + 31, oy + 21, ox + 34, oy + 23, sock)
-    poly(offset([(28, 24), (35, 23), (39, 25), (39, 27), (28, 27)], ox, oy), 0)
-    poly(offset([(30, 25), (35, 24), (38, 26), (30, 26)], ox, oy), boot)
+    poly(offset([(29, 24), (35, 23), (38, 25), (38, 27), (29, 27)], ox, oy), 0)
+    poly(offset([(30, 25), (35, 24), (37, 26), (30, 26)], ox, oy), boot)
 
 
 def draw_step2(ox, oy, trunks, trim, boot, sock, hi):
@@ -366,22 +361,36 @@ def draw_step2(ox, oy, trunks, trim, boot, sock, hi):
     line(ox + 26, oy + 11, ox + 30, oy + 17, hi)
     rect(ox + 4, oy + 21, ox + 10, oy + 25, 0)
     rect(ox + 5, oy + 21, ox + 9, oy + 23, sock)
-    poly(offset([(2, 24), (10, 23), (14, 25), (13, 27), (2, 27)], ox, oy), 0)
-    poly(offset([(4, 25), (10, 24), (12, 26), (4, 26)], ox, oy), boot)
+    poly(offset([(3, 24), (10, 23), (12, 25), (11, 27), (3, 27)], ox, oy), 0)
+    poly(offset([(4, 25), (9, 24), (11, 26), (4, 26)], ox, oy), boot)
     rect(ox + 30, oy + 19, ox + 36, oy + 23, 0)
     rect(ox + 31, oy + 19, ox + 35, oy + 21, sock)
-    poly(offset([(28, 22), (36, 21), (39, 23), (39, 26), (28, 26)], ox, oy), 0)
-    poly(offset([(30, 23), (36, 22), (38, 24), (30, 25)], ox, oy), boot)
+    poly(offset([(29, 22), (36, 21), (38, 23), (38, 26), (29, 26)], ox, oy), 0)
+    poly(offset([(30, 23), (36, 22), (37, 24), (30, 25)], ox, oy), boot)
+
+
+def stretch_frame(sx, sy, dx, dy, width, source_height=28, target_height=32):
+    source = [[px[sy + y][sx + x] for x in range(width)] for y in range(source_height)]
+    for y in range(target_height):
+        source_y = round(y * (source_height - 1) / (target_height - 1))
+        for x in range(width):
+            px[dy + y][dx + x] = source[source_y][x]
 
 
 draw_ab()
 draw_dg()
+stretch_frame(0, 28, 0, 32, 40)
+stretch_frame(40, 28, 40, 32, 40)
 portrait_ab()
 portrait_dg()
 draw_step(0, 80, 2, 13, 2, 6, 9)
 draw_step(40, 80, 3, 10, 0, 0, 10)
-draw_step2(80, 60, 2, 13, 2, 6, 9)
-draw_step2(80, 88, 3, 10, 0, 0, 10)
+stretch_frame(0, 80, 0, 80, 40)
+stretch_frame(40, 80, 40, 80, 40)
+draw_step2(80, 64, 2, 13, 2, 6, 9)
+draw_step2(80, 96, 3, 10, 0, 0, 10)
+stretch_frame(80, 64, 80, 64, 40)
+stretch_frame(80, 96, 80, 96, 40)
 
 gfx = "\n".join("".join(format(c, "x") for c in row) for row in px)
 cart = CART.read_text(encoding="utf-8")

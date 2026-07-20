@@ -40,17 +40,23 @@ async function waitReady(page) {
   await page.waitForFunction(() => {
     const s = JSON.parse(window.render_game_to_text());
     return s.mode === "fight" && s.playerWindup === 0 && s.playerRecovery === 0
-      && s.playerStun === 0 && s.playerDodge === 0;
+      && s.playerStun === 0 && s.playerDodge === 0 && s.playerCounterSlow === 0
+      && s.opponentWindup === 0 && s.opponentRecovery === 0;
   }, null, { timeout: 10000 });
 }
 
 async function captureMove(page, canvas, name, keys, attack) {
   await waitReady(page);
   await chord(page, keys);
-  await page.waitForFunction((expected) => {
-    const s = JSON.parse(window.render_game_to_text());
-    return s.mode === "fight" && s.playerAttack === expected && s.playerWindup > 0;
-  }, attack, { timeout: 3000 });
+  try {
+    await page.waitForFunction((expected) => {
+      const s = JSON.parse(window.render_game_to_text());
+      return s.mode === "fight" && s.playerAttack === expected && s.playerWindup > 0;
+    }, attack, { timeout: 3000 });
+  } catch (error) {
+    await canvas.screenshot({ path: path.join(output, `${name}-error.png`) });
+    throw new Error(`${name} did not start: ${JSON.stringify(await state(page))}`);
+  }
   await canvas.screenshot({ path: path.join(output, `${name}-windup.png`) });
 
   if (attack === 6) {
@@ -60,7 +66,7 @@ async function captureMove(page, canvas, name, keys, attack) {
   }
   await canvas.screenshot({ path: path.join(output, `${name}-active.png`) });
   if (attack !== 6) {
-    const halfway = Math.ceil(({ 1: 8, 2: 13, 3: 10, 4: 13, 5: 12 })[attack] / 2);
+    const halfway = Math.ceil(({ 1: 8, 2: 13, 3: 10, 4: 13, 5: 12, 7: 10, 8: 14 })[attack] / 2);
     await page.waitForFunction((limit) => {
       const s = JSON.parse(window.render_game_to_text());
       return s.playerRecovery > 0 && s.playerRecovery <= limit;
@@ -125,6 +131,8 @@ async function captureMove(page, canvas, name, keys, attack) {
     results.bodyJab = await captureMove(page, canvas, "04-body-jab", ["ArrowDown", "z"], 3);
     results.bodyHook = await captureMove(page, canvas, "05-body-hook", ["ArrowDown", "x"], 4);
     results.uppercut = await captureMove(page, canvas, "06-uppercut", ["ArrowUp", "x"], 5);
+    results.overhand = await captureMove(page, canvas, "08-overhand", ["ArrowRight", "x"], 8);
+    results.leadHook = await captureMove(page, canvas, "07-lead-hook", ["ArrowRight", "z"], 7);
 
     if (errors.length) throw new Error(errors.join(" | "));
     fs.writeFileSync(path.join(output, "states.json"), JSON.stringify(results, null, 2));

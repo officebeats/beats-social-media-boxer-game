@@ -53,6 +53,16 @@ async function forceAttack(page, attack) {
   }
 }
 
+async function closeRange(page) {
+  await page.keyboard.down("ArrowRight");
+  await page.waitForFunction(() => {
+    const s = JSON.parse(window.render_game_to_text());
+    return s.opponentX - s.playerX <= 31;
+  });
+  await page.keyboard.up("ArrowRight");
+  await page.waitForFunction(() => JSON.parse(window.render_game_to_text()).playerMovement === 0);
+}
+
 async function waitBlock(page, type) {
   await page.waitForFunction((expected) => {
     const s = JSON.parse(window.render_game_to_text());
@@ -86,13 +96,7 @@ async function waitBlock(page, type) {
     await reachFight(page);
     await page.evaluate(() => { window.pico8_gpio[118] = 1; });
 
-    await page.keyboard.down("ArrowRight");
-    await page.waitForFunction(() => {
-      const s = JSON.parse(window.render_game_to_text());
-      return s.opponentX - s.playerX <= 31;
-    });
-    await page.keyboard.up("ArrowRight");
-    await page.waitForFunction(() => JSON.parse(window.render_game_to_text()).playerMovement === 0);
+    await closeRange(page);
 
     const beforeNormal = await state(page);
     await page.keyboard.down("ArrowUp");
@@ -119,6 +123,7 @@ async function waitBlock(page, type) {
     await page.keyboard.up("ArrowUp");
     await page.keyboard.up("ArrowLeft");
     await waitIdle(page);
+    await closeRange(page);
 
     const beforeBodyLean = await state(page);
     await page.keyboard.down("ArrowLeft");
@@ -133,6 +138,7 @@ async function waitBlock(page, type) {
     await page.keyboard.up("ArrowDown");
     await page.keyboard.up("ArrowLeft");
     await waitIdle(page);
+    await closeRange(page);
 
     const beforePerfect = await state(page);
     await forceAttack(page, 2);

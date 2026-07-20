@@ -2,8 +2,8 @@ pico-8 cartridge // http://www.pico-8.com
 version 42
 __lua__
 defs={
- {ab="ab",nm="a.b. problem",rl="counter",art=1,ed=8,tr=7,gl=8,hi=7,sk=4,hm=100,sm=100,gm=40,lk=64,spd=0,ag=1,pdw=1,dm=0,rg=.92},
- {ab="dg",nm="d. great",rl="speed",art=2,ed=10,tr=8,gl=2,hi=10,sk=15,hm=100,sm=100,gm=40,lk=56,spd=1,ag=1,pdw=0,dm=.16,rg=1.06},
+ {ab="ab",nm="a.b. problem",rl="counter",art=1,ed=13,tr=2,gl=13,hi=7,sk=4,hm=100,sm=100,gm=40,lk=64,spd=0,ag=1,pdw=1,dm=0,rg=.92},
+ {ab="dg",nm="d. great",rl="speed",art=2,ed=11,tr=3,gl=11,hi=7,sk=4,hm=100,sm=100,gm=40,lk=56,spd=1,ag=1,pdw=0,dm=.16,rg=1.06},
  {ab="ck",nm="callout king",rl="pressure",art=2,ed=8,tr=8,gl=8,hi=10,hm=98,sm=104,gm=38,lk=55,spd=1,ag=1.03,pdw=0,dm=.1,rg=1.04},
  {ab="sg",nm="studio guest",rl="wildcard",art=1,ed=12,tr=12,gl=12,hi=6,hm=96,sm=102,gm=38,lk=53,spd=1,ag=1.02,pdw=0,dm=.08,rg=1.05},
  {ab="lc",nm="legend coach",rl="veteran",art=1,ed=10,tr=9,gl=10,hi=7,hm=103,sm=95,gm=46,lk=61,spd=0,ag=.94,pdw=1,dm=.04,rg=.96},
@@ -15,10 +15,17 @@ mvs={
  {ln=1,wd=7,re=11,st=6,d=11,gd=8,hy=11,sk=8},
  {ln=0,wd=5,re=9,st=4,d=7,gd=5,hy=8,sk=10},
  {ln=0,wd=7,re=11,st=6,d=10,gd=7,hy=11,sk=12},
- {ln=1,wd=7,re=12,st=7,d=12,gd=9,hy=13,sk=8}
+ {ln=1,wd=7,re=12,st=7,d=12,gd=9,hy=13,sk=8},
+ [7]={ln=1,wd=6,re=10,st=5,d=9,gd=7,hy=10,sk=7},
+ [8]={ln=1,wd=9,re=14,st=8,d=14,gd=11,hy=16,sk=9}
 }
-rch={29,32,29,23,19}
-anm={"jab","straight","body jab","body hook","uppercut","feint"}
+rch={29,32,29,23,19,0,25,30}
+anm={"jab","straight","body jab","body hook","uppercut","feint","lead hook","overhand"}
+rr={0,1,0,1,1,0,0,1}
+wx={5,-8,3,-5,-5,13,-2,-9}
+wy={39,32,25,25,22,34,35,56}
+ry={49,48,27,27,51,34,47,45}
+cmb={[12]=1,[13]=1,[17]=1,[32]=1,[37]=1,[24]=1,[27]=1,[72]=1,[74]=1,[78]=1,[45]=1,[48]=1}
 
 function mkb(i,sd,ai)
  local d=defs[i]
@@ -143,14 +150,8 @@ function human_ctl()
  elseif btn(0) and o and o.wind>0 and fresh==0 and p.sl==0 then g=1
  elseif btn(3) then g=2 end
  local a=0
- if btnp(4) then
-  if btn(2) then a=6 elseif btn(3) then a=3 else a=1 end
- end
- if btnp(5) then
-  if btn(2) then a=5
-  elseif btn(3) then a=4
-  else a=2 end
- end
+ if btnp(4) then a=btn(2) and 6 or btn(3) and 3 or btn(1) and 7 or 1 end
+ if btnp(5) then a=btn(2) and 5 or btn(3) and 4 or btn(1) and 8 or 2 end
  return mv,g,a
 end
 
@@ -198,7 +199,7 @@ function begin_atk(f,a)
   f.st-=1 f.atk=6 f.aln=1 f.wind=3
   return
  end
- local co=f.link>0 and ((f.la==1 and (a==2 or a==3)) or (f.la==3 and a==2) or (f.la==2 and a==4) or (f.la==4 and a==5))
+ local co=f.link>0 and cmb[f.la*10+a]
  f.co=co and 1 or 0
  if f==p then htxt=(co and "combo " or "")..anm[a] ht=18 end
  local m=mvs[a]
@@ -222,6 +223,7 @@ function begin_atk(f,a)
  end
  if rng<2 then f.vx=-f.sd*(a==2 and .8 or a>3 and .55 or .4) end
  local wd=max(2,m.wd-flr(f.acc*8))
+ if rng==2 and f.cp==0 and a>1 then wd+=1 end
  if f.fe>0 or co then wd=max(2,wd-2) end
  if f.cp>0 then
   wd=max(2,wd-1-(f.cp==3 and 1 or 0))
@@ -249,7 +251,7 @@ function hit(a,d)
  if a.atk==6 then return end
  local m=mvs[a.atk]
  if not m then return end
- if abs(a.x-d.x)>rch[a.atk]+11 then
+ if abs(a.x-d.x)>rch[a.atk]+9 then
   d.cnt=max(d.cnt,8)
   d.ca=max(d.ca,1)
   a.tz=30
@@ -288,7 +290,7 @@ function hit(a,d)
    a.stun=3
    cam=3 fl=2
    d.g=min(d.gm,d.g+1)
-   if d==p then htxt="perfect block" ht=24 end
+   if d==p then htxt="catch + shoot" ht=24 end
    sfx(5)
   else
    d.hp-=(lean and .1 or .22)*m.d
@@ -311,7 +313,7 @@ function hit(a,d)
  end
  local mult=1
  local ch=d.wind>0
- local fin=a.co>0 and a.atk==5 and a.chain>=2
+ local fin=a.co>0 and (a.atk==5 or a.atk==8) and a.chain>=2
  local cp=a.cp
  if ch then
   mult+=.18
@@ -347,14 +349,14 @@ function hit(a,d)
  if fr-a.ct<40 then a.chain+=1 else a.chain=1 end
  a.ct=fr
  a.la=a.atk
- a.link=a.atk<5 and 20 or 0
+ a.link=(a.atk==5 or a.atk==8) and 0 or 20
  d.shake=(fin and 7 or 3)+cp
  hs=fin and 7 or 3+(a.atk>1 and 2 or 0)+(cp>1 and 1 or 0)
  cam=fin and 7 or a.atk>1 and 4 or 2
  fl=fin and 3 or a.atk>1 and 2 or 0
  if fin and a==p then htxt="combo finish" ht=24 end
  d.bh=m.ln==0
- local pb=(a.atk==1 or a.atk==3) and 1 or a.atk==5 and 6 or 4
+ local pb=(a.atk==1 or a.atk==3) and 1 or (a.atk==5 or a.atk==8) and 6 or 4
  if a.co>0 then pb=max(1,pb-2) end
  d.x=clamp(d.x+d.sd*(fin and 8 or pb),18,110)
  if a.atk>1 and a.co==0 then a.x=clamp(a.x+a.sd,18,110) end
@@ -621,14 +623,14 @@ function ring_front()
  line(0,108,127,108,5)
 end
 
-function portrait(id,x,y)
+function portrait(id,x,y,flip)
  local d=defs[id]
- panel(x,y,x+16,y+17,d.ed,0)
+ panel(x,y,x+16,y+17,d.ed,1)
  pal(4,d.sk or 4)
  if d.art==1 then pal(2,d.tr) pal(13,d.gl)
  else pal(3,d.tr) pal(11,d.hi) end
  palt(14,true) palt(0,false)
- sspr((d.art-1)*16,64,16,16,x+1,y+1,15,15)
+ sspr((d.art-1)*16,64,16,16,x+1,y+1,15,15,flip)
  palt() pal()
 end
 
@@ -640,35 +642,39 @@ function meter(x,y,w,v,m,c,rev)
  else rectfill(x+1,y+1,x+n,y+3,c) end
 end
 
-function limb(x1,y1,x2,y2,c)
- line(x1-2,y1,x2-2,y2,0)
- line(x1+2,y1,x2+2,y2,0)
- line(x1,y1-2,x2,y2-2,0)
- line(x1,y1+2,x2,y2+2,0)
- line(x1-1,y1,x2-1,y2,c)
- line(x1+1,y1,x2+1,y2,c)
- line(x1,y1,x2,y2,c)
+function limb(x1,y1,x2,y2,c,h,s)
+ local v=abs(x2-x1)>abs(y2-y1)
+ local px=v and 0 or 1
+ local py=v and 1 or 0
+ line(x1-px*2,y1-py*2,x2-px*2,y2-py*2,0)
+ line(x1+px*2,y1+py*2,x2+px*2,y2+py*2,0)
+ for i=-1,1 do line(x1+px*i,y1+py*i,x2+px*i,y2+py*i,c) end
+ line(x1+px,y1+py,x2+px,y2+py,s)
+ line(x1-px,y1-py,x2-px,y2-py,h)
+ circfill(x1,y1,1,c)
+ circfill(x2,y2,1,c)
 end
 
-function joint(x1,y1,x2,y2,c,b)
+function joint(x1,y1,x2,y2,c,h,s,b)
  local mx=(x1+x2)/2
  local my=(y1+y2)/2+abs(b)
  mx+=b
- limb(x1,y1,mx,my,c)
- limb(mx,my,x2,y2,c)
- circfill(mx,my,3,0)
- circfill(mx,my,2,c)
- pset(mx-1,my-1,9)
+ limb(x1,y1,mx,my,c,h,s)
+ limb(mx,my,x2,y2,c,h,s)
+ circfill(mx,my,2,0)
+ circfill(mx,my,1,c)
+ pset(mx-1,my-1,h)
 end
 
 function draw_glove(x,y,r,c,h,d)
- rectfill(x-r,y-r+1,x+r,y+r-1,0)
- rectfill(x-r+1,y-r,x+r-1,y+r,0)
- rectfill(x-r+1,y-r+1,x+r-1,y+r-1,c)
- rectfill(x-r+2,y-r+1,x+r-2,y-r+1,h)
- line(x-d*(r-2),y-r+2,x+d,y-r+2,h)
- rectfill(x-d*(r+2),y-2,x-d*r,y+2,0)
- rectfill(x-d*(r+1),y-1,x-d*r,y+1,h)
+ circfill(x,y,r+1,0)
+ circfill(x,y,r,c)
+ line(x-d*(r-2),y-r+1,x+d,y-r+1,h)
+ pset(x+d*2,y-1,h)
+ circfill(x-d*(r-1),y+2,1,0)
+ pset(x-d*(r-1),y+1,c)
+ rectfill(x-d*(r+3),y-2,x-d*(r+1),y+2,0)
+ rectfill(x-d*(r+2),y-1,x-d*(r+1),y+1,h)
 end
 
 function draw_boxer(id,x,y,dir,guard,wind,rec,atk,down,sl,shake,mv,stun,bl,bi,ds,inside)
@@ -679,7 +685,7 @@ function draw_boxer(id,x,y,dir,guard,wind,rec,atk,down,sl,shake,mv,stun,bl,bi,ds
  local bob=wind+rec==0 and (walk and step%2 or flr(fr/10)%2) or 0
  local lean=sl>0 and -dir*7 or stun and stun>0 and -dir*(3+min(4,stun)) or 0
  local crouch=sl>0 and 3 or 0
- local rear=atk==2 or atk==4 or atk==5
+ local rear=rr[atk]==1
  if dash then lean+=mv*3 crouch=1 end
  if inside and wind+rec==0 and sl==0 then
   lean-=dir
@@ -691,10 +697,10 @@ function draw_boxer(id,x,y,dir,guard,wind,rec,atk,down,sl,shake,mv,stun,bl,bi,ds
  end
  if bi and bi>0 then lean-=dir*(1+bi%2) end
  local ext=0
-  if rec>0 and atk>0 and atk<6 then
+  if rec>0 and atk>0 and atk~=6 then
    local rm=mvs[atk].re
    ext=rec>=rm-2 and 1 or max(.18,(rec-1)/(rm-3))
-   lean+=dir*flr(ext*(atk==2 and 7 or atk==5 and 5 or rear and 4 or 3))
+   lean+=dir*flr(ext*(atk==2 and 7 or atk==8 and 6 or atk==5 and 5 or rear and 4 or 3))
   elseif wind>0 and atk>0 then
    lean-=dir*(atk==2 and 3 or atk==4 and 2 or 1)
    if atk==4 then crouch=2 elseif atk==5 then crouch=4 end
@@ -710,7 +716,7 @@ function draw_boxer(id,x,y,dir,guard,wind,rec,atk,down,sl,shake,mv,stun,bl,bi,ds
  if down>0 then
   rectfill(x-11,y-5,x+7,y+1,0)
   rectfill(x-9,y-4,x+3,y,trunks)
-  limb(x-7,y-1,x-13,y+2,skin)
+  limb(x-7,y-1,x-13,y+2,skin,15,5)
   circfill(x+10,y-3,6,0) circfill(x+10,y-3,5,skin)
   circfill(x-13,y+1,3,0) circfill(x-13,y+1,2,glove)
   return
@@ -719,23 +725,25 @@ function draw_boxer(id,x,y,dir,guard,wind,rec,atk,down,sl,shake,mv,stun,bl,bi,ds
  if d.art==1 then pal(2,d.tr) pal(13,d.gl)
  else pal(3,d.tr) pal(11,d.hi) end
  palt(14,true) palt(0,false)
- sspr((d.art-1)*40,0,40,30,x-20+lean,y-56+crouch,40,30,dir<0)
+ sspr((d.art-1)*40,0,40,32,x-20+lean,y-64+crouch,40,32,dir<0)
  local pivot=rear and atk>1 and wind+rec>0
  local alt=step==2 or pivot
  local lx=alt and 80 or (d.art-1)*40
- local ly=alt and 60+(d.art-1)*28 or step%2==1 and 80 or 28
- sspr(lx,ly,40,28,x-20,y-26,40,28,dir<0)
+ local ly=alt and 64+(d.art-1)*32 or step%2==1 and 80 or 32
+ sspr(lx,ly,40,32,x-20,y-32,40,32,dir<0)
  palt() pal()
  local ux=x+lean
  local uy=y+crouch
- local sy=uy-33
+ local sy=uy-43
+ local shi=skin==15 and 7 or 9
+ local ssh=skin==15 and 9 or 5
  local g1x=ux+dir*1
- local g1y=uy-37
+ local g1y=uy-42
  local g2x=ux+dir*10
- local g2y=uy-32
+ local g2y=uy-35
  if inside and guard==0 and wind+rec==0 then
-  g1x=ux-dir*2 g1y=uy-35
-  g2x=ux+dir*6 g2y=uy-34
+  g1x=ux-dir*2 g1y=uy-39
+  g2x=ux+dir*6 g2y=uy-36
  end
  if guard==0 and wind+rec==0 then g1y-=flr(fr/5)%2 g2y+=flr(fr/5)%2 end
  if guard==1 then
@@ -745,17 +753,17 @@ function draw_boxer(id,x,y,dir,guard,wind,rec,atk,down,sl,shake,mv,stun,bl,bi,ds
   g1x=ux-dir g1y=uy-28
   g2x=ux+dir*7 g2y=uy-27
   elseif wind>0 and atk>0 then
-   local tx=atk==6 and ux+dir*13 or atk==1 and ux+dir*5 or atk==3 and ux+dir*3 or atk==2 and ux-dir*8 or ux-dir*5
-   local ty=uy-(atk==6 and 34 or atk==1 and 35 or atk==2 and 29 or atk==5 and 22 or 25)
-  local load=1-wind/mvs[min(atk,5)].wd
+   local tx=ux+dir*wx[atk]
+   local ty=uy-wy[atk]
+  local load=1-wind/(atk==6 and 3 or mvs[atk].wd)
   if rear then
    g1x+=load*(tx-g1x) g1y+=load*(ty-g1y)
   else
    g2x+=load*(tx-g2x) g2y+=load*(ty-g2y)
   end
- elseif rec>0 and atk>0 and atk<6 then
+ elseif rec>0 and atk>0 and atk~=6 then
   local tx=ux+dir*rch[atk]
-  local ty=uy-(atk==5 and 43 or atk==2 and 38 or atk>=3 and 27 or 36)
+  local ty=uy-ry[atk]
   if rear then
    g1x+=ext*(tx-g1x) g1y+=ext*(ty-g1y)
   else
@@ -764,15 +772,15 @@ function draw_boxer(id,x,y,dir,guard,wind,rec,atk,down,sl,shake,mv,stun,bl,bi,ds
  end
  local b1=-dir*3
  local b2=-dir*3
- if rec>0 and atk>0 and atk<6 then
-  local bend=atk==4 and -dir*(4+flr(3*ext)) or atk==5 and dir*(3+flr(3*ext)) or -dir*flr(3*(1-ext))
+ if rec>0 and atk>0 and atk~=6 then
+  local bend=(atk==4 or atk==7) and -dir*(5+flr(4*ext)) or (atk==5 or atk==8) and dir*(3+flr(3*ext)) or -dir*flr(3*(1-ext))
   if rear then b1=bend else b2=bend end
  elseif wind>0 and atk==5 then b1=dir*6 end
- local s1x=ux-dir*3+(rear and dir*flr(ext*(atk==2 and 5 or 3)) or 0)
- local s2x=ux+dir*4+(not rear and dir*flr(ext*2) or -dir*flr(ext*2))
- local s1y=sy-(atk==5 and flr(ext*4) or 0)
- joint(s1x,s1y,g1x,g1y,skin,b1)
- joint(s2x,sy,g2x,g2y,skin,b2)
+ local s1x=ux-dir*3+(rear and dir*flr(ext*(atk==2 and 5 or atk==8 and 6 or 3)) or 0)
+ local s2x=ux+dir*4+(not rear and dir*flr(ext*(atk==7 and 4 or 2)) or -dir*flr(ext*2))
+ local s1y=sy-((atk==5 or atk==8) and flr(ext*4) or 0)
+ joint(s1x,s1y,g1x,g1y,skin,shi,ssh,b1)
+ joint(s2x,sy,g2x,g2y,skin,shi,ssh,b2)
  local px=rear and g1x or g2x
  local py=rear and g1y or g2y
  if ext==1 then
@@ -784,9 +792,9 @@ function draw_boxer(id,x,y,dir,guard,wind,rec,atk,down,sl,shake,mv,stun,bl,bi,ds
     line(px-dir*9,py+2,px-dir*3,py+2,glove)
    end
   end
- local gr=ext==1 and 5 or 4
- local r1=rear and gr or 4
- local r2=rear and 4 or gr
+ local gr=ext==1 and 4 or 3
+ local r1=rear and gr or 3
+ local r2=rear and 3 or gr
  draw_glove(g1x,g1y,r1,glove,ghi,dir)
  draw_glove(g2x,g2y,r2,glove,ghi,dir)
 end
@@ -817,7 +825,7 @@ function hud()
  line(0,20,127,20,5)
  if not p then return end
  portrait(p.id,0,1)
- portrait(o.id,110,1)
+ portrait(o.id,110,1,true)
  print(p.ab,18,1,defs[p.id].ed)
  print(o.ab,100,1,defs[o.id].ed)
  meter(18,6,36,p.hp,p.hm,8,false)
@@ -860,8 +868,8 @@ function draw_select()
  local d=defs[sel]
  panel(11,89,116,110,d.ed,0)
  btxt(d.nm,64-#d.nm*2,92,d.ed)
- print("combo jab>straight>body>upper",6,101,10)
- print("back block down+back body",15,113,6)
+ print("fwd+o hook fwd+x overhand",10,101,10)
+ print("up guard down/back body",18,113,6)
  print("left/right select o fight x back",0,121,7)
 end
 
@@ -906,7 +914,7 @@ function draw_result()
  ring_front()
  local win=res.w==1
  panel(9,27,118,76,win and 11 or 8,0)
- portrait(res.w==1 and p.id or o.id,15,33)
+ portrait(res.w==1 and p.id or o.id,15,33,res.w~=1)
  btxt(win and "you win" or "you lose",42,32,win and 11 or 8)
  print("method "..res.k,43,43,7)
  btxt("grade "..grade,44,53,10)
@@ -925,36 +933,41 @@ function _draw()
 end
 __gfx__
 eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-eeeeeeeeeeeeeeeeeeee000eee00eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee9eee99eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-eeeeeeeeeeeeeeeeeee0000000000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeee77aa997799999eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-eeeeeeeeeeeeeeee0005000005000000eeeeeeeeeeeeeeeeeeeeeeee99a7aaaa779aa9977eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-eeeeeeeeeeeeeeee00000000000005000eeeeeeeeeeeeeeeeeeeeeee977aaaaaaaaaa77aa999eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-eeeeeeeeeeeeeee000000000000000000eeeeeeeeeeeeeeeeeeeeee9aaaaaaaaaaafaaaa999eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-eeeeeeeeeeeeeee000000000000000000eeeeeeeeeeeeeeeeeeeee999aaf99999999999999eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-eeeeeeeeeeeeee08888e88888888e888eeeeeeeeeeeeeeeeeeeee99999999444444999999eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-eeeeeeeeeeeee88000444444444444400eeeeeeeeeeeeeeeeeeeee999944444444444400eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-eeeeeeeeeee888e0999444440000000400eeeeeeeeeeeeeeeeeeeee99994444400000000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-eeeeeeeee8888ee999f94444444470499400eeeeeeeeeeeeeeeeeee999f94444444470099eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-eeeeeeeeee8eeee994994444444444444990eeeeeeeeeeeeeeeeeee99499444444444444499eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-eeeeeeeee8eeeee9999944444444444440f0eeeeeeeeeeeeeeeeeee9999944444444444440feeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-eeeeeeee8eeeeee09994444444444455550eeeeeeeeeeeeeeeeeeee09994444444444055550eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-eeeeeeeeeeeeeee00004444444444400eeeeeeeeeeeeeeeeeeeeeee0004444444444400eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-eeeeeeeeeeeeeeee0004444444440000eeeeeeeeeeeeeeeeeeeeeeee00444444444400000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-eeeeeeeeeeeeeeeee00004f444444000eeeeeeeeeeeeeeeeeeeeeeeee00044f44444400eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-eeeeeeeeeeeeeeeee00000444449000eeeeeeeeeeeeeeeeeeeeeeeeee0000444444f000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-eeeeeeeeeeeeeeee0000000000000000eeeeeeeeeeeeeeeeeeeeeeee0000000000000000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-eeeeeeeeeeeeee0044400000000040000eeeeeeeeeeeeeeeeeeefe0044400000000004400eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-eeeeeeeeeeee00044440000000004f400eeeeeeeeeeeeeeeeeee099444400000000499f400eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-eeeeeeeeeeee04ff44444454444444f400eeeeeeeeeeeeeeeeee0449944404449999444440eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-eeeeeeeeeeee0044fff499549994444f00eeeeeeeeeeeeeeeeee0444499404994444444440eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-eeeeeeeeeee000444999445444499944f00eeeeeeeeeeeeeeee044440000000000000444440eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-eeeeeeeeeee004444444445444444444400eeeeeeeeeeeeeeee004444444044444444444440eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-eeeeeeeeee0000444444445444444444000eeeeeeeeeeeeeee0000444444044444444444400eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-eeeeeeeeeee000444994445444499944000eeeeeeeeeeeeeeee000444994044449994444000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-eeeeeeeeeee000f4444994544994444000eeeeeeeeeeeeeeeee00044444994499444444400eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-eeeeeeeeeee00044444444544444445000eeeeeeeeeeeeeeeee00044444404444444444000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-eeeeeeeeeee0004444444454444444000eeeeeeeeeeeeeeeeee0004944440444444444000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+eeeeeeeeeeeeeeeeeeee0556555eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee0555000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+eeeeeeeeeeeeeeeeeeee00000000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee00005550eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+eeeeeeeeeeeeeeeeeee0004440000eeeeeeeeeeeeeeeeeeeeeeeeeeeeee5054540000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+eeeeeeeeeeeeeeeeee00044445550eeeeeeeeeeeeeeeeeeeeeeeeeeeee05054545550eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+eeeeeeeeeeeeeeeeee04444444700eeeeeeeeeeeeeeeeeeeeeeeeeeeee54054544700eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+eeeeeeeeeeeeeeeeee09f44444440eeeeeeeeeeeeeeeeeeeeeeeeeeee059f44544440eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+eeeeeeeeeeeeeeeeee09944444449eeeeeeeeeeeeeeeeeeeeeeeeeeee509944544449eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+eeeeeeeeeeeeeeeeee09944444440eeeeeeeeeeeeeeeeeeeeeeeeeee0509944544440eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+eeeeeeeeeeeeeeeeeee0444444440eeeeeeeeeeeeeeeeeeeeeeeeeee5ee0540544440eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+eeeeeeeeeeeeeeeeeee000444444eeeeeeeeeeeeeeeeeeeeeeeeeee06ee0540544490eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+eeeeeeeeeeeeeeeeeee000000000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeee5440544400eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+eeeeeeeeeeeeeeeeeee000550000eeeeeeeeeeeeeeeeeeeeeeeeeeeeee0504054445eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+eeeeeeeeeeeeeeeeeeee000055000eeeeeeeeeeeeeeeeeeeeeeeeeeeee06000500000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+eeeeeeeeeeeeeeeeeee0000000090eeeeeeeeeeeeeeeeeeeeeeeeeeeeee00005444900eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+eeeeeeeeeeeeeeeee00000f44449000eeeeeeeeeeeeeeeeeeeeeeeeee00000064449000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+eeeeeeeeeeeeeeee0000004444090000eeeeeeeeeeeeeeeeeeeeeeee0000004444090000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+eeeeeeeeeeeeee0011110000000000000eeeeeeeeeeeeeeeeeeefe0044440000000004400eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+eeeeeeeeeeee000111110000000055100eeeeeeeeeeeeeeeeeee099444440000000099f400eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+eeeeeeeeeeee0155115555011111115100eeeeeeeeeeeeeeeeee0449944404449999444440eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+eeeeeeeeeeee0011555111011111161500eeeeeeeeeeeeeeeeee0444499404994444444440eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+eeeeeeeeeee000161111110111111111500eeeeeeeeeeeeeeee044440000000000000444440eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+eeeeeeeeeee001111111110111111111100eeeeeeeeeeeeeeee004444444044444444444440eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+eeeeeeeeee0000111111110111111111000eeeeeeeeeeeeeee0000444444044444444444400eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+eeeeeeeeeee000111111110111111111000eeeeeeeeeeeeeeee000444994044449994444000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+eeeeeeeeeee00011555111011115551000eeeeeeeeeeeeeeeee00044444994499444444400eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+eeeeeeeeeee00011111555015551111000eeeeeeeeeeeeeeeee00044444404444444444000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+eeeeeeeeeee0001111111101111111000eeeeeeeeeeeeeeeeee0004944440444444444000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
 eeeeeeeeeee0000000000000000000000eeeeeeeeeeeeeeeeee0004444440444494440000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+eeeeeeeeeee0002227222622222200eeeeeeeeeeeeeeeeeeeee000000000000000000000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+eeeeeeeeeee00011111555015551111000eeeeeeeeeeeeeeeee00044444404444444444000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+eeeeeeeeeee0001111111101111111000eeeeeeeeeeeeeeeeee0004944440444444444000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+eeeeeeeeeee0000000000000000000000eeeeeeeeeeeeeeeeee0004444440444494440000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+eeeeeeeeeee0002227222622222200eeeeeeeeeeeeeeeeeeeee000000000000000000000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
 eeeeeeeeeee0002227222622222200eeeeeeeeeeeeeeeeeeeee000000000000000000000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
 eeeeeeeeeee0072222222222222700eeeeeeeeeeeeeeeeeeeee00a33333333333333a00eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
 eeeeeeeeeee007d222222222225700eeeeeeeeeeeeeeeeeeeee00aa3333333333335300eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
@@ -963,6 +976,7 @@ eeeeeeeeeee007d22220022225700eeeeeeeeeeeeeeeeeeeeee00aa333300333335000eeeeeeeeee
 eeeeeeeeeee007d22220e02257000eeeeeeeeeeeeeeeeeeeeee00aa33330e03335a00eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
 eeeeeeeeeee007d22200e0225700eeeeeeeeeeeeeeeeeeeeeee00aa33300e0335a000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
 eeeeeeeeeee0000d0000ee0d0000eeeeeeeeeeeeeeeeeeeeeee0000b0000ee0b00000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+eeeeeeeeeee0000d0000ee0d0000eeeeeeeeeeeeeeeeeeeeeee0000b0000ee0b00000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
 eeeeeeeeeee0000000e0ee0000000eeeeeeeeeeeeeeeeeeeeee0000000e0ee0000000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
 eeeeeeeeee0444940eeeeeee44940eeeeeeeeeeeeeeeeeeeee0444940eeeeeee449440eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
 eeeeeeeeee0444900eeeeeee04940eeeeeeeeeeeeeeeeeeeee0444900eeeeeee044940eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
@@ -970,87 +984,81 @@ eeeeeeeee0444490eeeeeeeee04940eeeeeeeeeeeeeeeeeee0444900eeeeeeeee044940eeeeeeeee
 eeeeeeeee0444900eeeeeeeee00490eeeeeeeeeeeeeeeeee04449000eeeeeeeee004940eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
 eeeeeeee0444490eeeeeeeeeee04449eeeeeeeeeeeeeeee04444900eeeeeeeeeee004449eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
 eeeeeee00445440eeeeeeeeeee00544eeeeeeeeeeeeeee00445440eeeeeeeeeeeee04544eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+eeeeeee00445440eeeeeeeeeee00544eeeeeeeeeeeeeee00445440eeeeeeeeeeeee04544eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
 eeeeeee0444400eeeeeeeeeeeee04440eeeeeeeeeeeeee0444400eeeeeeeeeeeeeee04440eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
 eeeeeee044440eeeeeeeeeeeeee04446666eeeeeeeeeee044440eeeeeeeeeeeeeeee044440eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
 eee0666660400eeeeeeeeeeeeeee04067660eeeeee0000000400eeeeeeeeeeeeeeeee004000000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
 eee067666000eeeeeeeeeeeeeeeee0066660eeeeee00a000000eeeeeeeeeeeeeeeeeee0000a000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-eee06666600eeeeeeeeeeeeeeeeee00000000eeeee00000000eeeeeeeeeeeeeeeeeeee00000000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-0000000000eeeeeeeeeeeeeeeeeee0022222d0ee0000000000eeeeeeeeeeeeeeeeeeee000000a0eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-00222222d000eeeeeeeeeeeeeeeee0022222220e0000000a0000eeeeeeeeeeeeeeeeee000000000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-002222222200eeeeeeeeeeeeeeeee0022222220e000000000000eeeeeeeeeeeeeeeeee000000000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-000000000000eeeeeeeeeeeeeeeee0000000000e000000000000eeeeeeeeeeeeeeeeee000000000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+eee06666600eeeeeeeeeeeeeeeeeee000000eeeeee00000000eeeeeeeeeeeeeeeeeeee00000000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+e000000000eeeeeeeeeeeeeeeeeeee022222deeee000000000eeeeeeeeeeeeeeeeeeee000000a0eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+e0022222d00eeeeeeeeeeeeeeeeeee02222220eee000000a000eeeeeeeeeeeeeeeeeee00000000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+e0022222d00eeeeeeeeeeeeeeeeeee02222220eee000000a000eeeeeeeeeeeeeeeeeee00000000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+e0022222200eeeeeeeeeeeeeeeeeee02222220eee0000000000eeeeeeeeeeeeeeeeeee00000000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+e0000000000eeeeeeeeeeeeeeeeeee00000000eee0000000000eeeeeeeeeeeeeeeeeee00000000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
 eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
 eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee0000000000000000000eeeeeeeeeeeeeeeeee
 eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee00dddddddd222222200eeeeeeeeeeeeeeeeee
-eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee0022222222dddddddd0eeeeeeeeeeeeeeeeee
-eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee0022222222222222000eeeeeeeeeeeeeeeeee
-eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee002222222222222000eeeeeeeeeeeeeeeeeee
-eeeeeee0eeeeeeeeeeeeeee9aeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee002000220220000000eeeeeeeeeeeeeeeeeee
-eeee00000000eeeeeeee97aaa7999eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee00044400000444000eeeeeeeeeeeeeeeeeeee
-eeee00000000eeeeeeeeaaaaaaaaaeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee00444440e0444440eeeeeeeeeeeeeeeeeeeee
-eee0e00000000eeeeeeaaaaaaaaa99eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee04444440e04444440eeeeeeeeeeeeeeeeeeee
-ee88888888888eeeee99aa9999999eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee04444440e044444440eeeeeeeeeeeeeeeeeee
-ee80444444440eeeee09994444440eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee04444440eee044444440eeeeeeeeeeeeeeeeee
-e80444440000440eee0444440000440eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee04944440eeee04449440eeeeeeeeeeeeeeeeee
-8e004f444474940eee004f444474940eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee04494440eeeeee04449440eeeeeeeeeeeeeeeee
-ee00444444400feeee00444444400feeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee04944440eeeeee044490000eeeeeeeeeeeeeeee
-eee0444444000eeeeee04444440000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee04494440eeeeeeee044094400eeeeeeeeeeeeeee
-eeee0044f440eeeeeeee0044f440eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee00904440eeeeeeeee04099400eeeeeeeeeeeeeee
-ee0000000000eeeeee0000000000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee00494040eeeeeeeeeee0049400eeeeeeeeeeeeeee
-ee0044ff444000eeee00444ff44000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee00944040eeeeeeeeeeee0009440eeeeeeeeeeeeee
-e00fff444444400ee004fff44444400eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee0094400eeeeeeeeeeeeee044440eeeeeeeeeeeeee
-eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee040000eeeeeeeeeeeeeeee00666660eeeeeeeeeee
-eeeeeeeeeee0000000000000000000eeeeeeeeeeeeeeeeeeeee0000000000000000000eeeeeeeeeeeeeeee044440eeeeeeeeeeeeeeeee00666660eeeeeeeeeee
-eeeeeeeeeee00dddddddd222222200eeeeeeeeeeeeeeeeeeeee00aaaaaaaa333333300eeeeeeeeeeeeee06666600eeeeeeeeeeeeeeeeee0666660eeeeeeeeeee
-eeeeeeeeeee0022222222dddddddd0eeeeeeeeeeeeeeeeeeeee0033333333aaaaaaaa0eeeeeeeeeeeeee0666660eeeeeeeeeeeeeeeee0000000000eeeeeeeeee
-eeeeeeeeeee0022222222222222200eeeeeeeeeeeeeeeeeeeee0033333333333333300eeeeeeeeeeeeee0666660eeeeeeeeeeeeeeeee00222222200eeeeeeeee
-eeeeeeeeeee0022222222222222000eeeeeeeeeeeeeeeeeeeee0033333333333333000eeeeeeeeeeee0000000000eeeeeeeeeeeeeeee00222222220eeeeeeeee
-eeeeeeeeeee0020002222200022000eeeeeeeeeeeeeeeeeeeee0030003333300033000eeeeeeeeeeee002222222000eeeeeeeeeeeeee00000000000eeeeeeeee
-eeeeeeeeeee000444020004440000eeeeeeeeeeeeeeeeeeeeee000444030004440000eeeeeeeeeeeee000000000000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-eeeeeeeeeee00444440004444400eeeeeeeeeeeeeeeeeeeeeee00444440004444400eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-eeeeeeeeeee04444440e04444440eeeeeeeeeeeeeeeeeeeeeee04444440e04444440eeeeeeeeeeeeeeeeeeeeeee0000000000000000000eeeeeeeeeeeeeeeeee
-eeeeeeeeeee04444440e04444440eeeeeeeeeeeeeeeeeeeeeee04444440e04444440eeeeeeeeeeeeeeeeeeeeeee00aaaaaaaa333333300eeeeeeeeeeeeeeeeee
-eeeeeeeeee04444440eee04444440eeeeeeeeeeeeeeeeeeeee04444440eee04444440eeeeeeeeeeeeeeeeeeeeee0033333333aaaaaaaa0eeeeeeeeeeeeeeeeee
-eeeeeeeeee04444440eee044444440eeeeeeeeeeeeeeeeeeee04444440eee044444440eeeeeeeeeeeeeeeeeeeee0033333333333333000eeeeeeeeeeeeeeeeee
-eeeeeeeee04944440eeeee04449440eeeeeeeeeeeeeeeeeee04a44440eeeee0444a440eeeeeeeeeeeeeeeeeeeee003333333333333000eeeeeeeeeeeeeeeeeee
-eeeeeeeee04944440eeeeee04449440eeeeeeeeeeeeeeeeee04a44440eeeeee0444a440eeeeeeeeeeeeeeeeeeee003000330330000000eeeeeeeeeeeeeeeeeee
-eeeeeeee04944440eeeeeee04449000eeeeeeeeeeeeeeeee04a44440eeeeeee0444a000eeeeeeeeeeeeeeeeeeee00044400000444000eeeeeeeeeeeeeeeeeeee
-eeeeeeee00904440eeeeeeee04049400eeeeeeeeeeeeeeee00a04440eeeeeeee0404a400eeeeeeeeeeeeeeeeeee00444440e0444440eeeeeeeeeeeeeeeeeeeee
-eeeeeee00494040eeeeeeeee04099400eeeeeeeeeeeeeee004a4040eeeeeeeee040aa400eeeeeeeeeeeeeeeeeee04444440e04444440eeeeeeeeeeeeeeeeeeee
-eeeeeee00944040eeeeeeeeee0044900eeeeeeeeeeeeeee00a44040eeeeeeeeee0044a00eeeeeeeeeeeeeeeeeee04444440e044444440eeeeeeeeeeeeeeeeeee
-eeeeeee0094400eeeeeeeeeeee0000440eeeeeeeeeeeeee00a4400eeeeeeeeeeee0000440eeeeeeeeeeeeeeeee04444440eee044444440eeeeeeeeeeeeeeeeee
-eeeeeee040000eeeeeeeeeeeeee044440eeeeeeeeeeeeee040000eeeeeeeeeeeeee044440eeeeeeeeeeeeeeeee04a44440eeee0444a440eeeeeeeeeeeeeeeeee
-eeeeeee04440eeeeeeeeeeeeeeee044440eeeeeeeeeeeee04440eeeeeeeeeeeeeeee044440eeeeeeeeeeeeeee044a4440eeeeee0444a440eeeeeeeeeeeeeeeee
-eeeee0666660eeeeeeeeeeeeeeee04066660eeeeeeeee0000000eeeeeeeeeeeeeeee04000000eeeeeeeeeeeee04a44440eeeeee0444a0000eeeeeeeeeeeeeeee
-eeeee0666660eeeeeeeeeeeeeeeee0066660eeeeeeeee0000000eeeeeeeeeeeeeeeee0000000eeeeeeeeeeee044a4440eeeeeeee0440a4400eeeeeeeeeeeeeee
-eeeee0666660eeeeeeeeeeeeeeeee0066660eeeeeeeee0000000eeeeeeeeeeeeeeeee0000000eeeeeeeeeeee00a04440eeeeeeeee040aa400eeeeeeeeeeeeeee
-ee0000000000eeeeeeeeeeeeeeee000000000eeeee0000000000eeeeeeeeeeeeeeee000000000eeeeeeeeee004a4040eeeeeeeeeee004a400eeeeeeeeeeeeeee
-ee002222222000eeeeeeeeeeeeee00222222200eee000000000000eeeeeeeeeeeeee00000000000eeeeeeee00a44040eeeeeeeeeeee000a440eeeeeeeeeeeeee
-ee000000000000eeeeeeeeeeeeee00000000000eee000000000000eeeeeeeeeeeeee00000000000eeeeeeee00a4400eeeeeeeeeeeeee044440eeeeeeeeeeeeee
+eeeee0555eeeeeeeeeeee0555eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee0022222222dddddddd0eeeeeeeeeeeeeeeeee
+eeeee000055eeeeeeeee0000055eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee0022222222222222000eeeeeeeeeeeeeeeeee
+eeee00440000eeeeeeee50545000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee0022222222222222000eeeeeeeeeeeeeeeeee
+eee004444440eeeeeee050545440eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee002222222222222000eeeeeeeeeeeeeeeeeee
+eee004f04f00eeeeeee500f05f00eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee002000220220000000eeeeeeeeeeeeeeeeeee
+eee009444440eeeeee0509445440eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee00044400000444000eeeeeeeeeeeeeeeeeeee
+eee044444440eeeeee0505445440eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee00444440e0444440eeeeeeeeeeeeeeeeeeeee
+eee000444440eeeee05005405440eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee04444440e04444440eeeeeeeeeeeeeeeeeeee
+eeee00000000eeeee05e05405440eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee04444440e044444440eeeeeeeeeeeeeeeeeee
+eeeee055000eeeeeeeee5000505eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee04444440eee044444440eeeeeeeeeeeeeeeeee
+eee111005501eeeeeee054405444eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee04444440eee044444440eeeeeeeeeeeeeeeeee
+eee1114444411eeeeee0544054444eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee04944440eeee04449440eeeeeeeeeeeeeeeeee
+ee111144444111eeee444440544444eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee04494440eeeeee04449440eeeeeeeeeeeeeeeee
+eeeeee44444eeeeeeeeeee44444eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee04944440eeeeee044490000eeeeeeeeeeeeeeee
+eeeeeeeeeee0000000000000000000eeeeeeeeeeeeeeeeeeeee0000000000000000000eeeeeeeeeeeeeeeeee04494440eeeeeeee044094400eeeeeeeeeeeeeee
+eeeeeeeeeee00dddddddd222222200eeeeeeeeeeeeeeeeeeeee00aaaaaaaa333333300eeeeeeeeeeeeeeeeee00904440eeeeeeeee04099400eeeeeeeeeeeeeee
+eeeeeeeeeee0022222222dddddddd0eeeeeeeeeeeeeeeeeeeee0033333333aaaaaaaa0eeeeeeeeeeeeeeeee00494040eeeeeeeeeee0049400eeeeeeeeeeeeeee
+eeeeeeeeeee0022222222222222200eeeeeeeeeeeeeeeeeeeee0033333333333333300eeeeeeeeeeeeeeeee00944040eeeeeeeeeeee0009440eeeeeeeeeeeeee
+eeeeeeeeeee0022222222222222200eeeeeeeeeeeeeeeeeeeee0033333333333333300eeeeeeeeeeeeeeeee00944040eeeeeeeeeeee0009440eeeeeeeeeeeeee
+eeeeeeeeeee0022222222222222000eeeeeeeeeeeeeeeeeeeee0033333333333333000eeeeeeeeeeeeeeeee0094400eeeeeeeeeeeeee044440eeeeeeeeeeeeee
+eeeeeeeeeee0020002222200022000eeeeeeeeeeeeeeeeeeeee0030003333300033000eeeeeeeeeeeeeeeee040000eeeeeeeeeeeeeeee00666660eeeeeeeeeee
+eeeeeeeeeee000444020004440000eeeeeeeeeeeeeeeeeeeeee000444030004440000eeeeeeeeeeeeeeeee044440eeeeeeeeeeeeeeeee00666660eeeeeeeeeee
+eeeeeeeeeee00444440004444400eeeeeeeeeeeeeeeeeeeeeee00444440004444400eeeeeeeeeeeeeeee06666600eeeeeeeeeeeeeeeeee0666660eeeeeeeeeee
+eeeeeeeeeee04444440e04444440eeeeeeeeeeeeeeeeeeeeeee04444440e04444440eeeeeeeeeeeeeeee0666660eeeeeeeeeeeeeeeeee00000000eeeeeeeeeee
+eeeeeeeeeee04444440e04444440eeeeeeeeeeeeeeeeeeeeeee04444440e04444440eeeeeeeeeeeeeeee0666660eeeeeeeeeeeeeeeeee022222220eeeeeeeeee
+eeeeeeeeee04444440eee04444440eeeeeeeeeeeeeeeeeeeee04444440eee04444440eeeeeeeeeeeeee00000000eeeeeeeeeeeeeeeeee022222220eeeeeeeeee
+eeeeeeeeee04444440eee04444440eeeeeeeeeeeeeeeeeeeee04444440eee04444440eeeeeeeeeeeeee00000000eeeeeeeeeeeeeeeeee022222220eeeeeeeeee
+eeeeeeeeee04444440eee044444440eeeeeeeeeeeeeeeeeeee04444440eee044444440eeeeeeeeeeeee022222200eeeeeeeeeeeeeeeee000000000eeeeeeeeee
+eeeeeeeee04944440eeeee04449440eeeeeeeeeeeeeeeeeee04a44440eeeee0444a440eeeeeeeeeeeee000000000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+eeeeeeeee04944440eeeeee04449440eeeeeeeeeeeeeeeeee04a44440eeeeee0444a440eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+eeeeeeee04944440eeeeeee04449000eeeeeeeeeeeeeeeee04a44440eeeeeee0444a000eeeeeeeeeeeeeeeeeeee0000000000000000000eeeeeeeeeeeeeeeeee
+eeeeeeee00904440eeeeeeee04049400eeeeeeeeeeeeeeee00a04440eeeeeeee0404a400eeeeeeeeeeeeeeeeeee00aaaaaaaa333333300eeeeeeeeeeeeeeeeee
+eeeeeee00494040eeeeeeeee04099400eeeeeeeeeeeeeee004a4040eeeeeeeee040aa400eeeeeeeeeeeeeeeeeee0033333333aaaaaaaa0eeeeeeeeeeeeeeeeee
+eeeeeee00944040eeeeeeeeee0044900eeeeeeeeeeeeeee00a44040eeeeeeeeee0044a00eeeeeeeeeeeeeeeeeee0033333333333333000eeeeeeeeeeeeeeeeee
+eeeeeee00944040eeeeeeeeee0044900eeeeeeeeeeeeeee00a44040eeeeeeeeee0044a00eeeeeeeeeeeeeeeeeee0033333333333333000eeeeeeeeeeeeeeeeee
+eeeeeee0094400eeeeeeeeeeee0000440eeeeeeeeeeeeee00a4400eeeeeeeeeeee0000440eeeeeeeeeeeeeeeeee003333333333333000eeeeeeeeeeeeeeeeeee
+eeeeeee040000eeeeeeeeeeeeee044440eeeeeeeeeeeeee040000eeeeeeeeeeeeee044440eeeeeeeeeeeeeeeeee003000330330000000eeeeeeeeeeeeeeeeeee
+eeeeeee04440eeeeeeeeeeeeeeee044440eeeeeeeeeeeee04440eeeeeeeeeeeeeeee044440eeeeeeeeeeeeeeeee00044400000444000eeeeeeeeeeeeeeeeeeee
+eeeee0666660eeeeeeeeeeeeeeee04066660eeeeeeeee0000000eeeeeeeeeeeeeeee04000000eeeeeeeeeeeeeee00444440e0444440eeeeeeeeeeeeeeeeeeeee
+eeeee0666660eeeeeeeeeeeeeeeee0066660eeeeeeeee0000000eeeeeeeeeeeeeeeee0000000eeeeeeeeeeeeeee04444440e04444440eeeeeeeeeeeeeeeeeeee
+eeeee0666660eeeeeeeeeeeeeeeee0066660eeeeeeeee0000000eeeeeeeeeeeeeeeee0000000eeeeeeeeeeeeeee04444440e044444440eeeeeeeeeeeeeeeeeee
+eee000000000eeeeeeeeeeeeeeeee00000000eeeeee000000000eeeeeeeeeeeeeeeee00000000eeeeeeeeeeeee04444440eee044444440eeeeeeeeeeeeeeeeee
+eee000000000eeeeeeeeeeeeeeeee00000000eeeeee000000000eeeeeeeeeeeeeeeee00000000eeeeeeeeeeeee04444440eee044444440eeeeeeeeeeeeeeeeee
+eee022222200eeeeeeeeeeeeeeeee022222200eeeee000000000eeeeeeeeeeeeeeeee000000000eeeeeeeeeeee04a44440eeee0444a440eeeeeeeeeeeeeeeeee
+eee000000000eeeeeeeeeeeeeeeee000000000eeeee000000000eeeeeeeeeeeeeeeee000000000eeeeeeeeeee044a4440eeeeee0444a440eeeeeeeeeeeeeeeee
+eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee04a44440eeeeee0444a0000eeeeeeeeeeeeeeee
+eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee044a4440eeeeeeee0440a4400eeeeeeeeeeeeeee
+eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee00a04440eeeeeeeee040aa400eeeeeeeeeeeeeee
+eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee004a4040eeeeeeeeeee004a400eeeeeeeeeeeeeee
+eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee00a44040eeeeeeeeeeee000a440eeeeeeeeeeeeee
+eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee00a44040eeeeeeeeeeee000a440eeeeeeeeeeeeee
+eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee00a4400eeeeeeeeeeeeee044440eeeeeeeeeeeeee
 eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee040000eeeeeeeeeeeeeeee00000000eeeeeeeeeee
 eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee044440eeeeeeeeeeeeeeeee00000000eeeeeeeeeee
 eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee00000000eeeeeeeeeeeeeeeeee0000000eeeeeeeeeee
-eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee0000000eeeeeeeeeeeeeeeee0000000000eeeeeeeeee
-eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee0000000eeeeeeeeeeeeeeeee00000000000eeeeeeeee
-eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee0000000000eeeeeeeeeeeeeeee00000000000eeeeeeeee
-eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee000000000000eeeeeeeeeeeeee00000000000eeeeeeeee
-eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee000000000000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee0000000eeeeeeeeeeeeeeeeee00000000eeeeeeeeeee
+eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee0000000eeeeeeeeeeeeeeeeee000000000eeeeeeeeee
+eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee00000000eeeeeeeeeeeeeeeeee000000000eeeeeeeeee
+eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee00000000eeeeeeeeeeeeeeeeee000000000eeeeeeeeee
+eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee000000000eeeeeeeeeeeeeeeee000000000eeeeeeeeee
+eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee000000000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
 eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
 __gff__
 __map__

@@ -56,6 +56,8 @@ async function link(page, canvas, keys, attack, chain, name) {
       await tap(page, "z");
       await page.waitForTimeout(80);
     }
+    await page.waitForTimeout(180);
+    await canvas.screenshot({ path: path.join(output, "00-neutral.png") });
     await page.evaluate(() => { window.pico8_gpio[118] = 1; });
     await page.keyboard.down("ArrowRight");
     await page.waitForFunction(() => {

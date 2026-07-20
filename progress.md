@@ -264,6 +264,18 @@ Atlas-pass verification:
 - Desktop neutral, straight contact, lean block, and portrait-mobile screenshot review passed at `90/100` for the side-view arcade-fighter category.
 - Release, movement, animation, combo, defense, arcade-feel, UI, mobile, natural-bout, restart, and 100-bout balance checks pass with zero browser errors. Balance is `52-48`; the source cart is `58,355` bytes and the exported cartridge is `24,010` bytes.
 
+## Bruisers-Inspired Boxing And Flat-Face Pass
+
+- Deep-reviewed the official Bruisers Steam description, demo page, screenshots, manual, and update history for punch selection, head/body defense, parries, close-range timing, stamina pressure, foot positioning, and ring presentation.
+- Added `forward + O` lead hook and `forward + X` overhand while retaining jab, straight, body jab, body hook, uppercut, feint, slips, quick-steps, high/body guards, and lean blocks on the two-button PICO-8 layout.
+- Raised head-punch trajectories to visible cheek/temple contact, gave the lead hook a bent horizontal path, and gave the overhand a high load followed by a descending rear-hand path.
+- Tightened hit range so damage resolves only when the rendered glove reaches the opponent. Body punches continue to drain stamina; close-range power punches gain an extra commitment frame.
+- Renamed perfect-block feedback to `catch + shoot`; a late matching guard still grants the top counter tier and slows the attacker for `30` frames so the return punch can land.
+- Replaced the rejected modeled noses with flat face planes in the 40x64 fighters and 16x16 portraits. A.B. and D. Great now rely on fade/beard/shirt/purple gear versus braids/bare torso/green gear for recognition.
+- Refactored move routes and animation coordinates into compact tables after the first implementation exceeded the native cartridge limit. A two-button frame-and-push experiment was rejected at `8799 / 8192` tokens; the shipped directional-punch build boots natively.
+- Verified all seven player move families, the four-hit combo, normal/lean/body/parry defense, a `16`-damage catch-and-shoot counter, six-fighter selection, desktop UI, and portrait/landscape mobile layouts with zero browser errors.
+- Strict visual review passed at `92/100` after neutral, straight, lead-hook, fighter-select, and 390x844 iPhone screenshot inspection. The exported cartridge is `24,463` bytes.
+
 ## Next Polish Priorities
 
 - Replace existing procedural pose code with authored transition frames for every punch, block, slip, knockdown, and corner idle without expanding the cartridge token count.
