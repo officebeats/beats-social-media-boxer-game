@@ -336,3 +336,16 @@ User request: replace the disliked lead sprites with temporary original boxer ar
 - Strict visual review passed at `91/100` against the approved production sheet after desktop select/neutral/contact and portrait/landscape mobile screenshot inspection.
 - The committed likeness sheet is generated original art. Downloaded photo and video research remains excluded from version control.
 - Final native export, static release gate, browser boot, all three bag systems, full clear/rematch, likeness captures, and iPhone portrait/landscape checks pass with zero browser errors. The source cart remains `6632 / 8192` tokens.
+
+## Heavy Bag Default And Versus Mode
+
+- Reworked the title into three explicit routes: `O Heavy Bag`, `X Versus`, and `Down Targets`.
+- Heavy Bag now starts immediately after fighter selection without visiting the target menu; Speed Bag and Wreck Bag remain available through the complete target selector.
+- Added a separate timed one-round CPU Versus mode using the existing fighter roster, mirrored sprites, movement, stamina, punch definitions, combo links, contact reach, hit-stop, recoil, and sound effects.
+- Added separate player/opponent health and stamina HUDs, reciprocal hit reactions, knockout/time-decision resolution, result health totals, and full-health rematches.
+- Extended the browser diagnostics with game route, player health, opponent position, opponent attack, and opponent stun state.
+- Added `tools/versus-check.cjs` for live CPU contact, deterministic player contact, knockout, result, and rematch coverage; mobile QA now captures portrait Versus neutral and contact states.
+- Gated browser diagnostics and CPU-idle test controls behind `127.0.0.1` plus `?test_bridge=1`; the public export exposes neither test hook.
+- Final native source is `7482 / 8192` tokens. Static release, public boot security, all three targets, Heavy Bag clear/rematch, both fighter likeness captures, reciprocal Versus contact/KO/rematch, and portrait/landscape mobile checks pass with zero browser errors.
+- Fresh desktop and iPhone portrait screenshots were inspected after the final export. Heavy Bag is visually dominant on the title, bag and fighter contact read at glove range, both HUDs remain legible, and touch controls do not overlap the game viewport.
+- Physical PICO handheld hardware and subjective long-session CPU balance remain untested.

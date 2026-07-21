@@ -3,6 +3,7 @@ const path = require("node:path");
 const { chromium } = require("playwright");
 
 const url = process.argv[2] || "http://127.0.0.1:4173";
+const testUrl = `${url}${url.includes("?") ? "&" : "?"}test_bridge=1`;
 const output = path.resolve(process.argv[3] || "output/bag-check");
 fs.mkdirSync(output, { recursive: true });
 
@@ -87,7 +88,7 @@ async function punch(page, keys, canvas, impactPath, targetGap = 34) {
   page.on("pageerror", (error) => errors.push(String(error)));
 
   try {
-    await page.goto(url, { waitUntil: "networkidle" });
+    await page.goto(testUrl, { waitUntil: "networkidle" });
     await page.waitForFunction(() => typeof window.render_game_to_text === "function");
     await page.evaluate(() => window.set_locked_in_ring_test_mode({ freeze: true }));
     await page.locator("#p8_start_button").click();
@@ -99,11 +100,12 @@ async function punch(page, keys, canvas, impactPath, targetGap = 34) {
       window.pico8_state?.frame_number > 5 &&
       JSON.parse(window.render_game_to_text()).mode === "title"
     );
-    await tap(page, "z");
+    await tap(page, "ArrowDown");
     await page.waitForFunction(() => JSON.parse(window.render_game_to_text()).mode === "fighter-select");
     await canvas.screenshot({ path: path.join(output, "01-fighter-select.png") });
     await tap(page, "z");
     await page.waitForFunction(() => JSON.parse(window.render_game_to_text()).mode === "bag-select");
+    await tap(page, "ArrowLeft");
     await canvas.screenshot({ path: path.join(output, "02-speed-select.png") });
 
     await tap(page, "ArrowRight");

@@ -3,6 +3,7 @@ const path = require("node:path");
 const { chromium } = require("playwright");
 
 const url = process.argv[2] || "http://127.0.0.1:4173";
+const testUrl = `${url}${url.includes("?") ? "&" : "?"}test_bridge=1`;
 const output = path.resolve(process.argv[3] || "output/mobile");
 fs.mkdirSync(output, { recursive: true });
 
@@ -80,7 +81,7 @@ async function boot(browser, name, viewport) {
   const errors = [];
   page.on("console", (message) => { if (message.type() === "error") errors.push(message.text()); });
   page.on("pageerror", (error) => errors.push(String(error)));
-  await page.goto(url, { waitUntil: "networkidle" });
+  await page.goto(testUrl, { waitUntil: "networkidle" });
   await page.waitForFunction(() => window.pico8_gpio?.length >= 128 && typeof window.render_game_to_text === "function");
   await page.evaluate(() => window.set_locked_in_ring_test_mode({ freeze: true }));
   await page.locator("#p8_start_button").tap();
@@ -96,8 +97,6 @@ async function openChallenge(page) {
   await touch(page, "o", 130);
   await page.waitForFunction(() => JSON.parse(window.render_game_to_text()).mode === "fighter-select");
   await touch(page, "o", 130);
-  await page.waitForFunction(() => JSON.parse(window.render_game_to_text()).mode === "bag-select");
-  await touch(page, "o", 130);
   await page.waitForFunction(() => JSON.parse(window.render_game_to_text()).mode === "challenge");
 }
 
@@ -107,10 +106,8 @@ async function runPortrait(browser) {
   try {
     await touch(page, "o", 130);
     await page.waitForFunction(() => JSON.parse(window.render_game_to_text()).mode === "fighter-select");
-    await touch(page, "o", 130);
-    await page.waitForFunction(() => JSON.parse(window.render_game_to_text()).mode === "bag-select");
-    await layout(page, "portrait-bag-select");
-    await page.screenshot({ path: path.join(output, "portrait-bag-select.png") });
+    await layout(page, "portrait-fighter-select");
+    await page.screenshot({ path: path.join(output, "portrait-fighter-select.png") });
     await touch(page, "o", 130);
     await page.waitForFunction(() => JSON.parse(window.render_game_to_text()).mode === "challenge");
     await layout(page, "portrait-challenge");
@@ -118,14 +115,23 @@ async function runPortrait(browser) {
 
     const initial = await state(page);
     let contactCaptured = false;
-    for (let attempt = 0; attempt < 24 && (await state(page)).mode === "challenge"; attempt += 1) {
-      const before = await state(page);
+    for (let attempt = 0; attempt < 40 && (await state(page)).mode === "challenge"; attempt += 1) {
+      let before = await state(page);
       if (before.destructionFrames > 0) break;
+      if (before.bagX - before.playerX > 31) {
+        await touch(page, "right", 180);
+      }
       await page.waitForFunction(() => {
         const s = JSON.parse(window.render_game_to_text());
-        return s.mode !== "challenge" || (s.playerWindup === 0 && s.playerRecovery === 0 && s.playerStun === 0 && s.playerStamina >= 3);
+        return s.mode !== "challenge" || (s.playerWindup === 0 && s.playerRecovery === 0 && s.playerStun === 0 && s.playerStamina >= 6);
       });
-      await touch(page, "o", 110);
+      before = await state(page);
+      await touch(page, ["down", "x"], 110);
+      await page.waitForFunction((hp) => {
+        const s = JSON.parse(window.render_game_to_text());
+        return s.mode !== "challenge" || s.bagHp < hp ||
+          (s.playerWindup === 0 && s.playerRecovery === 0);
+      }, before.bagHp, { timeout: 2500 });
       const after = await state(page);
       if (!contactCaptured && after.bagHp < before.bagHp) {
         contactCaptured = true;
@@ -138,7 +144,7 @@ async function runPortrait(browser) {
     await page.screenshot({ path: path.join(output, "portrait-result.png") });
     assert(contactCaptured && result.result === 1 && result.hits > 0, `portrait: invalid clear ${JSON.stringify({ initial, result })}`);
     await touch(page, "x", 130);
-    await page.waitForFunction(() => JSON.parse(window.render_game_to_text()).mode === "bag-select");
+    await page.waitForFunction(() => JSON.parse(window.render_game_to_text()).mode === "title");
     assert(errors.length === 0, `portrait: browser errors: ${errors.join(" | ")}`);
     return { initial, result, errors };
   } finally {
@@ -154,9 +160,33 @@ async function runLandscape(browser) {
     const current = await state(page);
     await layout(page, "landscape-challenge");
     await page.screenshot({ path: path.join(output, "landscape-challenge.png") });
-    assert(current.mode === "challenge" && current.bagType === 1, `landscape: challenge did not start ${JSON.stringify(current)}`);
+    assert(current.mode === "challenge" && current.bagType === 2 && current.route === "heavy", `landscape: challenge did not start ${JSON.stringify(current)}`);
     assert(errors.length === 0, `landscape: browser errors: ${errors.join(" | ")}`);
     return { current, errors };
+  } finally {
+    await context.close();
+  }
+}
+
+async function runVersus(browser) {
+  const session = await boot(browser, "versus", { width: 390, height: 844 });
+  const { context, page, errors } = session;
+  try {
+    await touch(page, "x", 130);
+    await page.waitForFunction(() => JSON.parse(window.render_game_to_text()).mode === "fighter-select");
+    await touch(page, "o", 130);
+    await page.waitForFunction(() => JSON.parse(window.render_game_to_text()).mode === "challenge");
+    const initial = await state(page);
+    await layout(page, "portrait-versus");
+    await page.screenshot({ path: path.join(output, "portrait-versus.png") });
+    assert(initial.gameMode === "versus" && initial.route === "versus" && initial.playerHp === 100,
+      `portrait versus did not start ${JSON.stringify(initial)}`);
+    await page.waitForFunction(() => JSON.parse(window.render_game_to_text()).playerHp < 100, null, { timeout: 12000 });
+    const contact = await state(page);
+    await page.screenshot({ path: path.join(output, "portrait-versus-contact.png") });
+    assert(contact.opponentAttack > 0 && errors.length === 0,
+      `portrait versus contact failed ${JSON.stringify({ contact, errors })}`);
+    return { initial, contact, errors };
   } finally {
     await context.close();
   }
@@ -165,7 +195,11 @@ async function runLandscape(browser) {
 (async () => {
   const browser = await chromium.launch({ headless: true, args: ["--use-gl=angle", "--use-angle=swiftshader"] });
   try {
-    const summary = { portrait: await runPortrait(browser), landscape: await runLandscape(browser) };
+    const summary = {
+      portrait: await runPortrait(browser),
+      landscape: await runLandscape(browser),
+      versus: await runVersus(browser)
+    };
     fs.writeFileSync(path.join(output, "summary.json"), JSON.stringify(summary, null, 2));
     console.log(JSON.stringify(summary, null, 2));
   } finally {

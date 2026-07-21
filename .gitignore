@@ -3,3 +3,4 @@ server.pid
 tmp/
 __pycache__/
 reference/research/
+.omx/

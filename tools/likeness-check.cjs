@@ -3,6 +3,7 @@ const path = require("node:path");
 const { chromium } = require("playwright");
 
 const url = process.argv[2] || "http://127.0.0.1:4173";
+const testUrl = `${url}${url.includes("?") ? "&" : "?"}test_bridge=1`;
 const output = path.resolve(process.argv[3] || "output/likeness-check");
 fs.mkdirSync(output, { recursive: true });
 
@@ -22,7 +23,7 @@ async function boot(browser) {
   const errors = [];
   page.on("console", (message) => { if (message.type() === "error") errors.push(message.text()); });
   page.on("pageerror", (error) => errors.push(String(error)));
-  await page.goto(url, { waitUntil: "networkidle" });
+  await page.goto(testUrl, { waitUntil: "networkidle" });
   await page.waitForFunction(() => window.pico8_gpio?.length >= 128 &&
     typeof window.render_game_to_text === "function");
   await page.evaluate(() => window.set_locked_in_ring_test_mode({ freeze: true }));
@@ -47,8 +48,6 @@ async function captureFight(browser, fighter, slug) {
   await enterSelect(session);
   if (fighter === 2) await button(page, "ArrowRight");
   if ((await state(page)).selectedFighter !== fighter) throw new Error(`${slug} selection failed`);
-  await button(page, "z");
-  await page.waitForFunction(() => JSON.parse(window.render_game_to_text()).mode === "bag-select");
   await button(page, "z");
   await page.waitForFunction(() => JSON.parse(window.render_game_to_text()).mode === "challenge");
   await page.keyboard.down("ArrowRight");

@@ -43,6 +43,9 @@ const bridge = `
   \`;
   document.head.appendChild(mobileStyle);
 
+  const localTest = location.hostname === "127.0.0.1" &&
+    new URLSearchParams(location.search).get("test_bridge") === "1";
+  if (localTest) {
   const stateNames = ["title", "fighter-select", "bag-select", "challenge", "result"];
   const pin = (index) => {
     const value = window.pico8_gpio && window.pico8_gpio[index];
@@ -77,6 +80,12 @@ const bridge = `
     playerStun: pin(23),
     linkedPunch: pin(24),
     playerSlowdown: pin(25),
+    gameMode: pin(26) === 1 ? "versus" : "bag",
+    playerHp: pin(27),
+    opponentX: pin(28),
+    opponentAttack: pin(29),
+    opponentStun: pin(30),
+    route: ["heavy", "versus", "targets"][pin(31)] || "heavy",
     viewport: {
       width: window.innerWidth,
       height: window.innerHeight,
@@ -88,10 +97,12 @@ const bridge = `
     window.setTimeout(resolve, Math.max(0, milliseconds));
   });
 
-  window.set_locked_in_ring_test_mode = ({ fast = false, freeze = false } = {}) => {
+  window.set_locked_in_ring_test_mode = ({ fast = false, freeze = false, cpuIdle = false } = {}) => {
     if (!window.pico8_gpio) throw new Error("PICO-8 GPIO is not ready");
+    window.pico8_gpio[126] = cpuIdle ? 1 : 0;
     window.pico8_gpio[127] = freeze ? 2 : fast ? 1 : 0;
   };
+  }
 
   const remap = new Map([
     ["KeyA", 4],
@@ -122,6 +133,6 @@ const bridge = `
 
 if (!html.includes("</body>")) throw new Error(`No </body> tag found in ${resolvedPath}`);
 html = html.replace("</body>", `${bridge}\n</body>`);
-html = html.replace(/<title>.*?<\/title>/i, "<title>Locked-In Bag Break</title>");
+html = html.replace(/<title>.*?<\/title>/i, "<title>Locked-In Boxing</title>");
 fs.writeFileSync(resolvedPath, html, "utf8");
 console.log(`Injected test/fullscreen bridge: ${resolvedPath}`);

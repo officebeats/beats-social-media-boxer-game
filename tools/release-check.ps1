@@ -20,7 +20,8 @@ $requiredFiles = @(
     (Join-Path $projectRoot 'tools\bag-check.cjs'),
     (Join-Path $projectRoot 'tools\likeness-check.cjs'),
     (Join-Path $projectRoot 'tools\mobile-check.cjs'),
-    (Join-Path $projectRoot 'tools\playthrough.cjs')
+    (Join-Path $projectRoot 'tools\playthrough.cjs'),
+    (Join-Path $projectRoot 'tools\versus-check.cjs')
 )
 
 $rows = foreach ($file in $requiredFiles) {
@@ -35,11 +36,11 @@ foreach ($section in '__lua__', '__sfx__', '__label__') {
     if (-not $cartText.Contains($section)) { throw "Cartridge is missing required section: $section" }
 }
 
-$requiredGamePatterns = @('bags={', 'function hit_bag(', 'function draw_bag(', 'function start_beat(', 'return hit!', 'gym demolition')
+$requiredGamePatterns = @('bags={', 'function hit_bag(', 'function draw_bag(', 'function new_vs(', 'function hit_f(', 'function start_beat(', 'return hit!', 'bag work + versus')
 $missingGamePatterns = @($requiredGamePatterns | Where-Object { -not $cartText.Contains($_) })
-if ($missingGamePatterns.Count -gt 0) { throw "Cartridge is missing bag-stage systems: $($missingGamePatterns -join ', ')" }
+if ($missingGamePatterns.Count -gt 0) { throw "Cartridge is missing dual-mode systems: $($missingGamePatterns -join ', ')" }
 
-$removedGamePatterns = @('function ai_ctl(', 'function guard(', 'function decision(', 'function corner_init(', 'opponent hp')
+$removedGamePatterns = @('function ai_ctl(', 'function guard(', 'function decision(', 'function corner_init(')
 $foundRemovedGamePatterns = @($removedGamePatterns | Where-Object { $cartText.Contains($_) })
 if ($foundRemovedGamePatterns.Count -gt 0) { throw "Cartridge still contains opponent-bout systems: $($foundRemovedGamePatterns -join ', ')" }
 
@@ -66,7 +67,7 @@ foreach ($pattern in 'sfx(8,0)', 'sfx(9,1)', 'sfx(10,2)', 'sfx(win and 7 or 6,3)
 }
 
 $htmlText = Get-Content -LiteralPath (Join-Path $webPath 'index.html') -Raw
-foreach ($pattern in 'locked-in-ring-test-bridge', 'Locked-In Bag Break', 'viewport-fit=cover', 'touch-action: none', 'window.pico8_buttons[0]') {
+foreach ($pattern in 'locked-in-ring-test-bridge', 'Locked-In Boxing', 'viewport-fit=cover', 'touch-action: none', 'window.pico8_buttons[0]', 'gameMode', 'location.hostname === "127.0.0.1"', 'test_bridge') {
     if (-not $htmlText.Contains($pattern)) { throw "Exported HTML is missing: $pattern" }
 }
 

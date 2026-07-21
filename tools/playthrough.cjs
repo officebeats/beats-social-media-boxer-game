@@ -3,6 +3,7 @@ const path = require("node:path");
 const { chromium } = require("playwright");
 
 const url = process.argv[2] || "http://127.0.0.1:4173";
+const testUrl = `${url}${url.includes("?") ? "&" : "?"}test_bridge=1`;
 const output = path.resolve(process.argv[3] || "output/playthrough");
 fs.mkdirSync(output, { recursive: true });
 
@@ -33,7 +34,7 @@ async function ready(page) {
   page.on("pageerror", (error) => errors.push(String(error)));
 
   try {
-    await page.goto(url, { waitUntil: "networkidle" });
+    await page.goto(testUrl, { waitUntil: "networkidle" });
     await page.waitForFunction(() => window.pico8_gpio?.length >= 128 && typeof window.render_game_to_text === "function");
     await page.evaluate(() => window.set_locked_in_ring_test_mode({ freeze: true }));
     await page.locator("#p8_start_button").click();
@@ -46,10 +47,11 @@ async function ready(page) {
     await page.waitForFunction(() => JSON.parse(window.render_game_to_text()).mode === "fighter-select");
     await button(page, "ArrowRight");
     await button(page, "z");
-    await page.waitForFunction(() => JSON.parse(window.render_game_to_text()).mode === "bag-select");
     if ((await state(page)).selectedFighter !== 2) throw new Error("fighter selection did not persist");
-    await button(page, "z");
     await page.waitForFunction(() => JSON.parse(window.render_game_to_text()).mode === "challenge");
+    if ((await state(page)).bagType !== 2 || (await state(page)).route !== "heavy") {
+      throw new Error("default route did not start the heavy bag");
+    }
 
     await page.keyboard.down("ArrowRight");
     await page.waitForFunction(() => {
@@ -59,7 +61,7 @@ async function ready(page) {
     await page.keyboard.up("ArrowRight");
 
     let contactCaptured = false;
-    for (let attempt = 0; attempt < 24; attempt += 1) {
+    for (let attempt = 0; attempt < 40; attempt += 1) {
       const before = await state(page);
       if (before.mode !== "challenge" || before.destructionFrames > 0) break;
       await ready(page);

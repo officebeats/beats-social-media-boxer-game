@@ -1,6 +1,6 @@
-# Locked-In Bag Break
+# Locked-In Boxing
 
-`Locked-In Bag Break` is an original PICO-8 boxing bonus-stage game. Pick one of six fictional gym personalities, choose a piece of equipment, and destroy it before time expires through clean range, target selection, stamina management, and punch combinations.
+`Locked-In Boxing` is an original PICO-8 arcade boxing game. Heavy Bag is the immediate default, alternate equipment challenges remain available, and a separate Versus mode lets any selectable gym personality fight a CPU boxer.
 
 ## Play
 
@@ -10,7 +10,15 @@
 
 The web export supports desktop keyboards, touch controls, iPhone portrait and landscape layouts, and fullscreen with `F`. PICO handhelds use the standard D-pad plus `O` and `X` buttons.
 
-## Targets
+## Modes
+
+- `O Heavy Bag`: the default route. Pick a fighter and begin Heavy Bag work immediately.
+- `X Versus`: pick a fighter and enter a timed one-round bout against a CPU rival.
+- `Down Targets`: open the complete Speed Bag, Heavy Bag, and Wreck Bag selector.
+
+Versus uses separate health and stamina bars, mirrored fighter stances, contact-authoritative punches, knockback, hit reactions, knockout resolution, time decisions, and immediate rematches.
+
+## Target Details
 
 - `Speed bag`: a 30-second rhythm challenge. Head punches score; body punches are too low.
 - `Heavy bag`: a 40-second power challenge. Body punches do the most damage, but committed shots can leave you exposed to the return swing.
@@ -30,7 +38,7 @@ Targets progress through intact, cracked, torn, and destroyed states. Accuracy, 
 - `up + O`: feint; the next linked punch starts faster and gains power.
 - `up + X`: uppercut.
 
-Punches only score when the rendered glove reaches the target. Each punch has a preferred distance; reaching or crowded contact does less damage. Clean hits open short links, while whiffs break the combination. Stamina affects movement, output, and how quickly another power shot can be thrown.
+Punches only score when the rendered glove reaches the equipment or opposing fighter. Each punch has a preferred distance; reaching or crowded bag contact does less damage. Clean hits open short links, while whiffs break the combination. Stamina affects movement, output, and how quickly another power shot can be thrown.
 
 ## Audio
 
@@ -66,11 +74,12 @@ node .\tools\boot-check.cjs http://127.0.0.1:4173
 node .\tools\bag-check.cjs http://127.0.0.1:4173 .\output\bag-systems
 node .\tools\playthrough.cjs http://127.0.0.1:4173 .\output\playthrough
 node .\tools\likeness-check.cjs http://127.0.0.1:4173 .\output\likeness
+node .\tools\versus-check.cjs http://127.0.0.1:4173 .\output\versus
 node .\tools\mobile-check.cjs http://127.0.0.1:4173 .\output\mobile
 python C:\Users\admin-beats\pico8-mcp-server\shrinko8\shrinko8.py locked-in-ring.p8 --count
 ```
 
-The release gate checks the native 8192-token ceiling, browser boot, all target behaviors, a complete destruction/rematch path, portrait and landscape touch controls, audio rows, public-name safety, and the GitHub Pages workflow. Physical PICO handheld testing remains separate from browser emulation and native cartridge export.
+The release gate checks the native 8192-token ceiling, browser boot, Heavy Bag default routing, all target behaviors, a complete destruction/rematch path, reciprocal Versus contact and rematch, portrait and landscape touch controls, audio rows, public-name safety, and the GitHub Pages workflow. Physical PICO handheld testing remains separate from browser emulation and native cartridge export.
 
 ## Release
 

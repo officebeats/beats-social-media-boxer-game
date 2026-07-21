@@ -41,7 +41,7 @@ end
 function mkb(i,sd,ai)
  local d=defs[i]
  local f={
-  id=i,ab=d.ab,sd=-1,sm=d.sm,
+  id=i,ab=d.ab,sd=sd or -1,sm=d.sm,
   dm=d.dm,rg=d.rg,spd=d.spd,hmul=1
  }
  z(f,"acc,hy,ct,wind,rec,atk,aln,stun,q,fe,link,vx,mv,co,tz,chain,shake,ds,dd,la")
@@ -62,15 +62,24 @@ end
 function title_mode()
  mode=0
  cam=0 fl=0
- p=nil
+ p=nil o=nil route=0
  rescode=0
  stop_beat()
 end
 
 function new_run()
+ vs=false
  run_n+=1
  srand(2048+run_n*37+sel*101+bag*53)
  p=mkb(sel)
+ challenge_init()
+end
+
+function new_vs()
+ vs=true bag=2 run_n+=1
+ srand(4096+run_n*37+sel*101)
+ p=mkb(sel)
+ o=mkb(sel==1 and 2 or 1,1)
  challenge_init()
 end
 
@@ -89,12 +98,16 @@ end
 function challenge_init()
  local d=bags[bag]
  mode=3
- bhm=d.hp bhp=bhm
- rt=fast_hook() and 300 or d.tm*30
+ bhm=vs and 100 or d.hp bhp=bhm php=100
+ rt=fast_hook() and 300 or (vs and 45 or d.tm)*30
  score=0 shots=0 hits=0 clear=0
  ba=0 bv=0 bx=88 bflash=0 br=0
  p.x=43 p.vx=0 p.mv=0 p.st=p.sm
  z(p,"wind,rec,atk,aln,stun,q,fe,link,co,tz,chain,shake,ds,dd")
+ if vs then
+  p.x=40 o.x=88 o.st=o.sm
+  z(o,"wind,rec,atk,aln,stun,q,fe,link,co,tz,chain,shake,ds,dd")
+ end
  bell=18
  ht=0 hs=0 cam=0 fl=0
  tapd=0 tapt=-20 held=0 fresh=0
@@ -129,14 +142,14 @@ end
 
 function begin_atk(f,a)
  if a==6 then
-  htxt=anm[a] ht=18
+  if f==p then htxt=anm[a] ht=18 end
   if f.st<1 then return end
   f.st-=1 f.atk=6 f.aln=1 f.wind=3
   return
  end
  local co=f.link>0 and cmb[f.la*10+a]
  f.co=co and 1 or 0
- htxt=(co and "combo " or "")..anm[a] ht=18
+ if f==p then htxt=(co and "combo " or "")..anm[a] ht=18 end
  local m=mvs[a]
  local cost=m.st
  if f.st<cost then
@@ -144,11 +157,11 @@ function begin_atk(f,a)
   return
  end
  f.st-=cost
- shots+=1
+ if f==p then shots+=1 end
  f.atk=a
  f.aln=m.ln
  if co then
-  f.x=min(f.x+2,bx-26)
+  f.x-=f.sd*2
  end
  if rng<2 then f.vx=-f.sd*(a==2 and .8 or a>3 and .55 or .4) end
  local wd=max(2,m.wd-flr(f.acc*8))
@@ -157,9 +170,9 @@ function begin_atk(f,a)
  f.wind=wd
 end
 
-function miss(t)
- htxt=t ht=18
- p.tz=10 p.link=0 p.la=0 p.co=0
+function miss(f,t)
+ if f==p then htxt=t ht=18 end
+ f.tz=10 f.link=0 f.la=0 f.co=0
  sfx(3,3)
 end
 
@@ -169,11 +182,11 @@ function hit_bag()
  if not m then return end
  local gap=bx-p.x
  if gap>rch[a]+9 then
-  miss("out of range")
+  miss(p,"out of range")
   return
  end
  if bag==1 and m.ln==0 then
-  miss("too low")
+  miss(p,"too low")
   return
  end
  local mult=1
@@ -206,40 +219,57 @@ function hit_bag()
  end
 end
 
-function step_box(mv,a)
- if p.fe>0 then p.fe-=1 end
- if p.link>0 then p.link-=1 end
- if p.shake>0 then p.shake-=1 end
- if p.tz>0 and p.tz%2==1 then
-  if a>0 then p.q=a end
+function hit_f(a,d)
+ local m=mvs[a.atk]
+ if abs(a.x-d.x)>rch[a.atk]+9 then miss(a,"out of range") return end
+ local dmg=m.d*(1+a.dm)*(.85+.15*a.st/a.sm)
+ if d==p then php=max(0,php-dmg) else
+  bhp=max(0,bhp-dmg) hits+=1 score+=flr(dmg*12)
+ end
+ if fr-a.ct<40 then a.chain+=1 else a.chain=1 end
+ a.ct=fr a.la=a.atk a.link=20
+ d.stun=a.atk>1 and 7 or 4
+ d.vx=-a.sd*(a.atk>1 and 1.2 or .7)
+ d.shake=6 hs=a.atk>1 and 4 or 2
+ cam=a.atk>1 and 4 or 2 fl=a.atk>1 and 2 or 1
+ if a==p then htxt=a.co>0 and "combo!" or "clean hit" ht=18 end
+ sfx(a.atk>1 and 2 or 1,3)
+end
+
+function step_box(f,mv,a)
+ if f.fe>0 then f.fe-=1 end
+ if f.link>0 then f.link-=1 end
+ if f.shake>0 then f.shake-=1 end
+ if f.tz>0 and f.tz%2==1 then
+  if a>0 then f.q=a end
   return 0
  end
- if p.stun>0 then
-  p.stun-=1
+ if f.stun>0 then
+  f.stun-=1
   return mv
  end
- if p.rec>0 then
-  p.rec-=1
-  if a>0 and p.rec<=5 then p.q=a end
+ if f.rec>0 then
+  f.rec-=1
+  if a>0 and f.rec<=5 then f.q=a end
  else
-  if p.q>0 then a=p.q p.q=0 end
-  if a>0 and p.wind<=0 then begin_atk(p,a) end
+  if f.q>0 then a=f.q f.q=0 end
+  if a>0 and f.wind<=0 then begin_atk(f,a) end
  end
- if p.wind>0 then
-  p.wind-=1
-  if p.wind==0 then
-   if p.atk==6 then
-    p.fe=20 p.rec=2 sfx(5,3)
+ if f.wind>0 then
+  f.wind-=1
+  if f.wind==0 then
+   if f.atk==6 then
+    f.fe=20 f.rec=2 sfx(5,3)
    else
-    hit_bag()
-    local rec=mvs[p.atk].re
-    p.rec=max(3,rec-(p.co>0 and 2 or p.chain>1 and 1 or 0))
+    if vs then hit_f(f,f==p and o or p) else hit_bag() end
+    local rec=mvs[f.atk].re
+    f.rec=max(3,rec-(f.co>0 and 2 or f.chain>1 and 1 or 0))
    end
   end
  end
  local regen=.25
  if rng==0 then regen+=.18 end
- p.st=min(p.sm,p.st+regen*p.rg)
+ f.st=min(f.sm,f.st+regen*f.rg)
  return mv
 end
 
@@ -275,6 +305,7 @@ function fight_tick()
  end
  fr+=1
  if p.tz>0 then p.tz-=1 end
+ if vs and o.tz>0 then o.tz-=1 end
  local pm,pa=human_ctl()
  if hs>0 then
   if pa>0 then p.q=pa end
@@ -282,11 +313,25 @@ function fight_tick()
   return
  end
  if peek(0x5fff)!=2 then rt-=1 end
+ if vs then
+  local gap=o.x-p.x
+  local om=gap>40 and -1 or gap<30 and 1 or 0
+  local oa=0
+  if o.wind+o.rec+o.stun==0 and gap<43 and rnd()<.09 then
+   oa=gap<33 and (rnd()<.5 and 4 or 5) or (rnd()<.65 and 1 or 2)
+  end
+  if peek(0x5ffe)==1 then om=0 oa=0 end
+  move_box(p,pm,18,o.x-28) move_box(o,om,p.x+28,110)
+  rng=o.x-p.x>48 and 0 or o.x-p.x>34 and 1 or 2
+  step_box(p,pm,pa) step_box(o,om,oa)
+  if php<=0 or bhp<=0 or rt<=0 then finish(bhp<=0 or php>bhp) end
+  return
+ end
  bv-=ba*.045 bv*=.965
  ba=clamp(ba+bv,-9,12) bx=88+ba
  move_box(p,pm,18,bx-26)
  rng=bx-p.x>48 and 0 or bx-p.x>34 and 1 or 2
- step_box(pm,pa)
+ step_box(p,pm,pa)
  if bag>1 and br==0 and bv<-.32 and bx-p.x<39 and p.stun==0 then
   p.stun=6 p.st=max(0,p.st-7) p.x=max(18,p.x-4)
   score=max(0,score-50) bv=abs(bv)*.35 br=18
@@ -297,13 +342,18 @@ function fight_tick()
 end
 
 function upd_title()
- if btnp(4) then mode=1 sfx(5,3) end
+ if btnp(4) then route=0 bag=2 mode=1 sfx(5,3)
+ elseif btnp(5) then route=1 mode=1 sfx(5,3)
+ elseif btnp(3) then route=2 mode=1 sfx(5,3) end
 end
 
 function upd_select()
  if btnp(0) then sel=sel==1 and #defs or sel-1 sfx(5,3) end
  if btnp(1) then sel=sel==#defs and 1 or sel+1 sfx(5,3) end
- if btnp(4) then mode=2 sfx(5,3) end
+ if btnp(4) then
+  sfx(5,3)
+  if route==0 then bag=2 new_run() elseif route==1 then new_vs() else mode=2 end
+ end
  if btnp(5) then title_mode() end
 end
 
@@ -315,8 +365,8 @@ function upd_bags()
 end
 
 function upd_result()
- if btnp(4) then new_run() end
- if btnp(5) then mode=2 stop_beat() end
+ if btnp(4) then if vs then new_vs() else new_run() end end
+ if btnp(5) then if route==2 then mode=2 else title_mode() end stop_beat() end
 end
 
 function gpio()
@@ -325,8 +375,9 @@ function gpio()
   p and flr(p.st) or 0,bhp and flr(bhp) or 0,bhm or 0,rescode or 0,
   p and p.atk or 0,p and p.wind or 0,p and p.rec or 0,p and p.fe or 0,
   p and p.mv+1 or 1,p and flr(p.x) or 0,flr(bx or 0),p and p.chain or 0,
-  score or 0,rt or 0,mode==3 and weak_zone() or 0,shots or 0,hits or 0,clear or 0,
-  hs or 0,p and p.ds or 0,p and p.stun or 0,p and p.co or 0,p and p.tz or 0
+  score or 0,rt or 0,mode==3 and not vs and weak_zone() or 0,shots or 0,hits or 0,clear or 0,
+  hs or 0,p and p.ds or 0,p and p.stun or 0,p and p.co or 0,p and p.tz or 0,
+  vs and 1 or 0,php or 0,o and flr(o.x) or 0,o and o.atk or 0,o and o.stun or 0,route or 0
  }
  for i=1,#q do poke(0x5f7f+i,q[i]) end
 end
@@ -334,7 +385,7 @@ end
 function _init()
  run_n=0
  sel=1
- bag=1
+ bag=2 route=0 vs=false
  fr=0
  title_mode()
 end
@@ -645,7 +696,7 @@ function draw_f(f)
   line(f.x-f.dd*11,106,f.x-f.dd*5,106,5)
   circfill(f.x-f.dd*12,105,1,7)
  end
- local inside=bx-f.x<30
+ local inside=(vs and o.x-p.x or bx-p.x)<30
  draw_boxer(f.id,f.x,105,-f.sd,0,f.wind,f.rec,f.atk,0,0,f.shake,f.mv,f.stun,0,0,f.ds,inside)
 end
 
@@ -654,6 +705,16 @@ function hud()
  line(0,20,127,20,5)
  if not p then return end
  portrait(p.id,0,1)
+ if vs then
+  portrait(o.id,110,1,true)
+  print(p.ab,18,1,defs[p.id].ed) print(o.ab,100,1,defs[o.id].ed)
+  meter(18,6,36,php,100,8,false) meter(73,6,36,bhp,100,8,true)
+  meter(18,13,36,p.st,p.sm,12,false) meter(73,13,36,o.st,o.sm,12,true)
+  panel(56,1,71,19,10,1)
+  local sec=max(0,flr((rt or 0)/30))
+  print(sec<10 and "0"..sec or sec,60,7,7) print("vs",60,14,10)
+  return
+ end
  panel(110,1,127,18,bags[bag].col,1)
  bag_icon(bag,119,9)
  print(p.ab,18,1,defs[p.id].ed)
@@ -678,9 +739,12 @@ function draw_title()
  ring_front()
  rectfill(0,0,127,19,0)
  rectfill(9,2,118,4,8)
- btxt("locked-in bag break",27,7,10)
- print("gym demolition",39,14,6)
- btxt("press o",50,118,7)
+ btxt("locked-in boxing",31,7,10)
+ print("bag work + versus",31,14,6)
+ panel(28,106,99,127,10,0)
+ btxt("o heavy bag",40,109,10)
+ print("x versus",48,116,7)
+ print("down targets",40,122,6)
 end
 
 function draw_select()
@@ -701,7 +765,8 @@ function draw_select()
  btxt(d.nm,64-#d.nm*2,92,d.ed)
  print("fwd+o hook fwd+x overhand",10,101,10)
  print("up feint/upper down body",18,113,6)
- print("left/right select o bags x back",0,121,7)
+ local a=route==0 and "heavy bag" or route==1 and "versus" or "targets"
+ print("< > select  o "..a.."  x back",2,121,7)
 end
 
 function draw_bags()
@@ -728,7 +793,7 @@ function draw_fight()
  local cy=cam>4 and (flr(cam/2)%2*2-1) or 0
  camera(cx,cy)
  ring_bg()
- draw_bag()
+ if vs then draw_f(o) else draw_bag() end
  draw_f(p)
  ring_front()
  camera()
@@ -739,8 +804,8 @@ function draw_fight()
   if fl>1 then line(0,fy+58,127,fy+58,6) end
  end
  hud()
- if bell>0 then panel(43,43,84,55,10,0) btxt("break it!",47,47,10) end
- if ht==0 then btxt(weak_zone()==1 and "high target" or "body target",4,24,10) end
+ if bell>0 then panel(43,43,84,55,10,0) btxt(vs and "fight!" or "break it!",vs and 52 or 47,47,10) end
+ if ht==0 and not vs then btxt(weak_zone()==1 and "high target" or "body target",4,24,10) end
  if p.chain>1 and fr-p.ct<30 then btxt(p.chain.." hit",95,27,10) end
  if ht>0 then btxt(htxt,64-#htxt*2,24,10) end
  if clear>0 then btxt("destroyed!",46,53,10) end
@@ -750,15 +815,16 @@ function draw_result()
  ring_bg()
  ring_front()
  draw_boxer(p.id,31,105,1,0,0,0,0,0,0,0)
+ if vs then draw_boxer(o.id,97,105,-1,0,0,0,0,0,0,0) end
  local win=rescode==1
  panel(24,27,119,83,win and 11 or 8,0)
- btxt(win and "bag cleared" or "time up",42,32,win and 11 or 8)
- print(bags[bag].nm,46,44,bags[bag].col)
- btxt("grade "..grade,49,54,10)
+ btxt(win and (vs and "you win" or "bag cleared") or (vs and "you lose" or "time up"),42,32,win and 11 or 8)
+ print(vs and "vs "..o.ab or bags[bag].nm,46,44,vs and defs[o.id].ed or bags[bag].col)
+ btxt(vs and "hp "..flr(php).." - "..flr(bhp) or "grade "..grade,43,54,10)
  print("score "..score,46,65,7)
  local acc=flr(100*hits/max(1,shots))
  print("accuracy "..acc.."%",42,74,6)
- print("o retry   x targets",29,116,7)
+ print("o retry   x "..(route==2 and "targets" or "menu"),29,116,7)
 end
 
 function _draw()
