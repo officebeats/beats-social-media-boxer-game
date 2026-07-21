@@ -325,3 +325,14 @@ User request: replace the disliked lead sprites with temporary original boxer ar
 - Current focused QA passes all three target behaviors, a complete clear/rematch, browser boot, iPhone portrait touch play, landscape framing, and zero browser errors. Strict visual review is `94/100`.
 - Final native source is `6632 / 8192` tokens. Static release, browser boot, all-target behavior, full clear/rematch, portrait touch, and landscape layout checks pass with zero browser errors; physical PICO handheld hardware and subjective speaker/headphone mix remain untested.
 - GitHub rejected Pages activation for the private repository with HTTP 422 because the current account plan does not support it. The workflow now requests self-enablement so an account upgrade plus workflow rerun is the only remaining deployment step; repository visibility was not changed.
+
+## Broner And Deen Likeness Pass
+
+- Replaced the temporary arcade-rival heads with original PICO-8 caricatures based on current public training appearances and the approved `reference/likeness-sprite-reference.png` production sheet.
+- A.B. now reads through a squared close fade, warm cheek plane, compact full beard with gray breakup, fitted black training shirt, purple trunks, and purple gloves.
+- D. Great now reads through a narrower clean profile, four independently tapered swept-back braid rows, bare athletic torso, teal-gold trunks, and teal gloves.
+- Re-authored both 16x16 HUD portraits separately so their hair, beard, jaw, and kit remain distinguishable at native 128x128 scale and on an iPhone viewport.
+- Added `tools/likeness-check.cjs`, which captures both fighter-select states plus neutral and contact frames for each lead fighter while asserting real target damage and zero browser errors.
+- Strict visual review passed at `91/100` against the approved production sheet after desktop select/neutral/contact and portrait/landscape mobile screenshot inspection.
+- The committed likeness sheet is generated original art. Downloaded photo and video research remains excluded from version control.
+- Final native export, static release gate, browser boot, all three bag systems, full clear/rematch, likeness captures, and iPhone portrait/landscape checks pass with zero browser errors. The source cart remains `6632 / 8192` tokens.

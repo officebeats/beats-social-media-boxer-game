@@ -18,6 +18,7 @@ $requiredFiles = @(
     (Join-Path $projectRoot 'README.md'),
     (Join-Path $projectRoot 'tools\boot-check.cjs'),
     (Join-Path $projectRoot 'tools\bag-check.cjs'),
+    (Join-Path $projectRoot 'tools\likeness-check.cjs'),
     (Join-Path $projectRoot 'tools\mobile-check.cjs'),
     (Join-Path $projectRoot 'tools\playthrough.cjs')
 )

@@ -65,6 +65,7 @@ To run locally:
 node .\tools\boot-check.cjs http://127.0.0.1:4173
 node .\tools\bag-check.cjs http://127.0.0.1:4173 .\output\bag-systems
 node .\tools\playthrough.cjs http://127.0.0.1:4173 .\output\playthrough
+node .\tools\likeness-check.cjs http://127.0.0.1:4173 .\output\likeness
 node .\tools\mobile-check.cjs http://127.0.0.1:4173 .\output\mobile
 python C:\Users\admin-beats\pico8-mcp-server\shrinko8\shrinko8.py locked-in-ring.p8 --count
 ```
@@ -75,4 +76,4 @@ The release gate checks the native 8192-token ceiling, browser boot, all target 
 
 Pushes to `main` that change `dist/web` deploy through `.github/workflows/pages.yml`. The repository remains private, while GitHub Pages serves the generated browser artifact publicly. Pages availability for a private repository depends on the GitHub account plan.
 
-The public build uses fictional names, original text, original sprites, and original audio. Real public figures are private research references only; no real names, logos, catchphrases, copied portraits, animation frames, game assets, or music ship in the cartridge.
+The public build keeps fictional cartridge names and uses original pixel art, text, and audio. The two lead fighters use stylized appearance cues informed by public Broner and Deen training footage; no source photos, logos, catchphrases, copied portraits, animation frames, game assets, or commercial music ship in the cartridge.
