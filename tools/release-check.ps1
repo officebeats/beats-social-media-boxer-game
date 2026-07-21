@@ -70,7 +70,7 @@ foreach ($pattern in 'locked-in-ring-test-bridge', 'Locked-In Bag Break', 'viewp
 }
 
 $workflowText = Get-Content -LiteralPath (Join-Path $projectRoot '.github\workflows\pages.yml') -Raw
-foreach ($pattern in 'actions/configure-pages@v5', 'actions/upload-pages-artifact@v4', 'actions/deploy-pages@v4', 'path: dist/web') {
+foreach ($pattern in 'actions/configure-pages@v5', 'enablement: true', 'actions/upload-pages-artifact@v4', 'actions/deploy-pages@v4', 'path: dist/web') {
     if (-not $workflowText.Contains($pattern)) { throw "Pages workflow is missing: $pattern" }
 }
 
