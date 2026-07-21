@@ -1,76 +1,78 @@
-# Locked-In Ring
+# Locked-In Bag Break
 
-`Locked-In Ring` is a public-safe PICO-8 arcade boxing game about discipline versus spectacle. Choose from six fictional boxing archetypes and enter a three-round rivalry bout immediately.
+`Locked-In Bag Break` is an original PICO-8 boxing bonus-stage game. Pick one of six fictional gym personalities, choose a piece of equipment, and destroy it before time expires through clean range, target selection, stamina management, and punch combinations.
 
 ## Play
 
-Browser build: [http://127.0.0.1:4173/](http://127.0.0.1:4173/)
+- GitHub Pages: [https://officebeats.github.io/beats-social-media-boxer-game/](https://officebeats.github.io/beats-social-media-boxer-game/)
+- Local browser build: [http://127.0.0.1:4173/](http://127.0.0.1:4173/)
+- PICO-8 cartridge: `dist/locked-in-ring.p8.png`
 
-- Desktop or PICO handheld: D-pad plus the standard PICO-8 `O` and `X` buttons.
-- Mobile portrait: the canvas stays above a large D-pad and `O/X` touch panel.
-- Mobile landscape: the canvas stays centered between the two touch panels.
-- `F`: fullscreen in the HTML wrapper.
+The web export supports desktop keyboards, touch controls, iPhone portrait and landscape layouts, and fullscreen with `F`. PICO handhelds use the standard D-pad plus `O` and `X` buttons.
 
-### Boxing controls
+## Targets
 
-- `left/right`: step toward or away; double-tap deliberately for a stamina-costing quick-step. Tap either direction during an opponent windup to dodge a head strike and earn a counter window. Hold back through contact to block high; body shots punish slips.
-- `up/down`: high or body guard. Add `back` to plant and lean behind the matching block.
-- `O`: jab; `down + O`: body jab; `forward + O`: lead hook.
-- `X`: rear straight; `down + X`: body hook; `forward + X`: overhand.
-- `up + O`: feint with a half-jab animation; the next punch starts faster and hits harder.
-- `up + X`: uppercut. It can be thrown anywhere but only reaches at close range.
+- `Speed bag`: a 30-second rhythm challenge. Head punches score; body punches are too low.
+- `Heavy bag`: a 40-second power challenge. Body punches do the most damage, but committed shots can leave you exposed to the return swing.
+- `Wreck bag`: a 50-second durability challenge. Its flashing weak zone alternates between high and body targets.
 
-Hold `up` to block head punches or `down` to block body punches. Holding back also raises the high guard, while `down + back` protects the body. A planted matching block leans away from impact; timing the guard just before contact produces a catch-and-shoot parry, slows the attacker for one second, and grants the strongest counter window.
+Targets progress through intact, cracked, torn, and destroyed states. Accuracy, combinations, weak-zone hits, destruction speed, and remaining time determine the score and rank.
 
-Clean contact opens short boxing-combo links. The primary route is `O` jab, `X` straight, `down + X` body hook, then `up + X` uppercut. Jab can also link into body jab, and body jab can link into straight. Linked punches start faster, recover faster, and take a small contact-safe step without passing through the opponent; a whiff or successful dodge ends the route.
+## Controls
 
-Fighters accelerate into steps, brake firmly on release, and become more flat-footed as stamina falls. Edge-tracked directional input prevents held directions from creating accidental repeated dashes. Forward pressure is slightly faster than retreat, while deliberate double taps create short boxing quick-steps that can flow into committed punches. A four-beat planted shuffle shifts weight through compressed knees and a lifted heel while slips, blocks, and punches move the torso over that base. Lead jabs and body jabs use the front glove; rear straights, hooks, and uppercuts rotate the shoulder line and pivot the stance. Punches interpolate through anticipation, contact, impact hold, and recovery; power shots add stronger hit-stop without dropping buffered follow-up input.
+- `left/right`: footwork. Double-tap for a stamina-costing quick step.
+- `O`: jab.
+- `X`: rear straight.
+- `down + O`: body jab.
+- `down + X`: body hook.
+- `forward + O`: lead hook.
+- `forward + X`: overhand.
+- `up + O`: feint; the next linked punch starts faster and gains power.
+- `up + X`: uppercut.
 
-Clean hits now produce positive frame advantage, allowing confirmed links without making whiffed punches safe. Interrupting an opponent during startup creates a counter-hit, cancels the incoming punch, and adds hitstun. Weight-based pushback separates isolated power shots while confirmed combo routes retain enough range to continue. A held matching block absorbs the shot, a planted lean block reduces chip and guard wear, and a late matching block creates a stronger perfect-return window. Counter opportunity scales with defensive skill: ordinary blocks slow the attacker for 12 frames, lean blocks for 18, slips for 24, and a perfect catch for the full 30-frame second. Starting a punch during that counter window commits its tier through startup so the advantage cannot expire before contact.
+Punches only score when the rendered glove reaches the target. Each punch has a preferred distance; reaching or crowded contact does less damage. Clean hits open short links, while whiffs break the combination. Stamina affects movement, output, and how quickly another power shot can be thrown.
 
-Damage only resolves when the rendered glove reaches the opponent, and every punch has a preferred distance. Clean shots at that distance deal full damage; crowded or reaching shots are weaker, so stepping into range matters without making contact feel arbitrary. Pressure near the ropes adds a modest damage bonus, while a fighter resting on the ropes regenerates stamina more slowly. The opponent also adjusts its guard against repeated landed punches, covers up and retreats when hurt, pressures a trapped fighter, and mixes lead hooks and overhands into its range-specific offense.
+## Audio
 
-The fight HUD uses a fixed broadcast order for both corners: red health, blue stamina, then yellow guard. The center stack shows round, clock, and the player's compact hype value.
+The cartridge contains original PICO-8 tracker audio:
 
-## Release Files
+- three synchronized looping channels for kick/snare, trap hats, and bass;
+- separate jab, power-hit, whiff, rebound, menu, bell, and destruction effects;
+- effects routed independently from the music so impacts remain audible.
 
-- `locked-in-ring.p8`: editable PICO-8 source.
-- `dist/locked-in-ring.p8.png`: cartridge image for PICO-8 and compatible handhelds.
-- `dist/web/index.html`: mobile/desktop browser build.
+No commercial song, sample, or audio from another game is included.
 
 ## Build
 
-PICO-8 0.2.7 is installed at `C:\Program Files (x86)\PICO-8\pico8.exe`.
+PICO-8 0.2.7 is expected at `C:\Program Files (x86)\PICO-8\pico8.exe`.
 
 ```powershell
 .\build.ps1
 ```
 
-The build creates the cartridge label when needed, exports `.p8.png` and HTML, waits for OneDrive writes to settle, and injects the responsive touch/test bridge.
+The build exports the cartridge and browser files, waits for OneDrive writes to settle, and injects the responsive touch, fullscreen, and test bridge into `dist/web/index.html`.
 
-The source is kept below PICO-8's 8192-token ceiling through shared fighter resets and compact test-timing helpers. Native `.p8.png` and HTML export success is the release gate because this PICO-8 installation does not report an exact token count in the non-interactive build output.
+To run locally:
+
+```powershell
+.\tools\serve.ps1
+```
 
 ## Verification
 
 ```powershell
 .\tools\release-check.ps1
+node .\tools\boot-check.cjs http://127.0.0.1:4173
+node .\tools\bag-check.cjs http://127.0.0.1:4173 .\output\bag-systems
 node .\tools\playthrough.cjs http://127.0.0.1:4173 .\output\playthrough
-node .\tools\move-check.cjs http://127.0.0.1:4173 .\output\moves
-node .\tools\defense-check.cjs http://127.0.0.1:4173 .\output\defense
-node .\tools\animation-check.cjs http://127.0.0.1:4173 .\output\animation
-node .\tools\combo-check.cjs http://127.0.0.1:4173 .\output\combo
-node .\tools\ui-check.cjs http://127.0.0.1:4173 .\output\ui
-node .\tools\playthrough.cjs http://127.0.0.1:4173 .\output\normal --normal
 node .\tools\mobile-check.cjs http://127.0.0.1:4173 .\output\mobile
-node .\tools\arcade-feel-check.cjs http://127.0.0.1:4173
-node .\tools\range-check.cjs http://127.0.0.1:4173 .\output\range
-.\tools\run-balance-check.ps1
+python C:\Users\admin-beats\pico8-mcp-server\shrinko8\shrinko8.py locked-in-ring.p8 --count
 ```
 
-The shipped art uses a custom default-palette fighter atlas for bodies and HUD portraits, with procedural arms retained so every rendered punch stays aligned to gameplay reach. Fight layers render at their native 40-pixel atlas width with no runtime downscaling. The lead silhouettes return to the lock-in aesthetic: A.B. uses a compact fade, full beard, fitted black shirt, purple trunks, and purple gloves; D. Great uses rearward braids, a lean bare torso, green trunks, and green gloves. Faces deliberately use flat planes with no projected nose pixels; identity comes from hair, beard, braids, torso treatment, and equipment. [`reference/style-target.png`](reference/style-target.png) is the current art-direction target. Regenerate the atlas after source edits with `python .\tools\build-fighter-atlas.py`.
+The release gate checks the native 8192-token ceiling, browser boot, all target behaviors, a complete destruction/rematch path, portrait and landscape touch controls, audio rows, public-name safety, and the GitHub Pages workflow. Physical PICO handheld testing remains separate from browser emulation and native cartridge export.
 
-[Backstreet Warriors](https://sebagamesdev.itch.io/backstreet-warriors) is a motion reference for compressed anticipation, oversized active gloves, strong key poses, hit-stop, camera kick, and combo-finisher impact. [Bruisers 2D Boxing](https://store.steampowered.com/app/3740090/Bruisers_2D_Boxing/) is a systems reference for directional punch selection, catch-and-shoot parries, head/body defense, close-range timing, body-stamina pressure, and side-view ring composition. [Ready 2 Rumble Boxing on Game Boy Color](https://www.mobygames.com/game/75245/ready-2-rumble-boxing/) remains a handheld readability reference for limited-color dither, thick rope bands, compressed crowds, and oversized gloves. The game translates general techniques into original PICO-8 art and code; no source art, animation frames, characters, names, logos, ring graphics, or audio from those titles are included.
+## Release
 
-The arena uses a flat side-view action line inside the lock-in warehouse: a dark loading door, hanging heavy bags, layered spectators, perspective floor marks, bold horizontal ropes, and purple/teal rivalry colors. A top arcade HUD gives each fighter a portrait plus red health, blue stamina, and yellow guard, with the round and clock centered between them.
+Pushes to `main` that change `dist/web` deploy through `.github/workflows/pages.yml`. The repository remains private, while GitHub Pages serves the generated browser artifact publicly. Pages availability for a private repository depends on the GitHub account plan.
 
-The public build uses fictional names, original text, and parody-coded silhouettes. Public figures remain private research references; no real names, logos, copied audio, footage, catchphrases, or exact portraits ship in the cartridge.
+The public build uses fictional names, original text, original sprites, and original audio. Real public figures are private research references only; no real names, logos, catchphrases, copied portraits, animation frames, game assets, or music ship in the cartridge.

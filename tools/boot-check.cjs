@@ -36,7 +36,7 @@ const screenshot = path.resolve(process.argv[3] || "output/boot-check.png");
     await page.keyboard.down("z");
     await page.waitForTimeout(50);
     await page.keyboard.up("z");
-    await page.waitForFunction(() => JSON.parse(window.render_game_to_text()).mode === "select");
+    await page.waitForFunction(() => JSON.parse(window.render_game_to_text()).mode === "fighter-select");
     if (errors.length) throw new Error(errors.join(" | "));
     console.log(JSON.stringify({ screenshot, state: JSON.parse(await page.evaluate(() => window.render_game_to_text())) }, null, 2));
   } finally {

@@ -43,7 +43,7 @@ const bridge = `
   \`;
   document.head.appendChild(mobileStyle);
 
-  const stateNames = ["title", "select", "fight", "corner", "result"];
+  const stateNames = ["title", "fighter-select", "bag-select", "challenge", "result"];
   const pin = (index) => {
     const value = window.pico8_gpio && window.pico8_gpio[index];
     return Number.isFinite(value) ? value : 0;
@@ -52,42 +52,31 @@ const bridge = `
   window.render_game_to_text = () => JSON.stringify({
     coordinateSystem: "PICO-8 canvas: origin top-left, x right, y down, 128x128",
     mode: stateNames[pin(0)] || "unknown",
-    round: pin(1),
-    playerHp: pin(2),
-    opponentHp: pin(3),
-    result: pin(4),
-    selectedFighter: pin(5),
-    playerAttack: pin(6),
-    playerWindup: pin(7),
-    playerRecovery: pin(8),
-    playerDodge: pin(9),
+    selectedFighter: pin(1),
+    bagType: pin(2),
+    playerStamina: pin(3),
+    bagHp: pin(4),
+    bagMaxHp: pin(5),
+    result: pin(6),
+    playerAttack: pin(7),
+    playerWindup: pin(8),
+    playerRecovery: pin(9),
     playerFeint: pin(10),
-    opponentAttack: pin(11),
-    opponentWindup: pin(12),
-    playerMovement: pin(13) - 1,
-    opponentMovement: pin(14) - 1,
-    playerX: pin(15),
-    opponentX: pin(16),
-    playerGuard: pin(17),
-    playerGuardFrames: pin(18),
-    playerBlockLean: pin(19),
-    playerBlockImpact: pin(20),
-    playerBlockType: pin(21),
-    playerCounterWindow: pin(22),
-    playerCounterTier: pin(23),
-    playerCounterPunch: pin(24),
-    playerGuardMeter: pin(25),
-    playerBlockStun: pin(26),
-    opponentRecovery: pin(27),
-    playerStun: pin(28),
-    hitStop: pin(29),
-    playerQuickStep: pin(30),
-    playerCombo: pin(31),
-    playerChain: pin(32),
-    playerFighter: pin(33),
-    opponentFighter: pin(34),
-    playerCounterSlow: pin(35),
-    opponentCounterSlow: pin(36),
+    playerMovement: pin(11) - 1,
+    playerX: pin(12),
+    bagX: pin(13),
+    combo: pin(14),
+    score: pin(15),
+    timerFrames: pin(16),
+    weakZone: pin(17) === 1 ? "high" : pin(17) === 2 ? "body" : "none",
+    shots: pin(18),
+    hits: pin(19),
+    destructionFrames: pin(20),
+    hitStop: pin(21),
+    playerQuickStep: pin(22),
+    playerStun: pin(23),
+    linkedPunch: pin(24),
+    playerSlowdown: pin(25),
     viewport: {
       width: window.innerWidth,
       height: window.innerHeight,
@@ -99,9 +88,9 @@ const bridge = `
     window.setTimeout(resolve, Math.max(0, milliseconds));
   });
 
-  window.set_locked_in_ring_test_mode = ({ fast = false } = {}) => {
+  window.set_locked_in_ring_test_mode = ({ fast = false, freeze = false } = {}) => {
     if (!window.pico8_gpio) throw new Error("PICO-8 GPIO is not ready");
-    window.pico8_gpio[127] = fast ? 1 : 0;
+    window.pico8_gpio[127] = freeze ? 2 : fast ? 1 : 0;
   };
 
   const remap = new Map([
@@ -133,6 +122,6 @@ const bridge = `
 
 if (!html.includes("</body>")) throw new Error(`No </body> tag found in ${resolvedPath}`);
 html = html.replace("</body>", `${bridge}\n</body>`);
-html = html.replace(/<title>.*?<\/title>/i, "<title>Locked-In Ring</title>");
+html = html.replace(/<title>.*?<\/title>/i, "<title>Locked-In Bag Break</title>");
 fs.writeFileSync(resolvedPath, html, "utf8");
 console.log(`Injected test/fullscreen bridge: ${resolvedPath}`);

@@ -304,3 +304,23 @@ User request: replace the disliked lead sprites with temporary original boxer ar
 - Added per-fighter skin palette remapping so atlas bodies, procedural punch arms, knockdown poses, and HUD portraits remain visually consistent.
 - Strict visual verdict reached `93/100` after direct inspection of desktop straight-contact, lean-block, and portrait-mobile screenshots against the generated reference.
 - Release, movement, five-move animation, combo, defense, arcade-feel, six-fighter UI, portrait/landscape mobile, full-bout restart, and 100-bout balance checks all pass with zero browser errors. Balance remains `52-48`; the source cart is `58,513` bytes and the exported cartridge is `24,096` bytes.
+
+## Gym Demolition QA Cleanup Plan
+
+- Keep `bag-check.cjs` as the locked regression baseline for contact, target weaknesses, rebound risk, destruction, and results.
+- Replace versus-mode mobile and playthrough automation with speed, heavy, and wreck-bag flows.
+- Delete obsolete opponent AI, defense, range, animation, and balance scripts instead of carrying misleading dead QA.
+- Update the release gate to verify the three target systems, original looping SFX rows, mobile bridge, and GitHub Pages workflow.
+- Rebuild from source and rerun every remaining check before release.
+
+## Gym Demolition Pivot And Pages Release
+
+- Replaced the AI rivalry bout, rounds, guards, decisions, and opponent state with three selectable arcade targets: a head-only speed bag, body-power heavy bag, and alternating-zone wreck bag.
+- Added contact-gated target damage, preferred punch distances, weak-zone multipliers, stamina scaling, combination bonuses, time scoring, cracks, tears, debris, destruction pauses, grades, and rematches.
+- Added heavy-bag return physics with one recoverable punishment window; a cooldown and stronger damping prevent repeated rebound stunlock.
+- Preserved the six fictional fighter silhouettes, authored punch poses, two-button directional move set, quick steps, feints, uppercuts, body punches, hooks, overhands, hit-stop, camera kick, and mobile controls.
+- Rebuilt audio as an original three-channel trap loop plus separate jab, power, whiff, menu, bell, rebound, and destruction effects.
+- Added a GitHub Actions Pages deployment for `dist/web` while keeping the source repository private. The hosted Pages artifact remains public when the account plan permits private-repository Pages.
+- Deleted ten opponent-only QA scripts and replaced them with target-specific release, full-playthrough, and portrait/landscape mobile checks.
+- Current focused QA passes all three target behaviors, a complete clear/rematch, browser boot, iPhone portrait touch play, landscape framing, and zero browser errors. Strict visual review is `94/100`.
+- Final native source is `6632 / 8192` tokens. Static release, browser boot, all-target behavior, full clear/rematch, portrait touch, and landscape layout checks pass with zero browser errors; physical PICO handheld hardware and subjective speaker/headphone mix remain untested.

@@ -2,12 +2,18 @@ pico-8 cartridge // http://www.pico-8.com
 version 42
 __lua__
 defs={
- {ab="ab",nm="a.b. problem",rl="counter",art=1,ed=13,tr=2,gl=13,hi=7,sk=4,hm=100,sm=100,gm=40,lk=64,spd=0,ag=1,pdw=1,dm=0,rg=.92},
- {ab="dg",nm="d. great",rl="speed",art=2,ed=11,tr=3,gl=11,hi=7,sk=4,hm=100,sm=100,gm=40,lk=56,spd=1,ag=1,pdw=0,dm=.16,rg=1.06},
- {ab="ck",nm="callout king",rl="pressure",art=2,ed=8,tr=8,gl=8,hi=10,hm=98,sm=104,gm=38,lk=55,spd=1,ag=1.03,pdw=0,dm=.1,rg=1.04},
- {ab="sg",nm="studio guest",rl="wildcard",art=1,ed=12,tr=12,gl=12,hi=6,hm=96,sm=102,gm=38,lk=53,spd=1,ag=1.02,pdw=0,dm=.08,rg=1.05},
- {ab="lc",nm="legend coach",rl="veteran",art=1,ed=10,tr=9,gl=10,hi=7,hm=103,sm=95,gm=46,lk=61,spd=0,ag=.94,pdw=1,dm=.04,rg=.96},
- {ab="tl",nm="tall lightwt",rl="outside",art=2,ed=14,tr=14,gl=14,hi=7,hm=97,sm=101,gm=39,lk=57,spd=1,ag=.98,pdw=0,dm=.07,rg=1.02}
+ {ab="ab",nm="a.b. problem",rl="power",art=1,ed=13,tr=2,gl=13,hi=7,sk=4,sm=100,spd=0,dm=0,rg=.92},
+ {ab="dg",nm="d. great",rl="speed",art=2,ed=11,tr=3,gl=11,hi=7,sk=4,sm=100,spd=1,dm=.16,rg=1.06},
+ {ab="ck",nm="callout king",rl="pressure",art=2,ed=8,tr=8,gl=8,hi=10,sk=4,sm=104,spd=1,dm=.1,rg=1.04},
+ {ab="sg",nm="studio guest",rl="wildcard",art=1,ed=12,tr=12,gl=12,hi=6,sk=4,sm=102,spd=1,dm=.08,rg=1.05},
+ {ab="lc",nm="legend coach",rl="veteran",art=1,ed=10,tr=9,gl=10,hi=7,sk=4,sm=95,spd=0,dm=.04,rg=.96},
+ {ab="tl",nm="tall lightwt",rl="outside",art=2,ed=14,tr=14,gl=14,hi=7,sk=4,sm=101,spd=1,dm=.07,rg=1.02}
+}
+
+bags={
+ {ab="speed",nm="speed bag",rl="rhythm",hp=72,tm=30,sw=1.35,wk=1,col=8},
+ {ab="heavy",nm="heavy bag",rl="power",hp=150,tm=40,sw=.72,wk=2,col=2},
+ {ab="wreck",nm="wreck bag",rl="switch",hp=220,tm=50,sw=.9,wk=0,col=5}
 }
 
 mvs={
@@ -35,13 +41,11 @@ end
 function mkb(i,sd,ai)
  local d=defs[i]
  local f={
-  id=i,ab=d.ab,sd=sd,ai=ai,
-  hm=d.hm,sm=d.sm,gm=d.gm,
-  lk=d.lk,spd=d.spd,ag=d.ag,pg=d.pdw,
-  dm=d.dm,rg=d.rg,hmul=1
+  id=i,ab=d.ab,sd=-1,sm=d.sm,
+  dm=d.dm,rg=d.rg,spd=d.spd,hmul=1
  }
- z(f,"acc,bres,brs,sh,hy,kd,pts,ct,wind,rec,atk,aln,guard,sl,cnt,stun,down,q,fe,link,vx,mv,bl,bi,bs,ca,cp,la,co,tz,rdm,rcl,rdef,rkd,chain,shake,ds,dd")
- f.hp=f.hm f.st=f.sm f.g=f.gm f.gt=9 f.bh=false
+ z(f,"acc,hy,ct,wind,rec,atk,aln,stun,q,fe,link,vx,mv,co,tz,chain,shake,ds,dd,la")
+ f.st=f.sm
  return f
 end
 
@@ -55,87 +59,57 @@ function fast_hook()
  return peek(0x5fff)==1
 end
 
-function round_len()
- return fast_hook() and 240 or 1350
-end
-
-function corner_len()
- return fast_hook() and 45 or 240
-end
-
 function title_mode()
  mode=0
  cam=0 fl=0
  p=nil
- o=nil
  rescode=0
- music(-1)
+ stop_beat()
 end
 
 function new_run()
  run_n+=1
- srand(2048+run_n*37+sel*101)
- p=mkb(sel,-1,false)
- local oi=sel==1 and 2 or sel==2 and 1 or sel%2==1 and 2 or 1
- o=mkb(oi,1,true)
- res=nil
- rescode=0
- fight_init()
+ srand(2048+run_n*37+sel*101+bag*53)
+ p=mkb(sel)
+ challenge_init()
 end
 
-function fight_init()
- mode=2
- round=1
- bell=18
- ht=0 hs=0
- tapd=0 tapt=-20 held=0 fresh=0
- set_round(1)
+function start_beat()
+ sfx(8,0) sfx(9,1) sfx(10,2)
 end
 
-function round_reset(f,x)
- f.x=x f.gt=9 f.bh=false
- z(f,"vx,mv,wind,rec,stun,sl,cnt,guard,down,atk,q,fe,link,la,co,bl,bi,bs,ca,cp,ds,dd,tz,rdm,rcl,rdef,rkd,shake")
+function stop_beat()
+ sfx(-1,0) sfx(-1,1) sfx(-1,2)
 end
 
-function set_round(n)
- round=n
- rt=round_len()
- ht=0 hs=0
- round_reset(p,42) round_reset(o,86) rng=1
- p.hy=max(p.hy,p.sh)
- o.hy=0
- bell=12
- sfx(0)
+function weak_zone()
+ return bags[bag].wk>0 and bags[bag].wk or flr(fr/75)%2+1
 end
 
-function corner_init()
+function challenge_init()
+ local d=bags[bag]
  mode=3
- ct=corner_len()
- p.st=min(p.sm,p.st+18+p.brs)
- p.g=min(p.gm,p.g+10)
- o.st=min(o.sm,o.st+16)
- o.g=min(o.gm,o.g+10)
- msg=p.hp>o.hp and "corner: stay sharp" or "corner: build clean shots"
+ bhm=d.hp bhp=bhm
+ rt=fast_hook() and 300 or d.tm*30
+ score=0 shots=0 hits=0 clear=0
+ ba=0 bv=0 bx=88 bflash=0 br=0
+ p.x=43 p.vx=0 p.mv=0 p.st=p.sm
+ z(p,"wind,rec,atk,aln,stun,q,fe,link,co,tz,chain,shake,ds,dd")
+ bell=18
+ ht=0 hs=0 cam=0 fl=0
+ tapd=0 tapt=-20 held=0 fresh=0
+ rescode=0
+ start_beat()
+ sfx(0,3)
 end
 
-function round_score()
- local ps=10
- local os=10
- local pd=p.rdm+p.rcl*2+p.rkd*18+p.rdef
- local od=o.rdm+o.rcl*2+o.rkd*18+o.rdef
- local d=pd-od
- if d>26 then os=8 elseif d>7 then os=9 elseif d<-26 then ps=8 elseif d<-7 then ps=9 end
- p.pts+=ps
- o.pts+=os
-end
-
-function finish(win,kind)
+function finish(win)
  mode=4
- res={w=win,k=kind}
- rescode=kind=="dec" and 3 or (win==1 and 1 or 2)
- grade=win==1 and (kind=="dec" and "b" or "a") or "c"
- music(-1)
- if win==1 then sfx(4) else sfx(2) end
+ rescode=win and 1 or 2
+ local par=bhm*14
+ grade=not win and "d" or score>par and "s" or score>par*.72 and "a" or "b"
+ stop_beat()
+ sfx(win and 7 or 6,3)
 end
 
 function human_ctl()
@@ -147,312 +121,125 @@ function human_ctl()
   if tapd==dp and fr-tapt<9 and p.st>=3 then p.ds=5 p.dd=dp p.st-=3 end
   tapd=dp tapt=fr
  end
- local g=0
- if btn(2) then g=1
- elseif btn(0) and btn(3) then g=2
- elseif btn(0) and o and o.wind>0 and fresh==0 and p.sl==0 then g=1
- elseif btn(3) then g=2 end
  local a=0
  if btnp(4) then a=btn(2) and 6 or btn(3) and 3 or btn(1) and 7 or 1 end
  if btnp(5) then a=btn(2) and 5 or btn(3) and 4 or btn(1) and 8 or 2 end
- return mv,g,a
-end
-
-function ai_ctl(f,e)
- local mv=0
- local g=0
- local a=0
- local read=e.atk==e.la and .22 or 0
- if e.wind>0 and rng>0 then
-  if rnd()<(.18+f.lk/180+read) then
-   g=e.aln==1 and 1 or 2
-   if rnd()<.45 then mv=-1 end
-  elseif rnd()<.35 then
-   mv=rnd()<.5 and -1 or 1
- end
- elseif f.stun<=0 and f.rec<=0 and f.wind<=0 then
-  if f.hp<30 and rng>0 then
-   g=(e.la==3 or e.la==4) and 2 or 1
-   mv=f.x>103 and 1 or -1
-  elseif f.cnt>0 and rng>0 and f.st>5 and rnd()<.7 then
-   a=rng==2 and (rnd()<.35 and 5 or 2) or 1
-  elseif f.st<20 and rnd()<.55 then
-   mv=-1
-  elseif e.x<25 and f.st>20 then
-   mv=1
-  elseif rng==0 and rnd()<.7 then
-   mv=1
-  elseif rng==2 and rnd()<.3 then
-   mv=-1
-  else
-   if rnd()>.22*f.ag then return mv,g,a end
-   local r=rnd()
-   if rng>0 and f.st>25 and rnd()<.08 then
-    a=6
-   elseif rng==0 then
-    a=r<.6 and 1 or 3
-   elseif rng==1 then
-    if r<.28 then a=1 elseif r<.52 then a=2 elseif r<.72 then a=3 else a=7 end
-   else
-    if r<.25 then a=2 elseif r<.5 then a=4 elseif r<.72 then a=5 elseif r<.88 then a=7 else a=8 end
-   end
-  end
- end
- return mv,g,a
+ return mv,a
 end
 
 function begin_atk(f,a)
  if a==6 then
-  if f==p then htxt=anm[a] ht=18 end
+  htxt=anm[a] ht=18
   if f.st<1 then return end
   f.st-=1 f.atk=6 f.aln=1 f.wind=3
   return
  end
  local co=f.link>0 and cmb[f.la*10+a]
  f.co=co and 1 or 0
- if f==p then htxt=(co and "combo " or "")..anm[a] ht=18 end
+ htxt=(co and "combo " or "")..anm[a] ht=18
  local m=mvs[a]
  local cost=m.st
  if f.st<cost then
   f.rec=5
   return
  end
- f.cp=0
- if f.cnt>0 then
-  f.cp=f.ca f.cnt=0 f.ca=0
- end
  f.st-=cost
+ shots+=1
  f.atk=a
  f.aln=m.ln
- f.guard=0 f.bl=0
  if co then
-  local e=f==p and o or p
-  f.x=clamp(f.x-f.sd*2,18,110)
-  if f.sd<0 then f.x=min(f.x,e.x-28) else f.x=max(f.x,e.x+28) end
+  f.x=min(f.x+2,bx-26)
  end
  if rng<2 then f.vx=-f.sd*(a==2 and .8 or a>3 and .55 or .4) end
  local wd=max(2,m.wd-flr(f.acc*8))
- if rng==2 and f.cp==0 and a>1 then wd+=1 end
+ if rng==2 and a>1 then wd+=1 end
  if f.fe>0 or co then wd=max(2,wd-2) end
- if f.cp>0 then
-  wd=max(2,wd-1-(f.cp==3 and 1 or 0))
-  if f==p then htxt="counter "..anm[a] ht=20 end
- end
  f.wind=wd
 end
 
-function knock(d,a)
- d.kd+=1
- a.rkd+=1
- a.hy=min(100,a.hy+18)
- d.down=75
- z(d,"wind,rec,stun,guard,sl,bl,bi,bs,cnt,ca,cp,ds,tz")
- a.wind=0 a.tz=0
- a.rec=18
- cam=7 fl=3
- sfx(4)
- if d.kd>=3 then
-  finish(a==p and 1 or 2,"tko")
- end
+function miss(t)
+ htxt=t ht=18
+ p.tz=10 p.link=0 p.la=0 p.co=0
+ sfx(3,3)
 end
 
-function hit(a,d)
- if a.atk==6 then return end
- local m=mvs[a.atk]
+function hit_bag()
+ local a=p.atk
+ local m=mvs[a]
  if not m then return end
- local gap=abs(a.x-d.x)
- if gap>rch[a.atk]+9 then
-  d.cnt=max(d.cnt,8)
-  d.ca=max(d.ca,1)
-  a.tz=18
-  a.cp=0 a.co=0 a.link=0 a.la=0
-  sfx(3)
+ local gap=bx-p.x
+ if gap>rch[a]+9 then
+  miss("out of range")
   return
  end
- if d.sl>0 and m.ln==1 then
-  d.cnt=14+d.pg
-  d.ca=2
-  a.tz=24
-  d.hy=min(100,d.hy+4)
-  d.rdef+=2
-  a.st=max(0,a.st-1)
-  a.cp=0 a.co=0 a.link=0 a.la=0
-  if d==p then htxt="slip" ht=22 end
-  sfx(3)
-  return
- end
- local need=m.ln==1 and 1 or 2
-  if d.guard==need then
-  local pg=d.gt<=2+d.pg
-  local lean=d.bl>0
-  d.bi=5
-  hs=pg and 4 or lean and 3 or 2
-  d.bh=m.ln==0
-  d.bs=pg and 1 or lean and 3 or 4+(a.atk>1 and 2 or 0)
-  d.rdef+=pg and 3 or lean and 2 or 1
-  d.g-=m.gd*(pg and .25 or lean and .6 or 1)
-  a.hy=min(100,a.hy+2)
-  if pg then
-    d.cnt=16+d.pg
-    d.ca=3
-    a.tz=30
-   d.hy=min(100,d.hy+5)
-   a.stun=3
-   cam=3 fl=2
-   d.g=min(d.gm,d.g+1)
-   if d==p then htxt="catch + shoot" ht=24 end
-   sfx(5)
-  else
-   d.hp-=(lean and .1 or .22)*m.d
-   d.cnt=max(d.cnt,lean and 9 or 6)
-   d.ca=max(d.ca,1)
-   a.tz=lean and 18 or 12
-   if d==p then htxt=lean and "lean block" or "blocked" ht=18 end
-   sfx(3)
-  end
-  a.cp=0
-  a.la=a.atk a.link=16
-  local pb=a.atk>1 and 1 or .5
-  d.x=clamp(d.x+d.sd*pb,18,110)
-  if d.g<=0 then
-   d.g=0
-   d.stun=8
-   d.cnt=0 d.ca=0 d.bl=0 d.guard=0
-  end
+ if bag==1 and m.ln==0 then
+  miss("too low")
   return
  end
  local mult=1
- local ch=d.wind>0
- local fin=a.co>0 and (a.atk==5 or a.atk==8) and a.chain>=2
- local cp=a.cp
- if ch then
-  mult+=.18
-  d.wind=0 d.atk=0
-  a.hy=min(100,a.hy+5)
-  if a==p then htxt="counter hit" ht=22 end
- end
- if cp>0 then
-  mult=1.12+cp*.09
-  a.cp=0
-  a.hy=min(100,a.hy+cp*3)
-  if a.id==1 and a.hy>=100 then
-   mult=1.35
-   a.hy=0
-  end
- end
- if a.fe>0 then mult+=.15 a.fe=0 end
- if a.co>0 then mult+=.1 end
+ local fin=p.co>0 and (a==5 or a==8) and p.chain>=2
+ local sweet=m.ln==weak_zone()
+ if p.fe>0 then mult+=.15 p.fe=0 end
+ if p.co>0 then mult+=.1 end
  if fin then mult+=.18 end
- mult*=max(.6,1-abs(gap-opt[a.atk])*.07)
- if d.x<25 or d.x>103 then mult+=.12 end
- mult*=.8+.2*a.st/a.sm
- a.hy=min(100,a.hy+m.hy*a.hmul)
- if a.chain>=2 and fr-a.ct<40 and a.hy>=100 then mult+=.2 a.hy=0 end
- local dmg=(m.d*(1+a.dm))*mult
- local gdm=m.sk
- if m.ln==0 then
-  dmg*=1-d.bres
-  d.st=max(0,d.st-gdm)
- end
- d.hp-=dmg
- d.stun=m.re+2+cp+(fin and 3 or 0)+(ch and 2 or 0)
- a.rcl+=1
- a.rdm+=dmg
- if fr-a.ct<40 then a.chain+=1 else a.chain=1 end
- a.ct=fr
- a.la=a.atk
- a.link=(a.atk==5 or a.atk==8) and 0 or 20
- d.shake=(fin and 7 or 3)+cp
- hs=fin and 7 or 3+(a.atk>1 and 2 or 0)+(cp>1 and 1 or 0)
- cam=fin and 7 or a.atk>1 and 4 or 2
- fl=fin and 3 or a.atk>1 and 2 or 0
- if fin and a==p then htxt="combo finish" ht=24 end
- d.bh=m.ln==0
- local pb=(a.atk==1 or a.atk==3) and 1 or (a.atk==5 or a.atk==8) and 6 or 4
- if a.co>0 then pb=max(1,pb-2) end
- d.x=clamp(d.x+d.sd*(fin and 8 or pb),18,110)
- if a.atk>1 and a.co==0 then a.x=clamp(a.x+a.sd,18,110) end
- sfx(a.atk>=2 and 2 or 1)
- if d.hp<=0 or (a.atk>=2 and d.hp<14 and d.kd<2) then
-  knock(d,a)
+ mult*=sweet and 1.3 or .78
+ mult*=max(.55,1-abs(gap-opt[a])*.07)
+ mult*=.8+.2*p.st/p.sm
+ local dmg=m.d*(1+p.dm)*mult
+ bhp=max(0,bhp-dmg)
+ hits+=1
+ if fr-p.ct<40 then p.chain+=1 else p.chain=1 end
+ p.ct=fr p.la=a
+ p.link=(a==5 or a==8) and 0 or 20
+ p.hy=min(100,p.hy+m.hy)
+ score+=flr(dmg*12)+p.chain*8
+ bv+=(m.d*.04+.28)*bags[bag].sw
+ bflash=6 hs=fin and 7 or a>1 and 5 or 3
+ cam=fin and 8 or a>1 and 4 or 2
+ fl=fin and 3 or a>1 and 2 or 1
+ htxt=fin and "demolition combo!" or sweet and "sweet spot!" or "glancing"
+ ht=22
+ sfx(a>1 and 2 or 1,3)
+ if bhp<=0 then
+  clear=45 score+=flr(rt/3)
+  p.link=0 p.vx=-2
  end
 end
 
-function step_box(f,e,mv,g,a)
- if f.fe>0 then f.fe-=1 end
- if f.link>0 then f.link-=1 end
- if f.sl>0 then f.sl-=1 end
- if f.cnt>0 then
-  f.cnt-=1
-  if f.cnt==0 then f.ca=0 end
- end
- if f.shake>0 then f.shake-=1 end
- if f.bs>0 then
-  a=0
-  if f.bi<5 then f.bs-=1 end
- end
- if f.bi>0 then f.bi-=1 end
- if f.down>0 then
-  f.down-=1
-  if f.down==0 then
-   f.hp=max(10,14-f.kd)
-   f.st=max(18,f.st)
-   f.g=max(12,f.g)
-   p.x=42 o.x=86 p.vx=0 o.vx=0 p.mv=0 o.mv=0 rng=1
-  end
-  return mv
- end
- if f.tz>0 and f.tz%2==1 then
-  if a>0 then f.q=a end
+function step_box(mv,a)
+ if p.fe>0 then p.fe-=1 end
+ if p.link>0 then p.link-=1 end
+ if p.shake>0 then p.shake-=1 end
+ if p.tz>0 and p.tz%2==1 then
+  if a>0 then p.q=a end
   return 0
  end
- local ng=f.wind+f.rec+f.stun>0 and 0 or g
- if ng~=f.guard then
-  f.guard=ng
-  f.gt=0
- else
-  f.gt=min(9,f.gt+1)
- end
- f.bl=f.guard>0 and mv==f.sd and 1 or 0
- if f.stun>0 then
-  f.stun-=1
-  f.guard=0
-  f.bl=0
+ if p.stun>0 then
+  p.stun-=1
   return mv
  end
- if f.rec>0 then
-  f.rec-=1
-  if a>0 and f.rec<=5 then f.q=a end
+ if p.rec>0 then
+  p.rec-=1
+  if a>0 and p.rec<=5 then p.q=a end
  else
-  if f.q>0 then a=f.q f.q=0 end
-  if a>0 and f.wind<=0 then begin_atk(f,a) end
+  if p.q>0 then a=p.q p.q=0 end
+  if a>0 and p.wind<=0 then begin_atk(p,a) end
  end
- if f.wind>0 then
-  f.wind-=1
-  if f.wind==0 then
-   if f.atk==6 then
-    f.fe=20 f.rec=2 sfx(5)
+ if p.wind>0 then
+  p.wind-=1
+  if p.wind==0 then
+   if p.atk==6 then
+    p.fe=20 p.rec=2 sfx(5,3)
    else
-    hit(f,e)
-    local rec=mvs[f.atk].re
-    f.rec=max(3,rec-(f.co>0 and 2 or f.chain>1 and 1 or 0))
+    hit_bag()
+    local rec=mvs[p.atk].re
+    p.rec=max(3,rec-(p.co>0 and 2 or p.chain>1 and 1 or 0))
    end
   end
  end
- if e.wind>0 and fresh~=0 and f==p and f.guard==0 and rng>0 then
-  f.sl=8 mv=0
-  htxt="dodge" ht=18
- end
- if f.ai and e.wind>0 and f.guard==0 and (bal or peek(0x5ff6)==0) and rnd()<.08 then
-  f.sl=5
- end
- local regen=.22
+ local regen=.25
  if rng==0 then regen+=.18 end
- if f.guard>0 then regen+=.12 end
- regen*=f.rg
- if f.x<25 or f.x>103 then regen*=.75 end
- f.st=min(f.sm,f.st+regen)
- f.g=min(f.gm,f.g+.05+(f.guard>0 and .12 or .03))
+ p.st=min(p.sm,p.st+regen*p.rg)
  return mv
 end
 
@@ -478,82 +265,68 @@ function fight_tick()
  if fl>0 then fl-=1 end
  if bell>0 then bell-=1 end
  if ht>0 then ht-=1 end
- if p.down>0 or o.down>0 then
-  step_box(p,o,0,0,0)
-  step_box(o,p,0,0,0)
+ if bflash>0 then bflash-=1 end
+ if br>0 then br-=1 end
+ if clear>0 then
+  clear-=1
+  ba+=bv bv*=.9
+  if clear==0 then finish(true) end
   return
  end
  fr+=1
  if p.tz>0 then p.tz-=1 end
- if o.tz>0 then o.tz-=1 end
- local pm,pg,pa=human_ctl()
+ local pm,pa=human_ctl()
  if hs>0 then
   if pa>0 then p.q=pa end
   hs-=1
   return
  end
- rt-=1
- local om,og,oa=ai_ctl(o,p)
- if not bal and peek(0x5ff6)==1 then om=0 og=0 oa=0 end
- local ta=peek(0x5ff5)
- if not bal and ta>0 and o.wind+o.rec==0 then oa=ta poke(0x5ff5,0) end
- local ow=-om
- move_box(p,pg>0 and pm==p.sd and 0 or pm,18,o.x-28)
- move_box(o,og>0 and ow==o.sd and 0 or ow,p.x+28,110)
- rng=o.x-p.x>48 and 0 or o.x-p.x>34 and 1 or 2
- step_box(p,o,pm,pg,pa)
- step_box(o,p,ow,og,oa)
- if rt<=0 then
-  round_score()
-  if round>=3 then
-   if p.pts>o.pts then finish(1,"dec")
-   elseif p.pts<o.pts then finish(2,"dec")
-   else
-    if p.hp>=o.hp then finish(1,"dec") else finish(2,"dec") end
-   end
-  else
-   corner_init()
-  end
+ if peek(0x5fff)!=2 then rt-=1 end
+ bv-=ba*.045 bv*=.965
+ ba=clamp(ba+bv,-9,12) bx=88+ba
+ move_box(p,pm,18,bx-26)
+ rng=bx-p.x>48 and 0 or bx-p.x>34 and 1 or 2
+ step_box(pm,pa)
+ if bag>1 and br==0 and bv<-.32 and bx-p.x<39 and p.stun==0 then
+  p.stun=6 p.st=max(0,p.st-7) p.x=max(18,p.x-4)
+  score=max(0,score-50) bv=abs(bv)*.35 br=18
+  htxt="return hit!" ht=22 cam=4
+  sfx(6,3)
  end
- if p.hp<=0 and mode~=4 then finish(2,"ko") end
- if o.hp<=0 and mode~=4 then finish(1,"ko") end
+ if rt<=0 then finish(false) end
 end
 
 function upd_title()
- if btnp(4) then mode=1 sfx(5) end
+ if btnp(4) then mode=1 sfx(5,3) end
 end
 
 function upd_select()
- if btnp(0) then sel=sel==1 and #defs or sel-1 sfx(5) end
- if btnp(1) then sel=sel==#defs and 1 or sel+1 sfx(5) end
- if btnp(4) then new_run() sfx(5) end
+ if btnp(0) then sel=sel==1 and #defs or sel-1 sfx(5,3) end
+ if btnp(1) then sel=sel==#defs and 1 or sel+1 sfx(5,3) end
+ if btnp(4) then mode=2 sfx(5,3) end
  if btnp(5) then title_mode() end
 end
 
-function upd_corner()
- ct-=1
- if ct<=0 then
-  set_round(round+1)
-  mode=2
- end
+function upd_bags()
+ if btnp(0) then bag=bag==1 and #bags or bag-1 sfx(5,3) end
+ if btnp(1) then bag=bag==#bags and 1 or bag+1 sfx(5,3) end
+ if btnp(4) then new_run() end
+ if btnp(5) then mode=1 end
 end
 
 function upd_result()
  if btnp(4) then new_run() end
- if btnp(5) then title_mode() end
+ if btnp(5) then mode=2 stop_beat() end
 end
 
 function gpio()
  local q={
-  mode,round or 0,
-  p and flr(clamp(p.hp,0,100)) or 0,o and flr(clamp(o.hp,0,100)) or 0,
-  rescode or 0,sel or 0,
-  p and p.atk or 0,p and p.wind or 0,p and p.rec or 0,p and p.sl or 0,p and p.fe or 0,
-  o and o.atk or 0,o and o.wind or 0,p and p.mv+1 or 1,o and o.mv+1 or 1,
-  p and flr(p.x) or 0,o and flr(o.x) or 0,p and p.guard or 0,p and p.gt or 0,
-  p and p.bl or 0,p and p.bi or 0,p and (p.ca==3 and 3 or p.bl>0 and 2 or p.bi>0 and 1 or 0) or 0,p and p.cnt or 0,p and p.ca or 0,
-  p and p.cp or 0,p and flr(p.g) or 0,p and p.bs or 0,o and o.rec or 0,p and p.stun or 0,hs or 0,p and p.ds or 0,
-  p and p.co or 0,p and p.chain or 0,p and p.id or 0,o and o.id or 0,p and p.tz or 0,o and o.tz or 0
+  mode,sel or 0,bag or 0,
+  p and flr(p.st) or 0,bhp and flr(bhp) or 0,bhm or 0,rescode or 0,
+  p and p.atk or 0,p and p.wind or 0,p and p.rec or 0,p and p.fe or 0,
+  p and p.mv+1 or 1,p and flr(p.x) or 0,flr(bx or 0),p and p.chain or 0,
+  score or 0,rt or 0,mode==3 and weak_zone() or 0,shots or 0,hits or 0,clear or 0,
+  hs or 0,p and p.ds or 0,p and p.stun or 0,p and p.co or 0,p and p.tz or 0
  }
  for i=1,#q do poke(0x5f7f+i,q[i]) end
 end
@@ -561,6 +334,7 @@ end
 function _init()
  run_n=0
  sel=1
+ bag=1
  fr=0
  title_mode()
 end
@@ -569,8 +343,8 @@ function _update()
  gpio()
  if mode==0 then upd_title()
  elseif mode==1 then upd_select()
- elseif mode==2 then fight_tick()
- elseif mode==3 then upd_corner()
+ elseif mode==2 then upd_bags()
+ elseif mode==3 then fight_tick()
  elseif mode==4 then upd_result() end
 end
 
@@ -586,54 +360,44 @@ end
 
 function ring_bg()
  cls(0)
- rectfill(0,20,127,80,1)
- for y=24,76,8 do line(0,y,127,y,5) end
- for x=5,124,13 do line(x,20,x,48,5) end
- rectfill(39,21,88,76,0)
- rect(38,20,89,77,5)
- for x=44,84,8 do line(x,23,x,74,1) end
- line(63,21,63,76,5)
- rectfill(8,22,21,47,0)
- rectfill(10,25,19,44,8)
- rectfill(108,22,120,47,0)
- rectfill(110,25,118,44,4)
- for x=12,116,52 do
-  line(x,20,x,27,5)
-  circfill(x,29,3,7)
-  line(x-7,32,x+7,32,6)
+ rectfill(0,20,127,73,1)
+ for y=24,68,8 do line(0,y,127,y,5) end
+ for x=4,124,12 do line(x,20,x,46,5) end
+ rectfill(34,21,94,72,0)
+ rect(33,20,95,73,5)
+ for x=40,90,10 do line(x,22,x,71,1) end
+ for x=13,115,51 do
+  line(x,20,x,28,5)
+  circfill(x,30,3,7)
+  line(x-7,33,x+7,33,6)
  end
- for row=0,2 do
+ rectfill(8,24,20,47,0) rectfill(10,27,18,45,8)
+ rectfill(108,24,120,47,0) rectfill(110,27,118,45,4)
+ for row=0,1 do
   for i=0,15 do
-   local x=-2+i*9+(row%2)*4
-   local y=52+row*7-(i%3)
+   local x=-2+i*9+row*4
+   local y=55+row*8-(i%3)
    local sk=(i+row)%3==0 and 4 or (i+row)%3==1 and 9 or 15
    circfill(x,y,2,sk)
-   rectfill(x-3,y+2,x+3,y+6,row==0 and 1 or 5)
-   if (i+row)%5==0 then pset(x+2,y-3,7) end
+   rectfill(x-3,y+2,x+3,y+7,row==0 and 1 or 5)
+   if (i+row)%4==0 then pset(x+2,y-3,7) end
   end
  end
- rectfill(0,79,127,108,5)
- for y=82,106,6 do line(0,y,127,y,6) end
- for x=8,120,16 do line(64,79,x,108,6) end
- rectfill(2,48,6,105,0)
- rectfill(3,49,5,104,7)
- rectfill(121,48,125,105,0)
- rectfill(122,49,124,104,7)
- for j=0,2 do
-  local y=56+j*12
-  line(4,y,123,y,0)
-  line(5,y,122,y,j==0 and 8 or j==1 and 7 or 12)
- end
- circ(64,94,8,6)
- line(56,94,72,94,6)
- line(64,86,64,102,6)
+ rectfill(0,74,127,110,5)
+ line(0,76,127,76,6)
+ for y=82,106,8 do line(0,y,127,y,6) end
+ for x=4,124,15 do line(64,74,x,110,6) end
+ rectfill(0,69,127,73,0)
+ for x=0,127,16 do line(x,73,x+8,69,10) end
+ circ(30,94,7,6) circ(30,94,4,6)
+ line(23,94,37,94,6) line(30,87,30,101,6)
 end
 
 function ring_front()
- line(0,105,127,105,0)
- rectfill(0,106,127,108,1)
- line(0,106,127,106,7)
- line(0,108,127,108,5)
+ line(0,109,127,109,0)
+ rectfill(0,110,127,114,1)
+ line(0,110,127,110,7)
+ for x=0,127,12 do line(x,114,x+6,110,10) end
 end
 
 function portrait(id,x,y,flip)
@@ -812,6 +576,67 @@ function draw_boxer(id,x,y,dir,guard,wind,rec,atk,down,sl,shake,mv,stun,bl,bi,ds
  draw_glove(g2x,g2y,r2,glove,ghi,dir)
 end
 
+function bag_icon(k,x,y)
+ line(x,y-9,x,y-5,6)
+ if k==1 then
+  line(x-6,y-6,x+6,y-6,5)
+  circfill(x,y,5,0) circfill(x,y,4,8)
+  line(x-2,y-2,x+2,y-2,10)
+ else
+  local w=k==3 and 7 or 6
+  rectfill(x-w-1,y-5,x+w+1,y+9,0)
+  rectfill(x-w,y-4,x+w,y+8,bags[k].col)
+  line(x-w,y-2,x+w,y-2,10)
+  line(x-w+2,y+6,x+w-2,y+6,6)
+ end
+end
+
+function draw_bag()
+ local x=flr(bx)
+ if clear>0 then
+  line(88,20,88,29,6)
+  for i=0,8 do
+   local dx=(i*17+clear*2)%38-19
+   local dy=52+(i*11+45-clear)%45
+   rectfill(x+dx,dy,x+dx+2,dy+2,i%2==0 and bags[bag].col or 7)
+  end
+  circ(x,70,18-clear%5,10)
+  return
+ end
+ line(88,20,x,31,0) line(89,20,x+1,31,6)
+ local ratio=bhp/bhm
+ if bag==1 then
+  line(x-8,32,x+8,32,0) line(x-7,31,x+7,31,6)
+  line(x,32,x,47,6)
+  circfill(x,53,7,0) circfill(x,53,6,bflash>0 and 10 or 8)
+  line(x-3,50,x+3,50,10)
+  if ratio<.45 then line(x-4,55,x+2,51,0) end
+ else
+  local w=bag==3 and 11 or 9
+  local bot=bag==3 and 96 or 91
+  rectfill(x-w-2,30,x+w+2,bot+2,0)
+  rectfill(x-w,32,x+w,bot,bflash>0 and 10 or bags[bag].col)
+  line(x-w+2,35,x+w-2,35,7)
+  line(x-w,61,x+w,61,0)
+  line(x-w+1,63,x+w-1,63,6)
+  line(x-w+2,bot-5,x+w-2,bot-5,7)
+  if ratio<.7 then
+   line(x-5,44,x+1,51,0) line(x+1,51,x-3,58,0)
+   rectfill(x+w-2,67,x+w+1,73,0)
+  end
+  if ratio<.35 then
+   circfill(x-2,78,5,0)
+   line(x-7,bot,x-3,bot+5,7) line(x+4,bot,x+8,bot+4,7)
+  end
+ end
+ local ty=weak_zone()==1 and 53 or 78
+ if fr%12<7 then circ(x,ty,bag==1 and 9 or 13,10) end
+ if bflash>0 then
+  circ(x,weak_zone()==1 and 53 or 78,16,7)
+  line(x-18,65,x-12,65,7) line(x+12,65,x+18,65,7)
+ end
+end
+
 function draw_f(f)
  if f.ds>0 then
   line(f.x-f.dd*18,83,f.x-f.dd*8,83,5)
@@ -820,17 +645,8 @@ function draw_f(f)
   line(f.x-f.dd*11,106,f.x-f.dd*5,106,5)
   circfill(f.x-f.dd*12,105,1,7)
  end
- local inside=p and o and abs(p.x-o.x)<30
- draw_boxer(f.id,f.x,105,-f.sd,f.guard,f.wind,f.rec,f.atk,f.down,f.sl,f.shake,f.mv,f.stun,f.bl,f.bi,f.ds,inside)
- if f.shake>0 then
-  local sx=f.x-f.sd*8
-  local sy=105-(f.bh and 28 or 42)
-  circfill(sx,sy,2,7) circ(sx,sy,4,10)
-  line(sx-7,sy,sx-3,sy,7) line(sx+3,sy,sx+7,sy,7)
-  line(sx,sy-7,sx,sy-3,7) line(sx,sy+3,sx,sy+7,7)
-  pset(sx-5,sy-4,10) pset(sx+5,sy+4,10)
- end
- if f.bi>0 then circ(f.x-f.sd*10,105-(f.bh and 28 or 40),3,f.ca==3 and 10 or 7) end
+ local inside=bx-f.x<30
+ draw_boxer(f.id,f.x,105,-f.sd,0,f.wind,f.rec,f.atk,0,0,f.shake,f.mv,f.stun,0,0,f.ds,inside)
 end
 
 function hud()
@@ -838,30 +654,32 @@ function hud()
  line(0,20,127,20,5)
  if not p then return end
  portrait(p.id,0,1)
- portrait(o.id,110,1,true)
+ panel(110,1,127,18,bags[bag].col,1)
+ bag_icon(bag,119,9)
  print(p.ab,18,1,defs[p.id].ed)
- print(o.ab,100,1,defs[o.id].ed)
- meter(18,6,36,p.hp,p.hm,8,false)
- meter(73,6,36,o.hp,o.hm,8,true)
- meter(18,12,36,p.st,p.sm,12,false)
- meter(73,12,36,o.st,o.sm,12,true)
- meter(18,17,36,p.g,p.gm,10,false)
- meter(73,17,36,o.g,o.gm,10,true)
+ print(bags[bag].ab,88,1,bags[bag].col)
+ meter(18,7,36,p.st,p.sm,12,false)
+ meter(73,7,36,bhp,bhm,8,true)
+ meter(18,13,36,p.hy,100,10,false)
+ print(score,75,14,10)
  panel(56,1,71,19,10,1)
- print("r"..(round or 0),60,3,10)
  local sec=max(0,flr((rt or 0)/30))
- print(sec<10 and "0"..sec or sec,60,11,7)
+ print(sec<10 and "0"..sec or sec,60,7,7)
+ print("sec",58,14,6)
 end
 
 function draw_title()
  ring_bg()
- draw_boxer(1,33,105,1,1,0,0,0,0,0,0)
- draw_boxer(2,94,105,-1,1,0,0,0,0,0,0)
+ draw_boxer(1,35,105,1,0,0,0,0,0,0,0)
+ local ob,ox,oh,om,oc,of=bag,bx,bhp,bhm,clear,bflash
+ bag=2 bx=93 bhp=100 bhm=150 clear=0 bflash=0
+ draw_bag()
+ bag=ob bx=ox bhp=oh bhm=om clear=oc bflash=of
  ring_front()
- panel(13,4,114,48,2,0)
- rectfill(17,7,110,9,8)
- btxt("locked-in",46,14,7)
- btxt("ring",56,23,10)
+ rectfill(0,0,127,19,0)
+ rectfill(9,2,118,4,8)
+ btxt("locked-in bag break",27,7,10)
+ print("gym demolition",39,14,6)
  btxt("press o",50,118,7)
 end
 
@@ -882,8 +700,27 @@ function draw_select()
  panel(11,89,116,110,d.ed,0)
  btxt(d.nm,64-#d.nm*2,92,d.ed)
  print("fwd+o hook fwd+x overhand",10,101,10)
- print("up guard down/back body",18,113,6)
- print("left/right select o fight x back",0,121,7)
+ print("up feint/upper down body",18,113,6)
+ print("left/right select o bags x back",0,121,7)
+end
+
+function draw_bags()
+ ring_bg()
+ btxt("choose target",38,4,7)
+ for i=1,#bags do
+  local d=bags[i]
+  local x=2+(i-1)*42
+  panel(x,27,x+39,83,bag==i and 10 or d.col,0)
+  bag_icon(i,x+20,48)
+  print(d.ab,x+20-#d.ab*2,63,d.col)
+  print(d.rl,x+20-#d.rl*2,70,bag==i and 10 or 7)
+  print(d.tm.." sec",x+8,77,6)
+ end
+ local d=bags[bag]
+ panel(12,89,115,109,d.col,0)
+ btxt(d.nm,64-#d.nm*2,93,d.col)
+ print("hit the flashing zone",24,102,10)
+ print("left/right select o start x back",0,119,7)
 end
 
 function draw_fight()
@@ -891,8 +728,8 @@ function draw_fight()
  local cy=cam>4 and (flr(cam/2)%2*2-1) or 0
  camera(cx,cy)
  ring_bg()
+ draw_bag()
  draw_f(p)
- draw_f(o)
  ring_front()
  camera()
  if fl>0 then
@@ -902,46 +739,34 @@ function draw_fight()
   if fl>1 then line(0,fy+58,127,fy+58,6) end
  end
  hud()
- if bell>0 then panel(49,43,78,55,10,0) btxt("fight!",52,47,10) end
- if p.cnt>0 then btxt(p.ca==3 and "perfect return!" or "counter!",6,27,10)
- elseif p.bl>0 then btxt("lean block",8,27,6) end
+ if bell>0 then panel(43,43,84,55,10,0) btxt("break it!",47,47,10) end
+ if ht==0 then btxt(weak_zone()==1 and "high target" or "body target",4,24,10) end
  if p.chain>1 and fr-p.ct<30 then btxt(p.chain.." hit",95,27,10) end
- if p.g<=0 and p.stun>0 then btxt("guard break",39,34,8) end
  if ht>0 then btxt(htxt,64-#htxt*2,24,10) end
-end
-
-function draw_corner()
- ring_bg()
- draw_f(p)
- draw_f(o)
- ring_front()
- hud()
- panel(16,43,111,84,7,0)
- btxt("corner break",38,49,11)
- print(msg,22,63,7)
- print("round "..(round+1).." coming",33,74,6)
+ if clear>0 then btxt("destroyed!",46,53,10) end
 end
 
 function draw_result()
  ring_bg()
  ring_front()
- local win=res.w==1
- panel(9,27,118,76,win and 11 or 8,0)
- portrait(res.w==1 and p.id or o.id,15,33,res.w~=1)
- btxt(win and "you win" or "you lose",42,32,win and 11 or 8)
- print("method "..res.k,43,43,7)
- btxt("grade "..grade,44,53,10)
- if res.k=="dec" then print("score "..p.pts.."-"..o.pts,43,64,6)
- else print("round "..round,43,64,6) end
- print("o rematch   x title",25,111,7)
+ draw_boxer(p.id,31,105,1,0,0,0,0,0,0,0)
+ local win=rescode==1
+ panel(24,27,119,83,win and 11 or 8,0)
+ btxt(win and "bag cleared" or "time up",42,32,win and 11 or 8)
+ print(bags[bag].nm,46,44,bags[bag].col)
+ btxt("grade "..grade,49,54,10)
+ print("score "..score,46,65,7)
+ local acc=flr(100*hits/max(1,shots))
+ print("accuracy "..acc.."%",42,74,6)
+ print("o retry   x targets",29,116,7)
 end
 
 function _draw()
  gpio()
  if mode==0 then draw_title()
  elseif mode==1 then draw_select()
- elseif mode==2 then draw_fight()
- elseif mode==3 then draw_corner()
+ elseif mode==2 then draw_bags()
+ elseif mode==3 then draw_fight()
  elseif mode==4 then draw_result() end
 end
 __gfx__
@@ -1076,12 +901,17 @@ eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
 __gff__
 __map__
 __sfx__
-000800000000000000000000000000000000000000000000183701c37020360223600000000000000000000000000000000000000000000000000000000000000000000
-000600000867006660466500000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-000600000867006750566400366300000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-000400000447000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-000a00002047024370264702a770000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-000600001c47020470184700000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00060000245700000028560000002c555000003053500000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+000300000c67308053046350000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+000400001067308273046550000014635000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00020000266311c645126250000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+000300002467318663106550000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00030000243502b345000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+000400000a67306263000000e64500000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+000300001267308273246730c663000001c6650000008655000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00080020086730000000000000000000000000000000000020665000000000000000096630000000000000000867300000000000000000000000000b663000002067500000000000000000000000000000000000
+000800202d635000002d625000002d635000002d625000002d635000002d625000002d6350000030635326252d635000002d625000002d635000002d625000002d635000002d625000002d635000003063534625
+000800200c2510c2500c2500c250000000000000000000000a2510a2500a2500a250000000000000000000000f2510f2500f2500f250000000000000000000000825108250082500825000000000000000000000
 __music__
 __label__
 11111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111
