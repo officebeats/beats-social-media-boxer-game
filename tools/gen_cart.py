@@ -667,127 +667,42 @@ function find_pow(g)
  return rects,seen
 end
 
+-- SF-style chibi sprites from sheet (20x28 frames)
+-- broner y0: idle idle2 jab punch upper hit; super 0,28
+-- deen y56: same layout; super 0,84
+function pose_xy(fid,anim,af)
+ local row=fid==1 and 0 or 56
+ local frame=0
+ if anim=="idle" then
+  frame=flr(t()/16)%2
+ elseif anim=="jab" or anim=="flinch" then frame=2
+ elseif anim=="cross" or anim=="parry" then frame=3
+ elseif anim=="upper" then frame=4
+ elseif anim=="hit" or anim=="stumble" or anim=="crumple" then frame=5
+ elseif anim=="special" or anim=="super" or anim=="finisher" then
+  return 0,row+28
+ end
+ if anim=="jab" and af and af>=3 and af<6 then frame=3 end
+ if anim=="cross" and af and af>=4 and af<8 then frame=3 end
+ if (anim=="special" or anim=="super") and af and af>=8 then
+  return 0,row+28
+ end
+ return (frame%6)*20,row+flr(frame/6)*28
+end
+
 function dchibi(fid,x,y,b)
- local f=fighters[fid]
  local anim=b and b.anim or "idle"
  local af=b and b.af or 0
  local face=b and b.face or 1
- local bob=flr(t()/14)%2
- local sk,gl,tr,sh=f.sk,f.gl,f.tr,f.sh
- local gold=f.style==0
- local phase,punch,crouch,lean=0,0,0,0
- if anim=="jab" then
-  if af<3 then phase=1 punch=face*2
-  elseif af<6 then phase=2 punch=face*7
-  else phase=3 punch=face*3 end
- elseif anim=="cross" then
-  if af<4 then phase=1 punch=face*3 lean=face
-  elseif af<8 then phase=2 punch=face*10 lean=face*2
-  else phase=3 punch=face*4 end
- elseif anim=="upper" then
-  if af<4 then phase=1 punch=face*2 crouch=2
-  elseif af<10 then phase=2 punch=face*6 crouch=-4
-  else phase=3 punch=face*2 end
- elseif anim=="special" then
-  if af<5 then phase=1 punch=face*4 lean=face*2
-  elseif af<12 then phase=2 punch=face*12 lean=face*3
-  else phase=3 punch=face*5 end
- elseif anim=="super" then
-  if af<8 then phase=1 punch=-face*2
-  elseif af<16 then phase=2 punch=face*14 lean=face*4
-  else phase=3 punch=face*6 end
- elseif anim=="parry" then
-  phase=2 punch=face*4 lean=-face
- elseif anim=="flinch" then
-  lean=-face*2 punch=-face
- elseif anim=="hit" then
-  lean=-face*3 punch=-face*2
- elseif anim=="stumble" then
-  lean=-face*4 crouch=2
- elseif anim=="crumple" then
-  crouch=8 lean=-face*2
- end
- local yy=y+crouch
- circfill(x+7,yy+31,7,0)
- rectfill(x+2+lean,yy+27,x+7+lean,yy+31,sh)
- rectfill(x+10+lean,yy+26,x+15+lean,yy+31,sh)
- rectfill(x+3+lean,yy+19,x+7+lean,yy+27,tr)
- rectfill(x+10+lean,yy+18,x+14+lean,yy+26,tr)
- rectfill(x+2+lean,yy+14,x+15+lean,yy+20,tr)
- if gold then
-  line(x+3+lean,yy+15,x+14+lean,yy+15,10)
-  line(x+3+lean,yy+19,x+14+lean,yy+19,10)
- else
-  rectfill(x+7+lean,yy+14,x+10+lean,yy+20,0)
-  line(x+3+lean,yy+15,x+14+lean,yy+15,8)
- end
- rectfill(x+4+lean,yy+10,x+13+lean,yy+16,sk)
- if gold then
-  for i=0,2 do circ(x+8+lean,yy+12+i,3+i,10) end
-  pset(x+8+lean,yy+16,9)
- else
-  line(x+5+lean,yy+12,x+12+lean,yy+12,9)
-  pset(x+8+lean,yy+13,10)
- end
- local gx1=x+1+punch
- local gx2=x+14+flr(punch/2)
- local gy=yy+12+bob
- if phase==1 then gy+=1 end
- circfill(gx1,gy,5,gl)
- circfill(gx1,gy,4,gold and 14 or 8)
- circfill(gx1,gy,2,7)
- circfill(gx2,gy+1,5,gl)
- circfill(gx2,gy+1,4,gold and 14 or 8)
- circfill(gx2,gy+1,2,7)
- if phase==2 and (anim=="special" or anim=="super" or anim=="cross") then
-  for i=0,3 do
-   line(gx1-face*(4+i*2),gy-1+i%2,gx1-face*2,gy,gold and 10 or 8)
+ local sx,sy=pose_xy(fid,anim,af)
+ local flip=face<0
+ sspr(sx,sy,20,28,x-2,y-2,24,32,flip)
+ if b and b.atier and b.atier>=3 and anim!="idle" and anim!="hit" and anim!="flinch" and anim!="crumple" and anim!="stumble" then
+  if af and af>=4 and af<=12 then
+   local ix=face>0 and x+20 or x
+   circfill(ix,y+16,2+b.atier%2,7)
+   pset(ix,y+16,10)
   end
- end
- rectfill(x+6+lean,yy+8,x+11+lean,yy+11,sk)
- local hx,hy=x+8+lean,yy+4+bob
- if anim=="hit" or anim=="stumble" then hy+=1 hx+=-face end
- circfill(hx,hy,8,0)
- circfill(hx,hy,7,sk)
- if gold then
-  circfill(hx,hy-3,6,0)
-  rectfill(hx-5,hy-1,hx+5,hy+3,sk)
-  line(hx-7,hy,hx-7,hy+3,5)
-  line(hx+7,hy,hx+7,hy+3,5)
-  line(hx-4,hy-1,hx-1,hy-2,0)
-  line(hx+1,hy-2,hx+4,hy-1,0)
-  if anim!="hit" and anim!="crumple" then line(hx-1,hy+3,hx+4,hy+2,8) end
-  pset(hx-7,hy+1,10) pset(hx+7,hy+1,10)
- else
-  for i=-3,3 do
-   line(hx+i*2,hy-4,hx+i*2,hy-8-(abs(i)%2),0)
-  end
-  circfill(hx,hy-3,5,0)
-  line(hx-5,hy-1,hx-1,hy-3,0)
-  line(hx+1,hy-3,hx+5,hy-1,0)
-  if phase==2 and anim!="flinch" then
-   rectfill(hx-3,hy+2,hx+3,hy+4,0)
-   line(hx-2,hy+3,hx+2,hy+3,7)
-  else
-   line(hx-2,hy+3,hx+3,hy+3,0)
-  end
- end
- if anim=="hit" or anim=="crumple" or anim=="stumble" then
-  print("x",hx-4,hy,8)
-  print("x",hx+1,hy,8)
- elseif anim=="flinch" then
-  line(hx-4,hy+1,hx-1,hy,0)
-  line(hx+1,hy,hx+4,hy+1,0)
- else
-  rectfill(hx-4,hy,hx-1,hy+2,7)
-  rectfill(hx+1,hy,hx+4,hy+2,7)
-  pset(hx-3+(face>0 and 1 or 0),hy+1,0)
-  pset(hx+2+(face>0 and 1 or 0),hy+1,0)
- end
- if phase==2 and b and b.atier and b.atier>=3 then
-  local ix=face>0 and gx1+6 or gx1-6
-  circfill(ix,gy,2+b.atier%3,7)
-  pset(ix,gy,10)
  end
 end
 
@@ -1147,7 +1062,8 @@ def main():
         "00 01030000",
         "02 01030000",
     ] + ["00 40414243"] * 58
-    gfx = ("0" * 128 + "\n") * 128
+    from gen_sprites import build_sheet, sheet_to_gfx
+    gfx = sheet_to_gfx(build_sheet())
     gff = "0" * 256 + "\n"
     mmap = "0" * 256 + "\n"
     cart = (
