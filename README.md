@@ -9,6 +9,8 @@ energy, themed around **Gold Problem** vs **Great Crashout**.
 > This replaces the earlier “Locked-In Boxing” bag/versus prototype in this
 > repo. That gameplay and art are gone on purpose.
 
+## Latest release: **v1.0.0** (Ring Rush Puzzle Fighters)
+
 ## Play
 
 | Where | URL |

@@ -1,0 +1,9 @@
+Run this to count tokens:
+
+  python C:\Users\admin-beats\pico8-mcp-server\shrinko8\shrinko8.py C:\Users\admin-beats\beats-social-media-boxer-game\ring-rush.p8 --count
+
+Or:
+
+  python C:\Users\admin-beats\beats-social-media-boxer-game\tools\count_tokens.py
+
+Estimated tokens: ~6800-7400 (under 8192). Dense cart ~1080 Lua lines, 59 functions.
