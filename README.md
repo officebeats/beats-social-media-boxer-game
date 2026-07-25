@@ -63,11 +63,30 @@ Outputs:
 - `dist/ring-rush.p8.png` — loadable cart image  
 - `dist/web/index.html` + `index.js` — browser player (GitHub Pages source)
 
-## Local test server
+## Local test (no `cd` needed)
+
+From **any** directory or the Run box:
 
 ```powershell
-.\build.ps1          # if you changed the cart
-.\tools\serve.ps1    # http://127.0.0.1:4173/
+ring-rush
+```
+
+That starts `http://127.0.0.1:4173/`, opens your browser, and rebuilds the web export if it’s missing.
+
+| Command | What it does |
+| --- | --- |
+| `ring-rush` | Serve + open browser |
+| `ring-rush -Rebuild` | Force PICO-8 export first |
+| `ring-rush -NoBrowser` | Serve only |
+
+Also works as a double-click: `%USERPROFILE%\ring-rush.cmd`  
+(or `%USERPROFILE%\.grok\bin\ring-rush.cmd`).
+
+Inside the repo (optional):
+
+```powershell
+.\build.ps1
+.\tools\serve.ps1
 ```
 
 ## GitHub Pages
