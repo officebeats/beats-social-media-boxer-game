@@ -1,88 +1,97 @@
-# Locked-In Boxing
+# Ring Rush Puzzle Fighters
 
-`Locked-In Boxing` is an original PICO-8 arcade boxing game. Heavy Bag is the immediate default, alternate equipment challenges remain available, and a separate Versus mode lets any selectable gym personality fight a CPU boxer.
+PICO-8 boxing-themed homage to **Super Puzzle Fighter II Turbo**.
+
+Dual wells, **crash gems**, power gems, countdown counters, diamond pieces,
+character drop patterns, chibi boxers, and **top-out** wins — GBA puzzle-fighter
+energy, themed around **Gold Problem** vs **Great Crashout**.
+
+> This replaces the earlier “Locked-In Boxing” bag/versus prototype in this
+> repo. That gameplay and art are gone on purpose.
 
 ## Play
 
-- GitHub Pages: [https://officebeats.github.io/beats-social-media-boxer-game/](https://officebeats.github.io/beats-social-media-boxer-game/)
-- Local browser build: [http://127.0.0.1:4173/](http://127.0.0.1:4173/)
-- PICO-8 cartridge: `dist/locked-in-ring.p8.png`
+| Where | URL |
+| --- | --- |
+| **GitHub Pages** | [https://officebeats.github.io/beats-social-media-boxer-game/](https://officebeats.github.io/beats-social-media-boxer-game/) |
+| **Local browser** | [http://127.0.0.1:4173/](http://127.0.0.1:4173/) after `.\tools\serve.ps1` |
+| **PICO-8 cart** | `ring-rush.p8` or `dist/ring-rush.p8.png` |
 
-The web export supports desktop keyboards, touch controls, iPhone portrait and landscape layouts, and fullscreen with `F`. PICO handhelds use the standard D-pad plus `O` and `X` buttons.
-
-## Modes
-
-- `O Heavy Bag`: the default route. Pick a fighter and begin Heavy Bag work immediately.
-- `X Versus`: pick a fighter and enter a timed one-round bout against a CPU rival.
-- `Down Targets`: open the complete Speed Bag, Heavy Bag, and Wreck Bag selector.
-
-Versus uses separate health and stamina bars, mirrored fighter stances, contact-authoritative punches, knockback, hit reactions, knockout resolution, time decisions, and immediate rematches.
-
-## Target Details
-
-- `Speed bag`: a 30-second rhythm challenge. Head punches score; body punches are too low.
-- `Heavy bag`: a 40-second power challenge. Body punches do the most damage, but committed shots can leave you exposed to the return swing.
-- `Wreck bag`: a 50-second durability challenge. Its flashing weak zone alternates between high and body targets.
-
-Targets progress through intact, cracked, torn, and destroyed states. Accuracy, combinations, weak-zone hits, destruction speed, and remaining time determine the score and rank.
+Click the canvas once (browser audio unlock), then play.
 
 ## Controls
 
-- `left/right`: footwork. Double-tap for a stamina-costing quick step.
-- `O`: jab.
-- `X`: rear straight.
-- `down + O`: body jab.
-- `down + X`: body hook.
-- `forward + O`: lead hook.
-- `forward + X`: overhand.
-- `up + O`: feint; the next linked punch starts faster and gains power.
-- `up + X`: uppercut.
+| Input | Action |
+| --- | --- |
+| ← → | Move gem pair |
+| ↓ | Soft drop |
+| ❎ (Z / C) | Rotate pair |
+| 🅾️ (X / V) | Hard drop |
+| Enter / P | Pause (fight) / confirm (menus) |
+| F (web) | Fullscreen |
 
-Punches only score when the rendered glove reaches the equipment or opposing fighter. Each punch has a preferred distance; reaching or crowded bag contact does less damage. Clean hits open short links, while whiffs break the combination. Stamina affects movement, output, and how quickly another power shot can be thrown.
+## How to play
 
-## Audio
+1. Drop pairs of gems into your 6×12 well.
+2. **Crash gems** (star) wipe connected gems of that color.
+3. Fuse same colors into **2×2+ power gems** for bigger attacks.
+4. Clears send **countdown counters** onto the opponent (pattern depends on fighter).
+5. Counters become normal gems after ticking down.
+6. **Diamond** every 25 pieces wipes a whole color.
+7. Top out the opponent’s **4th column** to win.
 
-The cartridge contains original PICO-8 tracker audio:
+## Characters
 
-- three synchronized looping channels for kick/snare, trap hats, and bass;
-- separate jab, power-hit, whiff, rebound, menu, bell, and destruction effects;
-- effects routed independently from the music so impacts remain audible.
+| Public name | Theme |
+| --- | --- |
+| **Gold Problem** | Flashy gold boxer — staggered garbage bands |
+| **Great Crashout** | Aggressive crashout energy — multi-color chip storm |
 
-No commercial song, sample, or audio from another game is included.
+Set `private_names=true` at the top of `ring-rush.p8` for local name labels.
 
-## Build
+## Build (export web + cart PNG)
 
-PICO-8 0.2.7 is expected at `C:\Program Files (x86)\PICO-8\pico8.exe`.
+Requires [PICO-8](https://www.lexaloffle.com/pico-8.php) at  
+`C:\Program Files (x86)\PICO-8\pico8.exe` (or pass `-Pico8Path`).
 
 ```powershell
 .\build.ps1
 ```
 
-The build exports the cartridge and browser files, waits for OneDrive writes to settle, and injects the responsive touch, fullscreen, and test bridge into `dist/web/index.html`.
+Outputs:
 
-To run locally:
+- `dist/ring-rush.p8.png` — loadable cart image  
+- `dist/web/index.html` + `index.js` — browser player (GitHub Pages source)
 
-```powershell
-.\tools\serve.ps1
-```
-
-## Verification
+## Local test server
 
 ```powershell
-.\tools\release-check.ps1
-node .\tools\boot-check.cjs http://127.0.0.1:4173
-node .\tools\bag-check.cjs http://127.0.0.1:4173 .\output\bag-systems
-node .\tools\playthrough.cjs http://127.0.0.1:4173 .\output\playthrough
-node .\tools\likeness-check.cjs http://127.0.0.1:4173 .\output\likeness
-node .\tools\versus-check.cjs http://127.0.0.1:4173 .\output\versus
-node .\tools\mobile-check.cjs http://127.0.0.1:4173 .\output\mobile
-python C:\Users\admin-beats\pico8-mcp-server\shrinko8\shrinko8.py locked-in-ring.p8 --count
+.\build.ps1          # if you changed the cart
+.\tools\serve.ps1    # http://127.0.0.1:4173/
 ```
 
-The release gate checks the native 8192-token ceiling, browser boot, Heavy Bag default routing, all target behaviors, a complete destruction/rematch path, reciprocal Versus contact and rematch, portrait and landscape touch controls, audio rows, public-name safety, and the GitHub Pages workflow. Physical PICO handheld testing remains separate from browser emulation and native cartridge export.
+## GitHub Pages
 
-## Release
+Pushing `main` with changes under `dist/web/**` runs `.github/workflows/pages.yml`
+and deploys the browser export.
 
-Pushes to `main` that change `dist/web` deploy through `.github/workflows/pages.yml`. The repository remains private, while GitHub Pages serves the generated browser artifact publicly. Pages availability for a private repository depends on the GitHub account plan.
+Manual redeploy: **Actions → Deploy game to GitHub Pages → Run workflow**.
 
-The public build keeps fictional cartridge names and uses original pixel art, text, and audio. The two lead fighters use stylized appearance cues informed by public Broner and Deen training footage; no source photos, logos, catchphrases, copied portraits, animation frames, game assets, or commercial music ship in the cartridge.
+## Docs
+
+- [docs/spf2t-rules.md](docs/spf2t-rules.md) — rules acceptance
+- [docs/characters.md](docs/characters.md) — fighters & patterns
+- [docs/art-bible.md](docs/art-bible.md) — visual direction
+- [docs/layout.md](docs/layout.md) — 128×128 layout
+
+## Project layout
+
+```
+ring-rush.p8              # source cartridge
+build.ps1                 # PICO-8 export + post-process
+dist/web/                 # GitHub Pages / local server root
+docs/                     # design docs
+tools/serve.ps1           # localhost static server
+tools/post-export.mjs     # mobile shell + title
+tools/ensure-label.mjs    # cart label for .p8.png
+```

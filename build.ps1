@@ -4,17 +4,28 @@ param(
 
 $ErrorActionPreference = 'Stop'
 $projectRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
-$cartPath = Join-Path $projectRoot 'locked-in-ring.p8'
+$cartName = 'ring-rush.p8'
+$cartPath = Join-Path $projectRoot $cartName
 $distPath = Join-Path $projectRoot 'dist'
 $webPath = Join-Path $distPath 'web'
-$nodePath = 'C:\Users\admin-beats\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe'
-$ensureLabelPath = Join-Path $projectRoot 'tools\ensure-label.mjs'
-$postExportPath = Join-Path $projectRoot 'tools\post-export.mjs'
+$pngPath = Join-Path $distPath 'ring-rush.p8.png'
+
+function Resolve-Node {
+    $candidates = @(
+        (Get-Command node -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source),
+        'C:\Program Files\nodejs\node.exe',
+        'C:\Users\admin-beats\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe'
+    )
+    foreach ($c in $candidates) {
+        if ($c -and (Test-Path -LiteralPath $c)) { return $c }
+    }
+    throw 'Node.js not found. Install Node or add node to PATH.'
+}
 
 function Wait-ForStableFile {
     param(
         [string]$Path,
-        [int]$TimeoutSeconds = 15
+        [int]$TimeoutSeconds = 20
     )
 
     $deadline = [DateTime]::UtcNow.AddSeconds($TimeoutSeconds)
@@ -41,17 +52,23 @@ if (-not (Test-Path -LiteralPath $cartPath)) {
     throw "Cartridge not found: $cartPath"
 }
 
-if (-not (Test-Path -LiteralPath $nodePath)) {
-    throw "Bundled Node.js executable not found: $nodePath"
-}
+$nodePath = Resolve-Node
+$ensureLabelPath = Join-Path $projectRoot 'tools\ensure-label.mjs'
+$postExportPath = Join-Path $projectRoot 'tools\post-export.mjs'
 
 New-Item -ItemType Directory -Force -Path $webPath | Out-Null
 
+# Clean previous export outputs only inside dist/
 $generatedFiles = @(
-    (Join-Path $distPath 'locked-in-ring.p8.png'),
+    $pngPath,
     (Join-Path $webPath 'index.html'),
     (Join-Path $webPath 'index.js')
 )
+# Also remove legacy export names
+$generatedFiles += @(
+    (Join-Path $distPath 'locked-in-ring.p8.png')
+)
+
 $projectPrefix = [IO.Path]::GetFullPath($projectRoot).TrimEnd('\') + '\'
 foreach ($generatedFile in $generatedFiles) {
     $resolvedGeneratedFile = [IO.Path]::GetFullPath($generatedFile)
@@ -70,13 +87,15 @@ try {
         throw "Cartridge label generation failed with exit code $LASTEXITCODE"
     }
 
-    & $Pico8Path 'locked-in-ring.p8' -export 'dist/locked-in-ring.p8.png'
+    Write-Host "Exporting cartridge PNG..."
+    & $Pico8Path $cartName -export 'dist/ring-rush.p8.png'
     if ($LASTEXITCODE -ne 0) {
         throw "PICO-8 cartridge export failed with exit code $LASTEXITCODE"
     }
-    Wait-ForStableFile (Join-Path $distPath 'locked-in-ring.p8.png')
+    Wait-ForStableFile $pngPath
 
-    & $Pico8Path 'dist/locked-in-ring.p8.png' -export 'dist/web/index.html'
+    Write-Host "Exporting HTML player..."
+    & $Pico8Path 'dist/ring-rush.p8.png' -export 'dist/web/index.html'
     if ($LASTEXITCODE -ne 0) {
         throw "PICO-8 HTML export failed with exit code $LASTEXITCODE"
     }
@@ -92,5 +111,10 @@ finally {
     Pop-Location
 }
 
-Get-Item -LiteralPath (Join-Path $distPath 'locked-in-ring.p8.png'), (Join-Path $webPath 'index.html'), (Join-Path $webPath 'index.js') |
+Get-Item -LiteralPath $pngPath, (Join-Path $webPath 'index.html'), (Join-Path $webPath 'index.js') |
     Select-Object FullName, Length, LastWriteTime
+
+Write-Host ""
+Write-Host "Build complete."
+Write-Host "  Local:  .\tools\serve.ps1   then open http://127.0.0.1:4173/"
+Write-Host "  Pages:  push main to deploy dist/web"

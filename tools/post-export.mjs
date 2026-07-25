@@ -8,13 +8,18 @@ const resolvedPath = path.resolve(htmlPath);
 let html = fs.readFileSync(resolvedPath, "utf8");
 
 html = html.replace(
+  /<title>[^<]*<\/title>/i,
+  "<title>Ring Rush Puzzle Fighters</title>"
+);
+
+html = html.replace(
   /<meta name="viewport"[^>]*>/i,
   '<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">'
 );
 
-const marker = "locked-in-ring-test-bridge";
+const marker = "ring-rush-web-shell";
 if (html.includes(marker)) {
-  console.log(`Bridge already present: ${resolvedPath}`);
+  console.log(`Shell already present: ${resolvedPath}`);
   process.exit(0);
 }
 
@@ -30,7 +35,7 @@ const bridge = `
       overflow: hidden;
       overscroll-behavior: none;
       touch-action: none;
-      background: #0d0d12;
+      background: #0a0a12;
     }
     #p8_frame_0 {
       max-width: 100vw !important;
@@ -43,96 +48,26 @@ const bridge = `
   \`;
   document.head.appendChild(mobileStyle);
 
-  const localTest = location.hostname === "127.0.0.1" &&
-    new URLSearchParams(location.search).get("test_bridge") === "1";
-  if (localTest) {
-  const stateNames = ["title", "fighter-select", "bag-select", "challenge", "result"];
-  const pin = (index) => {
-    const value = window.pico8_gpio && window.pico8_gpio[index];
-    return Number.isFinite(value) ? value : 0;
-  };
-
-  window.render_game_to_text = () => JSON.stringify({
-    coordinateSystem: "PICO-8 canvas: origin top-left, x right, y down, 128x128",
-    mode: stateNames[pin(0)] || "unknown",
-    selectedFighter: pin(1),
-    bagType: pin(2),
-    playerStamina: pin(3),
-    bagHp: pin(4),
-    bagMaxHp: pin(5),
-    result: pin(6),
-    playerAttack: pin(7),
-    playerWindup: pin(8),
-    playerRecovery: pin(9),
-    playerFeint: pin(10),
-    playerMovement: pin(11) - 1,
-    playerX: pin(12),
-    bagX: pin(13),
-    combo: pin(14),
-    score: pin(15),
-    timerFrames: pin(16),
-    weakZone: pin(17) === 1 ? "high" : pin(17) === 2 ? "body" : "none",
-    shots: pin(18),
-    hits: pin(19),
-    destructionFrames: pin(20),
-    hitStop: pin(21),
-    playerQuickStep: pin(22),
-    playerStun: pin(23),
-    linkedPunch: pin(24),
-    playerSlowdown: pin(25),
-    gameMode: pin(26) === 1 ? "versus" : "bag",
-    playerHp: pin(27),
-    opponentX: pin(28),
-    opponentAttack: pin(29),
-    opponentStun: pin(30),
-    route: ["heavy", "versus", "targets"][pin(31)] || "heavy",
-    viewport: {
-      width: window.innerWidth,
-      height: window.innerHeight,
-      touch: Boolean(window.p8_touch_detected)
+  // Fullscreen helper: press F
+  window.addEventListener("keydown", (e) => {
+    if (e.key === "f" || e.key === "F") {
+      const el = document.documentElement;
+      if (!document.fullscreenElement) {
+        el.requestFullscreen?.();
+      } else {
+        document.exitFullscreen?.();
+      }
     }
   });
-
-  window.advanceTime = (milliseconds) => new Promise((resolve) => {
-    window.setTimeout(resolve, Math.max(0, milliseconds));
-  });
-
-  window.set_locked_in_ring_test_mode = ({ fast = false, freeze = false, cpuIdle = false } = {}) => {
-    if (!window.pico8_gpio) throw new Error("PICO-8 GPIO is not ready");
-    window.pico8_gpio[126] = cpuIdle ? 1 : 0;
-    window.pico8_gpio[127] = freeze ? 2 : fast ? 1 : 0;
-  };
-  }
-
-  const remap = new Map([
-    ["KeyA", 4],
-    ["KeyB", 5]
-  ]);
-
-  const forward = (event) => {
-    const bit = remap.get(event.code);
-    if (bit === undefined || !window.pico8_buttons) return;
-    if (event.type === "keydown") window.pico8_buttons[0] |= 1 << bit;
-    else window.pico8_buttons[0] &= ~(1 << bit);
-    event.preventDefault();
-  };
-
-  window.addEventListener("keydown", (event) => {
-    if (event.code === "KeyF" && !event.repeat) {
-      const canvas = document.querySelector("canvas");
-      if (document.fullscreenElement) document.exitFullscreen();
-      else if (canvas) canvas.requestFullscreen();
-      event.preventDefault();
-      return;
-    }
-    forward(event);
-  }, true);
-  window.addEventListener("keyup", forward, true);
 })();
-</script>`;
+</script>
+`;
 
-if (!html.includes("</body>")) throw new Error(`No </body> tag found in ${resolvedPath}`);
-html = html.replace("</body>", `${bridge}\n</body>`);
-html = html.replace(/<title>.*?<\/title>/i, "<title>Locked-In Boxing</title>");
+if (html.includes("</body>")) {
+  html = html.replace("</body>", `${bridge}</body>`);
+} else {
+  html += bridge;
+}
+
 fs.writeFileSync(resolvedPath, html, "utf8");
-console.log(`Injected test/fullscreen bridge: ${resolvedPath}`);
+console.log(`Post-export shell applied: ${resolvedPath}`);
