@@ -71,7 +71,7 @@ function fighterName(id: FighterId): string {
 function spriteStyle(id: FighterId, pose: FighterPose, flip = false): string {
   const poseIndex: Record<FighterPose, number> = { idle: 0, attack: 1, hurt: 2, win: 3 };
   return [
-    `--sprite:url("${assetUrl(`assets/fighters/${id}-states.png`)}")`,
+    `--sprite:url(${assetUrl(`assets/fighters/${id}-states.png`)})`,
     `--pose-x:${poseIndex[pose] * 33.333}%`,
     `--flip:${flip ? -1 : 1}`,
   ].join(";");
