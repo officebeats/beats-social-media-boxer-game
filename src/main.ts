@@ -93,7 +93,7 @@ function fighterVisual(
   const naturalFacing = "right";
   const flip = naturalFacing !== facing;
   return `
-    <div class="fighter-frame ${classes} pose-${pose}" data-pose="${pose}">
+    <div class="fighter-frame fighter-${id} ${classes} pose-${pose}" data-pose="${pose}">
       <div class="fighter-sprite fighter-fill" style="${spriteStyle(id, pose, flip)}"></div>
       ${id === "deen" && flip ? '<span class="deen-belt-fix">DEEN</span>' : ""}
     </div>
@@ -576,6 +576,10 @@ async function initBabylon(): Promise<void> {
   if (currentEngine) return;
   const canvas = document.querySelector<HTMLCanvasElement>("#scene-canvas");
   if (!canvas) return;
+  await Promise.all([
+    import("@babylonjs/core/Shaders/default.vertex"),
+    import("@babylonjs/core/Shaders/default.fragment"),
+  ]);
   const [
     { FreeCamera },
     { Engine },

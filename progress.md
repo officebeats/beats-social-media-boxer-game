@@ -48,3 +48,14 @@ Original prompt: Build a polished, mobile-friendly Ring Rush vertical slice that
 - Confirmed the match screen and board DOM nodes stay stable across live timer ticks.
 - Passed lint, TypeScript, 5 deterministic puzzle tests, and the production Vite build.
 - Final visual verdict for the motion pass: 94/100, pass. Remaining character-animation depth depends on future multi-frame sprite atlases rather than DOM/CSS fixes.
+
+## 2026-07-28 Puzzle Fighter sprite staging and idle pass
+
+- Used an official Super Puzzle Fighter II Turbo gameplay capture to measure fighter scale, baseline, negative space, and relationship to the puzzle wells.
+- Added fighter identity classes and preserved Broner and Deen's native per-frame aspect ratios instead of stretching both into the same percentage box.
+- Reduced the match fighters to a compact stage band, placed both feet on one ring baseline, and separated the stage from the board frames.
+- Replaced the barely visible idle bob with a 1.6-second stepped breathing and weight-shift cycle, offset between fighters; attack and hurt poses still override idle.
+- Preserved reduced-motion behavior so continuous idle movement collapses to the static stance when the OS/browser requests it.
+- Verified the revised staging at 320 × 568, 390 × 844, 430 × 932, and 844 × 390. Touch controls remained visible and active pieces responded correctly.
+- Explicitly preloaded Babylon's default shaders before arena material creation, eliminating an in-app-browser shader initialization race and its console errors.
+- Visual verdict iteration 9: 94/100, pass.

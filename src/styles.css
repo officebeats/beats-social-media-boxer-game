@@ -489,7 +489,7 @@ button {
 }
 
 .match-screen .arena {
-  height: 48%;
+  height: 43%;
 }
 
 .match-screen .ring-foreground {
@@ -603,10 +603,10 @@ button {
 .fight-plane {
   position: absolute;
   z-index: 6;
-  top: 5%;
+  top: 6.4%;
   left: 50%;
-  width: min(110vw, 760px);
-  height: 36%;
+  width: min(96vw, 680px);
+  height: clamp(154px, 27vh, 248px);
   transform: translateX(-50%);
   pointer-events: none;
 }
@@ -614,24 +614,50 @@ button {
 .match-fighter {
   position: absolute;
   bottom: 0;
-  width: 51%;
   height: 100%;
+  width: auto;
+  transform-origin: 50% 100%;
+}
+
+.match-fighter.fighter-broner {
+  aspect-ratio: 0.586;
+}
+
+.match-fighter.fighter-deen {
+  aspect-ratio: 0.625;
 }
 
 .match-fighter.player {
-  left: -1%;
+  left: 8%;
+  --idle-shift: 1.2%;
+  --idle-lean: 0.35deg;
+  --idle-counter-shift: -0.8%;
+  --idle-counter-lean: -0.25deg;
 }
 
 .match-fighter.rival {
-  right: -1%;
+  right: 8%;
+  --idle-shift: -1.2%;
+  --idle-lean: -0.35deg;
+  --idle-counter-shift: 0.8%;
+  --idle-counter-lean: 0.25deg;
 }
 
 .match-fighter.pose-idle {
-  animation: fighter-breathe 2.2s steps(8, end) infinite;
+  animation: fighter-idle-shift 1.6s steps(8, end) infinite;
+}
+
+.match-fighter.pose-idle .fighter-sprite {
+  transform-origin: 50% 82%;
+  animation: fighter-idle-breathe 1.6s steps(8, end) infinite;
 }
 
 .match-fighter.player.pose-idle {
-  animation-delay: -620ms;
+  animation-delay: -480ms;
+}
+
+.match-fighter.player.pose-idle .fighter-sprite {
+  animation-delay: -480ms;
 }
 
 .match-fighter.player.pose-attack {
@@ -650,13 +676,31 @@ button {
   animation: rival-recoil 360ms cubic-bezier(0.2, 0.72, 0.28, 1) both;
 }
 
-@keyframes fighter-breathe {
+@keyframes fighter-idle-shift {
   0%,
   100% {
-    transform: translate3d(0, 0, 0) scaleY(1);
+    transform: translate3d(0, 0, 0) rotate(0);
+  }
+  25% {
+    transform: translate3d(var(--idle-shift), -0.8%, 0) rotate(var(--idle-lean));
   }
   50% {
-    transform: translate3d(0, -1.2%, 0) scaleY(1.008);
+    transform: translate3d(0, -2.2%, 0) rotate(0);
+  }
+  75% {
+    transform: translate3d(var(--idle-counter-shift), -0.6%, 0) rotate(var(--idle-counter-lean));
+  }
+}
+
+@keyframes fighter-idle-breathe {
+  0%,
+  100% {
+    transform: scaleX(var(--flip)) scaleY(1) translateY(0);
+    filter: drop-shadow(0 12px 12px rgba(0, 0, 0, 0.58)) brightness(1);
+  }
+  50% {
+    transform: scaleX(var(--flip)) scaleY(1.018) translateY(-0.55%);
+    filter: drop-shadow(0 13px 13px rgba(0, 0, 0, 0.62)) brightness(1.045);
   }
 }
 
@@ -711,7 +755,7 @@ button {
 .gameplay-layout {
   position: absolute;
   z-index: 8;
-  top: 36%;
+  top: 34.5%;
   right: 8px;
   bottom: calc(var(--safe-bottom) + 76px);
   left: 8px;
@@ -1167,7 +1211,7 @@ button {
   }
 
   .gameplay-layout {
-    top: 34%;
+    top: 35%;
     right: 3%;
     bottom: 3%;
     left: 3%;
@@ -1181,9 +1225,17 @@ button {
   }
 
   .fight-plane {
-    top: 2%;
-    width: min(72vw, 860px);
-    height: 48%;
+    top: 4%;
+    width: min(68vw, 760px);
+    height: 30%;
+  }
+
+  .match-fighter.player {
+    left: 15%;
+  }
+
+  .match-fighter.rival {
+    right: 15%;
   }
 
   .match-screen .arena {
@@ -1281,6 +1333,14 @@ button {
     left: 22%;
     width: 52vw;
     height: 56%;
+  }
+
+  .match-fighter.player {
+    left: 8%;
+  }
+
+  .match-fighter.rival {
+    right: 8%;
   }
 
   .gameplay-layout {

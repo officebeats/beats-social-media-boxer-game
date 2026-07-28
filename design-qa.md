@@ -13,6 +13,9 @@
   - `docs/screenshots/qa-mobile-results.png`
 - Combined comparison evidence: `docs/screenshots/mock-comparison-board.png`
 - Current quality-pass comparison: `.omx/qa/quality-comparison.png`
+- Puzzle Fighter staging reference: `.omx/qa/puzzle-fighter-reference-3.jpg` (official Nintendo store capture, 1280 × 720).
+- Current sprite-staging comparison: `.omx/qa/sprite-stage-comparison.png`
+- Current sprite-staging capture: `.omx/qa/sprite-stage-pass-1/shot-0.png`
 - Current live-match captures:
   - `.omx/qa/quality-intro/shot-0.png`
   - `.omx/qa/quality-pass-1/shot-0.png`
@@ -23,6 +26,9 @@
   - `.omx/qa/responsive-320x568/shot-0.png`
   - `.omx/qa/responsive-430x932/shot-0.png`
   - `.omx/qa/responsive-844x390/shot-0.png`
+  - `.omx/qa/sprite-stage-320x568/shot-0.png`
+  - `.omx/qa/sprite-stage-430x932/shot-0.png`
+  - `.omx/qa/sprite-stage-844x390/shot-0.png`
 - States: title, fighter select, ROUND 1 / FIGHT intro, active match after input, paused match, and Deen victory results.
 - Normalization: implementation captures remain at their exact mobile viewport. The concept collage is scaled as one board in the comparison image because its square panels are not a literal 390 × 844 specification. Findings judge composition, hierarchy, frame language, typography, palette, image treatment, and responsive adaptation rather than pixel-identical panel geometry.
 
@@ -32,19 +38,23 @@
 
 `.omx/qa/quality-comparison.png` places the original six-screen concept directly beside the current 390 × 844 live match. The quality pass preserves that static fidelity while adding motion and responsive behavior without changing the approved visual direction.
 
+`.omx/qa/sprite-stage-comparison.png` places an official 1280 × 720 Super Puzzle Fighter II Turbo gameplay capture beside the revised 390 × 844 Ring Rush match. The comparison is scoped to fighter scale, shared baseline, negative space, and relationship to the puzzle wells; the phone layout intentionally stacks the fighter stage above the wells rather than reproducing the arcade cabinet's horizontal layout.
+
 ## Focused region comparison evidence
 
 - Title: `qa-mobile-title.png` retains the stacked white/gold logo, centered faceoff, oversized FIGHT control, and ring-depth composition.
 - Select: `qa-mobile-select.png` retains two outlined fighter cards, warm/cool selection colors, future roster slots, and a large confirm control.
 - Match: `qa-mobile-match-play.png` retains fighter portraits, opposing health treatments, two compact 6 × 12 boards, center rail, jewel facets, supers, and touch controls.
 - Match opening: `.omx/qa/quality-intro/shot-0.png` shows the guarded FIGHT callout, dimmed playfield, inward-facing fighters, and readable touch controls before simulation begins.
+- Fighter staging: `.omx/qa/sprite-stage-pass-1/shot-0.png` shows compact inward-facing fighters on one ring baseline, with the stage ending before the wells begin.
+- Idle motion: `.omx/qa/idle-motion-sequence/shot-1.png` and `shot-2.png` show the staggered breathing/weight-shift cycle at two different animation phases.
 - Pause: `qa-mobile-pause.png` retains the centered black/gold modal and adds a compact controls reminder without obscuring the match.
 - Results: `qa-mobile-results.png` retains the oversized winner heading, victory sprite, three-stat strip, rematch, and home hierarchy.
 
 ## Required fidelity surfaces
 
 - Fonts and typography: display text uses a condensed, heavy, italic arcade treatment with strong hierarchy and close mock-relative sizing. Small HUD and stat labels remain legible at 390 pixels. The code-rendered logo is less brush-like than the concept but remains an acceptable P3 difference.
-- Spacing and layout rhythm: fighter scale, title/select card proportions, board geometry, center rail, pause modal, and results spacing now track the reference. Persistent controls remain visible with safe-area padding at 320 × 568, 390 × 844, 430 × 932, and 844 × 390.
+- Spacing and layout rhythm: match fighters now preserve each source sheet's native frame aspect ratio, share one feet baseline, and occupy a compact 27-30% stage band before the wells. Title/select card proportions, board geometry, center rail, pause modal, and results spacing track the approved mock. Persistent controls remain visible with safe-area padding at 320 × 568, 390 × 844, 430 × 932, and 844 × 390.
 - Colors and visual tokens: black/navy surfaces, gold player emphasis, cyan rival emphasis, red/blue apparel, warm button highlights, and arena glows are consistent across all states.
 - Image quality and asset fidelity: the same high-resolution pixel-art fighter sheets and three arena layers are used throughout. Fighters face each other during competition, and solo victory art uses its natural orientation so apparel lettering remains readable.
 - Copy and content: RING RUSH, PUZZLE BOXING, FIGHT, SELECT FIGHTER, fighter names, YOU/RIVAL, SUPER, PAUSED, WINNER, REMATCH, and HOME are present and correctly prioritized.
@@ -60,6 +70,9 @@
 - The required web-game Playwright driver captured text state and screenshots at each major state.
 - The live match screen and both board nodes remained identity-stable across timer ticks; HUD and board state now patch in place instead of replacing the screen.
 - Parallax now interpolates once per animation frame rather than applying a long CSS transition to every pointer/orientation event.
+- Idle fighters use a 1.6-second stepped breathing and weight-shift cycle with offset timing; attack and hurt poses replace the idle animation rather than running on top of it.
+- Reduced-motion mode collapses continuous idle motion to the existing static stance.
+- Babylon's default vertex and fragment shaders are preloaded before arena materials initialize; the in-app browser reported no warnings or errors after the preload fix.
 - Browser console warnings/errors checked: none.
 
 ## Comparison history
@@ -102,6 +115,17 @@
 
 - Post-fix evidence: `.omx/qa/quality-comparison.png`, `.omx/qa/quality-intro/shot-0.png`, `.omx/qa/quality-pass-1/shot-0.png`, and all three responsive breakpoint captures.
 - The implementation preserves the reference hierarchy and art direction while the live match now feels continuous rather than repeatedly reconstructed.
+
+### Iteration 8 — 82/100
+
+- Findings: fighters were too large relative to the wells, their legs competed with the board frame, and the earlier one-pixel bob was not legible as an idle animation on a phone.
+- Fixes: per-fighter native aspect ratios, compact shared-baseline staging, clearer separation between the ring and wells, and a stronger staggered breathing/weight-shift cycle.
+- Evidence: `.omx/qa/quality-final/shot-0.png` and `.omx/qa/puzzle-fighter-reference-3.jpg`.
+
+### Iteration 9 — 94/100
+
+- Post-fix evidence: `.omx/qa/sprite-stage-comparison.png`, `.omx/qa/sprite-stage-pass-1/shot-0.png`, `.omx/qa/idle-motion-sequence/shot-1.png`, `.omx/qa/idle-motion-sequence/shot-2.png`, and the three revised responsive captures.
+- The fighters now read as compact Puzzle Fighter-style stage actors while retaining the selected Street Fighter/MVC anatomical art direction.
 
 ## Findings
 
