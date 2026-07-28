@@ -36,3 +36,15 @@ Original prompt: Build a polished, mobile-friendly Ring Rush vertical slice that
 - Captured and visually inspected 390 × 844 title, select, active match, pause, and results screenshots with the required game driver.
 - Exercised title → select → match → pause → resume → results → rematch and pause → quit → title with no browser console errors.
 - Final visual verdict: 96/100, pass. Design QA is recorded in `design-qa.md`.
+
+## 2026-07-28 mobile motion and match-start polish
+
+- Reproduced the reported match jank and traced it to a full match-screen DOM rebuild every 100 milliseconds.
+- Refactored live play so the match shell, fighters, boards, controls, listeners, and CSS animation state remain mounted; only board cells, timer, next pair, chain, meter, poses, and impact text update in place.
+- Added a guarded 1.3 second ROUND 1 / FIGHT opening so simulation and controls begin after an intentional visual handoff.
+- Added persistent fighter breathing, directional attack/recoil motion, active-gem motion, screen transitions, hover/press feedback, and requestAnimationFrame-interpolated parallax.
+- Removed the fixed 560/420 pixel minimum-height constraints and added dedicated 320-pixel portrait and short-landscape game layouts.
+- Verified gameplay at 320 × 568, 390 × 844, 430 × 932, and 844 × 390 with visible boards and touch controls and no console errors.
+- Confirmed the match screen and board DOM nodes stay stable across live timer ticks.
+- Passed lint, TypeScript, 5 deterministic puzzle tests, and the production Vite build.
+- Final visual verdict for the motion pass: 94/100, pass. Remaining character-animation depth depends on future multi-frame sprite atlases rather than DOM/CSS fixes.

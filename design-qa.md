@@ -12,27 +12,39 @@
   - `docs/screenshots/qa-mobile-pause.png`
   - `docs/screenshots/qa-mobile-results.png`
 - Combined comparison evidence: `docs/screenshots/mock-comparison-board.png`
+- Current quality-pass comparison: `.omx/qa/quality-comparison.png`
+- Current live-match captures:
+  - `.omx/qa/quality-intro/shot-0.png`
+  - `.omx/qa/quality-pass-1/shot-0.png`
+  - `.omx/qa/quality-pause/shot-0.png`
 - Implementation viewport: 390 × 844 CSS pixels, device scale factor 1.
 - Implementation pixels: 390 × 844 per mobile capture.
-- States: title, fighter select, active match after keyboard input, paused match, and Deen victory results.
+- Additional responsive evidence:
+  - `.omx/qa/responsive-320x568/shot-0.png`
+  - `.omx/qa/responsive-430x932/shot-0.png`
+  - `.omx/qa/responsive-844x390/shot-0.png`
+- States: title, fighter select, ROUND 1 / FIGHT intro, active match after input, paused match, and Deen victory results.
 - Normalization: implementation captures remain at their exact mobile viewport. The concept collage is scaled as one board in the comparison image because its square panels are not a literal 390 × 844 specification. Findings judge composition, hierarchy, frame language, typography, palette, image treatment, and responsive adaptation rather than pixel-identical panel geometry.
 
 ## Full-view comparison evidence
 
 `docs/screenshots/mock-comparison-board.png` places the supplied concept and all five verified implementation states in one image. The implementation now preserves the concept's two-fighter faceoff, bright ring lighting, black/gold shell, blue rival accents, compact faceted gems, large metallic controls, screen-edge frame, and late-1990s arcade hierarchy.
 
+`.omx/qa/quality-comparison.png` places the original six-screen concept directly beside the current 390 × 844 live match. The quality pass preserves that static fidelity while adding motion and responsive behavior without changing the approved visual direction.
+
 ## Focused region comparison evidence
 
 - Title: `qa-mobile-title.png` retains the stacked white/gold logo, centered faceoff, oversized FIGHT control, and ring-depth composition.
 - Select: `qa-mobile-select.png` retains two outlined fighter cards, warm/cool selection colors, future roster slots, and a large confirm control.
 - Match: `qa-mobile-match-play.png` retains fighter portraits, opposing health treatments, two compact 6 × 12 boards, center rail, jewel facets, supers, and touch controls.
+- Match opening: `.omx/qa/quality-intro/shot-0.png` shows the guarded FIGHT callout, dimmed playfield, inward-facing fighters, and readable touch controls before simulation begins.
 - Pause: `qa-mobile-pause.png` retains the centered black/gold modal and adds a compact controls reminder without obscuring the match.
 - Results: `qa-mobile-results.png` retains the oversized winner heading, victory sprite, three-stat strip, rematch, and home hierarchy.
 
 ## Required fidelity surfaces
 
 - Fonts and typography: display text uses a condensed, heavy, italic arcade treatment with strong hierarchy and close mock-relative sizing. Small HUD and stat labels remain legible at 390 pixels. The code-rendered logo is less brush-like than the concept but remains an acceptable P3 difference.
-- Spacing and layout rhythm: fighter scale, title/select card proportions, board geometry, center rail, pause modal, and results spacing now track the reference. Persistent controls remain visible with safe-area padding.
+- Spacing and layout rhythm: fighter scale, title/select card proportions, board geometry, center rail, pause modal, and results spacing now track the reference. Persistent controls remain visible with safe-area padding at 320 × 568, 390 × 844, 430 × 932, and 844 × 390.
 - Colors and visual tokens: black/navy surfaces, gold player emphasis, cyan rival emphasis, red/blue apparel, warm button highlights, and arena glows are consistent across all states.
 - Image quality and asset fidelity: the same high-resolution pixel-art fighter sheets and three arena layers are used throughout. Fighters face each other during competition, and solo victory art uses its natural orientation so apparel lettering remains readable.
 - Copy and content: RING RUSH, PUZZLE BOXING, FIGHT, SELECT FIGHTER, fighter names, YOU/RIVAL, SUPER, PAUSED, WINNER, REMATCH, and HOME are present and correctly prioritized.
@@ -40,12 +52,14 @@
 ## Interaction and runtime evidence
 
 - FIGHT transitioned synchronously from title to select on the first click.
-- ENTER THE RING started a match.
+- ENTER THE RING started a match behind a 1.3 second ROUND 1 / FIGHT input guard.
 - Left, right, rotate, and hard-drop inputs changed deterministic game state.
 - Escape opened pause; RESUME returned to play.
 - Top-out reached results; REMATCH created a fresh match.
 - Pause → QUIT returned to title.
 - The required web-game Playwright driver captured text state and screenshots at each major state.
+- The live match screen and both board nodes remained identity-stable across timer ticks; HUD and board state now patch in place instead of replacing the screen.
+- Parallax now interpolates once per animation frame rather than applying a long CSS transition to every pointer/orientation event.
 - Browser console warnings/errors checked: none.
 
 ## Comparison history
@@ -78,6 +92,17 @@
 
 - Post-fix evidence: all five core states align with the mock's visual category and hierarchy; Deen's winner apparel reads correctly.
 
+### Iteration 6 — 84/100
+
+- Findings: the static design passed, but ten full match-screen rebuilds per second restarted fighter, gem, and impact animation; match start was abrupt; short phone landscape could crop controls; parallax event writes competed with long transitions.
+- Fixes: stable in-place match updates, guarded ROUND 1 / FIGHT opening, persistent fighter/impact classes, interpolated parallax, responsive small-phone and short-landscape layouts.
+- Evidence: `.omx/qa/quality-baseline/shot-0.png`.
+
+### Iteration 7 — 94/100
+
+- Post-fix evidence: `.omx/qa/quality-comparison.png`, `.omx/qa/quality-intro/shot-0.png`, `.omx/qa/quality-pass-1/shot-0.png`, and all three responsive breakpoint captures.
+- The implementation preserves the reference hierarchy and art direction while the live match now feels continuous rather than repeatedly reconstructed.
+
 ## Findings
 
 No actionable P0, P1, or P2 visual mismatches remain.
@@ -86,7 +111,7 @@ No actionable P0, P1, or P2 visual mismatches remain.
 
 - [P3] Commission a dedicated transparent brush-lettered Ring Rush logo if exact mock typography is required.
 - [P3] Capture organic high-chain match statistics for store or marketing imagery instead of forced top-out QA values.
-- [P3] Expand the four-pose sheets into multi-frame animation atlases after timing is approved.
+- [P3] Expand the four-pose sheets into multi-frame animation atlases after timing is approved; the current pose-to-pose wrapper motion is smooth, but true frame animation remains an asset-production task.
 
 ## Final result
 

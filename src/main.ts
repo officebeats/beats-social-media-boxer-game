@@ -63,6 +63,13 @@ let impactText = "";
 let impactResetAt = 0;
 let parallaxX = 0;
 let parallaxY = 0;
+let renderedParallaxX = 0;
+let renderedParallaxY = 0;
+let matchReadyAt = 0;
+let lastMatchPatchAt = 0;
+
+const MATCH_INTRO_MS = 1300;
+const MATCH_PATCH_MS = 50;
 
 function fighterName(id: FighterId): string {
   return id === "broner" ? "BRONER" : "DEEN";
@@ -86,7 +93,7 @@ function fighterVisual(
   const naturalFacing = "right";
   const flip = naturalFacing !== facing;
   return `
-    <div class="fighter-frame ${classes}">
+    <div class="fighter-frame ${classes} pose-${pose}" data-pose="${pose}">
       <div class="fighter-sprite fighter-fill" style="${spriteStyle(id, pose, flip)}"></div>
       ${id === "deen" && flip ? '<span class="deen-belt-fix">DEEN</span>' : ""}
     </div>
@@ -181,24 +188,44 @@ function gemClass(gem: Gem | null): string {
   return `${gem.color} ${gem.kind}`;
 }
 
-function boardMarkup(game: PuzzleGame, compact: boolean, label: string): string {
+interface BoardCellView {
+  classes: string;
+  text: string;
+}
+
+function boardCells(game: PuzzleGame): BoardCellView[] {
   const active = new Map<string, Gem>();
   if (game.active) {
     pairCells(game.active).forEach(({ x, y, gem }) => active.set(`${y}:${x}`, gem));
   }
-  const cells: string[] = [];
+  const cells: BoardCellView[] = [];
   for (let y = 0; y < BOARD_HEIGHT; y += 1) {
     for (let x = 0; x < BOARD_WIDTH; x += 1) {
-      const gem = active.get(`${y}:${x}`) ?? game.board[y][x];
-      cells.push(
-        `<span class="gem ${gemClass(gem)}">${gem?.kind === "counter" ? gem.turns ?? "" : ""}</span>`,
-      );
+      const key = `${y}:${x}`;
+      const activeGem = active.get(key);
+      const gem = activeGem ?? game.board[y][x];
+      cells.push({
+        classes: `gem ${gemClass(gem)}${activeGem ? " active-piece" : ""}`,
+        text: gem?.kind === "counter" ? String(gem.turns ?? "") : "",
+      });
     }
   }
+  return cells;
+}
+
+function boardMarkup(
+  game: PuzzleGame,
+  compact: boolean,
+  label: string,
+  boardId: "player" | "rival",
+): string {
+  const cells = boardCells(game);
   return `
-    <section class="board-shell ${compact ? "compact" : ""}" aria-label="${label}">
+    <section class="board-shell ${compact ? "compact" : ""}" aria-label="${label}" data-board="${boardId}">
       <div class="board-label">${label}</div>
-      <div class="gem-board">${cells.join("")}</div>
+      <div class="gem-board">${cells
+        .map((cell) => `<span class="${cell.classes}">${cell.text}</span>`)
+        .join("")}</div>
     </section>
   `;
 }
@@ -211,12 +238,13 @@ function formatTime(ms: number): string {
 function matchMarkup(): string {
   if (!match) return "";
   const paused = match.phase === "paused";
+  const introActive = performance.now() < matchReadyAt;
   return `
-    <section class="screen match-screen">
+    <section class="screen match-screen ${introActive ? "is-intro" : ""}">
       ${stageMarkup()}
       <header class="match-hud">
         ${healthBar(match.playerFighter, true)}
-        <button class="timer" data-action="pause">${formatTime(match.elapsedMs)}<small>Ⅱ</small></button>
+        <button class="timer" data-action="pause"><span data-match-time>${formatTime(match.elapsedMs)}</span><small>Ⅱ</small></button>
         ${healthBar(match.rivalFighter, false)}
       </header>
       <div class="fight-plane">
@@ -225,26 +253,30 @@ function matchMarkup(): string {
         ${fighterVisual(match.rivalFighter, rivalPose, "match-fighter rival", "left")}
       </div>
       <div class="gameplay-layout">
-        ${boardMarkup(match.player, false, "YOU")}
+        ${boardMarkup(match.player, false, "YOU", "player")}
         <aside class="match-rail">
           <div class="next-label">NEXT</div>
           <div class="next-pair">
-            <span class="gem ${gemClass(match.player.next[0])}"></span>
-            <span class="gem ${gemClass(match.player.next[1])}"></span>
+            <span class="gem ${gemClass(match.player.next[0])}" data-next="0"></span>
+            <span class="gem ${gemClass(match.player.next[1])}" data-next="1"></span>
           </div>
-          <div class="chain-readout"><span>CHAIN</span><strong>${match.player.chain || "—"}</strong></div>
+          <div class="chain-readout"><span>CHAIN</span><strong data-chain>${match.player.chain || "—"}</strong></div>
           <button class="super-button ${match.player.meter >= 100 ? "ready" : ""}" data-action="super">
             <span>SUPER</span>
-            <i style="--meter:${match.player.meter}%"></i>
+            <i style="--meter:${match.player.meter}%" data-meter></i>
           </button>
         </aside>
-        ${boardMarkup(match.rival, true, "RIVAL")}
+        ${boardMarkup(match.rival, true, "RIVAL", "rival")}
       </div>
       <div class="touch-controls" aria-label="Game controls">
         <button data-command="left" aria-label="Move left">←</button>
         <button data-command="rotate" aria-label="Rotate">↻</button>
         <button data-command="right" aria-label="Move right">→</button>
         <button data-command="drop" class="drop" aria-label="Hard drop">↓</button>
+      </div>
+      <div class="round-intro ${introActive ? "" : "complete"}" aria-live="polite">
+        <span>ROUND 1</span>
+        <strong>FIGHT!</strong>
       </div>
       ${
         paused
@@ -290,6 +322,7 @@ function resultsMarkup(): string {
 
 function render(): void {
   renderDirty = false;
+  lastMatchPatchAt = 0;
   screenRoot.innerHTML =
     screen === "title"
       ? titleMarkup()
@@ -300,6 +333,75 @@ function render(): void {
           : resultsMarkup();
   bindInteractions();
   applyParallax();
+  if (screen === "match") updateMatchDom(performance.now());
+}
+
+function updateBoardDom(boardId: "player" | "rival", game: PuzzleGame): void {
+  const elements = app.querySelectorAll<HTMLElement>(`[data-board="${boardId}"] .gem-board > .gem`);
+  const cells = boardCells(game);
+  elements.forEach((element, index) => {
+    const cell = cells[index];
+    if (!cell) return;
+    if (element.className !== cell.classes) element.className = cell.classes;
+    if (element.textContent !== cell.text) element.textContent = cell.text;
+  });
+}
+
+function updateFighterDom(
+  role: "player" | "rival",
+  fighter: FighterId,
+  pose: FighterPose,
+  facing: "left" | "right",
+): void {
+  const frame = app.querySelector<HTMLElement>(`.match-fighter.${role}`);
+  const sprite = frame?.querySelector<HTMLElement>(".fighter-sprite");
+  if (!frame || !sprite) return;
+  if (frame.dataset.pose !== pose) {
+    (["idle", "attack", "hurt", "win"] as FighterPose[]).forEach((value) =>
+      frame.classList.toggle(`pose-${value}`, value === pose),
+    );
+    const flip = "right" !== facing;
+    sprite.setAttribute("style", spriteStyle(fighter, pose, flip));
+    frame.dataset.pose = pose;
+  }
+}
+
+function updateMatchDom(now = performance.now()): void {
+  if (!match || screen !== "match") return;
+  const matchScreen = app.querySelector<HTMLElement>(".match-screen");
+  if (!matchScreen) return;
+
+  const introActive = now < matchReadyAt;
+  matchScreen.classList.toggle("is-intro", introActive);
+  const intro = matchScreen.querySelector<HTMLElement>(".round-intro");
+  intro?.classList.toggle("complete", !introActive);
+
+  const timer = matchScreen.querySelector<HTMLElement>("[data-match-time]");
+  if (timer) timer.textContent = formatTime(match.elapsedMs);
+
+  updateBoardDom("player", match.player);
+  updateBoardDom("rival", match.rival);
+
+  match.player.next.forEach((gem, index) => {
+    const next = matchScreen.querySelector<HTMLElement>(`[data-next="${index}"]`);
+    const classes = `gem ${gemClass(gem)}`;
+    if (next && next.className !== classes) next.className = classes;
+  });
+  const chain = matchScreen.querySelector<HTMLElement>("[data-chain]");
+  if (chain) chain.textContent = String(match.player.chain || "—");
+  const superButton = matchScreen.querySelector<HTMLElement>(".super-button");
+  superButton?.classList.toggle("ready", match.player.meter >= 100);
+  matchScreen
+    .querySelector<HTMLElement>("[data-meter]")
+    ?.style.setProperty("--meter", `${match.player.meter}%`);
+
+  updateFighterDom("player", match.playerFighter, playerPose, "right");
+  updateFighterDom("rival", match.rivalFighter, rivalPose, "left");
+  const impact = matchScreen.querySelector<HTMLElement>(".impact-copy");
+  if (impact) {
+    impact.textContent = impactText;
+    impact.classList.toggle("show", Boolean(impactText));
+  }
 }
 
 function bindInteractions(): void {
@@ -335,6 +437,7 @@ function handleAction(action: string): void {
       return;
     case "pause":
     case "resume":
+      if (performance.now() < matchReadyAt) return;
       match?.togglePause();
       break;
     case "options":
@@ -350,7 +453,8 @@ function handleAction(action: string): void {
         poseResetAt = performance.now() + 500;
         impactResetAt = performance.now() + 700;
       }
-      break;
+      updateMatchDom();
+      return;
     case "rematch":
       startMatch(selectedFighter);
       return;
@@ -364,7 +468,7 @@ function handleAction(action: string): void {
 }
 
 function handleCommand(command: string): void {
-  if (!match || match.phase !== "playing") return;
+  if (!match || match.phase !== "playing" || performance.now() < matchReadyAt) return;
   switch (command) {
     case "left":
       match.movePlayer(-1);
@@ -383,8 +487,8 @@ function handleCommand(command: string): void {
       break;
   }
   processMatchEvents();
-  renderDirty = true;
-  render();
+  if (screen === "match") updateMatchDom();
+  else render();
 }
 
 function bindGestures(element: HTMLElement): void {
@@ -411,6 +515,12 @@ function startMatch(fighter: FighterId = selectedFighter): void {
   playerPose = "idle";
   rivalPose = "idle";
   impactText = "";
+  const now = performance.now();
+  matchReadyAt = now + MATCH_INTRO_MS;
+  poseResetAt = 0;
+  impactResetAt = 0;
+  accumulator = 0;
+  lastFrame = now;
   audio.title.pause();
   audio.title.currentTime = 0;
   audio.match.currentTime = 0;
@@ -422,6 +532,7 @@ function startMatch(fighter: FighterId = selectedFighter): void {
 function goHome(): void {
   screen = "title";
   match = null;
+  matchReadyAt = 0;
   audio.match.pause();
   audio.match.currentTime = 0;
   void audio.title.play().catch(() => undefined);
@@ -519,21 +630,19 @@ function applyParallax(): void {
       : layer.classList.contains("ring-mid")
         ? 0.65
         : 1;
-    layer.style.transform = `translate3d(${parallaxX * depth}px, ${parallaxY * depth}px, 0) scale(${1.04 + depth * 0.01})`;
+    layer.style.transform = `translate3d(${renderedParallaxX * depth}px, ${renderedParallaxY * depth}px, 0) scale(${1.04 + depth * 0.01})`;
   });
 }
 
 window.addEventListener("pointermove", (event) => {
   parallaxX = (event.clientX / window.innerWidth - 0.5) * -14;
   parallaxY = (event.clientY / window.innerHeight - 0.5) * -8;
-  applyParallax();
 });
 
 window.addEventListener("deviceorientation", (event) => {
   if (event.gamma == null || event.beta == null) return;
   parallaxX = Math.max(-12, Math.min(12, event.gamma * -0.4));
   parallaxY = Math.max(-7, Math.min(7, (event.beta - 45) * -0.16));
-  applyParallax();
 });
 
 window.addEventListener("keydown", (event) => {
@@ -542,7 +651,11 @@ window.addEventListener("keydown", (event) => {
     else void document.documentElement.requestFullscreen();
     return;
   }
-  if (event.key === "Escape" && match?.phase === "playing") {
+  if (
+    event.key === "Escape" &&
+    match?.phase === "playing" &&
+    performance.now() >= matchReadyAt
+  ) {
     match.togglePause();
     renderDirty = true;
     return;
@@ -564,6 +677,7 @@ window.addEventListener("keydown", (event) => {
 
 function fixedUpdate(deltaMs: number): void {
   if (!match || screen !== "match") return;
+  if (performance.now() < matchReadyAt) return;
   match.update(deltaMs);
   processMatchEvents();
   if (performance.now() >= poseResetAt && (playerPose !== "idle" || rivalPose !== "idle")) {
@@ -587,18 +701,30 @@ function frame(now: number): void {
       accumulator -= 1000 / 60;
     }
   }
-  if (match && screen === "match" && Math.floor(now / 100) !== Math.floor((now - delta) / 100)) {
-    renderDirty = true;
-  }
   if (renderDirty) render();
+  else if (match && screen === "match" && now - lastMatchPatchAt >= MATCH_PATCH_MS) {
+    updateMatchDom(now);
+    lastMatchPatchAt = now;
+  }
+
+  renderedParallaxX += (parallaxX - renderedParallaxX) * Math.min(1, delta / 90);
+  renderedParallaxY += (parallaxY - renderedParallaxY) * Math.min(1, delta / 90);
+  if (
+    Math.abs(parallaxX - renderedParallaxX) > 0.01 ||
+    Math.abs(parallaxY - renderedParallaxY) > 0.01
+  ) {
+    applyParallax();
+  }
   requestAnimationFrame(frame);
 }
 
 window.advanceTime = (ms: number) => {
   manualUntil = performance.now() + 100;
+  matchReadyAt = 0;
   const steps = Math.max(1, Math.round(ms / (1000 / 60)));
   for (let i = 0; i < steps; i += 1) fixedUpdate(1000 / 60);
-  render();
+  if (screen === "match") updateMatchDom();
+  else render();
 };
 
 window.render_game_to_text = () => {
@@ -610,6 +736,7 @@ window.render_game_to_text = () => {
     match: match
       ? {
           phase: match.phase,
+          ready: performance.now() >= matchReadyAt,
           elapsedMs: Math.round(match.elapsedMs),
           playerFighter: match.playerFighter,
           rivalFighter: match.rivalFighter,
