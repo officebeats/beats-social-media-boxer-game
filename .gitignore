@@ -1,6 +1,8 @@
-output/
-server.pid
-tmp/
-__pycache__/
-reference/research/
+node_modules/
+dist/
+.vite/
 .omx/
+*.tsbuildinfo
+*.log
+.DS_Store
+Thumbs.db

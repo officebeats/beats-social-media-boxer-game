@@ -1,0 +1,10 @@
+{
+  "name": "Ring Rush",
+  "short_name": "Ring Rush",
+  "description": "A premium 2.5D boxing puzzle fighter.",
+  "start_url": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#050815",
+  "theme_color": "#050815"
+}

@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "tracks": {
+    "title": {
+      "id": "try-me",
+      "src": "./assets/audio/music/try-me.mp3",
+      "loop": true,
+      "volume": 0.72,
+      "license": "CC0-1.0"
+    },
+    "match": {
+      "id": "the-mafia-game",
+      "src": "./assets/audio/music/the-mafia-game.mp3",
+      "loop": true,
+      "volume": 0.68,
+      "license": "CC0-1.0"
+    }
+  }
+}
