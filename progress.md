@@ -25,3 +25,14 @@ Original prompt: Build a polished, mobile-friendly Ring Rush vertical slice that
 - Add jewel break/hit particles and haptics after timing is locked.
 - Add Capacitor Android/iOS projects after the PWA vertical slice is approved.
 - Multiplayer and paid content remain interface-level future work only.
+
+## 2026-07-28 mock-fidelity pass
+
+- New request: capture screenshots while testing the basic game flow and revise the implementation toward the approved six-screen arcade mock.
+- Baseline visual verdict: 68/100. Character and arena art are directionally correct; board geometry, frame density, metallic controls, contrast, and desktop composition need revision.
+- First target: constrain square puzzle cells, strengthen arcade framing and HUD hierarchy, brighten the ring, and capture title/select/match/pause/results evidence.
+- Reproduced the deployed FIGHT action successfully, but found navigation rendering was deferred to `requestAnimationFrame` and the PWA used a stale-prone cache-first navigation policy. Navigation now renders synchronously, and service-worker navigations are network-first with an offline fallback.
+- Revised the shared screen frame, title hierarchy, fighter-select cards, HUD portraits, health/timer chrome, board proportions, faceted gems, center rail, SUPER control, pause modal, and results styling toward the approved mock.
+- Captured and visually inspected 390 × 844 title, select, active match, pause, and results screenshots with the required game driver.
+- Exercised title → select → match → pause → resume → results → rematch and pause → quit → title with no browser console errors.
+- Final visual verdict: 96/100, pass. Design QA is recorded in `design-qa.md`.

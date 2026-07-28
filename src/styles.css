@@ -39,6 +39,21 @@ button {
   min-height: 560px;
   overflow: hidden;
   background: #040610;
+  isolation: isolate;
+}
+
+.screen::before {
+  position: absolute;
+  z-index: 50;
+  inset: 5px;
+  border: 1px solid rgba(255, 190, 41, 0.72);
+  border-radius: 18px;
+  box-shadow:
+    inset 0 0 0 2px rgba(1, 4, 12, 0.96),
+    inset 0 0 0 3px rgba(255, 190, 41, 0.28),
+    0 0 18px rgba(255, 151, 0, 0.16);
+  content: "";
+  pointer-events: none;
 }
 
 #screen-root {
@@ -101,8 +116,10 @@ button {
   z-index: 5;
   pointer-events: none;
   background:
-    linear-gradient(180deg, rgba(3, 5, 13, 0.08), rgba(3, 5, 13, 0.38) 68%, rgba(3, 5, 13, 0.92)),
-    radial-gradient(circle at center 35%, transparent 24%, rgba(1, 2, 8, 0.55) 100%);
+    linear-gradient(180deg, rgba(3, 5, 13, 0.02), rgba(3, 5, 13, 0.22) 68%, rgba(3, 5, 13, 0.82)),
+    radial-gradient(circle at 30% 30%, rgba(255, 161, 38, 0.11), transparent 24%),
+    radial-gradient(circle at 72% 30%, rgba(39, 169, 255, 0.14), transparent 25%),
+    radial-gradient(circle at center 35%, transparent 30%, rgba(1, 2, 8, 0.48) 100%);
 }
 
 .fighter-sprite {
@@ -150,25 +167,26 @@ button {
   flex-direction: column;
   align-items: center;
   font-style: italic;
-  line-height: 0.72;
-  letter-spacing: -0.06em;
+  line-height: 0.68;
+  letter-spacing: -0.085em;
   text-transform: uppercase;
   transform: skew(-8deg) rotate(-2deg);
   filter: drop-shadow(0 8px 0 rgba(0, 0, 0, 0.48));
 }
 
 .logo span {
-  font-size: clamp(3.5rem, 12vw, 6rem);
+  font-size: clamp(3.7rem, 12vw, 6.4rem);
   font-weight: 1000;
   color: #f7f3e9;
   -webkit-text-stroke: 2px #111;
+  text-shadow: 2px 3px 0 #111, -2px 0 0 #111;
 }
 
 .logo strong {
-  font-size: clamp(4.4rem, 15vw, 7.6rem);
+  font-size: clamp(4.8rem, 15vw, 8rem);
   color: var(--gold);
   -webkit-text-stroke: 2px #2d1600;
-  text-shadow: 0 4px 0 #9b5500;
+  text-shadow: 0 4px 0 #9b5500, 0 0 20px rgba(255, 171, 0, 0.35);
 }
 
 .title-lockup {
@@ -243,7 +261,7 @@ button {
 .secondary-button {
   position: relative;
   min-height: 58px;
-  border: 1px solid var(--line);
+  border: 2px solid var(--line);
   clip-path: polygon(8% 0, 92% 0, 100% 50%, 92% 100%, 8% 100%, 0 50%);
   cursor: pointer;
   font-size: clamp(1.2rem, 4vw, 1.7rem);
@@ -258,14 +276,23 @@ button {
   background:
     linear-gradient(180deg, rgba(255, 212, 87, 0.26), transparent 52%),
     linear-gradient(90deg, #2d1903, #8c4b00 46%, #2d1903);
-  box-shadow: inset 0 0 0 4px #0b0c12, inset 0 0 0 6px var(--gold), 0 0 28px rgba(255, 162, 0, 0.34);
+  box-shadow:
+    inset 0 0 0 3px #0b0c12,
+    inset 0 0 0 5px var(--gold),
+    inset 0 12px 20px rgba(255, 221, 118, 0.14),
+    0 0 28px rgba(255, 162, 0, 0.42),
+    0 5px 0 #090b12;
   color: #ffe6a3;
   text-shadow: 2px 2px 0 #361b00;
 }
 
 .secondary-button {
   min-height: 48px;
-  background: linear-gradient(180deg, rgba(30, 41, 62, 0.92), rgba(6, 9, 17, 0.96));
+  border-color: rgba(255, 190, 41, 0.62);
+  background:
+    linear-gradient(180deg, rgba(65, 78, 102, 0.5), transparent 42%),
+    linear-gradient(180deg, rgba(22, 31, 50, 0.98), rgba(5, 8, 16, 0.98));
+  box-shadow: inset 0 0 0 3px #05070e, inset 0 0 0 4px rgba(255, 190, 41, 0.24), 0 4px 0 #03050b;
   color: #d8dde9;
   font-size: 0.98rem;
 }
@@ -335,10 +362,13 @@ button {
 .fighter-card {
   position: relative;
   overflow: hidden;
-  border: 2px solid rgba(255, 255, 255, 0.18);
+  border: 2px solid rgba(255, 190, 41, 0.42);
   clip-path: polygon(8% 0, 92% 0, 100% 6%, 100% 94%, 92% 100%, 8% 100%, 0 94%, 0 6%);
-  background: linear-gradient(180deg, rgba(7, 9, 18, 0.3), rgba(2, 4, 10, 0.94));
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent 32%),
+    linear-gradient(180deg, rgba(7, 9, 18, 0.36), rgba(2, 4, 10, 0.96));
   cursor: pointer;
+  box-shadow: inset 0 0 0 3px #050711, inset 0 0 0 4px rgba(255, 190, 41, 0.14);
 }
 
 .fighter-card.broner.selected {
@@ -349,6 +379,11 @@ button {
 .fighter-card.deen.selected {
   border-color: var(--blue);
   box-shadow: inset 0 0 36px rgba(0, 146, 255, 0.28), 0 0 20px rgba(0, 146, 255, 0.35);
+}
+
+.fighter-card.deen {
+  border-color: rgba(39, 169, 255, 0.46);
+  box-shadow: inset 0 0 0 3px #050711, inset 0 0 0 4px rgba(39, 169, 255, 0.16);
 }
 
 .card-fighter {
@@ -404,8 +439,9 @@ button {
   display: grid;
   place-items: center;
   aspect-ratio: 1.5;
-  border: 1px solid rgba(255, 190, 41, 0.25);
-  background: rgba(3, 5, 12, 0.8);
+  border: 1px solid rgba(255, 190, 41, 0.42);
+  clip-path: polygon(8% 0, 92% 0, 100% 12%, 100% 88%, 92% 100%, 8% 100%, 0 88%, 0 12%);
+  background: linear-gradient(180deg, rgba(25, 34, 50, 0.88), rgba(2, 5, 12, 0.96));
   color: rgba(255, 190, 41, 0.24);
   font-size: 1.4rem;
 }
@@ -431,24 +467,54 @@ button {
   position: relative;
   z-index: 10;
   display: grid;
-  grid-template-columns: 1fr 66px 1fr;
-  gap: 8px;
+  grid-template-columns: 1fr 72px 1fr;
+  gap: 6px;
   align-items: start;
   padding: calc(var(--safe-top) + 4px) 9px 0;
 }
 
 .fighter-hud {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  gap: 5px;
+  align-items: center;
   min-width: 0;
 }
 
 .fighter-hud.rival {
+  grid-template-columns: minmax(0, 1fr) 42px;
   text-align: right;
+}
+
+.fighter-hud.rival .hud-portrait {
+  grid-column: 2;
+}
+
+.fighter-hud.rival .hud-info {
+  grid-row: 1;
+  grid-column: 1;
+}
+
+.hud-portrait {
+  width: 42px;
+  height: 42px;
+  border: 1px solid var(--gold);
+  clip-path: polygon(18% 0, 100% 0, 100% 82%, 82% 100%, 0 100%, 0 18%);
+  background-position: 10% 16%;
+  background-size: 1600% 400%;
+  background-color: #070a12;
+  box-shadow: inset 0 0 0 2px #070911, 0 0 10px rgba(255, 166, 0, 0.34);
+}
+
+.fighter-hud.rival .hud-portrait {
+  border-color: var(--blue);
+  box-shadow: inset 0 0 0 2px #070911, 0 0 10px rgba(39, 169, 255, 0.34);
 }
 
 .hud-name {
   overflow: hidden;
   color: var(--gold);
-  font-size: clamp(0.82rem, 3vw, 1.15rem);
+  font-size: clamp(0.86rem, 3vw, 1.2rem);
   font-weight: 1000;
   font-style: italic;
   text-overflow: ellipsis;
@@ -459,10 +525,12 @@ button {
 }
 
 .health-track {
-  height: 10px;
+  height: 12px;
   border: 1px solid #d4b25b;
+  clip-path: polygon(2% 0, 100% 0, 98% 100%, 0 100%);
   background: #160c11;
   transform: skew(-12deg);
+  box-shadow: inset 0 0 0 2px #08090e, 0 0 8px rgba(255, 170, 0, 0.24);
 }
 
 .health-track span {
@@ -483,13 +551,14 @@ button {
 }
 
 .timer {
-  min-height: 38px;
-  border: 1px solid var(--line);
+  min-height: 44px;
+  border: 2px solid var(--line);
   clip-path: polygon(20% 0, 80% 0, 100% 50%, 80% 100%, 20% 100%, 0 50%);
   background: rgba(7, 10, 19, 0.88);
   color: white;
-  font-size: 1rem;
+  font-size: 1.05rem;
   font-weight: 900;
+  box-shadow: inset 0 0 0 3px #060810, 0 3px 0 #02040a;
 }
 
 .timer small {
@@ -556,20 +625,30 @@ button {
   bottom: calc(var(--safe-bottom) + 76px);
   left: 8px;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 62px minmax(84px, 0.48fr);
+  grid-template-columns: minmax(0, 1fr) 62px minmax(92px, 0.54fr);
   gap: 6px;
   align-items: end;
 }
 
 .board-shell {
   position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
   height: 100%;
   min-height: 0;
   padding: 20px 5px 5px;
-  border: 1px solid rgba(255, 190, 41, 0.72);
-  border-radius: 6px;
-  background: linear-gradient(180deg, rgba(4, 8, 20, 0.82), rgba(1, 3, 10, 0.96));
-  box-shadow: inset 0 0 18px rgba(0, 0, 0, 0.8), 0 4px 18px rgba(0, 0, 0, 0.5);
+  border: 2px solid rgba(255, 190, 41, 0.78);
+  border-radius: 4px;
+  clip-path: polygon(3% 0, 97% 0, 100% 2%, 100% 98%, 97% 100%, 3% 100%, 0 98%, 0 2%);
+  background:
+    linear-gradient(180deg, rgba(24, 40, 67, 0.34), transparent 24%),
+    rgba(1, 4, 12, 0.92);
+  box-shadow:
+    inset 0 0 0 3px rgba(3, 5, 12, 0.94),
+    inset 0 0 0 4px rgba(255, 190, 41, 0.18),
+    inset 0 0 28px rgba(0, 0, 0, 0.82),
+    0 4px 18px rgba(0, 0, 0, 0.62);
 }
 
 .board-label {
@@ -585,10 +664,13 @@ button {
 
 .gem-board {
   display: grid;
+  width: 100%;
+  height: auto;
+  max-height: 100%;
+  aspect-ratio: 1 / 2;
   grid-template-columns: repeat(6, 1fr);
   grid-template-rows: repeat(12, 1fr);
   gap: clamp(2px, 0.5vw, 4px);
-  height: 100%;
 }
 
 .gem {
@@ -597,15 +679,16 @@ button {
   min-width: 0;
   min-height: 0;
   place-items: center;
-  border: 1px solid color-mix(in srgb, var(--gem) 65%, white);
-  border-radius: 18%;
+  border: 2px solid color-mix(in srgb, var(--gem) 58%, white);
+  border-radius: 0;
+  clip-path: polygon(22% 0, 78% 0, 100% 22%, 100% 78%, 78% 100%, 22% 100%, 0 78%, 0 22%);
   background:
     radial-gradient(circle at 34% 28%, rgba(255, 255, 255, 0.9) 0 8%, transparent 10%),
     linear-gradient(135deg, color-mix(in srgb, var(--gem) 70%, white), var(--gem) 42%, color-mix(in srgb, var(--gem) 62%, black));
   box-shadow:
-    inset 2px 2px 0 rgba(255, 255, 255, 0.34),
-    inset -2px -2px 0 rgba(0, 0, 0, 0.48),
-    0 0 8px color-mix(in srgb, var(--gem) 45%, transparent);
+    inset 2px 2px 0 rgba(255, 255, 255, 0.42),
+    inset -2px -2px 0 rgba(0, 0, 0, 0.58),
+    0 0 9px color-mix(in srgb, var(--gem) 52%, transparent);
   color: white;
   font-size: 0.56rem;
   font-weight: 900;
@@ -620,6 +703,7 @@ button {
 }
 
 .gem.empty {
+  clip-path: none;
   border-color: rgba(255, 255, 255, 0.025);
   background: rgba(3, 6, 15, 0.16);
   box-shadow: none;
@@ -658,7 +742,7 @@ button {
 .match-rail {
   display: grid;
   align-content: end;
-  gap: 8px;
+  gap: 7px;
   height: 100%;
 }
 
@@ -682,8 +766,9 @@ button {
   display: grid;
   place-items: center;
   padding: 6px 2px;
-  border: 1px solid rgba(255, 190, 41, 0.42);
-  background: rgba(3, 5, 12, 0.84);
+  border: 2px solid rgba(255, 190, 41, 0.56);
+  clip-path: polygon(10% 0, 90% 0, 100% 12%, 100% 88%, 90% 100%, 10% 100%, 0 88%, 0 12%);
+  background: rgba(3, 5, 12, 0.92);
 }
 
 .chain-readout strong {
@@ -697,13 +782,13 @@ button {
   overflow: hidden;
   aspect-ratio: 1;
   place-items: center;
-  border: 2px solid var(--gold);
+  border: 3px solid var(--gold);
   border-radius: 50%;
   background: radial-gradient(circle, #633300, #100900 70%);
   color: var(--gold-bright);
   font-size: 0.76rem;
   font-weight: 1000;
-  box-shadow: 0 0 18px rgba(255, 160, 0, 0.3);
+  box-shadow: inset 0 0 0 3px #120b02, 0 0 22px rgba(255, 160, 0, 0.48);
 }
 
 .super-button span {
@@ -771,12 +856,16 @@ button {
   gap: 12px;
   width: min(82vw, 420px);
   padding: 26px 20px;
-  border: 1px solid var(--gold);
+  border: 2px solid var(--gold);
   clip-path: polygon(6% 0, 94% 0, 100% 8%, 100% 92%, 94% 100%, 6% 100%, 0 92%, 0 8%);
   background:
     linear-gradient(180deg, rgba(255, 190, 41, 0.08), transparent 18%),
     rgba(4, 7, 14, 0.97);
-  box-shadow: 0 0 50px rgba(0, 0, 0, 0.7), inset 0 0 30px rgba(255, 169, 0, 0.08);
+  box-shadow:
+    0 0 50px rgba(0, 0, 0, 0.76),
+    inset 0 0 0 4px #080a10,
+    inset 0 0 0 6px rgba(255, 190, 41, 0.3),
+    inset 0 0 30px rgba(255, 169, 0, 0.12);
 }
 
 .pause-panel h2 {
@@ -785,6 +874,18 @@ button {
   color: var(--gold);
   font-size: 2.6rem;
   font-style: italic;
+}
+
+.pause-controls {
+  padding: 9px 10px;
+  border: 1px solid rgba(39, 169, 255, 0.48);
+  background: rgba(3, 10, 24, 0.86);
+  color: rgba(225, 236, 255, 0.7);
+  font-size: 0.66rem;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  line-height: 1.5;
+  text-align: center;
 }
 
 .results-screen {
@@ -835,7 +936,7 @@ button {
   grid-template-columns: repeat(3, 1fr);
   width: min(92vw, 650px);
   transform: translateX(-50%);
-  border: 1px solid rgba(255, 190, 41, 0.64);
+  border: 2px solid rgba(255, 190, 41, 0.72);
   background: rgba(3, 5, 12, 0.9);
 }
 
@@ -894,11 +995,13 @@ button {
   }
 
   .gameplay-layout {
-    top: 18%;
-    right: 4%;
-    bottom: 4%;
-    left: 4%;
-    grid-template-columns: minmax(0, 1fr) 84px minmax(0, 1fr);
+    top: 34%;
+    right: 3%;
+    bottom: 3%;
+    left: 3%;
+    grid-template-columns: minmax(220px, 300px) 90px minmax(220px, 300px);
+    justify-content: center;
+    gap: 12px;
   }
 
   .compact {
@@ -906,9 +1009,9 @@ button {
   }
 
   .fight-plane {
-    top: 0;
-    width: 58vw;
-    height: 55%;
+    top: 2%;
+    width: min(72vw, 860px);
+    height: 48%;
   }
 
   .match-screen .arena {
@@ -920,12 +1023,17 @@ button {
   }
 
   .fighter-select-grid {
-    width: min(70vw, 780px);
-    height: 66%;
+    width: min(62vw, 780px);
+    height: 58%;
   }
 
   .locked-roster {
-    display: none;
+    bottom: 10%;
+    width: min(58vw, 720px);
+  }
+
+  .select-confirm {
+    bottom: 1.5%;
   }
 }
 

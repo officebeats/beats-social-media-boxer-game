@@ -166,9 +166,12 @@ function fighterCard(id: FighterId): string {
 function healthBar(id: FighterId, isPlayer: boolean): string {
   return `
     <div class="fighter-hud ${isPlayer ? "player" : "rival"}">
-      <div class="hud-name">${fighterName(id)}</div>
-      <div class="health-track"><span style="width:100%"></span></div>
-      <div class="hud-stars">★ ★ ★</div>
+      <div class="fighter-sprite hud-portrait" style="${spriteStyle(id, "idle", !isPlayer)}"></div>
+      <div class="hud-info">
+        <div class="hud-name">${fighterName(id)}</div>
+        <div class="health-track"><span style="width:100%"></span></div>
+        <div class="hud-stars">★ ★ ★</div>
+      </div>
     </div>
   `;
 }
@@ -249,6 +252,7 @@ function matchMarkup(): string {
               <div class="pause-panel" role="dialog" aria-modal="true" aria-label="Paused">
                 <h2>PAUSED</h2>
                 <button class="primary-button" data-action="resume">RESUME</button>
+                <div class="pause-controls">ARROWS / SWIPE TO MOVE · TAP / ↑ TO ROTATE · SPACE / ↓ TO DROP</div>
                 <button class="secondary-button" data-action="options">AUDIO: ${muted ? "OFF" : "ON"}</button>
                 <button class="secondary-button" data-action="quit">QUIT</button>
               </div>
@@ -270,7 +274,7 @@ function resultsMarkup(): string {
         <span>WINNER</span>
         <strong>${fighterName(match.winner)}</strong>
       </div>
-      ${fighterVisual(match.winner, "win", "winner-fighter", match.winner === "broner" ? "right" : "left")}
+      ${fighterVisual(match.winner, "win", "winner-fighter", "right")}
       <div class="results-stats">
         <div><span>MAX CHAIN</span><strong>${winnerStats.maxChain}</strong></div>
         <div><span>GEMS</span><strong>${winnerStats.cleared}</strong></div>
@@ -306,6 +310,7 @@ function bindInteractions(): void {
     element.addEventListener("click", () => {
       selectedFighter = element.dataset.fighter as FighterId;
       renderDirty = true;
+      render();
     });
   });
   app.querySelectorAll<HTMLElement>("[data-command]").forEach((element) => {
@@ -355,6 +360,7 @@ function handleAction(action: string): void {
       return;
   }
   renderDirty = true;
+  render();
 }
 
 function handleCommand(command: string): void {
@@ -378,6 +384,7 @@ function handleCommand(command: string): void {
   }
   processMatchEvents();
   renderDirty = true;
+  render();
 }
 
 function bindGestures(element: HTMLElement): void {
@@ -409,6 +416,7 @@ function startMatch(fighter: FighterId = selectedFighter): void {
   audio.match.currentTime = 0;
   void audio.match.play().catch(() => undefined);
   renderDirty = true;
+  render();
 }
 
 function goHome(): void {
@@ -418,6 +426,7 @@ function goHome(): void {
   audio.match.currentTime = 0;
   void audio.title.play().catch(() => undefined);
   renderDirty = true;
+  render();
 }
 
 function unlockAudio(): void {
@@ -642,6 +651,7 @@ window.__ringRush = {
     match.phase = "results";
     screen = "results";
     renderDirty = true;
+    render();
   },
 };
 
