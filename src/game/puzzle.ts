@@ -38,6 +38,19 @@ export interface Resolution {
   cleared: number;
   chain: number;
   attack: number;
+  locked: ResolvedCell[];
+  steps: ResolutionStep[];
+}
+
+export interface ResolvedCell {
+  x: number;
+  y: number;
+  gem: Gem;
+}
+
+export interface ResolutionStep {
+  chain: number;
+  cells: ResolvedCell[];
 }
 
 export class SeededRandom {
@@ -203,7 +216,7 @@ export class PuzzleGame {
   }
 
   hardDrop(): Resolution {
-    if (!this.active) return { cleared: 0, chain: 0, attack: 0 };
+    if (!this.active) return { cleared: 0, chain: 0, attack: 0, locked: [], steps: [] };
     while (this.active) {
       const moved: ActivePair = { ...this.active, y: this.active.y + 1 };
       if (!this.canPlace(moved)) break;
@@ -214,29 +227,35 @@ export class PuzzleGame {
   }
 
   private lockAndResolve(): Resolution {
-    if (!this.active) return { cleared: 0, chain: 0, attack: 0 };
-    for (const { x, y, gem } of pairCells(this.active)) {
+    if (!this.active) return { cleared: 0, chain: 0, attack: 0, locked: [], steps: [] };
+    const locked = pairCells(this.active).map(({ x, y, gem }) => ({ x, y, gem: { ...gem } }));
+    for (const { x, y, gem } of locked) {
       this.board[y][x] = { ...gem };
     }
     this.active = null;
     const resolution = this.resolve();
     this.tickCounters();
     this.spawn();
-    return resolution;
+    return { ...resolution, locked };
   }
 
   private resolve(): Resolution {
     let total = 0;
     let chain = 0;
+    const steps: ResolutionStep[] = [];
     while (true) {
       const removal = this.findRemovalSet();
       if (removal.size === 0) break;
       chain += 1;
       total += removal.size;
+      const cells: ResolvedCell[] = [];
       for (const key of removal) {
         const [y, x] = key.split(":").map(Number);
+        const gem = this.board[y][x];
+        if (gem) cells.push({ x, y, gem: { ...gem } });
         this.board[y][x] = null;
       }
+      steps.push({ chain, cells });
       this.applyGravity();
     }
 
@@ -249,6 +268,8 @@ export class PuzzleGame {
       cleared: total,
       chain,
       attack: total === 0 ? 0 : Math.max(0, total - 3) + Math.max(0, chain - 1) * 4,
+      locked: [],
+      steps,
     };
   }
 
@@ -349,20 +370,24 @@ export class PuzzleGame {
     }
   }
 
-  addCounterGems(amount: number): void {
+  addCounterGems(amount: number): ResolvedCell[] {
+    const placed: ResolvedCell[] = [];
     for (let i = 0; i < amount; i += 1) {
       const column = this.lowestColumn();
       const targetY = this.firstEmptyFromBottom(column);
       if (targetY < 0) {
         this.topOut = true;
-        return;
+        return placed;
       }
-      this.board[targetY][column] = {
+      const gem: Gem = {
         color: GEM_COLORS[this.random.int(GEM_COLORS.length)],
         kind: "counter",
         turns: 3,
       };
+      this.board[targetY][column] = gem;
+      placed.push({ x: column, y: targetY, gem: { ...gem } });
     }
+    return placed;
   }
 
   private lowestColumn(): number {

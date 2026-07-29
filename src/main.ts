@@ -6,6 +6,7 @@ import {
   pairCells,
   type Gem,
   type PuzzleGame,
+  type ResolvedCell,
 } from "./game/puzzle";
 
 type Screen = "title" | "select" | "match" | "results";
@@ -19,6 +20,7 @@ declare global {
       screen: () => Screen;
       startMatch: (fighter?: FighterId) => void;
       finish: (winner: FighterId) => void;
+      showcaseGems: () => void;
     };
   }
 }
@@ -34,6 +36,10 @@ app.style.setProperty("--ring-mid-image", `url("${assetUrl("assets/arena/ring-mi
 app.style.setProperty(
   "--ring-foreground-image",
   `url("${assetUrl("assets/arena/ring-foreground.png")}")`,
+);
+app.style.setProperty(
+  "--gem-atlas-image",
+  `url("${assetUrl("assets/gems/ring-rush-gem-atlas.png")}")`,
 );
 const screenRootElement = app.querySelector<HTMLElement>("#screen-root");
 if (!screenRootElement) throw new Error("Missing screen root");
@@ -61,6 +67,8 @@ let rivalPose: FighterPose = "idle";
 let poseResetAt = 0;
 let impactText = "";
 let impactResetAt = 0;
+let gemFeedback = "idle";
+let gemFeedbackResetAt = 0;
 let parallaxX = 0;
 let parallaxY = 0;
 let renderedParallaxX = 0;
@@ -225,7 +233,7 @@ function boardMarkup(
       <div class="board-label">${label}</div>
       <div class="gem-board">${cells
         .map((cell) => `<span class="${cell.classes}">${cell.text}</span>`)
-        .join("")}</div>
+        .join("")}<div class="gem-fx-layer" aria-hidden="true"></div></div>
     </section>
   `;
 }
@@ -555,7 +563,30 @@ function processMatchEvents(): void {
 }
 
 function applyMatchEvent(event: MatchEvent): void {
+  if ((event.delayMs ?? 0) > 0) {
+    window.setTimeout(() => applyMatchEvent({ ...event, delayMs: 0 }), event.delayMs);
+    return;
+  }
   const actorIsPlayer = event.actor === "player";
+  if (event.type === "land") {
+    spawnGemEffects(event.actor, event.cells ?? [], "land");
+    pulseBoard(event.actor, "board-landed", 300);
+    setGemFeedback(`${event.actor} locked a pair`, 360);
+    vibrate(8);
+  } else if (event.type === "break") {
+    spawnGemEffects(event.actor, event.cells ?? [], "break");
+    pulseBoard(event.actor, "board-breaking", 520);
+    setGemFeedback(
+      `${event.actor} broke ${event.cells?.length ?? 0} gems at chain ${event.value ?? 1}`,
+      700,
+    );
+    vibrate((event.value ?? 1) > 1 ? [16, 28, 24] : 18);
+  } else if (event.type === "garbage") {
+    spawnGemEffects(event.actor, event.cells ?? [], "garbage");
+    pulseBoard(event.actor, "board-garbage", 520);
+    setGemFeedback(`${event.actor} received ${event.cells?.length ?? 0} counter gems`, 620);
+    vibrate([10, 22, 10]);
+  }
   if (event.type === "attack" || event.type === "super") {
     playerPose = actorIsPlayer ? "attack" : "hurt";
     rivalPose = actorIsPlayer ? "hurt" : "attack";
@@ -568,6 +599,45 @@ function applyMatchEvent(event: MatchEvent): void {
     impactText = "SUPER!";
     impactResetAt = performance.now() + 650;
   }
+}
+
+function setGemFeedback(message: string, durationMs: number): void {
+  gemFeedback = message;
+  gemFeedbackResetAt = performance.now() + durationMs;
+}
+
+function pulseBoard(actor: "player" | "rival", className: string, durationMs: number): void {
+  const board = app.querySelector<HTMLElement>(`[data-board="${actor}"]`);
+  if (!board) return;
+  board.classList.remove(className);
+  void board.offsetWidth;
+  board.classList.add(className);
+  window.setTimeout(() => board.classList.remove(className), durationMs);
+}
+
+function spawnGemEffects(
+  actor: "player" | "rival",
+  cells: ResolvedCell[],
+  mode: "land" | "break" | "garbage",
+): void {
+  const layer = app.querySelector<HTMLElement>(`[data-board="${actor}"] .gem-fx-layer`);
+  if (!layer) return;
+  cells.forEach((cell, index) => {
+    const effect = document.createElement("span");
+    effect.className = `gem-fx ${mode} ${gemClass(cell.gem)}`;
+    effect.style.setProperty("--cell-x", String(cell.x));
+    effect.style.setProperty("--cell-y", String(cell.y));
+    effect.style.setProperty("--fx-delay", `${index * 24}ms`);
+    effect.style.left = `${((cell.x + 0.5) / BOARD_WIDTH) * 100}%`;
+    effect.style.top = `${((cell.y + 0.5) / BOARD_HEIGHT) * 100}%`;
+    layer.append(effect);
+    const lifetime = mode === "break" ? 1250 : mode === "garbage" ? 1040 : 880;
+    window.setTimeout(() => effect.remove(), lifetime);
+  });
+}
+
+function vibrate(pattern: number | number[]): void {
+  if ("vibrate" in navigator) navigator.vibrate(pattern);
 }
 
 let currentEngine: { resize: () => void } | null = null;
@@ -650,6 +720,16 @@ window.addEventListener("deviceorientation", (event) => {
 });
 
 window.addEventListener("keydown", (event) => {
+  if (import.meta.env.DEV && event.key.toLowerCase() === "g") {
+    event.preventDefault();
+    window.__ringRush.showcaseGems();
+    return;
+  }
+  if (import.meta.env.DEV && event.key.toLowerCase() === "p") {
+    event.preventDefault();
+    document.documentElement.classList.toggle("qa-freeze-gem-fx");
+    return;
+  }
   if (event.key === "f") {
     if (document.fullscreenElement) void document.exitFullscreen();
     else void document.documentElement.requestFullscreen();
@@ -692,6 +772,9 @@ function fixedUpdate(deltaMs: number): void {
   if (performance.now() >= impactResetAt && impactText) {
     impactText = "";
     renderDirty = true;
+  }
+  if (performance.now() >= gemFeedbackResetAt && gemFeedback !== "idle") {
+    gemFeedback = "idle";
   }
 }
 
@@ -737,6 +820,7 @@ window.render_game_to_text = () => {
     screen,
     selectedFighter,
     muted,
+    gemFeedback,
     match: match
       ? {
           phase: match.phase,
@@ -783,6 +867,25 @@ window.__ringRush = {
     screen = "results";
     renderDirty = true;
     render();
+  },
+  showcaseGems: () => {
+    if (!match || screen !== "match") startMatch(selectedFighter);
+    if (!match) return;
+    matchReadyAt = 0;
+    const red: Gem = { color: "red", kind: "normal" };
+    match.player.board[BOARD_HEIGHT - 1][0] = { ...red };
+    match.player.board[BOARD_HEIGHT - 1][1] = { ...red };
+    match.player.board[BOARD_HEIGHT - 1][2] = { ...red };
+    match.player.active = {
+      x: 3,
+      y: 8,
+      orientation: 0,
+      pivot: { ...red },
+      satellite: { color: "blue", kind: "normal" },
+    };
+    match.hardDropPlayer();
+    processMatchEvents();
+    updateMatchDom();
   },
 };
 

@@ -814,6 +814,8 @@ button {
 }
 
 .gem-board {
+  position: relative;
+  isolation: isolate;
   display: grid;
   width: 100%;
   height: auto;
@@ -825,77 +827,352 @@ button {
 }
 
 .gem {
+  --gem-atlas-x: 0%;
   position: relative;
+  isolation: isolate;
   display: grid;
   min-width: 0;
   min-height: 0;
   place-items: center;
-  border: 2px solid color-mix(in srgb, var(--gem) 58%, white);
-  border-radius: 0;
-  clip-path: polygon(22% 0, 78% 0, 100% 22%, 100% 78%, 78% 100%, 22% 100%, 0 78%, 0 22%);
-  background:
-    radial-gradient(circle at 34% 28%, rgba(255, 255, 255, 0.9) 0 8%, transparent 10%),
-    linear-gradient(135deg, color-mix(in srgb, var(--gem) 70%, white), var(--gem) 42%, color-mix(in srgb, var(--gem) 62%, black));
-  box-shadow:
-    inset 2px 2px 0 rgba(255, 255, 255, 0.42),
-    inset -2px -2px 0 rgba(0, 0, 0, 0.58),
-    0 0 9px color-mix(in srgb, var(--gem) 52%, transparent);
+  border: 0;
+  background: transparent;
   color: white;
   font-size: 0.56rem;
   font-weight: 900;
+  text-shadow: 0 1px 2px #000, 0 0 4px #000;
   transition: filter 100ms linear, transform 100ms ease;
 }
 
+.gem::before,
 .gem::after {
   content: "";
   position: absolute;
-  inset: 20%;
-  transform: rotate(45deg);
-  border: 1px solid rgba(255, 255, 255, 0.35);
+  z-index: -1;
+  inset: -16%;
+  background-image: var(--gem-atlas-image);
+  background-repeat: no-repeat;
+  background-position: var(--gem-atlas-x) 0%;
+  background-size: 800% 300%;
+  image-rendering: pixelated;
+  transform-origin: center;
+  filter: drop-shadow(0 0 5px color-mix(in srgb, var(--gem) 62%, transparent));
+}
+
+.gem::after {
+  background-position-y: 50%;
+  opacity: 0;
+  animation: gem-idle-glint 2.6s steps(10, end) infinite;
 }
 
 .gem.empty {
-  clip-path: none;
-  border-color: rgba(255, 255, 255, 0.025);
   background: rgba(3, 6, 15, 0.16);
-  box-shadow: none;
 }
 
+.gem.empty::before,
 .gem.empty::after {
   display: none;
 }
 
-.gem.red { --gem: #ef2b26; }
-.gem.blue { --gem: #168cff; }
-.gem.green { --gem: #19a948; }
-.gem.yellow { --gem: #f2ad16; }
-.gem.purple { --gem: #8e36de; }
+.gem.red {
+  --gem: #ef2b26;
+  --gem-atlas-x: 0%;
+}
+
+.gem.blue {
+  --gem: #168cff;
+  --gem-atlas-x: 14.2857%;
+}
+
+.gem.green {
+  --gem: #19a948;
+  --gem-atlas-x: 28.5714%;
+}
+
+.gem.yellow {
+  --gem: #f2ad16;
+  --gem-atlas-x: 42.8571%;
+}
+
+.gem.purple {
+  --gem: #8e36de;
+  --gem-atlas-x: 57.1429%;
+}
 
 .gem.crash {
-  border-radius: 50%;
-  box-shadow: inset 0 0 0 3px rgba(255, 255, 255, 0.28), 0 0 12px var(--gem);
+  --gem-atlas-x: 71.4286%;
 }
 
 .gem.rainbow {
   --gem: #d9f7ff;
-  background: conic-gradient(#ff4352, #ffd34d, #45d981, #4ba5ff, #a95aff, #ff4352);
+  --gem-atlas-x: 85.7143%;
+}
+
+.gem.rainbow::before {
+  animation: rainbow-gem 1.5s steps(10, end) infinite;
 }
 
 .gem.counter {
-  filter: saturate(0.45);
-  border-style: dashed;
+  --gem: #d7d9df;
+  --gem-atlas-x: 100%;
 }
 
 .gem.active-piece {
   z-index: 2;
-  animation: active-gem 720ms ease-in-out infinite alternate;
+  animation: active-gem 620ms cubic-bezier(0.34, 0, 0.66, 1) infinite alternate;
 }
+
+.gem.active-piece::after {
+  opacity: 0.62;
+  animation: active-gem-charge 620ms steps(6, end) infinite alternate;
+}
+
+.gem:nth-child(5n + 1)::after { animation-delay: -420ms; }
+.gem:nth-child(5n + 2)::after { animation-delay: -980ms; }
+.gem:nth-child(5n + 3)::after { animation-delay: -1540ms; }
+.gem:nth-child(5n + 4)::after { animation-delay: -2060ms; }
 
 @keyframes active-gem {
   to {
-    filter: brightness(1.24);
-    transform: translateY(-1px);
+    filter: brightness(1.22) drop-shadow(0 0 5px var(--gem));
+    transform: translateY(-2px) scale(1.035);
   }
+}
+
+@keyframes active-gem-charge {
+  to {
+    opacity: 0.18;
+    transform: scaleY(0.92) scaleX(1.06);
+  }
+}
+
+@keyframes gem-idle-glint {
+  0%,
+  72%,
+  100% {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  78% {
+    opacity: 0.38;
+    transform: scale(1.03);
+  }
+  86% {
+    opacity: 0;
+    transform: scale(1.08);
+  }
+}
+
+@keyframes rainbow-gem {
+  to {
+    filter: hue-rotate(360deg) drop-shadow(0 0 6px rgba(166, 231, 255, 0.9));
+  }
+}
+
+.gem-fx-layer {
+  position: absolute;
+  z-index: 8;
+  inset: 0;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.gem-fx {
+  position: absolute;
+  z-index: 1;
+  left: 50%;
+  top: 50%;
+  width: 18%;
+  aspect-ratio: 1;
+  margin: 0;
+  translate: -50% -50%;
+  background-image: var(--gem-atlas-image);
+  background-repeat: no-repeat;
+  background-position: var(--gem-atlas-x) 50%;
+  background-size: 800% 300%;
+  image-rendering: pixelated;
+  opacity: 0;
+  filter: drop-shadow(0 0 8px var(--gem));
+  animation-delay: var(--fx-delay);
+  animation-fill-mode: both;
+  pointer-events: none;
+}
+
+.gem-fx.land {
+  animation-name: gem-land-impact;
+  animation-duration: 720ms;
+  animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.gem-fx.break {
+  background-position-y: 100%;
+  animation-name: gem-break-burst;
+  animation-duration: 1140ms;
+  animation-timing-function: steps(16, end);
+}
+
+.gem-fx.break::before,
+.gem-fx.break::after {
+  content: "";
+  position: absolute;
+  inset: -24%;
+  background-image: var(--gem-atlas-image);
+  background-repeat: no-repeat;
+  background-position: var(--gem-atlas-x) 100%;
+  background-size: 800% 300%;
+  image-rendering: pixelated;
+  opacity: 0;
+  filter: drop-shadow(0 0 7px var(--gem));
+  animation-duration: 760ms;
+  animation-fill-mode: both;
+  animation-timing-function: cubic-bezier(0.12, 0.76, 0.22, 1);
+  pointer-events: none;
+}
+
+.gem-fx.break::before {
+  animation-name: gem-break-satellite-left;
+  animation-delay: calc(var(--fx-delay) + 70ms);
+}
+
+.gem-fx.break::after {
+  animation-name: gem-break-satellite-right;
+  animation-delay: calc(var(--fx-delay) + 120ms);
+}
+
+.gem-fx.garbage {
+  --gem-atlas-x: 100%;
+  background-position-y: 50%;
+  animation-name: gem-garbage-drop;
+  animation-duration: 920ms;
+  animation-timing-function: cubic-bezier(0.16, 0.82, 0.24, 1.12);
+}
+
+.qa-freeze-gem-fx .gem-fx {
+  animation-delay: -360ms !important;
+  animation-play-state: paused !important;
+}
+
+.board-landed {
+  animation: board-land-kick 260ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.board-breaking {
+  animation: board-break-flare 520ms ease-out;
+}
+
+.board-garbage {
+  animation: board-garbage-hit 480ms cubic-bezier(0.2, 0.75, 0.25, 1);
+}
+
+@keyframes gem-land-impact {
+  0% {
+    opacity: 0;
+    transform: translateY(-65%) scale(0.72, 1.2);
+  }
+  48% {
+    opacity: 0.95;
+    transform: translateY(8%) scale(1.18, 0.78);
+  }
+  76% {
+    opacity: 0.72;
+    transform: translateY(-3%) scale(0.94, 1.06);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes gem-break-burst {
+  0% {
+    opacity: 0;
+    transform: scale(0.46) rotate(-8deg);
+  }
+  14% {
+    opacity: 1;
+    transform: scale(1.22) rotate(3deg);
+  }
+  58% {
+    opacity: 1;
+    transform: scale(1.62) rotate(-2deg);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(2.08) rotate(8deg);
+    filter: brightness(1.45) drop-shadow(0 0 15px var(--gem));
+  }
+}
+
+@keyframes gem-break-satellite-left {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) rotate(0) scale(0.42);
+  }
+  24% {
+    opacity: 0.95;
+    transform: translate(-22%, -18%) rotate(-16deg) scale(0.78);
+  }
+  68% {
+    opacity: 0.78;
+    transform: translate(-72%, -58%) rotate(-44deg) scale(0.62);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-118%, -92%) rotate(-76deg) scale(0.34);
+  }
+}
+
+@keyframes gem-break-satellite-right {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) rotate(0) scale(0.4);
+  }
+  20% {
+    opacity: 1;
+    transform: translate(26%, 12%) rotate(18deg) scale(0.72);
+  }
+  66% {
+    opacity: 0.76;
+    transform: translate(84%, 54%) rotate(52deg) scale(0.58);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(128%, 94%) rotate(84deg) scale(0.3);
+  }
+}
+
+@keyframes gem-garbage-drop {
+  0% {
+    opacity: 0;
+    transform: translateY(-520%) rotate(-12deg) scale(0.7);
+  }
+  68% {
+    opacity: 1;
+    transform: translateY(10%) rotate(3deg) scale(1.08, 0.9);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(0) rotate(0) scale(1);
+  }
+}
+
+@keyframes board-land-kick {
+  42% { transform: translateY(2px); }
+  68% { transform: translateY(-1px); }
+}
+
+@keyframes board-break-flare {
+  28% {
+    box-shadow:
+      inset 0 0 30px rgba(255, 245, 184, 0.3),
+      0 0 22px rgba(255, 190, 41, 0.42);
+    filter: brightness(1.12);
+  }
+}
+
+@keyframes board-garbage-hit {
+  22% { transform: translateX(-2px); filter: saturate(0.72); }
+  44% { transform: translateX(2px); }
+  66% { transform: translateX(-1px); }
 }
 
 .compact {
@@ -1451,5 +1728,25 @@ button {
 
   .arena-layer {
     transform: none !important;
+  }
+
+  .gem-fx {
+    animation: none !important;
+    opacity: 0.88;
+    transform: scale(1.16);
+  }
+
+  .gem-fx.break::before,
+  .gem-fx.break::after {
+    animation: none !important;
+    opacity: 0.42;
+  }
+
+  .gem-fx.break::before {
+    transform: translate(-48%, -34%) scale(0.62);
+  }
+
+  .gem-fx.break::after {
+    transform: translate(54%, 38%) scale(0.58);
   }
 }

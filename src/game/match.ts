@@ -1,12 +1,20 @@
-import { BOARD_HEIGHT, BOARD_WIDTH, PuzzleGame, type Resolution } from "./puzzle";
+import {
+  BOARD_HEIGHT,
+  BOARD_WIDTH,
+  PuzzleGame,
+  type Resolution,
+  type ResolvedCell,
+} from "./puzzle";
 
 export type FighterId = "broner" | "deen";
 export type MatchPhase = "playing" | "paused" | "results";
 
 export interface MatchEvent {
-  type: "attack" | "hit" | "chain" | "super" | "result";
+  type: "land" | "break" | "garbage" | "attack" | "hit" | "chain" | "super" | "result";
   actor: "player" | "rival";
   value?: number;
+  cells?: ResolvedCell[];
+  delayMs?: number;
 }
 
 export class MatchGame {
@@ -77,7 +85,8 @@ export class MatchGame {
   usePlayerSuper(): boolean {
     if (this.phase !== "playing" || !this.player.useSuper()) return false;
     this.events.push({ type: "super", actor: "player" });
-    this.rival.addCounterGems(4);
+    const cells = this.rival.addCounterGems(4);
+    this.events.push({ type: "garbage", actor: "rival", cells, delayMs: 120 });
     this.checkResult();
     return true;
   }
@@ -93,14 +102,34 @@ export class MatchGame {
 
   private handleResolution(actor: "player" | "rival", resolution: Resolution | null): void {
     if (!resolution) return;
+    if (resolution.locked.length > 0) {
+      this.events.push({ type: "land", actor, cells: resolution.locked });
+    }
+    for (const step of resolution.steps) {
+      this.events.push({
+        type: "break",
+        actor,
+        value: step.chain,
+        cells: step.cells,
+        delayMs: (step.chain - 1) * 180,
+      });
+    }
+    const resolutionDelay = Math.max(0, resolution.steps.length - 1) * 180;
     if (resolution.chain > 1) {
-      this.events.push({ type: "chain", actor, value: resolution.chain });
+      this.events.push({ type: "chain", actor, value: resolution.chain, delayMs: resolutionDelay });
     }
     if (resolution.attack > 0) {
       const target = actor === "player" ? this.rival : this.player;
-      target.addCounterGems(Math.min(resolution.attack, 8));
-      this.events.push({ type: "attack", actor, value: resolution.attack });
-      this.events.push({ type: "hit", actor: actor === "player" ? "rival" : "player" });
+      const targetActor = actor === "player" ? "rival" : "player";
+      const cells = target.addCounterGems(Math.min(resolution.attack, 8));
+      this.events.push({ type: "attack", actor, value: resolution.attack, delayMs: resolutionDelay });
+      this.events.push({ type: "hit", actor: targetActor, delayMs: resolutionDelay });
+      this.events.push({
+        type: "garbage",
+        actor: targetActor,
+        cells,
+        delayMs: resolutionDelay + 120,
+      });
     }
   }
 
@@ -113,8 +142,9 @@ export class MatchGame {
     else if (this.rival.random.next() > 0.7) this.rival.rotate();
     if (this.rival.meter >= 100 && this.rival.random.next() > 0.82) {
       if (this.rival.useSuper()) {
-        this.player.addCounterGems(4);
+        const cells = this.player.addCounterGems(4);
         this.events.push({ type: "super", actor: "rival" });
+        this.events.push({ type: "garbage", actor: "player", cells, delayMs: 120 });
       }
     }
   }

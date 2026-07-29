@@ -22,7 +22,7 @@ Original prompt: Build a polished, mobile-friendly Ring Rush vertical slice that
 
 - Playtest and tune fall speed, attack tables, AI, meter gain, and super balance.
 - Expand four-state art strips into full multi-frame animation atlases.
-- Add jewel break/hit particles and haptics after timing is locked.
+- Tune jewel burst density and haptic strength on physical low-end mobile hardware.
 - Add Capacitor Android/iOS projects after the PWA vertical slice is approved.
 - Multiplayer and paid content remain interface-level future work only.
 
@@ -68,3 +68,13 @@ Original prompt: Build a polished, mobile-friendly Ring Rush vertical slice that
 - Added localhost-only worker and Ring Rush cache cleanup so stale production PWA modules cannot mask current development styling.
 - Captured and inspected before/after evidence at 590 × 559 plus 320 × 568, 390 × 844, and 844 × 390 select and match states.
 - Visual verdict iteration 12: 95/100, pass.
+
+## 2026-07-28 animated gem spectacle
+
+- Replaced flat CSS jewel faces with a generated, transparent 8 × 3 arcade gem atlas covering five normal colors, crash, rainbow, and counter gems in idle, impact, and burst states.
+- Extended deterministic puzzle resolution with immutable locked-cell and per-chain cleared-cell metadata; rendering consumes those events without slowing or changing game-state resolution.
+- Added cell-accurate landing squash, multi-stage break pinwheels, garbage drops, board impact, fighter reactions, chain feedback, and bounded mobile haptics.
+- Added a localhost-only deterministic `G` showcase that executes a real four-red-gem clear and counter attack for repeatable visual QA.
+- Preserved accessibility with a static, readable reduced-motion treatment instead of allowing animations to collapse to invisible final frames.
+- Verified the effect at 390 × 844 portrait and 844 × 390 landscape with the required game driver and in-app browser.
+- Visual verdict iteration 19: 93/100, pass.

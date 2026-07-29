@@ -165,3 +165,21 @@ No actionable P0, P1, or P2 visual mismatches remain.
 ## Final result
 
 final result: passed
+
+## 2026-07-28 gem spectacle pass
+
+### Iterations 13–18 — 72/100 → 87/100
+
+- Baseline finding: flat CSS jewels landed in a static column and successful clears had no cell-level visual payoff.
+- Added one generated 8 × 3 raster atlas for five colors plus crash, rainbow, and counter gems across idle, impact, and burst rows.
+- Routed immutable landing, per-chain break, and garbage-arrival cell metadata from deterministic puzzle resolution into the visual layer.
+- Corrected transient sprite coordinates, stacking, self-relative centering, and reduced-motion behavior.
+- Comparison evidence: `.omx/qa/gem-spectacle-comparison.png`.
+
+### Iteration 19 — 93/100
+
+- Every real clear now combines authored raster bursts, two staggered raster satellites, a board flare, fighter attack/hurt poses, chain feedback, garbage arrival, and bounded haptics.
+- The same choreography remains readable as a static treatment when reduced motion is requested.
+- Portrait evidence: `.omx/qa/gem-spectacle-final-portrait/shot-0.png`.
+- Landscape evidence: `.omx/qa/gem-spectacle-final-landscape/shot-0.png`.
+- Final result: passed.
