@@ -101,7 +101,7 @@ function fighterVisual(
   const naturalFacing = "right";
   const flip = naturalFacing !== facing;
   return `
-    <div class="fighter-frame fighter-${id} ${classes} pose-${pose}" data-pose="${pose}">
+    <div class="fighter-frame fighter-${id} ${classes} pose-${pose}" data-pose="${pose}" data-facing="${facing}">
       <div class="fighter-sprite fighter-fill" style="${spriteStyle(id, pose, flip)}"></div>
       ${id === "deen" && flip ? '<span class="deen-belt-fix">DEEN</span>' : ""}
     </div>
@@ -828,6 +828,10 @@ window.render_game_to_text = () => {
           elapsedMs: Math.round(match.elapsedMs),
           playerFighter: match.playerFighter,
           rivalFighter: match.rivalFighter,
+          fighters: {
+            player: { id: match.playerFighter, pose: playerPose, facing: "right" },
+            rival: { id: match.rivalFighter, pose: rivalPose, facing: "left" },
+          },
           winner: match.winner,
           player: {
             active: match.player.active,

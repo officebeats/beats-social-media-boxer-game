@@ -630,39 +630,42 @@ button {
   height: 100%;
   width: auto;
   transform-origin: 50% 100%;
+  will-change: transform;
 }
 
 .match-fighter.player {
   left: 8%;
-  --idle-shift: 1.2%;
-  --idle-lean: 0.35deg;
-  --idle-counter-shift: -0.8%;
-  --idle-counter-lean: -0.25deg;
+  --weave-in: 2.6%;
+  --weave-out: -2%;
+  --weave-in-lean: 1.35deg;
+  --weave-out-lean: -1.6deg;
 }
 
 .match-fighter.rival {
   right: 8%;
-  --idle-shift: -1.2%;
-  --idle-lean: -0.35deg;
-  --idle-counter-shift: 0.8%;
-  --idle-counter-lean: 0.25deg;
+  --weave-in: -2.6%;
+  --weave-out: 2%;
+  --weave-in-lean: -1.35deg;
+  --weave-out-lean: 1.6deg;
 }
 
 .match-fighter.pose-idle {
-  animation: fighter-idle-shift 1.6s steps(8, end) infinite;
+  animation: fighter-defensive-weave 2.6s steps(13, end) infinite;
 }
 
 .match-fighter.pose-idle .fighter-sprite {
-  transform-origin: 50% 82%;
-  animation: fighter-idle-breathe 1.6s steps(8, end) infinite;
+  transform-origin: 50% 78%;
+  will-change: transform;
+  filter: drop-shadow(0 12px 12px rgba(0, 0, 0, 0.6)) brightness(1.02);
+  animation: fighter-guard-roll 2.6s steps(13, end) infinite;
 }
 
-.match-fighter.player.pose-idle {
-  animation-delay: -480ms;
+.match-fighter.rival.pose-idle {
+  animation-delay: -1.3s;
 }
 
-.match-fighter.player.pose-idle .fighter-sprite {
-  animation-delay: -480ms;
+.match-fighter.rival.pose-idle .fighter-sprite {
+  animation-delay: -1.3s;
 }
 
 .match-fighter.player.pose-attack {
@@ -681,31 +684,59 @@ button {
   animation: rival-recoil 360ms cubic-bezier(0.2, 0.72, 0.28, 1) both;
 }
 
-@keyframes fighter-idle-shift {
+@keyframes fighter-defensive-weave {
   0%,
   100% {
     transform: translate3d(0, 0, 0) rotate(0);
   }
-  25% {
-    transform: translate3d(var(--idle-shift), -0.8%, 0) rotate(var(--idle-lean));
+  12% {
+    transform: translate3d(0, -1.1%, 0) rotate(0);
+  }
+  24% {
+    transform: translate3d(var(--weave-in), -0.5%, 0) rotate(var(--weave-in-lean))
+      scaleY(0.985);
+  }
+  38% {
+    transform: translate3d(var(--weave-out), 1.15%, 0) rotate(var(--weave-out-lean))
+      scaleY(0.968);
   }
   50% {
-    transform: translate3d(0, -2.2%, 0) rotate(0);
+    transform: translate3d(0, -2%, 0) rotate(0) scaleY(1.012);
   }
-  75% {
-    transform: translate3d(var(--idle-counter-shift), -0.6%, 0) rotate(var(--idle-counter-lean));
+  64% {
+    transform: translate3d(var(--weave-out), -0.15%, 0) rotate(var(--weave-out-lean));
+  }
+  78% {
+    transform: translate3d(var(--weave-in), 0.85%, 0) rotate(var(--weave-in-lean))
+      scaleY(0.977);
+  }
+  90% {
+    transform: translate3d(0, -1.15%, 0) rotate(0);
   }
 }
 
-@keyframes fighter-idle-breathe {
+@keyframes fighter-guard-roll {
   0%,
   100% {
     transform: scaleX(var(--flip)) scaleY(1) translateY(0);
-    filter: drop-shadow(0 12px 12px rgba(0, 0, 0, 0.58)) brightness(1);
+  }
+  24% {
+    transform: scaleX(var(--flip)) translate3d(2.8%, 0.8%, 0) rotate(1.15deg) scaleY(0.994);
+  }
+  38% {
+    transform: scaleX(var(--flip)) translate3d(-4.2%, 2.5%, 0) rotate(-1.9deg)
+      scaleY(0.972);
   }
   50% {
-    transform: scaleX(var(--flip)) scaleY(1.018) translateY(-0.55%);
-    filter: drop-shadow(0 13px 13px rgba(0, 0, 0, 0.62)) brightness(1.045);
+    transform: scaleX(var(--flip)) scaleY(1.022) translateY(-0.65%);
+  }
+  64% {
+    transform: scaleX(var(--flip)) translate3d(-3%, 1.25%, 0) rotate(-1.45deg)
+      scaleY(0.984);
+  }
+  78% {
+    transform: scaleX(var(--flip)) translate3d(3.6%, 1.7%, 0) rotate(1.65deg)
+      scaleY(0.978);
   }
 }
 

@@ -183,3 +183,17 @@ final result: passed
 - Portrait evidence: `.omx/qa/gem-spectacle-final-portrait/shot-0.png`.
 - Landscape evidence: `.omx/qa/gem-spectacle-final-landscape/shot-0.png`.
 - Final result: passed.
+
+### Iteration 20 — 74/100
+
+- Finding: fighter facing was correct, but the shared idle cycle read as a breathing bob rather than two boxers evading and studying one another.
+- Baseline evidence: `.omx/qa/weave-baseline/shot-0.png` through `shot-2.png`.
+
+### Iteration 21 — 94/100
+
+- Replaced the shared bob with mirrored 2.6-second defensive footwork and guard-roll cycles, offset by half a cycle so advances and slips answer one another.
+- Attack and hurt states still replace idle immediately; `data-facing` and text-state output prove Broner faces right and Deen faces left.
+- Comparison evidence: `.omx/qa/weave-comparison.png`.
+- Portrait sequence: `.omx/qa/weave-pass-portrait/shot-0.png` through `shot-3.png`.
+- Landscape sequence: `.omx/qa/weave-pass-landscape/shot-0.png` through `shot-3.png`.
+- Final result: passed.

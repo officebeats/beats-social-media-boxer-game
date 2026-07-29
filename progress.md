@@ -78,3 +78,13 @@ Original prompt: Build a polished, mobile-friendly Ring Rush vertical slice that
 - Preserved accessibility with a static, readable reduced-motion treatment instead of allowing animations to collapse to invisible final frames.
 - Verified the effect at 390 × 844 portrait and 844 × 390 landscape with the required game driver and in-app browser.
 - Visual verdict iteration 19: 93/100, pass.
+
+## 2026-07-28 defensive fighter weave
+
+- Preserved the side-aware pose contract: Broner always faces right toward center, while Deen always faces left toward center.
+- Replaced the shared breathing bob with mirrored guard slips, shoulder rolls, knee dips, lateral weight shifts, and light footwork.
+- Offset the rival by half of the 2.6-second cycle so one fighter advances as the other evades.
+- Kept the animation transform-only and scoped to `pose-idle`; attack and hurt sprites override it immediately.
+- Added fighter pose and facing to `render_game_to_text` for deterministic browser QA.
+- Verified four-frame portrait and landscape sequences plus attack/hurt override with no browser console errors.
+- Visual verdict iteration 21: 94/100, pass.
