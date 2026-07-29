@@ -151,9 +151,18 @@ button {
 }
 
 .fighter-frame {
+  aspect-ratio: var(--fighter-frame-ratio);
   overflow: visible;
   transform-origin: 50% 100%;
   will-change: transform;
+}
+
+.fighter-frame.fighter-broner {
+  --fighter-frame-ratio: 0.586;
+}
+
+.fighter-frame.fighter-deen {
+  --fighter-frame-ratio: 0.624;
 }
 
 .fighter-fill {
@@ -421,7 +430,11 @@ button {
 
 .card-fighter {
   position: absolute;
-  inset: 2% -22% 17%;
+  top: 2%;
+  bottom: 17%;
+  left: 50%;
+  width: auto;
+  transform: translateX(-50%);
 }
 
 .card-copy {
@@ -617,14 +630,6 @@ button {
   height: 100%;
   width: auto;
   transform-origin: 50% 100%;
-}
-
-.match-fighter.fighter-broner {
-  aspect-ratio: 0.586;
-}
-
-.match-fighter.fighter-deen {
-  aspect-ratio: 0.625;
 }
 
 .match-fighter.player {
@@ -1298,6 +1303,13 @@ button {
 
   .board-shell {
     padding-inline: 3px;
+  }
+}
+
+@media (min-width: 520px) and (max-width: 759px) and (max-height: 640px) {
+  .fight-plane {
+    top: 4%;
+    height: 31%;
   }
 }
 

@@ -59,3 +59,12 @@ Original prompt: Build a polished, mobile-friendly Ring Rush vertical slice that
 - Verified the revised staging at 320 × 568, 390 × 844, 430 × 932, and 844 × 390. Touch controls remained visible and active pieces responded correctly.
 - Explicitly preloaded Babylon's default shaders before arena material creation, eliminating an in-app-browser shader initialization race and its console errors.
 - Visual verdict iteration 9: 94/100, pass.
+
+## 2026-07-28 fighter aspect-ratio correction
+
+- Reproduced the reported 590 × 559 select screen and measured both card fighter containers at approximately 1.54:1, versus native frame ratios of 0.586:1 for Broner and 0.624:1 for Deen.
+- Replaced the negative horizontal card inset with centered height-based sizing and moved both source-frame ratios into shared fighter identity tokens used by select and match screens.
+- Added a bounded near-square match breakpoint so corrected fighters retain stage presence without overlapping the puzzle wells.
+- Added localhost-only worker and Ring Rush cache cleanup so stale production PWA modules cannot mask current development styling.
+- Captured and inspected before/after evidence at 590 × 559 plus 320 × 568, 390 × 844, and 844 × 390 select and match states.
+- Visual verdict iteration 12: 95/100, pass.

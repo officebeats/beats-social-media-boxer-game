@@ -16,6 +16,11 @@
 - Puzzle Fighter staging reference: `.omx/qa/puzzle-fighter-reference-3.jpg` (official Nintendo store capture, 1280 × 720).
 - Current sprite-staging comparison: `.omx/qa/sprite-stage-comparison.png`
 - Current sprite-staging capture: `.omx/qa/sprite-stage-pass-1/shot-0.png`
+- Aspect-ratio correction comparison: `.omx/qa/aspect-proportion-comparison.png`
+- Corrected 590 × 559 captures:
+  - `.omx/qa/aspect-fix-final-select/shot-0.png`
+  - `.omx/qa/aspect-fix-final-match/shot-0.png`
+- Corrected responsive contact sheet: `.omx/qa/aspect-responsive-contact-sheet.png`
 - Current live-match captures:
   - `.omx/qa/quality-intro/shot-0.png`
   - `.omx/qa/quality-pass-1/shot-0.png`
@@ -47,6 +52,7 @@
 - Match: `qa-mobile-match-play.png` retains fighter portraits, opposing health treatments, two compact 6 × 12 boards, center rail, jewel facets, supers, and touch controls.
 - Match opening: `.omx/qa/quality-intro/shot-0.png` shows the guarded FIGHT callout, dimmed playfield, inward-facing fighters, and readable touch controls before simulation begins.
 - Fighter staging: `.omx/qa/sprite-stage-pass-1/shot-0.png` shows compact inward-facing fighters on one ring baseline, with the stage ending before the wells begin.
+- Fighter geometry: `.omx/qa/aspect-proportion-comparison.png` shows the reported horizontally stretched select and match states beside the corrected native-frame rendering at the same 590 × 559 viewport.
 - Idle motion: `.omx/qa/idle-motion-sequence/shot-1.png` and `shot-2.png` show the staggered breathing/weight-shift cycle at two different animation phases.
 - Pause: `qa-mobile-pause.png` retains the centered black/gold modal and adds a compact controls reminder without obscuring the match.
 - Results: `qa-mobile-results.png` retains the oversized winner heading, victory sprite, three-stat strip, rematch, and home hierarchy.
@@ -73,6 +79,8 @@
 - Idle fighters use a 1.6-second stepped breathing and weight-shift cycle with offset timing; attack and hurt poses replace the idle animation rather than running on top of it.
 - Reduced-motion mode collapses continuous idle motion to the existing static stance.
 - Babylon's default vertex and fragment shaders are preloaded before arena materials initialize; the in-app browser reported no warnings or errors after the preload fix.
+- Broner and Deen now share one source-frame-ratio sizing path across selection cards and the match stage; computed select-card ratios changed from approximately 1.54:1 to 0.586:1 and 0.624:1.
+- Localhost unregisters old Ring Rush workers and clears Ring Rush caches before development modules settle, preventing cached pre-fix geometry from reappearing during visual iteration.
 - Browser console warnings/errors checked: none.
 
 ## Comparison history
@@ -126,6 +134,23 @@
 
 - Post-fix evidence: `.omx/qa/sprite-stage-comparison.png`, `.omx/qa/sprite-stage-pass-1/shot-0.png`, `.omx/qa/idle-motion-sequence/shot-1.png`, `.omx/qa/idle-motion-sequence/shot-2.png`, and the three revised responsive captures.
 - The fighters now read as compact Puzzle Fighter-style stage actors while retaining the selected Street Fighter/MVC anatomical art direction.
+
+### Iteration 10 — 64/100
+
+- Findings: both select-card fighters were stretched to approximately 1.54:1 by a negative horizontal inset even though their source frames are approximately 0.586:1 and 0.624:1; the supplied match capture showed the superseded wide fighter rule.
+- Evidence: `C:/Users/admin-beats/AppData/Local/Temp/codex-clipboard-c5d97884-3b80-41b7-aef5-0cd429b7b234.png`, `C:/Users/admin-beats/AppData/Local/Temp/codex-clipboard-91cb78f9-013b-49cd-8070-203746a328aa.png`, and `.omx/qa/aspect-baseline-select.png`.
+
+### Iteration 11 — 88/100
+
+- Fixes: removed the negative horizontal card inset, introduced one per-fighter source-frame ratio token, centered each card fighter by height, and added local worker/cache cleanup.
+- Remaining finding: naturally proportioned fighters were slightly undersized at the reported near-square viewport.
+- Evidence: `.omx/qa/aspect-fix-select/shot-0.png` and `.omx/qa/aspect-fix-match/shot-0.png`.
+
+### Iteration 12 — 95/100
+
+- Fix: added a bounded 520–759 pixel near-square breakpoint that uses 31% of viewport height for the stage without overlapping the wells.
+- Post-fix evidence: `.omx/qa/aspect-proportion-comparison.png`, `.omx/qa/aspect-fix-final-select/shot-0.png`, `.omx/qa/aspect-fix-final-match/shot-0.png`, and `.omx/qa/aspect-responsive-contact-sheet.png`.
+- Both fighters now preserve their original pixel-art anatomy and face one another across all tested breakpoints.
 
 ## Findings
 
