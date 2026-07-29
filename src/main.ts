@@ -260,6 +260,9 @@ function matchMarkup(): string {
         <div class="impact-copy ${impactText ? "show" : ""}">${impactText}</div>
         ${fighterVisual(match.rivalFighter, rivalPose, "match-fighter rival", "left")}
       </div>
+      <div class="ring-depth-occluder" aria-hidden="true">
+        <div class="arena-layer ring-foreground"></div>
+      </div>
       <div class="gameplay-layout">
         ${boardMarkup(match.player, false, "YOU", "player")}
         <aside class="match-rail">

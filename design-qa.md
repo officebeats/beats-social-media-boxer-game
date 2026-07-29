@@ -197,3 +197,23 @@ final result: passed
 - Portrait sequence: `.omx/qa/weave-pass-portrait/shot-0.png` through `shot-3.png`.
 - Landscape sequence: `.omx/qa/weave-pass-landscape/shot-0.png` through `shot-3.png`.
 - Final result: passed.
+
+## 2026-07-28 boxing-ring depth pass
+
+### Iterations 23–29 — 70/100 → 84/100
+
+- Baseline finding: the fighters rendered above every arena layer, so their feet appeared pasted over the canvas instead of standing between the ropes.
+- Reused the authored transparent `ring-foreground.png` as a match-only foreground plane rather than drawing a replacement rope in CSS.
+- Placed the foreground plane between the fighters and puzzle UI, then tuned its crop independently for portrait, desktop, and short landscape.
+- Kept the existing parallax transform on the inner arena layer while moving the clipping container separately.
+
+### Iteration 30 — 95/100
+
+- Rear ropes remain behind the fighters, the near rope visibly crosses their lower legs, and the puzzle wells remain the top readable interaction plane.
+- Short landscape preserves the raster's aspect ratio, shifts the oversized corner post mostly offscreen, and carries one continuous rope across both fighters.
+- Facing, defensive weave, attack/hurt overrides, board geometry, and mobile controls remain intact.
+- Comparison evidence: `.omx/qa/ring-depth-comparison.png`.
+- Portrait evidence: `.omx/qa/ring-depth-pass-portrait/shot-0.png`.
+- Desktop evidence: `.omx/qa/ring-depth-pass-desktop/shot-0.png`.
+- Short-landscape evidence: `.omx/qa/ring-depth-pass-short-landscape-v3/shot-0.png`.
+- Final result: passed.

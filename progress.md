@@ -88,3 +88,12 @@ Original prompt: Build a polished, mobile-friendly Ring Rush vertical slice that
 - Added fighter pose and facing to `render_game_to_text` for deterministic browser QA.
 - Verified four-frame portrait and landscape sequences plus attack/hurt override with no browser console errors.
 - Visual verdict iteration 21: 94/100, pass.
+
+## 2026-07-28 boxing-ring depth and occlusion
+
+- Reused the authored 3D/parallax ring foreground as a real occlusion plane instead of approximating a rope with CSS.
+- Established a clear depth stack: rear arena and ropes, fighters, foreground rope, then puzzle boards and controls.
+- Added breakpoint-specific clipping and positioning so the near rope crosses both fighters in portrait, desktop, and short landscape without hiding gameplay.
+- Preserved the source raster's aspect ratio in short landscape with `background-size: auto 100%` rather than stretching the ring art.
+- Verified 390 × 844 portrait, 1280 × 720 desktop, and 844 × 390 short-landscape captures against the approved mock.
+- Visual verdict iteration 30: 95/100, pass.
