@@ -498,10 +498,19 @@ button {
 
 .card-fighter {
   position: absolute;
-  top: 2%;
-  bottom: 17%;
-  left: 50%;
+  top: 4%;
+  bottom: 18%;
+  height: auto;
   width: auto;
+}
+
+.fighter-card.broner .card-fighter {
+  left: 57%;
+  transform: translateX(-50%);
+}
+
+.fighter-card.deen .card-fighter {
+  left: 49%;
   transform: translateX(-50%);
 }
 
