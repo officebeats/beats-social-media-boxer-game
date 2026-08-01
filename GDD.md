@@ -1,6 +1,6 @@
 # GAME DESIGN DOCUMENT: CRASH OUT: RING RUSH — PUZZLE BOXING
 
-**Document Version:** 4.0.0 (AAA Production Standard — Official Title Rebrand Release)  
+**Document Version:** 5.0.0 (AAA Production Standard — Single Player Arcade & Complete Visual Spec)  
 **Studio:** Antigravity Studios — Executive Production Division  
 **Lead Game Producer:** AAA Competitive Game Systems Producer  
 **Principal Game Designer:** Senior Puzzle-Fighter & 2D Combat Systems Architect  
@@ -221,41 +221,44 @@ Every screen in Crash Out: Ring Rush is navigable via **touch**, **gamepad**, or
 │   └──────────┘        └──────────┘       └──────┬───────┘                 │
 │        (1.5s auto)       (any input)            │                         │
 │                                                  │                         │
-│                          ┌───────────────────────┼─────────────┐           │
-│                          ▼                       ▼             ▼           │
-│                   ┌────────────┐         ┌────────────┐ ┌───────────┐     │
-│                   │  VS CPU    │         │  SETTINGS  │ │  HOW TO   │     │
-│                   │ (Fighter   │         │            │ │  PLAY     │     │
-│                   │  Select)   │         └────────────┘ └───────────┘     │
-│                   └─────┬──────┘               ▲              ▲           │
-│                         │ CONFIRM              │ BACK         │ BACK      │
-│                         ▼                      │              │           │
-│                  ┌──────────────┐               │              │           │
-│                  │ DIFFICULTY   │               │              │           │
-│                  │ SELECT       │               │              │           │
-│                  └──────┬───────┘               │              │           │
-│                         │ CONFIRM               │              │           │
-│                         ▼                       │              │           │
-│                  ┌──────────────┐               │              │           │
-│                  │ ROUND INTRO  │               │              │           │
-│                  │ "ROUND 1"    │               │              │           │
-│                  │ "FIGHT!"     │               │              │           │
-│                  └──────┬───────┘               │              │           │
-│                         │ (auto 1.5s)           │              │           │
-│                         ▼                       │              │           │
-│                  ┌──────────────┐               │              │           │
-│                  │ ACTIVE       │               │              │           │
-│                  │ BATTLE       │──▶ SUPER ──┐  │              │           │
-│                  │ (60 FPS)     │◀───────────┘  │              │           │
-│                  └──────┬───────┘    PAUSE ──▶┌──────────┐     │           │
-│                         │                     │ PAUSE    │     │           │
-│                         │ KO                  │ MENU     │     │           │
-│                         ▼                     └──────────┘     │           │
-│                  ┌──────────────┐                              │           │
-│                  │ RESULTS /    │──(PLAY AGAIN)──▶ Fighter Select           │
-│                  │ VICTORY      │──(MAIN MENU)──▶ Main Menu    │           │
-│                  │ SCREEN       │──(SHARE)──▶ Share Card Gen   │           │
-│                  └──────────────┘                              │           │
+│                ┌─────────────────────────────────┼─────────────┐           │
+│                ▼                                 ▼             ▼           │
+│         ┌──────────────┐                 ┌────────────┐ ┌───────────┐     │
+│         │ SINGLE PLAYER│                 │  SETTINGS  │ │  HOW TO   │     │
+│         │ ARCADE MODE  │                 │            │ │  PLAY     │     │
+│         └──────┬───────┘                 └────────────┘ └───────────┘     │
+│                │                               ▲              ▲           │
+│                ▼                               │ BACK         │ BACK      │
+│         ┌──────────────┐                       │              │           │
+│         │ FIGHTER      │ (Choose P1)           │              │           │
+│         │ SELECT       │                       │              │           │
+│         └──────┬───────┘                       │              │           │
+│                │ CONFIRM                       │              │           │
+│                ▼                               │              │           │
+│         ┌──────────────┐                       │              │           │
+│         │ ARCADE MAP / │                       │              │           │
+│         │ LADDER (7 STG)                       │              │           │
+│         └──────┬───────┘                       │              │           │
+│                │ CONFIRM STAGE                 │              │           │
+│                ▼                               │              │           │
+│         ┌──────────────┐                       │              │           │
+│         │ ROUND INTRO  │                       │              │           │
+│         │ "ROUND 1"    │                       │              │           │
+│         └──────┬───────┘                       │              │           │
+│                │ (auto 1.5s)                   │              │           │
+│                ▼                               │              │           │
+│         ┌──────────────┐                       │              │           │
+│         │ ACTIVE BATTLE│──▶ SUPER ──────────┐  │              │           │
+│         │ (60 FPS)     │◀───────────────────┘  │              │           │
+│         └──────┬───────┘        PAUSE ──────▶┌──────────┐     │           │
+│                │                             │ PAUSE    │     │           │
+│                │ KO                          │ MENU     │     │           │
+│                ▼                             └──────────┘     │           │
+│         ┌──────────────┐                                      │           │
+│         │ STAGE CLEAR /│──(NEXT STAGE)──▶ Arcade Ladder        │           │
+│         │ CHAMPIONSHIP │──(MAIN MENU)──▶ Main Menu            │           │
+│         │ VICTORY CARD │──(SHARE)─────▶ Share Card Gen        │           │
+│         └──────────────┘                                      │           │
 └────────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -331,24 +334,59 @@ Every screen in Crash Out: Ring Rush is navigable via **touch**, **gamepad**, or
 ┌──────────────────────────────────────┐
 │  [🔊]   CRASH OUT: RING RUSH    [⚙️] │  ← Top Bar
 │                                      │
-│                                      │
 │        ┌──────────────────┐          │
-│        │  ▶ VS CPU        │ ◀ focus  │  ← Menu Item (58px, gold border)
+│        │ ▶ SINGLE PLAYER  │ ◀ focus  │  ← Main Mode (Arcade Gauntlet)
+│        │   ARCADE MODE    │          │
 │        └──────────────────┘          │
 │        ┌──────────────────┐          │
-│        │    HOW TO PLAY   │          │  ← Menu Item (58px)
+│        │    VERSUS CPU    │          │  ← Quick Match vs AI
 │        └──────────────────┘          │
 │        ┌──────────────────┐          │
-│        │    SETTINGS      │          │  ← Menu Item (58px)
+│        │    HOW TO PLAY   │          │  ← Tutorial
+│        └──────────────────┘          │
+│        ┌──────────────────┐          │
+│        │    SETTINGS      │          │  ← Settings
 │        └──────────────────┘          │
 │                                      │
-│                                      │
-│    ◄/► D-Pad  ⓐ Select  ⓑ Back     │  ← Input legend (auto-detected)
-│                                      │
+│    ◄/► D-Pad  ⓐ Select  ⓑ Back     │
 └──────────────────────────────────────┘
 ```
 
-**Navigation Focus Order** (vertical list, wraps): `VS CPU` → `HOW TO PLAY` → `SETTINGS`.
+**Navigation Focus Order**: `SINGLE PLAYER ARCADE` → `VERSUS CPU` → `HOW TO PLAY` → `SETTINGS`.
+
+---
+
+#### 3.2.4 Single Player Arcade Mode ("Locked-In Warehouse Championship")
+
+**Overview**: Single Player Arcade Mode is the core solo campaign. The player selects their fighter, then battles through a 7-stage gauntlet of stream guests to earn the Kick Warehouse Championship Belt.
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│  [◀ BACK]     WAREHOUSE CHAMPIONSHIP LADDER      [⚙️]        │
+│                                                              │
+│  STAGE 7: [GRAND BOSS] FLOYD MAYWEATHER  (Pure Gold Wall)   │  🔒
+│  STAGE 6: [BOSS] GERVONTA "TANK" DAVIS   (Mono Red Wall)    │  🔒
+│  STAGE 5: ADRIEN BRONER                  (Philly Heavy)     │  🔒
+│  STAGE 4: RYAN GARCIA                    (Flash Cross)      │  🔒
+│  STAGE 3: BLUEFACE                       (Brawl Noise)      │  🔒
+│  STAGE 2: RAY J                          (Tech Grid)        │  🔒
+│  STAGE 1: N3ON ◀ CURRENT STAGE           (Twin Spikes)      │  ⚡
+│                                                              │
+│  ┌────────────────────────────────────────────────────────┐  │
+│  │ YOUR FIGHTER: DEEN THE GREAT    SCORE: 000,000        │  │
+│  └────────────────────────────────────────────────────────┘  │
+│                                                              │
+│              ┌──────────────────────────────┐                │
+│              │    ▶ START STAGE 1 ◀         │                │
+│              └──────────────────────────────┘                │
+└──────────────────────────────────────────────────────────────┘
+```
+
+**Arcade Rules**:
+1. **7 Sequential Stages**: Progression saves locally. Clearing a stage unlocks the next rung on the ladder.
+2. **Boss Unlocks**: Defeating Stage 6 (Tank Davis) and Stage 7 (Floyd Mayweather) permanently unlocks them as playable roster choices on the Character Select screen.
+3. **Cumulative High Score**: Points are awarded for speed, max chain combos, and remaining HP. High scores persist on a local Leaderboard screen.
+4. **Continue Screen**: On KO loss, player gets a 10-second arcade countdown ("CONTINUE? 9... 8...") with 3 continues allowed per run.
 
 | Input | Action |
 | :--- | :--- |
