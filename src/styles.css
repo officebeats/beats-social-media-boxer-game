@@ -666,94 +666,99 @@ button {
   --weave-out-lean: 1.6deg;
 }
 
-.match-fighter.pose-idle {
-  animation: fighter-defensive-weave 2.6s steps(13, end) infinite;
+.match-fighter.fighter-broner.pose-idle {
+  animation: broner-philly-roll 2.2s steps(11, end) infinite;
 }
 
-.match-fighter.pose-idle .fighter-sprite {
-  transform-origin: 50% 78%;
+.match-fighter.fighter-broner.pose-idle .fighter-sprite {
+  transform-origin: 50% 82%;
   will-change: transform;
-  filter: drop-shadow(0 12px 12px rgba(0, 0, 0, 0.6)) brightness(1.02);
-  animation: fighter-guard-roll 2.6s steps(13, end) infinite;
+  filter: drop-shadow(0 12px 14px rgba(0, 0, 0, 0.65)) brightness(1.04);
+  animation: broner-guard-dip 2.2s steps(11, end) infinite;
+}
+
+.match-fighter.fighter-deen.pose-idle {
+  animation: deen-pressure-bounce 1.7s steps(9, end) infinite;
+}
+
+.match-fighter.fighter-deen.pose-idle .fighter-sprite {
+  transform-origin: 50% 82%;
+  will-change: transform;
+  filter: drop-shadow(0 12px 14px rgba(0, 0, 0, 0.65)) brightness(1.04);
+  animation: deen-guard-pulse 1.7s steps(9, end) infinite;
 }
 
 .match-fighter.rival.pose-idle {
-  animation-delay: -1.3s;
+  animation-delay: -0.85s;
 }
 
 .match-fighter.rival.pose-idle .fighter-sprite {
-  animation-delay: -1.3s;
+  animation-delay: -0.85s;
 }
 
-.match-fighter.player.pose-attack {
-  animation: player-lunge 360ms cubic-bezier(0.16, 0.85, 0.24, 1) both;
-}
-
-.match-fighter.rival.pose-attack {
-  animation: rival-lunge 360ms cubic-bezier(0.16, 0.85, 0.24, 1) both;
-}
-
-.match-fighter.player.pose-hurt {
-  animation: player-recoil 360ms cubic-bezier(0.2, 0.72, 0.28, 1) both;
-}
-
-.match-fighter.rival.pose-hurt {
-  animation: rival-recoil 360ms cubic-bezier(0.2, 0.72, 0.28, 1) both;
-}
-
-@keyframes fighter-defensive-weave {
-  0%,
-  100% {
-    transform: translate3d(0, 0, 0) rotate(0);
+@keyframes broner-philly-roll {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
   }
-  12% {
-    transform: translate3d(0, -1.1%, 0) rotate(0);
-  }
-  24% {
-    transform: translate3d(var(--weave-in), -0.5%, 0) rotate(var(--weave-in-lean))
-      scaleY(0.985);
-  }
-  38% {
-    transform: translate3d(var(--weave-out), 1.15%, 0) rotate(var(--weave-out-lean))
-      scaleY(0.968);
+  25% {
+    transform: translate3d(-2.2%, 0.8%, 0) rotate(1.8deg) scaleY(0.982);
   }
   50% {
-    transform: translate3d(0, -2%, 0) rotate(0) scaleY(1.012);
+    transform: translate3d(1.4%, -1.8%, 0) rotate(-1.2deg) scaleY(1.02);
   }
-  64% {
-    transform: translate3d(var(--weave-out), -0.15%, 0) rotate(var(--weave-out-lean));
-  }
-  78% {
-    transform: translate3d(var(--weave-in), 0.85%, 0) rotate(var(--weave-in-lean))
-      scaleY(0.977);
-  }
-  90% {
-    transform: translate3d(0, -1.15%, 0) rotate(0);
+  75% {
+    transform: translate3d(-1.6%, 1.1%, 0) rotate(2.1deg) scaleY(0.975);
   }
 }
 
-@keyframes fighter-guard-roll {
-  0%,
-  100% {
-    transform: scaleX(var(--flip)) scaleY(1) translateY(0);
+@keyframes broner-guard-dip {
+  0%, 100% {
+    transform: scaleX(var(--flip)) translateY(0);
   }
-  24% {
-    transform: scaleX(var(--flip)) translate3d(2.8%, 0.8%, 0) rotate(1.15deg) scaleY(0.994);
-  }
-  38% {
-    transform: scaleX(var(--flip)) translate3d(-4.2%, 2.5%, 0) rotate(-1.9deg)
-      scaleY(0.972);
+  25% {
+    transform: scaleX(var(--flip)) translate3d(1.8%, 1.2%, 0) rotate(1.4deg);
   }
   50% {
-    transform: scaleX(var(--flip)) scaleY(1.022) translateY(-0.65%);
+    transform: scaleX(var(--flip)) translate3d(-1.2%, -1.2%, 0) rotate(-1deg) scaleY(1.025);
   }
-  64% {
-    transform: scaleX(var(--flip)) translate3d(-3%, 1.25%, 0) rotate(-1.45deg)
-      scaleY(0.984);
+  75% {
+    transform: scaleX(var(--flip)) translate3d(2.1%, 1.5%, 0) rotate(1.8deg);
   }
-  78% {
-    transform: scaleX(var(--flip)) translate3d(3.6%, 1.7%, 0) rotate(1.65deg)
-      scaleY(0.978);
+}
+
+@keyframes deen-pressure-bounce {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+  20% {
+    transform: translate3d(0, -2.4%, 0) scaleY(1.028);
+  }
+  40% {
+    transform: translate3d(2.2%, 0.6%, 0) rotate(-1.6deg) scaleY(0.98);
+  }
+  60% {
+    transform: translate3d(0, -2.8%, 0) scaleY(1.032);
+  }
+  80% {
+    transform: translate3d(-1.8%, 1.2%, 0) rotate(1.2deg) scaleY(0.972);
+  }
+}
+
+@keyframes deen-guard-pulse {
+  0%, 100% {
+    transform: scaleX(var(--flip)) translateY(0);
+  }
+  20% {
+    transform: scaleX(var(--flip)) translateY(-1.5%) scaleY(1.02);
+  }
+  40% {
+    transform: scaleX(var(--flip)) translate3d(-1.5%, 1%, 0) rotate(-1.2deg);
+  }
+  60% {
+    transform: scaleX(var(--flip)) translateY(-1.8%) scaleY(1.025);
+  }
+  80% {
+    transform: scaleX(var(--flip)) translate3d(1.2%, 1.2%, 0) rotate(1deg);
   }
 }
 
