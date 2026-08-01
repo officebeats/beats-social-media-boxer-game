@@ -325,6 +325,7 @@ function resultsMarkup(): string {
   if (!match || !match.winner) return "";
   const winnerIsPlayer = match.winner === match.playerFighter;
   const winnerStats = winnerIsPlayer ? match.player : match.rival;
+  const victoryImg = assetUrl(`assets/fighters/${match.winner}-hd-victory.jpg`);
   return `
     <section class="screen results-screen">
       ${stageMarkup()}
@@ -332,7 +333,9 @@ function resultsMarkup(): string {
         <span>WINNER</span>
         <strong>${fighterName(match.winner)}</strong>
       </div>
-      ${fighterVisual(match.winner, "win", "winner-fighter", "right")}
+      <div class="winner-portrait-card">
+        <img class="winner-hd-art" src="${victoryImg}" alt="${fighterName(match.winner)} Victory Portrait" />
+      </div>
       <div class="results-stats">
         <div><span>MAX CHAIN</span><strong>${winnerStats.maxChain}</strong></div>
         <div><span>GEMS</span><strong>${winnerStats.cleared}</strong></div>

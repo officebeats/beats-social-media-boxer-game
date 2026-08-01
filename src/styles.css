@@ -1654,19 +1654,27 @@ button {
   letter-spacing: 0.48em;
 }
 
-.winner-fighter {
+.winner-portrait-card {
   position: absolute;
   z-index: 6;
-  top: 20%;
+  top: 17%;
   left: 50%;
-  width: min(76vw, 430px);
-  height: 44%;
+  width: min(82vw, 440px);
+  height: 48%;
   transform: translateX(-50%);
+  border: 3px solid var(--gold);
+  clip-path: polygon(6% 0, 94% 0, 100% 6%, 100% 94%, 94% 100%, 6% 100%, 0 94%, 0 6%);
+  box-shadow: 0 0 45px rgba(255, 190, 41, 0.48), inset 0 0 0 3px #050711;
+  overflow: hidden;
+  background: #060914;
 }
 
-.winner-fighter .fighter-sprite {
-  image-rendering: auto;
-  filter: drop-shadow(0 0 30px rgba(255, 190, 41, 0.55)) drop-shadow(0 16px 22px rgba(0, 0, 0, 0.78)) brightness(1.08);
+.winner-hd-art {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  filter: brightness(1.06) contrast(1.04);
 }
 
 .results-stats {
