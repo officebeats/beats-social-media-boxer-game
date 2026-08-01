@@ -1657,11 +1657,16 @@ button {
 .winner-fighter {
   position: absolute;
   z-index: 6;
-  top: 17%;
+  top: 20%;
   left: 50%;
-  width: min(95vw, 620px);
-  height: 53%;
+  width: min(76vw, 430px);
+  height: 44%;
   transform: translateX(-50%);
+}
+
+.winner-fighter .fighter-sprite {
+  image-rendering: auto;
+  filter: drop-shadow(0 0 30px rgba(255, 190, 41, 0.55)) drop-shadow(0 16px 22px rgba(0, 0, 0, 0.78)) brightness(1.08);
 }
 
 .results-stats {
