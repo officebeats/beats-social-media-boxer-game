@@ -104,7 +104,6 @@ function fighterVisual(
   return `
     <div class="fighter-frame fighter-${id} ${classes} pose-${pose}" data-pose="${pose}" data-facing="${facing}">
       <div class="fighter-sprite fighter-fill" style="${spriteStyle(id, pose, flip)}"></div>
-      ${id === "deen" && flip ? '<span class="deen-belt-fix">DEEN</span>' : ""}
     </div>
   `;
 }
