@@ -1,6 +1,6 @@
 # GAME DESIGN DOCUMENT: CRASH OUT: RING RUSH — PUZZLE BOXING
 
-**Document Version:** 5.1.0 (AAA Production Standard — Dynamic Idle & Fidget Engine Spec)  
+**Document Version:** 6.0.0 (AAA Production Standard — Unified Active Battle Visual Benchmark)  
 **Studio:** Antigravity Studios — Executive Production Division  
 **Lead Game Producer:** AAA Competitive Game Systems Producer  
 **Principal Game Designer:** Senior Puzzle-Fighter & 2D Combat Systems Architect  
@@ -35,6 +35,7 @@
 2. **Tactile Arcade Boxing Impact** — Every puzzle event triggers a visible, audible, *felt* response: directional hit sparks, per-pixel screen shake with exponential decay curves, synth punch audio, and a parallax arena that reacts to combat.
 3. **Authentic 2026 Stream Culture** — Roster strictly features celebrities who actually appeared on the Adrien Broner & Deen The Great Kick streams in 2026.
 4. **Sub-100ms Mobile Ergonomics** — 58px+ touch targets, safe-area inset compliance, persistent container event delegation, and zero dropped taps on iOS Safari.
+5. **Unified Active Battle Aesthetic** — Every screen in the game (menus, ladder, character select, pause, results, tutorials) is strictly built around the high-impact visual splash, 16-bit Capcom pixel art, electric neon lighting, and gold/cyan 3D metallic bevel style of the **Active Battle View**.
 
 ---
 
