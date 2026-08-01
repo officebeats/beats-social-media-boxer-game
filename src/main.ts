@@ -113,7 +113,6 @@ function stageMarkup(): string {
       <div class="arena" aria-hidden="true">
       <div class="arena-layer venue-far"></div>
       <div class="arena-layer ring-mid"></div>
-      <div class="arena-layer ring-foreground"></div>
       <div class="arena-vignette"></div>
     </div>
   `;
@@ -135,7 +134,6 @@ function titleMarkup(): string {
         <div class="versus">VS</div>
         ${fighterVisual("deen", "idle", "title-fighter deen", "left")}
       </div>
-      <div class="title-ring-front" aria-hidden="true"></div>
       <nav class="title-actions" aria-label="Main menu">
         <button class="primary-button" data-action="fight">FIGHT</button>
         <button class="secondary-button" data-action="options">AUDIO: ${muted ? "OFF" : "ON"}</button>
@@ -279,9 +277,6 @@ function matchMarkup(): string {
         ${fighterVisual(match.playerFighter, playerPose, "match-fighter player", "right")}
         <div class="impact-copy ${impactText ? "show" : ""}">${impactText}</div>
         ${fighterVisual(match.rivalFighter, rivalPose, "match-fighter rival", "left")}
-      </div>
-      <div class="ring-depth-occluder" aria-hidden="true">
-        <div class="arena-layer ring-foreground"></div>
       </div>
       <div class="gameplay-layout">
         ${boardMarkup(match.player, false, "YOU", "player")}
