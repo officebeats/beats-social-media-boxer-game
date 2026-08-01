@@ -68,7 +68,7 @@ $$\text{Counter Gems Sent} = \left\lfloor (\text{Cleared Gems} \times 0.75) \tim
 
 ---
 
-## 4. Fighter Move Visualizer & Sprite Sheet Specifications
+## 4. Fighter Move Visualizer, Sprite Sheet Specs & Animation Timing
 
 ### 4.1 Visual Move Display System
 Every boxer visualizes real-time combat in the ring corresponding directly to puzzle board events:
@@ -87,13 +87,31 @@ Counter Gems Received       ──>   Hurt Flinch / Head Snap Back Animation
 Match Knockout (KO)         ──>   Knockdown Flatten Animation + KO Bell + HD Victory Card
 ```
 
-### 4.2 Sprite Sheet Generation Specs for AI Agents
+### 4.2 Capcom 12/15 FPS Arcade Animation Timing & Motion Style
+To capture the exact snappy, weighted 2D arcade feel of Capcom's *Super Puzzle Fighter II Turbo*:
+
+- **Render Loop vs. Animation Step Rate**: The web application renders at **60 FPS**, but character sprite sheet animations execute at a discrete **12 FPS – 15 FPS step rate** (each keyframe is held for 4 to 5 render frames, i.e., **80ms – 100ms per step**).
+- **CSS Step Functions**: Sprite keyframe animations MUST use discrete step timing (`animation-timing-function: steps(N)`) so transitions tick crisply between frames with **zero linear interpolation blur**.
+
+#### Frame Breakdown & Timing Matrix:
+
+| Move State | Total Frames | Step Duration per Frame | Total Cycle Time | Animation Feel & Motion Rules |
+| :--- | :--- | :--- | :--- | :--- |
+| **Idle Stance** | 4 Frames | 90ms | 360ms (Looping) | **Philly Roll / Bounce**: Frame 1 (Neutral), Frame 2 (Shoulder Step), Frame 3 (Peak Roll), Frame 4 (Relax Step). |
+| **Light Jab** | 3 Frames | 60ms / 120ms / 80ms | 260ms (Snappy) | Frame 1 (Quick Windup), Frame 2 (Full Extension Impact + Hit Spark), Frame 3 (Snappy Guard Recovery). |
+| **Heavy Counter** | 5 Frames | 80ms / 100ms / 140ms / 100ms / 80ms | 500ms (Heavy Weight) | Frame 1 (Crouch Windup), Frame 2 (Explosive Rise), Frame 3 (Peak Impact + Flash Screen Shake), Frame 4 (Follow-through), Frame 5 (Reset). |
+| **SUPER Finisher** | 8 Frames | 80ms per frame | 640ms (Multi-hit Flurry) | Rapid 4-punch flurry (Jab $\to$ Cross $\to$ Hook $\to$ Uppercut $\to$ Victory Pose). |
+| **Hurt Flinch** | 3 Frames | 120ms / 100ms / 80ms | 300ms (Recoil) | Frame 1 (Head Snap Back), Frame 2 (Peak Recoil), Frame 3 (Guard Reset). |
+| **Knockout (KO)** | 4 Frames | 140ms per frame | 560ms (Flatten) | Frame 1 (Stagger), Frame 2 (Knees Buckle), Frame 3 (Canvas Falling), Frame 4 (Sprawled Motionless). |
+| **Victory Pose** | 4 Frames | 100ms per frame | 400ms (Looping) | Belt Raise / Flex Stance with ambient sparkle particles. |
+
+### 4.3 Sprite Sheet Generation Specs for AI Agents
 To generate new or replacement fighter sprite sheets using AI image generation tools (`generate_image`), follow these precise specifications:
 
-- **Canvas Size**: 1024 × 1024 pixels.
-- **Grid Layout**: 4 Columns × 1 Row (or 4 Columns × 2 Rows).
+- **Canvas Resolution**: 2048 × 2048 pixels (or 1024 × 1024).
+- **Grid Layout**: 4 Columns × 2 Rows (8-cell sheet) or 4 Columns × 4 Rows (16-cell sheet).
 - **Background**: Solid `#00ff00` Chroma-Key Green for automated background removal.
-- **Style Keyword**: 16-bit Capcom Arcade Pixel Art, Super Puzzle Fighter II Turbo style, rich HSL colors, crisp black outlines, 2D fighting game character sprite sheet.
+- **Art Direction**: 16-bit Capcom Arcade Pixel Art, Super Puzzle Fighter II Turbo style, rich HSL colors, crisp black outlines, 2D fighting game character sprite sheet.
 
 #### AI Prompt Template (Example for Adrien Broner):
 > *"A 16-bit arcade pixel art sprite sheet of professional boxer Adrien Broner on a solid green #00ff00 background. 4 animation poses from left to right: Cell 1: Philly Shell boxer idle stance with left arm low and right glove at chin; Cell 2: Heavy right hook punch with extended arm and gold glove; Cell 3: Hurt flinch stance with head snapped back; Cell 4: Arms raised victory celebration stance with championship belt. Capcom Super Puzzle Fighter II Turbo pixel art style, high detail, clean outlines."*
