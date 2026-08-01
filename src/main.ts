@@ -446,26 +446,42 @@ function updateMatchDom(now = performance.now()): void {
   }
 }
 
-function bindInteractions(): void {
-  app.querySelectorAll<HTMLElement>("[data-action]").forEach((element) => {
-    element.addEventListener("click", () => handleAction(element.dataset.action ?? ""));
-  });
-  app.querySelectorAll<HTMLElement>("[data-fighter]").forEach((element) => {
-    element.addEventListener("click", () => {
-      selectedFighter = element.dataset.fighter as FighterId;
-      renderDirty = true;
-      render();
-    });
-  });
-  app.querySelectorAll<HTMLElement>("[data-command]").forEach((element) => {
-    element.addEventListener("pointerdown", (event) => {
-      event.preventDefault();
-      handleCommand(element.dataset.command ?? "");
-    });
-  });
+let interactionsInitialized = false;
 
+function bindInteractions(): void {
   const playerBoard = app.querySelector<HTMLElement>(".board-shell:not(.compact)");
   if (playerBoard) bindGestures(playerBoard);
+
+  if (interactionsInitialized) return;
+  interactionsInitialized = true;
+
+  app.addEventListener("pointerdown", (event) => {
+    unlockAudio();
+    const target = (event.target as HTMLElement | null)?.closest<HTMLElement>("[data-command]");
+    if (target) {
+      event.preventDefault();
+      handleCommand(target.dataset.command ?? "");
+    }
+  });
+
+  app.addEventListener("click", (event) => {
+    unlockAudio();
+    const target = event.target as HTMLElement | null;
+    const actionBtn = target?.closest<HTMLElement>("[data-action]");
+    if (actionBtn) {
+      handleAction(actionBtn.dataset.action ?? "");
+      return;
+    }
+    const fighterBtn = target?.closest<HTMLElement>("[data-fighter]");
+    if (fighterBtn) {
+      const fighter = fighterBtn.dataset.fighter as FighterId;
+      if (selectedFighter !== fighter) {
+        selectedFighter = fighter;
+        renderDirty = true;
+        render();
+      }
+    }
+  });
 }
 
 function handleAction(action: string): void {
@@ -544,7 +560,11 @@ function bindGestures(element: HTMLElement): void {
   element.addEventListener("pointerdown", (event) => {
     startX = event.clientX;
     startY = event.clientY;
-    element.setPointerCapture(event.pointerId);
+    try {
+      element.setPointerCapture(event.pointerId);
+    } catch {
+      // Ignored for browsers that restrict pointer capture
+    }
   });
   element.addEventListener("pointerup", (event) => {
     const dx = event.clientX - startX;
