@@ -1,6 +1,6 @@
 # GAME DESIGN DOCUMENT: RING RUSH — PUZZLE BOXING
 
-**Document Version:** 3.1.0 (AAA Production Standard — Full Input & Navigation Spec)  
+**Document Version:** 3.2.0 (AAA Production Standard — Fighter Persona & Animation Spec)  
 **Studio:** Antigravity Studios — Executive Production Division  
 **Lead Game Producer:** AAA Competitive Game Systems Producer  
 **Principal Game Designer:** Senior Puzzle-Fighter & 2D Combat Systems Architect  
@@ -813,6 +813,165 @@ Floyd Mayweather:  [ Gold | Gold | Gold | Gold | Gold | Gold ]   (Gold Wall)  [G
 | **Antonio Brown** | Stream Guest | 1,060 | 1.2× | 1.15× | 1.1× | **Business Boomin'**: Hard drops +30% score and +1 Counter Gem sent. | **84 Catch KO**: 560 dmg + business grid |
 | **Gervonta Davis** | BOSS | 1,250 | 1.1× | 1.45× | 1.0× | **Knockout Power**: Power Gem detonations 3× dmg + screen shake. | **Tank Uppercut**: 700 dmg + mono wall |
 | **Floyd Mayweather** | GRAND BOSS | 1,300 | 1.2× | 1.2× | 1.1× | **The Best Ever**: Auto-converts 2 Counter Gems→Normal every 10s. | **TBE Masterclass**: 680 dmg + gold wall |
+
+### 5.3 Persona-Authentic Idle Animations & Signature SUPER Finisher Breakdown
+
+Each fighter's visual design, idle animation loop, and signature SUPER finisher are directly modeled after their real-life personality, stream memes, and Kick warehouse stream moments ("Locked In-A-Thon" / "Crash Out Boyz").
+
+---
+
+#### 1. Adrien "The Problem" Broner
+- **Stream Context**: Main host of the Kick stream house, multi-division champion known for his brush meme, Philly shell defense, and "Can't Play With Me" catchphrase.
+- **Unique Idle Animation ("Philly Hairbrush Bounce")**: 4-frame loop. Broner holds a low Philly Shell guard, dipping his left shoulder. On frame 4 of every second loop, he quickly reaches down, pulls out a gold hairbrush, brushes his hair/beard twice, and snaps back to guard.
+- **Signature SUPER Finisher ("About Billions / Can't Play With Me")**:
+  - *Cinematic*: Broner flashes a stack of cash into the camera, yells "CAN'T PLAY WITH ME!", then charges with a 3-punch combination (Jab → Body Hook → Overhand Right).
+  - *Visual Effects*: Gold money bill particles burst on impact; camera shakes ±14px.
+  - *Audio Cue*: Synth voice burst + hard bass thud.
+  - *Puzzle Effect*: 600 Damage + drops a 5-row solid Red/Gold Heavy Block onto opponent board.
+
+---
+
+#### 2. Deen The Great
+- **Stream Context**: Co-host of Kick stream events, Misfits Boxing champion, hyper-athletic southpaw known for rapid combos and headband flair.
+- **Unique Idle Animation ("Misfits High Guard Bounce")**: 4-frame high-frequency bounce. Southpaw stance with tight gloves at forehead. Frame 3 features a quick head-twitch and headband adjustment with his right glove, eyes never leaving the rival.
+- **Signature SUPER Finisher ("Misfits Combo Blitz")**:
+  - *Cinematic*: Deen executes a 360° spin step, lunging across the ring mat with a 6-hit light speed combo (Jab-Cross-Hook-Upper-Hook-Cross).
+  - *Visual Effects*: Neon cyan speed ribbons trail his gloves; text "MISFITS!" flashes above opponent.
+  - *Audio Cue*: Rapid-fire high-pitch punch chimes (6 hits in 300ms).
+  - *Puzzle Effect*: 520 Damage + drops an Alternating Stair Step (Blue/Cyan) Counter Gem pattern.
+
+---
+
+#### 3. Ryan Garcia
+- **Stream Context**: Warehouse stream guest, world champion boxer, viral social media figure known for lightning-fast left hooks and cross necklace taps.
+- **Unique Idle Animation ("KingRy Flash & Cross Touch")**: Flamboyant orthodox posture. Taps his gloves together, quickly touches his gold cross necklace, and performs a lightning micro-jab shadowbox.
+- **Signature SUPER Finisher ("KingRy Flash Left Hook")**:
+  - *Cinematic*: Screen freezes, flashes pure white for 100ms. Ryan teleports across the canvas and delivers a single, devastating left hook that stops time for 200ms.
+  - *Visual Effects*: Bright yellow/red flash cross spark overlay; screen shakes exponentially.
+  - *Audio Cue*: High-voltage electrical arc SFX + heavy sub-bass thud.
+  - *Puzzle Effect*: 620 Damage + drops the KingRy Flash Cross pattern.
+
+---
+
+#### 4. Ray J
+- **Stream Context**: Tech entrepreneur stream guest, famous for introducing wild tech gadgets, Raytroniks glasses, and hilarious stream pitches.
+- **Unique Idle Animation ("Raytroniks Glasses Push & Pitch")**: Wears futuristic blue LED glasses on his forehead. Every 3rd idle loop, Ray J taps the side of his glasses (they light up blue), adjusts his jacket lapel, and winks at the arena camera.
+- **Signature SUPER Finisher ("Raytroniks Tech Overload")**:
+  - *Cinematic*: Ray J pulls out a glowing blue tech scanner device, aims it at the rival board, scanning it with a vertical laser grid.
+  - *Visual Effects*: Futuristic digital matrix grid overlay on rival's puzzle board; blue energy particles.
+  - *Audio Cue*: Synth digital laser sweep (440Hz → 1760Hz).
+  - *Puzzle Effect*: 520 Damage + converts 2 random rows into Gold/Blue Tech Grid Counter Gems.
+
+---
+
+#### 5. N3ON
+- **Stream Context**: Collaborator and Kick streamer known for hyperactive reactions, chat chaos, and dramatic stream moments.
+- **Unique Idle Animation ("Twitch Chat Twitch & Headset Fix")**: Unstable, energetic stance. Constantly fidgeting, adjusting his gaming headset/microphone, taking quick steps back and forth while looking up at invisible stream chat overlay.
+- **Signature SUPER Finisher ("Twitch Chat Agitation")**:
+  - *Cinematic*: N3ON clutches his head and screams, as the screen fills with red and green stream chat spam ("W N3ON", "L N3ON", "CRASH OUT!"). He rushes forward with a frantic multi-hit slap barrage.
+  - *Visual Effects*: Floating stream chat text particles scrolling upward across both puzzle boards.
+  - *Audio Cue*: High-frequency glitch synth noise burst.
+  - *Puzzle Effect*: 480 Damage + drops Twin Spike columns of 3-turn fast Countdown Gems.
+
+---
+
+#### 6. Blueface
+- **Stream Context**: Talent show guest and rapper/boxer known for his off-beat rhythm memes, face tattoos, and wild brawl style.
+- **Unique Idle Animation ("Off-Beat Brawler Sway")**: Asymmetric wide stance. Shrugs shoulders out of rhythm with the background music, taps his cheek face tattoo, and flexes his left arm with a cocky grin.
+- **Signature SUPER Finisher ("Thotiana Off-Beat Knockout")**:
+  - *Cinematic*: Blueface hits an off-beat dance step, then throws an unorthodox, looping wide right haymaker from out of frame.
+  - *Visual Effects*: Deep blue flame trails behind his fist; bass wave distortion ripple on screen.
+  - *Audio Cue*: Heavy off-beat bass drop synth thud (30Hz low end).
+  - *Puzzle Effect*: 580 Damage + drops a completely Randomized Noise barrage of Counter Gems.
+
+---
+
+#### 7. Chrisean Rock
+- **Stream Context**: Stream boxing match participant, known for raw power, South Beach stream moments, and unfiltered brawling energy.
+- **Unique Idle Animation ("South Beach Aggro Stinger")**: Forward-leaning aggressive posture. Chews gum aggressively, cracks her knuckles every 2nd loop, and forcefully double-taps the canvas with her lead foot.
+- **Signature SUPER Finisher ("South Beach Crash Out Brawl")**:
+  - *Cinematic*: Chrisean lets out a roar, charges across the ring with a flying tackle-punch, slamming the opponent into the ring ropes.
+  - *Visual Effects*: Red aura burst; ring ropes warp violently; max-amplitude screen shake (±16px).
+  - *Audio Cue*: Heavy impact crunch + roar distortion SFX.
+  - *Puzzle Effect*: 590 Damage + drops a 4-column Brawler Wall (Red/Yellow).
+
+---
+
+#### 8. Rampage Jackson
+- **Stream Context**: MMA legend and warehouse stream guest, famous for his iconic door-breaking chain howl, heavy slams, and power persona.
+- **Unique Idle Animation ("MMA Chain Howl & Slam Stance")**: Heavy, broad MMA stance. Wears his famous thick metal chain around his neck. Frame 4 of loop: tilts head back, howls at the ceiling spotlights, and slaps his chest with both gloves.
+- **Signature SUPER Finisher ("Rampage Cage Slam")**:
+  - *Cinematic*: Rampage grabs the opponent sprite by the waist (visual animation lock), lifts them overhead, and slams them straight down onto the ring canvas floor mat.
+  - *Visual Effects*: Radial ground shockwave crack texture on canvas floor; screen shake decay (400ms).
+  - *Audio Cue*: Low-frequency explosive explosion synth (60Hz → 20Hz).
+  - *Puzzle Effect*: 640 Damage + drops a Heavy Red/Gold MMA Slam pattern.
+
+---
+
+#### 9. Adin Ross
+- **Stream Context**: Main Kick collab streamer, stream host who brought huge audiences to the warehouse sessions, known for hype stream callouts.
+- **Unique Idle Animation ("Streamer Hype Lean & Chair Spin")**: Stands upright with a purple Kick microphone in his left glove. Every 3rd loop, does a quick 180° spin on an invisible gaming chair, pointing at the camera with a hype grin.
+- **Signature SUPER Finisher ("Brand Risk Overload")**:
+  - *Cinematic*: Adin yells "IS THAT A W?!", a purple Kick stream frame flashes over the match, and Adin lunges with a lucky, wildly animated overhand right.
+  - *Visual Effects*: Purple and gold coin particles stream from impact point; "W!" text pops over opponent.
+  - *Audio Cue*: Ascending hype chime + coin sound burst.
+  - *Puzzle Effect*: 500 Damage + drops a Gold/Red Checkerboard pattern.
+
+---
+
+#### 10. Charleston White
+- **Stream Context**: Stream rant guest famous for viral stream rants, holding a microphone, and hilarious pepper spray/mace references.
+- **Unique Idle Animation ("Crash Out Rant & Mace Touch")**: Frantic, highly expressive stance. Constantly talking with small animated speech bubble bursts popping near his head ("LISTEN HERE!"), holding a small yellow spray bottle in his left pocket.
+- **Signature SUPER Finisher ("Mace & Mic Crash Out")**:
+  - *Cinematic*: Charleston pulls out a yellow mace bottle, sprays a cloud of yellow mist across the ring (stunning the opponent sprite), then swings a heavy microphone like a club.
+  - *Visual Effects*: Yellow cloud fog particle overlay on opponent; star sparks on impact.
+  - *Audio Cue*: Hissing spray SFX + loud metallic mic thud.
+  - *Puzzle Effect*: 510 Damage + forces a Yellow/Red Rant Grid drop onto opponent.
+
+---
+
+#### 11. Walid Sharks
+- **Stream Context**: Deen The Great's main stream boxing rival, known for rapid speed bag reflexes, flashy footwork, and rainbow-styled gear.
+- **Unique Idle Animation ("Speed Bag Reflex Shuffle")**: Highly fluid bob-and-weave stance. Moves side-to-side while throwing rapid micro shadow-punches into the air as if hitting an invisible speed bag.
+- **Signature SUPER Finisher ("Flash Counter Uppercut")**:
+  - *Cinematic*: Walid slips an incoming punch with a crisp back-bend dodge, then explodes upward into the air with a soaring skyward uppercut.
+  - *Visual Effects*: Rainbow light trail follows his glove from bottom to top of screen; airborne particle trail.
+  - *Audio Cue*: Rising multi-pitch synth sweep (440Hz → 880Hz → 1760Hz).
+  - *Puzzle Effect*: 510 Damage + drops a full Rainbow Array of Counter Gems.
+
+---
+
+#### 12. Antonio Brown (AB)
+- **Stream Context**: NFL star turned stream personality guest, famous for his "Business Is Boomin'" catchphrase and viral shoulder-shrug dance.
+- **Unique Idle Animation ("Business Boomin' Shrug")**: Showboat stance wearing gold gloves and gold chains. Periodically points to his chest ("84"), does his viral shoulder-shrug dance gesture, and taps his gloves with a gold sparkle effect.
+- **Signature SUPER Finisher ("84 Business Boomin' Catch KO")**:
+  - *Cinematic*: AB leaps high into the air as if catching a touchdown pass in the back of the end zone, spikes a heavy punch downward onto the rival, and hits a touchdown dance pose.
+  - *Visual Effects*: Gold money bills and dollar signs explode in a 360° burst around the ring floor.
+  - *Audio Cue*: Stadium horn whistle synth + heavy punch crash.
+  - *Puzzle Effect*: 560 Damage + drops a Gold/Cyan Business Grid pattern.
+
+---
+
+#### 13. Gervonta "Tank" Davis [BOSS]
+- **Stream Context**: Multi-division champion, mentee of Adrien Broner, stream guest boss character known for devastating one-punch knockout power.
+- **Unique Idle Animation ("Tank Southpaw Stare & Hood Adjust")**: Compact, menacing southpaw posture. Wears an all-red boxing outfit. Slowly shifts weight back and forth, eyes narrowed under his hood, adjusting his championship belt with a calm, lethal composure.
+- **Signature SUPER Finisher ("Tank Explosive Uppercut")**:
+  - *Cinematic*: Screen darkens to a deep red vignette. Heartbeat sound plays twice (`thump-thump`). Tank bursts forward in slow motion, launching an unblockable left uppercut that sends the rival sprite flying off the top of the canvas.
+  - *Visual Effects*: Blood-red flash overlay; heavy screen shake (±18px); opponent sprite flies upward off-screen.
+  - *Audio Cue*: Double heartbeat thud → explosive cannon-fire synth burst.
+  - *Puzzle Effect*: 700 Damage + drops a Solid Monochromatic Red Wall (5 rows).
+
+---
+
+#### 14. Floyd "Money" Mayweather [GRAND BOSS]
+- **Stream Context**: 50-0 hall of fame boxing legend, ultimate grand boss of the stream roster, famous for pristine defense, shoulder roll, and TMT brand.
+- **Unique Idle Animation ("TBE Philly Roll & Coin Toss")**: Pristine, untouchable Philly Shell stance. Rolls his shoulders with zero effort. Frame 3: casually flips a gold coin into the air with his right glove, catches it, and smiles at the camera without dropping guard.
+- **Signature SUPER Finisher ("TBE 50-0 Masterclass")**:
+  - *Cinematic*: Floyd dodges 3 incoming punches in slow motion (Philly roll matrix effect), then delivers a 5-punch surgical masterclass combination, ending with a straight right hand to the chin.
+  - *Visual Effects*: Golden aura rings expand from Floyd; gold "50-0" text flashes on screen; golden light beams emit from hit points.
+  - *Audio Cue*: Pristine chime arpeggio + 5 crisp metallic punch impacts.
+  - *Puzzle Effect*: 680 Damage + drops a Pure Gold Wall (5 rows of gold Counter Gems).
+
 
 ---
 
