@@ -1,94 +1,119 @@
 # Game Design Document (GDD): Ring Rush - Puzzle Boxing
 
-## 1. Executive Summary & Vision
+## 1. Executive Summary & Core Concept
 
-**Ring Rush: Puzzle Boxing** is a 2026 AAA-grade 2D arcade versus puzzle game that merges the high-octane head-to-head mechanics of *Super Puzzle Fighter II Turbo* with the spectacle of modern championship boxing. Players choose between featured fighters (Adrien "The Problem" Broner and Deen The Great), dropping and detonating gems to trigger punches, counter-bars, and SUPER finisher combos.
+**Ring Rush: Puzzle Boxing** is a 2026 AAA arcade versus puzzle game directly inspired by Capcom's *Super Puzzle Fighter II Turbo*, rebuilt ground-up for boxing entertainment and themed around **Adrien "The Problem" Broner**, **Deen The Great**, and the broader influencer/pro boxing stream ecosystem (featuring Adin Ross, N3ON, Blueface, Gervonta Davis, and Floyd Mayweather).
 
-This document serves as the single source of truth for all game mechanics, design guidelines, technical architecture, and execution specifications so any developer or AI coding agent can recreate, maintain, or extend the game to AAA standards.
+The game combines dual-grid competitive drop-puzzle strategy with real-time animated boxing combat. Clearing gems, forming fused Power Gems, and triggering Crash Gem detonations causes fighters in the background ring to throw punches, weave in signature stances, unleash SUPER finishers, and drop custom Counter Gem patterns onto the rival's grid.
+
+This document serves as the authoritative blueprint for developers and AI agents to build, expand, or recreate the complete game vision.
 
 ---
 
-## 2. Core Game Loop & Match Flow
+## 2. Roster & Celebrity Stream Ecosystem
+
+The playable roster bridges championship pro boxing with the viral stream culture of Brand Risk, Misfits, and Kick/Twitch boxing events.
 
 ```
-[ Title Screen ] ──> [ Fighter Select ] ──> [ Match Intro / Round Call ]
-                                                   │
-[ Results / Victory Screen ] <── [ KO / Time Up ] <──┘ (Active Gameplay)
+                  ┌─────────────────────────────────────────┐
+                  │           SELECTABLE ROSTER             │
+                  ├────────────────────┬────────────────────┤
+                  │   PRO CHAMPIONS    │ STREAMER INFLUENCERS│
+                  ├────────────────────┼────────────────────┤
+                  │ Adrien Broner      │ Adin Ross          │
+                  │ Deen The Great     │ N3ON               │
+                  │ Gervonta Davis*    │ Blueface           │
+                  │ Floyd Mayweather*  │ Walid Sharks       │
+                  └────────────────────┴────────────────────┘
+                                         *Unlockable Bosses
 ```
 
-1. **Title Screen**: Animated faceoff showcase with continuous shadow boxing sparring between Broner and Deen inside the ring, arcade title logo, and audio toggle.
-2. **Fighter Select Screen**: Symmetrical selection cards featuring character stats (Power, Speed, Counter, Super), signature stance previews, and locked mystery slots for future roster expansions.
-3. **Match Intro Screen**: Round 1 call animation (`ROUND 1` / `FIGHT!`), dynamic arena crowd lighting, synth audio initialization.
-4. **Active Match Gameplay**: Real-time dual-board puzzle combat. Player controls left board; AI or local rival controls right board. Detonating gems triggers real-time punch animations and sends Counter Gems to the opponent's grid.
-5. **Results Screen**: KO victory call, statistics breakdown (Max Chain, Total Gems Cleared, Match Time), and high-resolution AAA digital painting victory portrait card (`broner-hd-victory.jpg` / `deen-hd-victory.jpg`).
+### 2.1 Roster Profiles & Gameplay Differentiators
+
+| Fighter | Archetype / Persona | Signature Stance | Passive Perk / Special Ability | Counter Gem Drop Pattern (6-Col Matrix) |
+| :--- | :--- | :--- | :--- | :--- |
+| **Adrien Broner** | Philly Shell Master | `broner-philly-roll` (Left arm low, shoulder roll) | **Philly Armor**: Takes 15% fewer Counter Gems. Power Gems yield +30% attack power. | `[Gold, Gold, Red, Red, Gold, Gold]` (Solid Heavy Block) |
+| **Deen The Great** | High-Guard Pressure | `deen-pressure-bounce` (Dual gloves high, rapid leg bounce) | **Chain Surge**: Chain Multipliers scale 1.5× faster. SUPER meter fills +20% faster. | `[Blue, Cyan, Blue, Cyan, Blue, Cyan]` (Alternating Stair Step) |
+| **Adin Ross** | The Executive Promoter | `adin-hype-guard` (Gold mic guard, ringmaster step) | **Hype Cash-In**: Soft/Hard drops grant +2% SUPER meter per gem dropped. | `[Gold, Red, Gold, Red, Gold, Red]` (Checkerboard Wealth) |
+| **N3ON** | The Agitator | `neon-twitch-guard` (Unstable frantic bobbing) | **Fast Countdown**: Counter Gems dropped onto opponent spawn with 3-turn timers instead of 5. | `[Green, Green, Yellow, Yellow, Green, Green]` (Twin Spike Columns) |
+| **Blueface** | The Wildcard | `blueface-brawl-stance` (Wide loose arms, unpredictable heavy stance) | **Brawl Chaos**: Counter Gems drop in randomized color order, confusing rival grid planning. | `[Random, Random, Random, Random, Random, Random]` (Randomized Noise) |
+| **Walid Sharks** | Flashy Counter-Puncher | `walid-counter-bounce` (Low hands, fast head movement) | **Reflex Counter**: Clearing gems while taking damage converts 1 incoming Counter Gem into a Crash Gem. | `[Red, Blue, Green, Yellow, Red, Blue]` (Full Rainbow Array) |
+| **Gervonta Davis** *(Boss)* | The Tank | `tank-peekaboo` (Tight peek-a-boo guard, heavy sway) | **Knockout Power**: 2×2 Power Gem detonations yield 3× attack damage and trigger immediate screen shake. | `[Red, Red, Red, Red, Red, Red]` (Solid Monochromatic Wall) |
+| **Floyd Mayweather** *(Boss)* | Money TBE | `floyd-master-defense` (Flawless shoulder roll & elbow block) | **The Best Ever**: Automatically converts 2 Counter Gems into Normal Gems every 10 seconds. | `[Gold, Gold, Gold, Gold, Gold, Gold]` (Pure Gold Wall) |
 
 ---
 
-## 3. Puzzle Engine & Grid Mechanics
+## 3. Puzzle Engine & Super Puzzle Fighter II Mechanics
 
-### 3.1 Grid Architecture
-- **Dimensions**: 6 Columns × 12 Rows per player grid.
-- **Piece Spawning**: Falling pairs consist of a `pivot` gem (`y=0`) and a `satellite` gem (`y=1`), vertically stacked matching the `NEXT` preview box 1:1.
-- **Movement & Rotation**:
-  - `Left` (`←`) / `Right` (`→`): Horizontal translation.
-  - `Rotate` (`↻`): 90-degree clockwise rotation around the pivot gem with wall-kick allowance.
-  - `Soft Drop` / `Hard Drop` (`↓`): Accelerates vertical gravity down to the highest available solid row.
+### 3.1 Grid Architecture & Controls
+- **Grid Dimensions**: 6 Columns × 12 Rows per player.
+- **Falling Candidate Pair**: Vertically stacked pair (`pivot` at `y=0`, `satellite` at `y=1`), matching the `NEXT` preview box 1:1.
+- **Controls**:
+  - `Left` (`←`) / `Right` (`→`): Horizontal grid translation.
+  - `Rotate` (`↻`): Clockwise 90-degree pair rotation with wall-kick allowance.
+  - `Soft/Hard Drop` (`↓`): Instant vertical acceleration to the lowest open row.
 
-### 3.2 Gem Types & Behaviors
-| Gem Type | Visual Marker | Engine Behavior |
-| :--- | :--- | :--- |
-| **Normal Gem** | Faceted jewel (Red, Blue, Green, Yellow) | Standard building block; stacks vertically and horizontally. |
-| **Crash Gem** | Glowing orb core | Detonates when landing adjacent to any matching-color Normal or Power Gem. |
-| **Power Gem** | Fused multi-cell giant gem (2×2 or larger) | Forms automatically when 4+ matching normal gems form solid rectangular blocks. Detonations yield 2.5× attack damage. |
-| **Counter Gem** | Timed countdown badge (`5` to `1`) | Sent to opponent grid upon taking damage. Displays underlying gem color. Decrements each turn; converts into Normal Gem at `0`. Cannot be detonated directly by Crash Gems until timer reaches `0`. |
+### 3.2 Gem Types
+1. **Normal Gems**: 4 colors (Red `#e63946`, Blue `#0077b6`, Green `#2a9d8f`, Yellow `#e9c46a`).
+2. **Crash Gems**: Glowing orb cores. Detonates when touching adjacent matching-color Normal or Power Gems.
+3. **Power Gems**: Fused 2×2, 2×3, 3×3, or 4×4 rectangular blocks formed automatically when matching normal gems settle into solid rectangles. Detonations deliver 2.5× base attack damage.
+4. **Counter Gems**: Timed countdown gems (`5` $\to$ `0`) displaying underlying gem color badges. Sent to rival's board upon taking damage. Decrements each turn; turns into Normal Gems at `0`.
 
-### 3.3 Chain Combos & Damage Formula
-When a Crash Gem detonates:
-1. All connected matching-color gems detonate simultaneously.
-2. Gravity applies, causing suspended gems to fall.
-3. If new matches or Crash Gems land adjacent to matching colors, a **Chain Combo** triggers (`CHAIN 2`, `CHAIN 3`, etc.).
-4. **Garbage Attack Sent**:
-   $$\text{Counter Gems Sent} = (\text{Cleared Gems} \times 0.75) \times \text{Chain Multiplier}$$
+### 3.3 Combo Damage & Garbage Formula
+$$\text{Counter Gems Sent} = \left\lfloor (\text{Cleared Gems} \times 0.75) \times \text{Chain Multiplier} \right\rfloor$$
+- **Chain 1**: 1.0×
+- **Chain 2**: 1.5×
+- **Chain 3**: 2.2×
+- **Chain 4+**: 3.5×
 
 ---
 
-## 4. Fighter Combat & Animation Specs
+## 4. Fighter Move Visualizer & Sprite Sheet Specifications
 
-### 4.1 Character Profiles & Stances
-- **Adrien Broner**:
-  - **Stance**: Philly Shell shoulder roll (`broner-philly-roll`). Left arm low, right hand guarding chin, rhythmic shoulder roll animation.
-  - **Trunks**: Black & Gold with crown emblem.
-  - **Stat Bias**: High Counter Damage, Heavy Punch Impact.
-- **Deen the Great**:
-  - **Stance**: High Guard pressure bounce (`deen-pressure-bounce`). Dual gloves up, rapid vertical leg bounce stance animation.
-  - **Trunks**: Cyan Blue & Red with `DEEN` waistband.
-  - **Stat Bias**: High Move Speed, Fast SUPER Meter Fill.
+### 4.1 Visual Move Display System
+Every boxer visualizes real-time combat in the ring corresponding directly to puzzle board events:
 
-### 4.2 Combat State Machine
-Each fighter sprite sheet (`broner-states.png`, `deen-states.png`) contains 4 state poses:
-1. `idle`: Default animated boxer stance.
-2. `attack`: Triggered when clearing 3+ gems or executing a chain. Displays hit spark flash overlays on rival.
-3. `hurt`: Triggered when receiving Counter Gems. Flinch / knockback animation.
-4. `win`: Triggered on match KO. Shown on Results screen alongside HD victory portrait art.
+```
+[ Puzzle Event ]                  [ Fighter Move Visualizer Action ]
+───────────────────────────────────────────────────────────────────────
+Idle Stance                 ──>   Continuous Idle Stance (Philly Roll / High Guard Bounce)
+1-2 Gem Clear               ──>   Light Left Jab + Jab SFX
+3-5 Gem Clear               ──>   Heavy Right Hook + Hit Spark Flash Overlay on Rival
+2×2 Power Gem Detonation    ──>   Signature Uppercut / Overhand + Screen Shake + Impact Flash
+Chain Combo (Chain 2+)      ──>   Flurry Combination (Jab-Cross-Hook) + Floating Combo Copy
+SUPER Meter Active (100%)   ──>   Golden Super Aura Glow (@keyframes super-ready)
+SUPER Button Tapped         ──>   Cinematic Finisher Punch + 5-Row Counter Gem Rain
+Counter Gems Received       ──>   Hurt Flinch / Head Snap Back Animation
+Match Knockout (KO)         ──>   Knockdown Flatten Animation + KO Bell + HD Victory Card
+```
 
-### 4.3 SUPER Meter System
-- Fills from `0%` to `100%` as gems are cleared.
-- At `100%`, the `SUPER` button glows with a golden aura animation (`@keyframes super-ready`).
-- Tapping `SUPER` unleashes a 5-row Counter Gem barrage and triggers the fighter's signature finisher punch.
+### 4.2 Sprite Sheet Generation Specs for AI Agents
+To generate new or replacement fighter sprite sheets using AI image generation tools (`generate_image`), follow these precise specifications:
+
+- **Canvas Size**: 1024 × 1024 pixels.
+- **Grid Layout**: 4 Columns × 1 Row (or 4 Columns × 2 Rows).
+- **Background**: Solid `#00ff00` Chroma-Key Green for automated background removal.
+- **Style Keyword**: 16-bit Capcom Arcade Pixel Art, Super Puzzle Fighter II Turbo style, rich HSL colors, crisp black outlines, 2D fighting game character sprite sheet.
+
+#### AI Prompt Template (Example for Adrien Broner):
+> *"A 16-bit arcade pixel art sprite sheet of professional boxer Adrien Broner on a solid green #00ff00 background. 4 animation poses from left to right: Cell 1: Philly Shell boxer idle stance with left arm low and right glove at chin; Cell 2: Heavy right hook punch with extended arm and gold glove; Cell 3: Hurt flinch stance with head snapped back; Cell 4: Arms raised victory celebration stance with championship belt. Capcom Super Puzzle Fighter II Turbo pixel art style, high detail, clean outlines."*
+
+#### AI Prompt Template (Example for Deen The Great):
+> *"A 16-bit arcade pixel art sprite sheet of champion boxer Deen The Great on a solid green #00ff00 background. 4 animation poses from left to right: Cell 1: High guard boxing stance with cyan blue trunks and red gloves; Cell 2: Fast left jab punch; Cell 3: Hurt reel back pose; Cell 4: Flexing victory pose. Capcom 2D fighting game pixel art style, solid green background."*
 
 ---
 
-## 5. UI/UX & Mobile Ergonomics Best Practices
+## 5. UI/UX & Mobile Ergonomics Standards
 
-1. **Touch Controls**:
-   - Minimum Button Height: **58px – 70px**.
-   - Border Radius: **14px** with tactile active press shrink (`scale(0.93)`).
-   - Placement: Elevated at `bottom: max(calc(env(safe-area-inset-bottom) + 12px), 14px)` to ensure natural thumb reach on 19.5:9 and 20:9 mobile viewports without hand joint strain.
-2. **Ring Perspective & Fighter Placement**:
-   - `.fight-plane` positioned at `top: 7.2%`, `height: clamp(165px, 28vh, 250px)` ([styles.css](file:///C:/Users/admin-beats/OneDrive/Documents/Puzzle-Fighter-Boxing/src/styles.css#L692-L702)).
-   - Fighters stand full-length directly on the ring canvas floor mat inside the 4 corner posts without puzzle board overlap or legs getting cut off.
-3. **HUD Header**:
-   - Dual health tracks (`16px` height) with high-contrast gradient fills and `48 × 48 px` fighter portrait frames.
+1. **Touch Control Buttons**:
+   - Height: **58px – 70px** minimum touch target.
+   - Border Radius: **14px** with inset gold highlights and tactile active press scale (`scale(0.93)`).
+   - Ergonomics: Elevated at `bottom: max(calc(env(safe-area-inset-bottom) + 12px), 14px)` to sit naturally in the thumb arc on modern mobile viewports (19.5:9 and 20:9 aspect ratios) without hand strain.
+2. **Ring Perspective & In-Ring Grounding**:
+   - `.fight-plane` anchored at `top: 7.2%`, `height: clamp(165px, 28vh, 250px)` ([styles.css](file:///C:/Users/admin-beats/OneDrive/Documents/Puzzle-Fighter-Boxing/src/styles.css#L692-L702)).
+   - Fighters stand full-length directly on the ring canvas floor mat inside the 4 corner posts and back ropes, with zero puzzle board clipping or overlapping.
+3. **Victory Presentation**:
+   - On match KO, the game displays a high-resolution AAA digital painting victory portrait card (`broner-hd-victory.jpg` / `deen-hd-victory.jpg`) framed in gold bevel borders with golden ambient lighting (`box-shadow: 0 0 45px rgba(255, 190, 41, 0.48)`), matching the victory presentation of *Street Fighter 6* and *Marvel vs. Capcom*.
 
 ---
 
@@ -98,8 +123,8 @@ Each fighter sprite sheet (`broner-states.png`, `deen-states.png`) contains 4 st
 ├── index.html                   # HTML5 Entry Point & Container Layout
 ├── GDD.md                       # Game Design Document (This File)
 ├── src/
-│   ├── main.ts                  # State Machine, Screen Rendering, Audio Synth, Event Delegation
-│   ├── styles.css               # Vanilla CSS Design System, Keyframes, Ergonomics Tokens
+│   ├── main.ts                  # State Machine, Screen Markup, Web Audio Synth, Event Delegation
+│   ├── styles.css               # Design System, Keyframe Animations, Ergonomics Tokens
 │   └── game/
 │       ├── puzzle.ts            # Pure Functional Puzzle Core & Collision Math
 │       └── puzzle.test.ts       # Vitest Unit Test Suite for Engine Validation
@@ -114,10 +139,9 @@ Each fighter sprite sheet (`broner-states.png`, `deen-states.png`) contains 4 st
 
 ---
 
-## 7. Guidelines for AI Agents Recreating this Vision
+## 7. Execution Rules for AI Agents Recreating or Extending the Game
 
-When an AI coding agent is tasked with adding features or recreating this game:
-1. **Never Break Touch Delegation**: All screen navigation and gameplay buttons must use persistent event delegation on `#app` for `pointerdown` and `click` to prevent dropped taps on mobile touchscreens.
-2. **Preserve High-Contrast Sizing**: Never decrease touch targets below 52px or hide health bars behind UI panels.
-3. **Maintain Pure Engine Tests**: All puzzle grid logic in `src/game/puzzle.ts` must remain pure functions tested via `vitest`. Run `npm run test` before every commit.
-4. **Use Screenshots for Visual Verification**: Always run `npm run capture` (`node capture.js`) to generate and verify screenshots in `playthrough_review_gallery.md` before claiming visual completion.
+When an AI coding agent works on this codebase:
+1. **Maintain Pure Engine Logic**: All puzzle state transformations in `src/game/puzzle.ts` must remain pure functions. Run `npm run test` before every commit.
+2. **Obey Persistent Event Delegation**: All screen interactions and gameplay touch buttons must use container event delegation on `#app` (`pointerdown` / `click`) to prevent dropped taps or audio unlock failures on mobile devices.
+3. **Validate Visual Quality with Screenshot Harness**: Run `npm run capture` (`node capture.js`) to refresh playthrough screenshots in `playthrough_review_gallery.md` and visually inspect alignment before submitting work.
