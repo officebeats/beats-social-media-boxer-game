@@ -101,9 +101,9 @@ export function cloneBoard(board: Board): Board {
 
 export function pairCells(pair: ActivePair): Array<{ x: number; y: number; gem: Gem }> {
   const offsets: Record<Orientation, [number, number]> = {
-    0: [0, -1],
+    0: [0, 1],
     1: [1, 0],
-    2: [0, 1],
+    2: [0, -1],
     3: [-1, 0],
   };
   const [dx, dy] = offsets[pair.orientation];
@@ -225,7 +225,7 @@ export class PuzzleGame {
     this.next = this.makePair();
     const candidate: ActivePair = {
       x: Math.floor(BOARD_WIDTH / 2) - 1,
-      y: 1,
+      y: 0,
       orientation: 0,
       pivot: { ...pivot },
       satellite: { ...satellite },

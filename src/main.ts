@@ -602,6 +602,15 @@ function triggerScreenShake(durationMs = 400): void {
   window.setTimeout(() => matchScreen.classList.remove("screen-shake"), durationMs);
 }
 
+function spawnHitSparks(actor: "player" | "rival"): void {
+  const fightPlane = app.querySelector<HTMLElement>(".fight-plane");
+  if (!fightPlane) return;
+  const spark = document.createElement("div");
+  spark.className = `hit-spark ${actor}`;
+  fightPlane.append(spark);
+  window.setTimeout(() => spark.remove(), 450);
+}
+
 function processMatchEvents(): void {
   if (!match) return;
   for (const event of match.consumeEvents()) applyMatchEvent(event);
@@ -649,6 +658,7 @@ function applyMatchEvent(event: MatchEvent): void {
   if (event.type === "attack" || event.type === "super") {
     playerPose = actorIsPlayer ? "attack" : "hurt";
     rivalPose = actorIsPlayer ? "hurt" : "attack";
+    spawnHitSparks(event.actor);
     poseResetAt = performance.now() + 360;
   }
   if (event.type === "chain") {

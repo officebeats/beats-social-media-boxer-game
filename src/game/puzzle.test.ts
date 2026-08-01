@@ -39,8 +39,8 @@ describe("PuzzleGame Power Gems & SPF2T Mechanics", () => {
 
     game.active = {
       x: 0,
-      y: 8,
-      orientation: 0,
+      y: 7,
+      orientation: 2,
       pivot: { color: "red", kind: "crash" },
       satellite: { color: "blue", kind: "normal" },
     };
