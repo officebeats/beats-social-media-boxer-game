@@ -1,13 +1,13 @@
 # GAME DESIGN DOCUMENT: CRASH OUT: RING RUSH — PUZZLE BOXING
 
-**Document Version:** 7.0.0 (AAA Production Standard — Complete 14-Fighter Sprite Catalog)  
+**Document Version:** 8.0.0 (AAA Production Standard — Phaser 3 + Capacitor Engine Migration)  
 **Studio:** Antigravity Studios — Executive Production Division  
 **Lead Game Producer:** AAA Competitive Game Systems Producer  
 **Principal Game Designer:** Senior Puzzle-Fighter & 2D Combat Systems Architect  
 **Art Director:** Pixel Art & UI/UX Visual Production Lead  
-**Target Platform:** Mobile Web (iOS Safari / Android Chrome), Desktop Browsers, Gamepad (Bluetooth / USB)  
+**Target Platform:** Native iOS (App Store), Native Android (Google Play), PWA (Mobile Web), Desktop Browsers, Gamepad (Bluetooth / USB)  
 **Aspect Ratios:** 19.5:9 (iPhone 16 Pro), 20:9 (Galaxy S24), 16:9 (Desktop)  
-**Tech Stack:** TypeScript, Vite, HTML5 Canvas (layered multi-canvas), Web Audio API, Vitest, Playwright  
+**Engine:** Phaser 3.80+ (WebGL 2D, `pixelArt: true`) — TypeScript, Vite 6.x, Capacitor 6.x (native wrapper), Vitest, Playwright  
 **Target FPS:** 60 FPS render / 12 FPS sprite step rate  
 
 ---
@@ -41,24 +41,24 @@
 
 ## 2. VISUAL PRODUCTION SYSTEM — ARENA, PARALLAX & SPRITE ARCHITECTURE
 
-This section defines the exact rendering pipeline that makes the game look and feel like a premium arcade title inside a web browser. Every element described here is designed to be implementable with `<canvas>` layers and CSS.
+This section defines the exact rendering pipeline that makes the game look and feel like a premium arcade title. All rendering is handled by **Phaser 3** (WebGL 2D with `pixelArt: true` nearest-neighbor scaling) and wrapped for native distribution via **Capacitor 6**.
 
-### 2.1 Stacked Multi-Canvas Architecture
+### 2.1 Phaser Scene & Layer Architecture
 
-The game renders using **4 stacked HTML5 canvas elements** (plus DOM overlays for UI) layered via CSS `position: absolute` inside a single `#arena-viewport` container. Each canvas has a distinct role and update frequency to maximize visual depth while minimizing overdraw.
+The game renders inside a single **Phaser.Game** instance configured with `type: Phaser.AUTO` (WebGL with Canvas fallback). Rendering layers are managed via **Phaser Containers** and **depth sorting** within a single WebGL context — no manual multi-canvas stacking required.
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
-│  Z-INDEX STACK (bottom to top)                                         │
+│  PHASER LAYER DEPTH STACK (bottom to top)                              │
 │                                                                        │
-│  [z:0]  CANVAS: bg-far      — Crowd & venue (parallax 0.15×)          │
-│  [z:1]  CANVAS: bg-mid      — Ring ropes, posts, floor (parallax 0.5×)│
-│  [z:2]  CANVAS: fighters    — Fighter sprites, hit sparks, particles   │
-│  [z:3]  CANVAS: puzzle-left — P1 6×12 gem grid + falling pair          │
-│  [z:3]  CANVAS: puzzle-right— P2 6×12 gem grid + falling pair          │
-│  [z:4]  DOM:    hud-overlay  — HP bars, SUPER meter, combo counter,    │
-│                                timer, touch controls                   │
-│  [z:5]  DOM:    modal-layer  — Round intro, SUPER cinematic, KO card   │
+│  [depth:0]  TileSprite: bg-far   — Crowd & venue (parallax 0.15×)     │
+│  [depth:1]  TileSprite: bg-mid   — Ring ropes, posts, floor (0.5×)    │
+│  [depth:2]  Container: fighters  — Fighter sprites, hit sparks, VFX   │
+│  [depth:3]  Container: board-p1  — P1 6×12 gem grid + falling pair    │
+│  [depth:3]  Container: board-p2  — P2 6×12 gem grid + falling pair    │
+│  [depth:4]  Container: hud       — HP bars, SUPER meter, combo text   │
+│  [depth:5]  Container: modal     — Round intro, SUPER cinematic, KO   │
+│  [depth:6]  DOM: touch-controls  — Capacitor-safe touch overlay        │
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -68,11 +68,11 @@ The boxing arena is composed of three visual depth layers that shift horizontall
 
 #### Layer Definitions
 
-| Layer | Canvas ID | Depth | Parallax Speed | Content | Redraw Frequency |
+| Layer | Phaser Object | Depth | Parallax Speed | Content | Update Strategy |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Far Background** | `bg-far` | Deepest | `0.15× camera` | Dark arena venue — upper balcony crowd silhouettes, overhead spotlights, haze glow, hanging banners. Rendered as a single wide bitmap (2048px or 3072px wide) tiled horizontally. | Redrawn only on camera drift (≤10×/sec). |
-| **Mid Ring** | `bg-mid` | Middle | `0.5× camera` | Boxing ring floor (canvas mat with logo), corner posts (4 visible), top and bottom ropes (3 ropes each), ring apron skirt, and floor shadow gradients. Perspective achieved via **per-row horizontal scaling** (wider rows at bottom, narrower at top) to simulate a 3/4 top-down view. | Redrawn only on camera drift. |
-| **Fighter Plane** | `fighters` | Foreground | `1.0× camera` | Both fighter sprites, hit spark overlays, floating combo text, SUPER aura particles, and knockdown animations. Fighters are drawn at full camera speed so they feel grounded on the ring mat. | Redrawn every frame (60 FPS). |
+| **Far Background** | `TileSprite` | 0 | `0.15× camera` | Dark arena venue — upper balcony crowd silhouettes, overhead spotlights, haze glow, hanging banners. Rendered as a tiling texture (3072×512 px). | `tilePositionX` updated on camera drift via `this.bg_far.tilePositionX = cameraOffset * 0.15`. |
+| **Mid Ring** | `TileSprite` | 1 | `0.5× camera` | Boxing ring floor (canvas mat with logo), corner posts, ropes, ring apron skirt, and floor shadow gradients. Perspective achieved via **per-row horizontal scaling** for 3/4 top-down view. | `tilePositionX` updated on camera drift via `this.bg_mid.tilePositionX = cameraOffset * 0.5`. |
+| **Fighter Plane** | `Container` | 2 | `1.0× camera` | Both fighter `Phaser.GameObjects.Sprite` instances (with `anims` state machine), hit spark `ParticleEmitter` overlays, floating combo `BitmapText`, SUPER aura particles, and knockdown animations. | Updated every frame (60 FPS) via Phaser's built-in scene `update()`. |
 
 #### Camera Drift Behavior
 
@@ -100,13 +100,14 @@ For each scanline Y from ringTopY to ringBottomY:
     destWidth    = sourceWidth * scaleX
     destX        = (canvasWidth - destWidth) / 2                 // center each scaled row
 
-    ctx.drawImage(ringTexture,
-        0, Y - ringTopY, sourceWidth, 1,                        // source: 1px-tall horizontal strip
-        destX, Y, destWidth, 1                                   // dest: scaled strip centered
+    // Phaser equivalent: use a RenderTexture or Graphics object
+    // to draw the pre-scaled ring floor rows during scene create()
+    this.ringFloor.draw(ringTexture,
+        destX, Y, destWidth, 1
     )
 ```
 
-This technique (identical to SNES Mode 7 / CPS-2 row-scroll) renders at ≤0.5ms per frame because it only runs on the `bg-mid` canvas, which redraws infrequently.
+This technique (identical to SNES Mode 7 / CPS-2 row-scroll) renders at ≤0.5ms per frame because it is baked into a `Phaser.GameObjects.RenderTexture` during scene initialization and only repositioned on camera drift.
 
 ### 2.3 Arena Visual Asset Specifications
 
@@ -124,7 +125,7 @@ Each fighter is a single PNG sprite sheet containing all animation states. Sprit
 
 #### Sprite Sheet Grid Layout
 
-Each sheet is a **1024 × 1024 px** PNG organized as an **8-column × 4-row grid** (32 cells total), where each cell is **128 × 256 px** (width × height). The fighter faces RIGHT by default; the P2 version is drawn by flipping the canvas horizontally (`ctx.scale(-1, 1)`).
+Each sheet is a **1024 × 1024 px** PNG organized as an **8-column × 4-row grid** (32 cells total), where each cell is **128 × 256 px** (width × height). The fighter faces RIGHT by default; the P2 version is drawn by setting `sprite.setFlipX(true)` on the Phaser Sprite.
 
 ```
 ┌──────────────────────────────────────────────────────────────────────┐
@@ -1086,33 +1087,38 @@ All animations run at discrete step rates (no linear interpolation) for authenti
 | **Guard** | 2 | 100ms each | 200ms | Blocking (AI defense) |
 | **Taunt** | 2 | 150ms each | 300ms | Chain 3+ combo |
 
-### 6.3 Sprite Rendering Code Contract
+### 6.3 Phaser Sprite Animation Code Contract
 
 ```typescript
-function drawFighter(
-    ctx: CanvasRenderingContext2D,
-    sheet: HTMLImageElement,
-    state: AnimationState,
-    frameIndex: number,
-    destX: number,
-    destY: number,
-    flipX: boolean
-): void {
-    const col = SPRITE_MAP[state].startCol + frameIndex;
-    const row = SPRITE_MAP[state].row;
-    const sx = col * 128;
-    const sy = row * 256;
+// In scene preload():
+this.load.spritesheet('broner', 'assets/fighters/broner.png', {
+    frameWidth: 128,
+    frameHeight: 256,
+});
 
-    ctx.save();
-    if (flipX) {
-        ctx.translate(destX + 128, destY);
-        ctx.scale(-1, 1);
-        ctx.drawImage(sheet, sx, sy, 128, 256, 0, 0, 128, 256);
-    } else {
-        ctx.drawImage(sheet, sx, sy, 128, 256, destX, destY, 128, 256);
-    }
-    ctx.restore();
-}
+// In scene create():
+this.anims.create({
+    key: 'broner-idle',
+    frames: this.anims.generateFrameNumbers('broner', { start: 0, end: 3 }),
+    frameRate: 12,   // 90ms per frame ≈ 12 FPS
+    repeat: -1,      // loop forever
+});
+
+this.anims.create({
+    key: 'broner-jab',
+    frames: this.anims.generateFrameNumbers('broner', { start: 8, end: 10 }),
+    frameRate: 10,
+    repeat: 0,       // play once, return to idle
+});
+
+// Fighter sprite:
+const fighter = this.add.sprite(destX, destY, 'broner');
+fighter.play('broner-idle');
+fighter.setFlipX(isP2);  // P2 faces left
+
+// Trigger attack animation on puzzle event:
+fighter.play('broner-jab');
+fighter.once('animationcomplete', () => fighter.play('broner-idle'));
 ```
 
 ---
@@ -1366,52 +1372,128 @@ The focus cursor is a visible gold highlight ring rendered around the currently 
 
 ---
 
-## 11. TECHNICAL ARCHITECTURE
+## 11. TECHNICAL ARCHITECTURE — PHASER 3 + CAPACITOR
+
+### 11.1 Production Tech Stack
+
+| Layer | Technology | Role |
+| :--- | :--- | :--- |
+| **Game Engine** | Phaser 3.80+ (`pixelArt: true`) | WebGL 2D rendering, sprite animation, particle emitters, input management, scene system, camera shake, audio |
+| **Language** | TypeScript 5.x (strict mode) | Full type safety, LLM-agentic coding compatibility |
+| **Bundler** | Vite 6.x | HMR, tree shaking, fast dev server |
+| **Native Wrapper** | Capacitor 6.x | iOS (App Store), Android (Google Play) native distribution |
+| **PWA** | vite-plugin-pwa | Service worker, offline support, installable web app |
+| **Testing** | Vitest (unit) + Playwright (e2e) | Pure function tests + cross-browser UI tests |
+| **CI/CD** | GitHub Actions | Automated builds → App Store Connect + Google Play Console |
+
+### 11.2 Project Directory Structure
 
 ```
-ring-rush/
-├── GDD.md                          # This document
-├── index.html                      # Entry point, canvas stack, viewport meta
-├── package.json                    # vite, typescript, vitest
-├── tsconfig.json                   # strict mode
-├── vite.config.ts
+crash-out-ring-rush/
+├── GDD.md                              # This document
+├── README.md                           # Production catalog & manual
+├── index.html                          # Phaser mount point
+├── package.json                        # phaser, vite, capacitor, vitest
+├── tsconfig.json                       # strict mode
+├── vite.config.ts                      # Phaser + PWA plugin config
+├── capacitor.config.ts                 # iOS + Android native config
+├── ios/                                # Capacitor iOS native project (auto-generated)
+├── android/                            # Capacitor Android native project (auto-generated)
 ├── public/
 │   └── assets/
 │       ├── arena/
-│       │   ├── arena-far.png       # Far crowd parallax (3072×512)
-│       │   ├── arena-mid.png       # Ring ropes/posts (2048×400)
-│       │   └── ring-floor.png      # Ring canvas mat (1024×256)
+│       │   ├── arena-far.png           # Far crowd parallax (3072×512)
+│       │   ├── arena-mid.png           # Ring ropes/posts (2048×400)
+│       │   └── ring-floor.png          # Ring canvas mat (1024×256)
 │       ├── fighters/
-│       │   ├── broner.png          # 1024×1024 sprite sheet
+│       │   ├── broner.png              # 1024×1024 sprite sheet (8×4 grid)
 │       │   ├── deen.png
 │       │   ├── ... (14 sheets total)
 │       │   └── floyd.png
-│       └── gems/
-│           └── gems.png            # 256×64 gem sprite sheet
+│       ├── gems/
+│       │   └── gems.png                # 256×64 gem sprite sheet
+│       └── audio/                      # Optional pre-rendered audio sprites
 ├── src/
-│   ├── main.ts                     # Boot, state machine, game loop
-│   ├── style.css                   # Design tokens, layout, touch controls
+│   ├── main.ts                         # Phaser.Game config + boot
+│   ├── config.ts                       # Game constants, design tokens
+│   ├── scenes/
+│   │   ├── BootScene.ts                # Asset preload + splash screen
+│   │   ├── TitleScene.ts               # Title screen + PRESS START
+│   │   ├── MenuScene.ts                # Main menu (Arcade, VS CPU, etc.)
+│   │   ├── SelectScene.ts              # Fighter select grid
+│   │   ├── ArcadeScene.ts              # Single player ladder map
+│   │   ├── BattleScene.ts              # Active battle (core gameplay)
+│   │   ├── PauseScene.ts               # Pause overlay (launched over Battle)
+│   │   ├── ResultsScene.ts             # Victory card + share
+│   │   └── TutorialScene.ts            # How to play
 │   ├── engine/
-│   │   ├── types.ts                # All interfaces & type definitions
-│   │   ├── puzzle.ts               # Pure functional puzzle matrix engine
-│   │   ├── fighters.ts             # 14-fighter roster data registry
-│   │   ├── ai.ts                   # AI decision engine
-│   │   └── audio.ts                # Web Audio synthesizer
-│   ├── render/
-│   │   ├── arena.ts                # 3-layer parallax arena renderer
-│   │   ├── board.ts                # 6×12 gem grid canvas renderer
-│   │   ├── fighters.ts             # Sprite sheet animation renderer
-│   │   ├── particles.ts            # Hit sparks, aura, combo text, KO flash
-│   │   └── camera.ts               # Camera drift & screen shake controller
-│   └── ui/
-│       ├── screens.ts              # Title, Select, Intro, Results screen builders
-│       ├── hud.ts                  # HP bars, SUPER meters, timer
-│       └── controls.ts             # Touch & keyboard input delegation
+│   │   ├── types.ts                    # Interfaces (Gem, Board, Fighter, Actions)
+│   │   ├── puzzle.ts                   # Pure functional puzzle matrix engine
+│   │   ├── fighters.ts                 # 14-fighter roster data registry
+│   │   ├── ai.ts                       # 3-tier AI placement scoring engine
+│   │   └── audio.ts                    # Phaser Sound Manager + Web Audio synth
+│   ├── objects/
+│   │   ├── FighterSprite.ts            # Fighter sprite w/ animation FSM & fidget
+│   │   ├── GemGrid.ts                  # 6×12 puzzle board game object
+│   │   ├── GemPair.ts                  # Active falling gem pair
+│   │   ├── ParallaxArena.ts            # 3-layer parallax TileSprite manager
+│   │   ├── HUD.ts                      # HP bars, SUPER meter, combo counter
+│   │   └── TouchControls.ts            # Mobile touch button overlay
+│   └── utils/
+│       ├── input.ts                    # InputAction enum + unified abstraction
+│       ├── camera.ts                   # Camera drift + screen shake helper
+│       └── share.ts                    # Fight card image export (snapshot)
 └── test/
-    ├── puzzle.test.ts              # Grid, gravity, fusion, detonation, garbage
-    ├── ai.test.ts                  # AI placement scoring
-    └── camera.test.ts              # Parallax drift math
+    ├── puzzle.test.ts                  # Grid, gravity, fusion, detonation, garbage
+    ├── ai.test.ts                      # AI placement scoring
+    └── fighters.test.ts                # Fighter data & ability validation
 ```
+
+### 11.3 Phaser Game Configuration
+
+```typescript
+const config: Phaser.Types.Core.GameConfig = {
+    type: Phaser.AUTO,                   // WebGL with Canvas fallback
+    width: 390,                          // Mobile-first base resolution
+    height: 844,                         // 19.5:9 iPhone viewport
+    pixelArt: true,                      // Nearest-neighbor scaling for 16-bit sprites
+    scale: {
+        mode: Phaser.Scale.FIT,          // Fit to viewport, maintain aspect ratio
+        autoCenter: Phaser.Scale.CENTER_BOTH,
+    },
+    physics: { default: 'none' },        // No physics needed for puzzle game
+    scene: [BootScene, TitleScene, MenuScene, SelectScene,
+            ArcadeScene, BattleScene, PauseScene, ResultsScene, TutorialScene],
+    input: {
+        gamepad: true,                   // Enable Gamepad API
+        touch: { capture: true },        // Capture touch for mobile
+    },
+    audio: {
+        disableWebAudio: false,          // Use Web Audio API for synth
+    },
+};
+
+new Phaser.Game(config);
+```
+
+### 11.4 Native Distribution via Capacitor
+
+```bash
+# Initialize Capacitor
+npx cap init "Crash Out Ring Rush" com.antigravity.crashoutringrush
+
+# Add native platforms
+npx cap add ios
+npx cap add android
+
+# Build web → sync to native → open in Xcode/Android Studio
+npm run build
+npx cap sync
+npx cap open ios      # Opens Xcode
+npx cap open android  # Opens Android Studio
+```
+
+**Capacitor provides**: Native haptics (vibration on SUPER finishers), push notifications, App Store / Google Play distribution, and splash screen / status bar control — all from the same TypeScript codebase.
 
 ---
 
@@ -1430,9 +1512,10 @@ ring-rush/
 ## 13. EXECUTION DIRECTIVES FOR AI CODING AGENTS
 
 1. **Pure Engine Logic**: All puzzle state transformations in `src/engine/puzzle.ts` MUST be pure functions (input→output, no side effects). Always run `npm test` before presenting work.
-2. **Container Event Delegation**: ALL interactive elements (buttons, cards, controls) MUST use a single persistent `pointerdown` listener on `#app`. Never attach listeners to dynamically created elements directly.
-3. **Canvas Layer Separation**: Never draw arena backgrounds, fighters, puzzle gems, and UI on the same canvas. Use the 4-canvas stack defined in Section 2.1.
-4. **Sprite Sheet Compliance**: Fighter sprites MUST use the 8×4 grid layout (128×256 cells) defined in Section 2.4. The animation renderer MUST index into this grid — never load individual frame images.
-5. **Parallax Math**: Camera drift MUST use `lerp(current, target, 0.08)` with the 3 parallax speeds (0.15×, 0.5×, 1.0×) defined in Section 2.2. Screen shake MUST use exponential decay (`magnitude *= 0.85`).
+2. **Phaser Scene Architecture**: Each screen is a separate `Phaser.Scene`. Use `this.scene.start()` for full transitions and `this.scene.launch()` for overlays (Pause). Never manipulate raw DOM for game UI — use Phaser Containers, BitmapText, and Sprites.
+3. **Phaser Layer Depth**: Use `setDepth()` on Phaser GameObjects for visual layering. Never create multiple canvas elements — Phaser manages the single WebGL context.
+4. **Sprite Sheet Compliance**: Fighter sprites MUST use the 8×4 grid layout (128×256 cells) defined in Section 2.4. Use `this.load.spritesheet()` and `this.anims.create()` — never load individual frame images.
+5. **Parallax via TileSprite**: Camera drift MUST use `tilePositionX` on Phaser `TileSprite` objects with the 3 parallax speeds (0.15×, 0.5×, 1.0×) defined in Section 2.2. Screen shake MUST use `this.cameras.main.shake()` or manual exponential decay (`magnitude *= 0.85`).
 6. **No Placeholder Art**: Use `generate_image` to create actual sprite sheets and arena assets. Never ship colored rectangles or text placeholders as fighter visuals.
-7. **Mobile-First**: Touch controls MUST meet the 58px minimum and safe-area compliance defined in Section 10. Test on 19.5:9 viewport (390×844px) before desktop.
+7. **Mobile-First + Capacitor**: Touch controls MUST meet the 58px minimum and safe-area compliance defined in Section 10. Test on 19.5:9 viewport (390×844px) before desktop. All builds MUST sync to Capacitor (`npx cap sync`) before native testing.
+8. **Input Abstraction**: Use Phaser's built-in `this.input.keyboard`, `this.input.gamepad`, and pointer events. Normalize all inputs through the `InputAction` enum defined in Section 10. Never read raw browser events directly.
