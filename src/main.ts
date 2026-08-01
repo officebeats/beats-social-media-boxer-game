@@ -8,6 +8,7 @@ import {
   type PuzzleGame,
   type ResolvedCell,
 } from "./game/puzzle";
+import { arcadeAudio } from "./game/audio";
 
 type Screen = "title" | "select" | "match" | "results";
 type FighterPose = "idle" | "attack" | "hurt" | "win";
@@ -199,6 +200,7 @@ function gemClass(gem: Gem | null): string {
 interface BoardCellView {
   classes: string;
   text: string;
+  dataset: Record<string, string>;
 }
 
 function boardCells(game: PuzzleGame): BoardCellView[] {
@@ -212,9 +214,22 @@ function boardCells(game: PuzzleGame): BoardCellView[] {
       const key = `${y}:${x}`;
       const activeGem = active.get(key);
       const gem = activeGem ?? game.board[y][x];
+
+      const ds: Record<string, string> = {};
+      let powerClass = "";
+      if (gem?.powerGem) {
+        const pg = gem.powerGem;
+        powerClass = " power-gem";
+        ds.powerW = String(pg.width);
+        ds.powerH = String(pg.height);
+        ds.powerRelX = String(pg.relX);
+        ds.powerRelY = String(pg.relY);
+      }
+
       cells.push({
-        classes: `gem ${gemClass(gem)}${activeGem ? " active-piece" : ""}`,
+        classes: `gem ${gemClass(gem)}${activeGem ? " active-piece" : ""}${powerClass}`,
         text: gem?.kind === "counter" ? String(gem.turns ?? "") : "",
+        dataset: ds,
       });
     }
   }
@@ -232,7 +247,12 @@ function boardMarkup(
     <section class="board-shell ${compact ? "compact" : ""}" aria-label="${label}" data-board="${boardId}">
       <div class="board-label">${label}</div>
       <div class="gem-board">${cells
-        .map((cell) => `<span class="${cell.classes}">${cell.text}</span>`)
+        .map((cell) => {
+          const dsAttr = Object.entries(cell.dataset)
+            .map(([k, v]) => `data-${k.replace(/([A-Z])/g, "-$1").toLowerCase()}="${v}"`)
+            .join(" ");
+          return `<span class="${cell.classes}" ${dsAttr}>${cell.text}</span>`;
+        })
         .join("")}<div class="gem-fx-layer" aria-hidden="true"></div></div>
     </section>
   `;
@@ -355,6 +375,18 @@ function updateBoardDom(boardId: "player" | "rival", game: PuzzleGame): void {
     if (!cell) return;
     if (element.className !== cell.classes) element.className = cell.classes;
     if (element.textContent !== cell.text) element.textContent = cell.text;
+
+    if (cell.dataset.powerW) {
+      element.dataset.powerW = cell.dataset.powerW;
+      element.dataset.powerH = cell.dataset.powerH;
+      element.dataset.powerRelX = cell.dataset.powerRelX;
+      element.dataset.powerRelY = cell.dataset.powerRelY;
+    } else {
+      delete element.dataset.powerW;
+      delete element.dataset.powerH;
+      delete element.dataset.powerRelX;
+      delete element.dataset.powerRelY;
+    }
   });
 }
 
@@ -455,12 +487,15 @@ function handleAction(action: string): void {
       muted = !muted;
       audio.title.muted = muted;
       audio.match.muted = muted;
+      arcadeAudio.setMuted(muted);
       break;
     case "super":
       if (match?.usePlayerSuper()) {
         playerPose = "attack";
         rivalPose = "hurt";
         impactText = "SUPER!";
+        arcadeAudio.play("super");
+        triggerScreenShake(500);
         poseResetAt = performance.now() + 500;
         impactResetAt = performance.now() + 700;
       }
@@ -482,19 +517,21 @@ function handleCommand(command: string): void {
   if (!match || match.phase !== "playing" || performance.now() < matchReadyAt) return;
   switch (command) {
     case "left":
-      match.movePlayer(-1);
+      if (match.movePlayer(-1)) arcadeAudio.play("move");
       break;
     case "right":
-      match.movePlayer(1);
+      if (match.movePlayer(1)) arcadeAudio.play("move");
       break;
     case "rotate":
-      match.rotatePlayer();
+      if (match.rotatePlayer()) arcadeAudio.play("rotate");
       break;
     case "soft":
       match.softDropPlayer();
+      arcadeAudio.play("land");
       break;
     case "drop":
       match.hardDropPlayer();
+      arcadeAudio.play("land");
       break;
   }
   processMatchEvents();
@@ -536,6 +573,7 @@ function startMatch(fighter: FighterId = selectedFighter): void {
   audio.title.currentTime = 0;
   audio.match.currentTime = 0;
   void audio.match.play().catch(() => undefined);
+  arcadeAudio.play("fight");
   renderDirty = true;
   render();
 }
@@ -555,12 +593,22 @@ function unlockAudio(): void {
   if (screen === "title" && audio.title.paused) void audio.title.play().catch(() => undefined);
 }
 
+function triggerScreenShake(durationMs = 400): void {
+  const matchScreen = app.querySelector<HTMLElement>(".match-screen");
+  if (!matchScreen) return;
+  matchScreen.classList.remove("screen-shake");
+  void matchScreen.offsetWidth;
+  matchScreen.classList.add("screen-shake");
+  window.setTimeout(() => matchScreen.classList.remove("screen-shake"), durationMs);
+}
+
 function processMatchEvents(): void {
   if (!match) return;
   for (const event of match.consumeEvents()) applyMatchEvent(event);
   if (match.phase === "results") {
     screen = "results";
     audio.match.volume = 0.18;
+    arcadeAudio.play("victory");
     renderDirty = true;
   }
 }
@@ -575,14 +623,22 @@ function applyMatchEvent(event: MatchEvent): void {
     spawnGemEffects(event.actor, event.cells ?? [], "land");
     pulseBoard(event.actor, "board-landed", 300);
     setGemFeedback(`${event.actor} locked a pair`, 360);
+    arcadeAudio.play("land");
     vibrate(8);
   } else if (event.type === "break") {
+    const isPowerBreak = event.cells?.some((c) => Boolean(c.gem.powerGem));
     spawnGemEffects(event.actor, event.cells ?? [], "break");
     pulseBoard(event.actor, "board-breaking", 520);
     setGemFeedback(
       `${event.actor} broke ${event.cells?.length ?? 0} gems at chain ${event.value ?? 1}`,
       700,
     );
+    if (isPowerBreak) {
+      arcadeAudio.play("powerBreak");
+      triggerScreenShake(350);
+    } else {
+      arcadeAudio.play("break");
+    }
     vibrate((event.value ?? 1) > 1 ? [16, 28, 24] : 18);
   } else if (event.type === "garbage") {
     spawnGemEffects(event.actor, event.cells ?? [], "garbage");
@@ -598,11 +654,16 @@ function applyMatchEvent(event: MatchEvent): void {
   if (event.type === "chain") {
     impactText = `${event.value} CHAIN!`;
     impactResetAt = performance.now() + 650;
+    arcadeAudio.play("chain", event.value ?? 1);
+    triggerScreenShake(300 + (event.value ?? 1) * 80);
   } else if (event.type === "super") {
     impactText = "SUPER!";
     impactResetAt = performance.now() + 650;
+    arcadeAudio.play("super");
+    triggerScreenShake(500);
   }
 }
+
 
 function setGemFeedback(message: string, durationMs: number): void {
   gemFeedback = message;

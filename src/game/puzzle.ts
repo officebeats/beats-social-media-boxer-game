@@ -5,10 +5,21 @@ export const GEM_COLORS = ["red", "blue", "green", "yellow", "purple"] as const;
 export type GemColor = (typeof GEM_COLORS)[number];
 export type GemKind = "normal" | "crash" | "rainbow" | "counter";
 
+export interface PowerGemBounds {
+  id: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  relX: number;
+  relY: number;
+}
+
 export interface Gem {
   color: GemColor;
   kind: GemKind;
   turns?: number;
+  powerGem?: PowerGemBounds;
 }
 
 export type Board = Array<Array<Gem | null>>;
@@ -81,7 +92,7 @@ export function createBoard(): Board {
 }
 
 function cloneGem(gem: Gem | null): Gem | null {
-  return gem ? { ...gem } : null;
+  return gem ? { ...gem, powerGem: gem.powerGem ? { ...gem.powerGem } : undefined } : null;
 }
 
 export function cloneBoard(board: Board): Board {
@@ -102,6 +113,79 @@ export function pairCells(pair: ActivePair): Array<{ x: number; y: number; gem: 
   ];
 }
 
+export function detectPowerGems(board: Board): void {
+  let powerGemCounter = 0;
+  for (let y = 0; y < BOARD_HEIGHT; y += 1) {
+    for (let x = 0; x < BOARD_WIDTH; x += 1) {
+      if (board[y][x]) delete board[y][x]!.powerGem;
+    }
+  }
+
+  const used = Array.from({ length: BOARD_HEIGHT }, () =>
+    Array.from<boolean>({ length: BOARD_WIDTH }).fill(false),
+  );
+
+  for (let y = 0; y < BOARD_HEIGHT; y += 1) {
+    for (let x = 0; x < BOARD_WIDTH; x += 1) {
+      const gem = board[y][x];
+      if (!gem || gem.kind !== "normal" || used[y][x]) continue;
+
+      let maxW = 1;
+      while (
+        x + maxW < BOARD_WIDTH &&
+        board[y][x + maxW]?.kind === "normal" &&
+        board[y][x + maxW]?.color === gem.color &&
+        !used[y][x + maxW]
+      ) {
+        maxW += 1;
+      }
+
+      if (maxW < 2) continue;
+
+      for (let w = maxW; w >= 2; w -= 1) {
+        let maxH = 1;
+        while (y + maxH < BOARD_HEIGHT) {
+          let validRow = true;
+          for (let dx = 0; dx < w; dx += 1) {
+            const checkGem = board[y + maxH][x + dx];
+            if (
+              !checkGem ||
+              checkGem.kind !== "normal" ||
+              checkGem.color !== gem.color ||
+              used[y + maxH][x + dx]
+            ) {
+              validRow = false;
+              break;
+            }
+          }
+          if (!validRow) break;
+          maxH += 1;
+        }
+
+        if (maxH >= 2) {
+          powerGemCounter += 1;
+          const id = `power_${gem.color}_${x}_${y}_${powerGemCounter}`;
+          for (let dy = 0; dy < maxH; dy += 1) {
+            for (let dx = 0; dx < w; dx += 1) {
+              used[y + dy][x + dx] = true;
+              board[y + dy][x + dx]!.powerGem = {
+                id,
+                x,
+                y,
+                width: w,
+                height: maxH,
+                relX: dx,
+                relY: dy,
+              };
+            }
+          }
+          break;
+        }
+      }
+    }
+  }
+}
+
 export class PuzzleGame {
   readonly board = createBoard();
   readonly random: SeededRandom;
@@ -114,9 +198,11 @@ export class PuzzleGame {
   cleared = 0;
   topOut = false;
   pieces = 0;
+  dropPattern: GemColor[] = ["red", "blue", "green", "yellow", "purple", "red"];
 
-  constructor(seed: number) {
+  constructor(seed: number, dropPattern?: GemColor[]) {
     this.random = new SeededRandom(seed);
+    if (dropPattern) this.dropPattern = dropPattern;
     this.next = this.makePair();
     this.spawn();
   }
@@ -233,6 +319,7 @@ export class PuzzleGame {
       this.board[y][x] = { ...gem };
     }
     this.active = null;
+    detectPowerGems(this.board);
     const resolution = this.resolve();
     this.tickCounters();
     this.spawn();
@@ -240,34 +327,57 @@ export class PuzzleGame {
   }
 
   private resolve(): Resolution {
-    let total = 0;
-    let chain = 0;
+    let totalCleared = 0;
+    let chainCount = 0;
+    let totalAttack = 0;
     const steps: ResolutionStep[] = [];
+
     while (true) {
+      detectPowerGems(this.board);
       const removal = this.findRemovalSet();
       if (removal.size === 0) break;
-      chain += 1;
-      total += removal.size;
+      chainCount += 1;
+      totalCleared += removal.size;
+
+      const powerGemsSeen = new Set<string>();
+      let powerGemBonus = 0;
+
       const cells: ResolvedCell[] = [];
       for (const key of removal) {
         const [y, x] = key.split(":").map(Number);
         const gem = this.board[y][x];
-        if (gem) cells.push({ x, y, gem: { ...gem } });
+        if (gem) {
+          cells.push({ x, y, gem: { ...gem } });
+          if (gem.powerGem && !powerGemsSeen.has(gem.powerGem.id)) {
+            powerGemsSeen.add(gem.powerGem.id);
+            const size = gem.powerGem.width * gem.powerGem.height;
+            powerGemBonus += size >= 9 ? 8 : size >= 6 ? 5 : 3;
+          }
+        }
         this.board[y][x] = null;
       }
-      steps.push({ chain, cells });
+      steps.push({ chain: chainCount, cells });
+
+      const stepAttack = Math.max(
+        0,
+        Math.floor((removal.size + powerGemBonus) * (chainCount === 1 ? 0.7 : chainCount * 1.2)),
+      );
+      totalAttack += stepAttack;
+
       this.applyGravity();
     }
 
-    this.chain = chain;
-    this.maxChain = Math.max(this.maxChain, chain);
-    this.cleared += total;
-    this.score += total * 100 * Math.max(chain, 1);
-    this.meter = Math.min(100, this.meter + total * 3 + Math.max(0, chain - 1) * 12);
+    detectPowerGems(this.board);
+    this.chain = chainCount;
+    this.maxChain = Math.max(this.maxChain, chainCount);
+    this.cleared += totalCleared;
+    this.score += totalCleared * 100 * Math.max(chainCount, 1);
+    this.meter = Math.min(100, this.meter + totalCleared * 3 + Math.max(0, chainCount - 1) * 12);
+
     return {
-      cleared: total,
-      chain,
-      attack: total === 0 ? 0 : Math.max(0, total - 3) + Math.max(0, chain - 1) * 4,
+      cleared: totalCleared,
+      chain: chainCount,
+      attack: totalAttack,
       locked: [],
       steps,
     };
@@ -275,7 +385,6 @@ export class PuzzleGame {
 
   private findRemovalSet(): Set<string> {
     const removal = new Set<string>();
-    const visited = new Set<string>();
     const crashes: Array<{ x: number; y: number; gem: Gem }> = [];
     const rainbows: Array<{ x: number; y: number }> = [];
 
@@ -285,20 +394,20 @@ export class PuzzleGame {
         if (!gem) continue;
         if (gem.kind === "crash") crashes.push({ x, y, gem });
         if (gem.kind === "rainbow") rainbows.push({ x, y });
-        const key = `${y}:${x}`;
-        if (visited.has(key) || gem.kind === "counter" || gem.kind === "rainbow") continue;
-        const group = this.collectColorGroup(x, y, gem.color, visited);
-        if (group.length >= 4) group.forEach((cell) => removal.add(cell));
       }
     }
 
     for (const { x, y, gem } of crashes) {
-      const neighborMatches = this.neighbors(x, y).some(({ x: nx, y: ny }) => {
+      const matchingNeighbors = this.neighbors(x, y).filter(({ x: nx, y: ny }) => {
         const neighbor = this.board[ny][nx];
         return neighbor && neighbor.color === gem.color && neighbor.kind !== "counter";
       });
-      if (neighborMatches) {
-        this.collectColorGroup(x, y, gem.color, new Set()).forEach((cell) => removal.add(cell));
+
+      if (matchingNeighbors.length > 0) {
+        removal.add(`${y}:${x}`);
+        this.collectColorCluster(x, y, gem.color, new Set()).forEach((cellKey) =>
+          removal.add(cellKey),
+        );
       }
     }
 
@@ -311,20 +420,50 @@ export class PuzzleGame {
           }
         }
       }
-      const target = [...counts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0];
-      if (target) {
+      const targetColor = [...counts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0];
+      if (targetColor) {
         for (let y = 0; y < BOARD_HEIGHT; y += 1) {
           for (let x = 0; x < BOARD_WIDTH; x += 1) {
-            if (this.board[y][x]?.color === target) removal.add(`${y}:${x}`);
+            if (this.board[y][x]?.color === targetColor) removal.add(`${y}:${x}`);
           }
         }
       }
       rainbows.forEach(({ x, y }) => removal.add(`${y}:${x}`));
     }
+
+    const powerGemIdsToInclude = new Set<string>();
+    for (const key of removal) {
+      const [y, x] = key.split(":").map(Number);
+      const gem = this.board[y][x];
+      if (gem?.powerGem) powerGemIdsToInclude.add(gem.powerGem.id);
+    }
+
+    if (powerGemIdsToInclude.size > 0) {
+      for (let y = 0; y < BOARD_HEIGHT; y += 1) {
+        for (let x = 0; x < BOARD_WIDTH; x += 1) {
+          const gem = this.board[y][x];
+          if (gem?.powerGem && powerGemIdsToInclude.has(gem.powerGem.id)) {
+            removal.add(`${y}:${x}`);
+          }
+        }
+      }
+    }
+
+    const counterGemsToRemove = new Set<string>();
+    for (const key of removal) {
+      const [y, x] = key.split(":").map(Number);
+      for (const { x: nx, y: ny } of this.neighbors(x, y)) {
+        if (this.board[ny][nx]?.kind === "counter") {
+          counterGemsToRemove.add(`${ny}:${nx}`);
+        }
+      }
+    }
+    counterGemsToRemove.forEach((key) => removal.add(key));
+
     return removal;
   }
 
-  private collectColorGroup(
+  private collectColorCluster(
     startX: number,
     startY: number,
     color: GemColor,
@@ -370,7 +509,8 @@ export class PuzzleGame {
     }
   }
 
-  addCounterGems(amount: number): ResolvedCell[] {
+  addCounterGems(amount: number, customPattern?: GemColor[]): ResolvedCell[] {
+    const pattern = customPattern ?? this.dropPattern;
     const placed: ResolvedCell[] = [];
     for (let i = 0; i < amount; i += 1) {
       const column = this.lowestColumn();
@@ -379,14 +519,16 @@ export class PuzzleGame {
         this.topOut = true;
         return placed;
       }
+      const gemColor = pattern[column % pattern.length];
       const gem: Gem = {
-        color: GEM_COLORS[this.random.int(GEM_COLORS.length)],
+        color: gemColor,
         kind: "counter",
         turns: 3,
       };
       this.board[targetY][column] = gem;
       placed.push({ x: column, y: targetY, gem: { ...gem } });
     }
+    detectPowerGems(this.board);
     return placed;
   }
 
@@ -422,6 +564,7 @@ export class PuzzleGame {
         if (gem.turns === 0) gem.kind = "normal";
       }
     }
+    detectPowerGems(this.board);
   }
 
   useSuper(): boolean {
@@ -438,6 +581,8 @@ export class PuzzleGame {
         }
       }
     }
+    detectPowerGems(this.board);
     return true;
   }
 }
+

@@ -2,6 +2,7 @@ import {
   BOARD_HEIGHT,
   BOARD_WIDTH,
   PuzzleGame,
+  type GemColor,
   type Resolution,
   type ResolvedCell,
 } from "./puzzle";
@@ -16,6 +17,11 @@ export interface MatchEvent {
   cells?: ResolvedCell[];
   delayMs?: number;
 }
+
+const FIGHTER_DROP_PATTERNS: Record<FighterId, GemColor[]> = {
+  broner: ["red", "red", "blue", "blue", "green", "green"],
+  deen: ["yellow", "purple", "red", "green", "blue", "yellow"],
+};
 
 export class MatchGame {
   player: PuzzleGame;
@@ -33,8 +39,8 @@ export class MatchGame {
   constructor(seed = 20260727, playerFighter: FighterId = "broner") {
     this.playerFighter = playerFighter;
     this.rivalFighter = playerFighter === "broner" ? "deen" : "broner";
-    this.player = new PuzzleGame(seed);
-    this.rival = new PuzzleGame(seed ^ 0x51f15e);
+    this.player = new PuzzleGame(seed, FIGHTER_DROP_PATTERNS[this.playerFighter]);
+    this.rival = new PuzzleGame(seed ^ 0x51f15e, FIGHTER_DROP_PATTERNS[this.rivalFighter]);
   }
 
   update(deltaMs: number): void {
@@ -121,7 +127,7 @@ export class MatchGame {
     if (resolution.attack > 0) {
       const target = actor === "player" ? this.rival : this.player;
       const targetActor = actor === "player" ? "rival" : "player";
-      const cells = target.addCounterGems(Math.min(resolution.attack, 8));
+      const cells = target.addCounterGems(Math.min(resolution.attack, 12));
       this.events.push({ type: "attack", actor, value: resolution.attack, delayMs: resolutionDelay });
       this.events.push({ type: "hit", actor: targetActor, delayMs: resolutionDelay });
       this.events.push({
@@ -139,8 +145,8 @@ export class MatchGame {
     const target = this.chooseAiColumn();
     if (active.x < target) this.rival.move(1);
     else if (active.x > target) this.rival.move(-1);
-    else if (this.rival.random.next() > 0.7) this.rival.rotate();
-    if (this.rival.meter >= 100 && this.rival.random.next() > 0.82) {
+    else if (this.rival.random.next() > 0.65) this.rival.rotate();
+    if (this.rival.meter >= 100 && this.rival.random.next() > 0.8) {
       if (this.rival.useSuper()) {
         const cells = this.player.addCounterGems(4);
         this.events.push({ type: "super", actor: "rival" });
@@ -152,6 +158,7 @@ export class MatchGame {
   private chooseAiColumn(): number {
     let best = 0;
     let bestScore = Number.NEGATIVE_INFINITY;
+    const activeColor = this.rival.active?.pivot.color;
     for (let x = 0; x < BOARD_WIDTH; x += 1) {
       let height = 0;
       for (let y = 0; y < BOARD_HEIGHT; y += 1) {
@@ -160,9 +167,12 @@ export class MatchGame {
           break;
         }
       }
-      let score = -height * 3 + this.rival.random.next();
-      const bottom = this.rival.board[BOARD_HEIGHT - 1][x];
-      if (bottom?.color === this.rival.active?.pivot.color) score += 4;
+      let score = -height * 2.5 + this.rival.random.next();
+      const topY = BOARD_HEIGHT - height;
+      if (topY < BOARD_HEIGHT && topY >= 0) {
+        const topGem = this.rival.board[topY][x];
+        if (topGem?.color === activeColor) score += 5;
+      }
       if (score > bestScore) {
         bestScore = score;
         best = x;
@@ -181,3 +191,4 @@ export class MatchGame {
     });
   }
 }
+

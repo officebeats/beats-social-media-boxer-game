@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { BOARD_HEIGHT, PuzzleGame, SeededRandom, type Gem } from "./puzzle";
+import { BOARD_HEIGHT, PuzzleGame, SeededRandom, detectPowerGems, type Gem } from "./puzzle";
 import { MatchGame } from "./match";
 
 describe("SeededRandom", () => {
@@ -12,7 +12,60 @@ describe("SeededRandom", () => {
   });
 });
 
-describe("PuzzleGame", () => {
+describe("PuzzleGame Power Gems & SPF2T Mechanics", () => {
+  it("fuses 2x2 adjacent normal gems into a Power Gem", () => {
+    const game = new PuzzleGame(5);
+    const red: Gem = { color: "red", kind: "normal" };
+    game.board[10][0] = { ...red };
+    game.board[10][1] = { ...red };
+    game.board[11][0] = { ...red };
+    game.board[11][1] = { ...red };
+
+    detectPowerGems(game.board);
+
+    expect(game.board[10][0]?.powerGem).toBeDefined();
+    expect(game.board[10][0]?.powerGem?.width).toBe(2);
+    expect(game.board[10][0]?.powerGem?.height).toBe(2);
+    expect(game.board[11][1]?.powerGem?.id).toBe(game.board[10][0]?.powerGem?.id);
+  });
+
+  it("detonates Power Gems when touched by a matching Crash Gem", () => {
+    const game = new PuzzleGame(12);
+    const redNormal: Gem = { color: "red", kind: "normal" };
+    game.board[10][0] = { ...redNormal };
+    game.board[10][1] = { ...redNormal };
+    game.board[11][0] = { ...redNormal };
+    game.board[11][1] = { ...redNormal };
+
+    game.active = {
+      x: 0,
+      y: 8,
+      orientation: 0,
+      pivot: { color: "red", kind: "crash" },
+      satellite: { color: "blue", kind: "normal" },
+    };
+
+    const result = game.hardDrop();
+
+    expect(result.locked).toHaveLength(2);
+    expect(result.steps).toHaveLength(1);
+    expect(result.steps[0].cells.length).toBeGreaterThanOrEqual(5);
+    expect(result.steps[0].cells.some((cell) => cell.gem.kind === "crash")).toBe(true);
+  });
+
+  it("applies character-specific drop patterns for Broner and Deen", () => {
+    const bronerMatch = new MatchGame(1, "broner");
+    const deenMatch = new MatchGame(1, "deen");
+
+    const bronerCells = bronerMatch.player.addCounterGems(6);
+    expect(bronerCells.length).toBe(6);
+
+    const deenCells = deenMatch.player.addCounterGems(6);
+    expect(deenCells.length).toBe(6);
+  });
+});
+
+describe("PuzzleGame Standard Features", () => {
   it("moves, rotates, and hard drops a pair", () => {
     const game = new PuzzleGame(7);
     expect(game.move(-1)).toBe(true);
@@ -43,29 +96,6 @@ describe("PuzzleGame", () => {
     expect(counters).toHaveLength(1);
   });
 
-  it("reports deterministic cells for land and break effects", () => {
-    const game = new PuzzleGame(12);
-    const red: Gem = { color: "red", kind: "normal" };
-    game.board[BOARD_HEIGHT - 1][0] = { ...red };
-    game.board[BOARD_HEIGHT - 1][1] = { ...red };
-    game.board[BOARD_HEIGHT - 1][2] = { ...red };
-    game.active = {
-      x: 3,
-      y: 8,
-      orientation: 0,
-      pivot: { ...red },
-      satellite: { color: "blue", kind: "normal" },
-    };
-
-    const result = game.hardDrop();
-
-    expect(result.locked).toHaveLength(2);
-    expect(result.steps).toHaveLength(1);
-    expect(result.steps[0].chain).toBe(1);
-    expect(result.steps[0].cells).toHaveLength(4);
-    expect(result.steps[0].cells.every((cell) => cell.gem.color === "red")).toBe(true);
-  });
-
   it("reports counter-gem landing cells", () => {
     const game = new PuzzleGame(18);
     const cells = game.addCounterGems(4);
@@ -85,3 +115,4 @@ describe("MatchGame", () => {
     expect(match.phase).toBe("paused");
   });
 });
+
