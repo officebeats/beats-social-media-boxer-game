@@ -1,6 +1,7 @@
+node_modules/
+dist/
 output/
 server.pid
 tmp/
 __pycache__/
-reference/research/
-.omx/
+.DS_Store
