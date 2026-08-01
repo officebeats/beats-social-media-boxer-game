@@ -1,98 +1,60 @@
 import Phaser from 'phaser';
-import { COLORS, GAME_WIDTH, GAME_HEIGHT } from '../config';
+import { GAME_WIDTH, GAME_HEIGHT } from '../config';
 import { audioManager, SFX } from '../engine/audio';
-
-interface MenuItem {
-    card: Phaser.GameObjects.Graphics;
-    text: Phaser.GameObjects.Text;
-    action: () => void;
-}
 
 /**
  * PauseScene
- * Styled after pause_menu_mockup_1785555910596.jpg with gold/cyan metallic modal overlay card.
+ * Uses pause_menu_mockup_1785555910596.jpg as overlay graphic over frozen battle scene.
  */
 export class PauseScene extends Phaser.Scene {
-    private menuItems: MenuItem[] = [];
     private selectedIndex: number = 0;
+    private selectionGlow!: Phaser.GameObjects.Graphics;
+
+    private readonly buttonPositions = [
+        { y: 310, action: () => this.resume() },
+        { y: 375, action: () => this.restart() },
+        { y: 440, action: () => this.scene.start('TutorialScene') },
+        { y: 505, action: () => this.quit() },
+    ];
 
     constructor() {
         super('PauseScene');
     }
 
     create() {
-        // 60% Dimmed Overlay over frozen battle
-        this.add.rectangle(0, 0, GAME_WIDTH, GAME_HEIGHT, 0x000000, 0.65).setOrigin(0);
+        // Dimmed backdrop
+        this.add.rectangle(0, 0, GAME_WIDTH, GAME_HEIGHT, 0x000000, 0.5).setOrigin(0);
 
         const cx = GAME_WIDTH / 2;
         const cy = GAME_HEIGHT / 2;
 
-        const modalW = 320;
-        const modalH = 380;
+        // 1. Exact Mockup Card Image
+        const cardBg = this.add.image(cx, cy, 'mockup-pause').setOrigin(0.5);
+        cardBg.setDisplaySize(GAME_WIDTH, GAME_HEIGHT);
 
-        // 3D Gold/Cyan Metallic Modal Card Frame
-        const modal = this.add.graphics();
-        modal.fillStyle(0x0a0a16, 0.95);
-        modal.fillRoundedRect(cx - modalW / 2, cy - modalH / 2, modalW, modalH, 14);
-        modal.lineStyle(3, 0xfbbf24, 1);
-        modal.strokeRoundedRect(cx - modalW / 2, cy - modalH / 2, modalW, modalH, 14);
-        modal.lineStyle(1.5, 0x22d3ee, 0.8);
-        modal.strokeRoundedRect(cx - modalW / 2 + 4, cy - modalH / 2 + 4, modalW - 8, modalH - 8, 10);
+        // 2. Selection Glow Graphic
+        this.selectionGlow = this.add.graphics();
 
-        // Header Title
-        this.add.text(cx, cy - modalH / 2 + 38, 'MATCH PAUSED', {
-            fontFamily: 'Impact, sans-serif',
-            fontSize: '32px',
-            color: '#fbbf24',
-            stroke: '#000000',
-            strokeThickness: 5
-        }).setOrigin(0.5);
-
-        const options = [
-            { label: 'RESUME MATCH', action: () => this.resume() },
-            { label: 'RESTART ROUND', action: () => this.restart() },
-            { label: 'HOW TO PLAY', action: () => this.scene.start('TutorialScene') },
-            { label: 'QUIT MATCH', action: () => this.quit() },
-        ];
-
-        this.menuItems = [];
-        this.selectedIndex = 0;
-
-        const cardW = 260;
+        // 3. Interactive Hit Zones for 4 Pause Menu Buttons
+        const cardW = 200;
         const cardH = 50;
-        const startY = cy - 65;
-        const gapY = 62;
 
-        options.forEach((opt, index) => {
-            const y = startY + index * gapY;
+        this.buttonPositions.forEach((pos, index) => {
+            const zone = this.add.zone(cx, pos.y, cardW, cardH).setInteractive({ useHandCursor: true });
 
-            const card = this.add.graphics();
-
-            const text = this.add.text(cx, y + cardH / 2, opt.label, {
-                fontFamily: 'Impact, sans-serif',
-                fontSize: '20px',
-                color: '#ffffff',
-                stroke: '#000000',
-                strokeThickness: 4
-            }).setOrigin(0.5);
-
-            const hitZone = this.add.zone(cx, y + cardH / 2, cardW, cardH).setInteractive({ useHandCursor: true });
-
-            hitZone.on('pointerdown', () => {
+            zone.on('pointerdown', () => {
                 this.selectedIndex = index;
                 this.updateSelection();
                 this.confirmSelection();
             });
 
-            hitZone.on('pointerover', () => {
+            zone.on('pointerover', () => {
                 if (this.selectedIndex !== index) {
                     this.selectedIndex = index;
                     this.updateSelection();
                     this.playMoveSound();
                 }
             });
-
-            this.menuItems.push({ card, text, action: opt.action });
         });
 
         this.updateSelection();
@@ -109,34 +71,19 @@ export class PauseScene extends Phaser.Scene {
 
     private updateSelection() {
         const cx = GAME_WIDTH / 2;
-        const cy = GAME_HEIGHT / 2;
-        const cardW = 260;
-        const cardH = 50;
-        const startY = cy - 65;
-        const gapY = 62;
+        const cardW = 200;
+        const cardH = 48;
+        const currentPos = this.buttonPositions[this.selectedIndex];
 
-        this.menuItems.forEach((item, index) => {
-            const y = startY + index * gapY;
-            const isSelected = index === this.selectedIndex;
+        this.selectionGlow.clear();
 
-            item.card.clear();
-
-            if (isSelected) {
-                item.card.fillStyle(0x1e1b4b, 0.95);
-                item.card.fillRoundedRect(cx - cardW / 2, y, cardW, cardH, 8);
-                item.card.lineStyle(2.5, 0xfbbf24, 1);
-                item.card.strokeRoundedRect(cx - cardW / 2, y, cardW, cardH, 8);
-
-                item.text.setColor('#fbbf24');
-            } else {
-                item.card.fillStyle(0x111827, 0.85);
-                item.card.fillRoundedRect(cx - cardW / 2, y, cardW, cardH, 8);
-                item.card.lineStyle(1.5, 0x374151, 0.8);
-                item.card.strokeRoundedRect(cx - cardW / 2, y, cardW, cardH, 8);
-
-                item.text.setColor('#d1d5db');
-            }
-        });
+        // Glowing Neon Selection Box over active pause button
+        this.selectionGlow.fillStyle(0xfbbf24, 0.25);
+        this.selectionGlow.fillRoundedRect(cx - cardW / 2, currentPos.y - cardH / 2, cardW, cardH, 10);
+        this.selectionGlow.lineStyle(3, 0xfbbf24, 1);
+        this.selectionGlow.strokeRoundedRect(cx - cardW / 2, currentPos.y - cardH / 2, cardW, cardH, 10);
+        this.selectionGlow.lineStyle(1.5, 0x22d3ee, 0.9);
+        this.selectionGlow.strokeRoundedRect(cx - cardW / 2 + 3, currentPos.y - cardH / 2 + 3, cardW - 6, cardH - 6, 8);
     }
 
     private playMoveSound() {
@@ -145,21 +92,21 @@ export class PauseScene extends Phaser.Scene {
 
     private moveUp() {
         this.selectedIndex--;
-        if (this.selectedIndex < 0) this.selectedIndex = this.menuItems.length - 1;
+        if (this.selectedIndex < 0) this.selectedIndex = this.buttonPositions.length - 1;
         this.updateSelection();
         this.playMoveSound();
     }
 
     private moveDown() {
         this.selectedIndex++;
-        if (this.selectedIndex >= this.menuItems.length) this.selectedIndex = 0;
+        if (this.selectedIndex >= this.buttonPositions.length) this.selectedIndex = 0;
         this.updateSelection();
         this.playMoveSound();
     }
 
     private confirmSelection() {
         audioManager.play(SFX.MENU_CONFIRM);
-        this.menuItems[this.selectedIndex].action();
+        this.buttonPositions[this.selectedIndex].action();
     }
 
     private resume() {

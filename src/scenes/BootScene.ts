@@ -70,6 +70,16 @@ export class BootScene extends Phaser.Scene {
             });
         });
 
+        // Preload screen mockup backgrounds
+        this.load.image('mockup-title', 'assets/title_screen_mockup_1785555675601.jpg');
+        this.load.image('mockup-menu', 'assets/main_menu_mockup_1785555687774.jpg');
+        this.load.image('mockup-arcade', 'assets/arcade_mode_mockup_1785555697837.jpg');
+        this.load.image('mockup-select', 'assets/character_select_mockup_1785555825691.jpg');
+        this.load.image('mockup-battle', 'assets/battle_screen_mockup_1785554702942.jpg');
+        this.load.image('mockup-pause', 'assets/pause_menu_mockup_1785555910596.jpg');
+        this.load.image('mockup-victory', 'assets/victory_screen_mockup_1785555728023.jpg');
+        this.load.image('mockup-tutorial', 'assets/how_to_play_mockup_1785555737435.jpg');
+
         // Generate high quality procedural textures
         this.createProceduralTextures();
     }

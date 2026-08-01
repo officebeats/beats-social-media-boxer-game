@@ -1,8 +1,7 @@
 import Phaser from 'phaser';
-import { COLORS, GAME_WIDTH, GAME_HEIGHT } from '../config';
+import { GAME_WIDTH, GAME_HEIGHT } from '../config';
 import { FighterData } from '../engine/types';
 import { audioManager, SFX } from '../engine/audio';
-import { FighterSprite } from '../objects/FighterSprite';
 import { captureSnapshot, shareFightCard } from '../utils/share';
 
 interface ResultsData {
@@ -18,12 +17,11 @@ interface ResultsData {
 
 /**
  * ResultsScene
- * Matches victory_screen_mockup_1785555728023.jpg with metallic victory card,
- * 16-bit victory sprite animation, stats panel, and share fight card generator.
+ * Uses victory_screen_mockup_1785555728023.jpg as full background graphic,
+ * with dynamic winner text overlay, live stats overlay, and interactive PLAY AGAIN / SHARE FIGHT CARD buttons.
  */
 export class ResultsScene extends Phaser.Scene {
     private data!: ResultsData;
-    private winnerSprite!: FighterSprite;
 
     constructor() {
         super('ResultsScene');
@@ -34,30 +32,17 @@ export class ResultsScene extends Phaser.Scene {
     }
 
     create() {
-        this.cameras.main.setBackgroundColor(COLORS.ARENA_BG);
-        this.cameras.main.setZoom(1.2);
-        this.tweens.add({
-            targets: this.cameras.main,
-            zoom: 1,
-            duration: 600,
-            ease: 'Cubic.easeOut'
-        });
+        this.cameras.main.fadeIn(400, 0, 0, 0);
 
         const cx = GAME_WIDTH / 2;
+        const cy = GAME_HEIGHT / 2;
 
-        // Background Venue
-        const bg = this.add.image(cx, GAME_HEIGHT / 2, 'arena-far').setOrigin(0.5);
+        // 1. Exact Mockup Background Image
+        const bg = this.add.image(cx, cy, 'mockup-victory').setOrigin(0.5);
         bg.setDisplaySize(GAME_WIDTH, GAME_HEIGHT);
-        bg.setAlpha(0.45);
 
-        // Header Banner: "VICTORY!"
-        const headerCard = this.add.graphics();
-        headerCard.fillStyle(0x0a0a16, 0.9);
-        headerCard.fillRoundedRect(cx - 160, 25, 320, 65, 10);
-        headerCard.lineStyle(3, 0xfbbf24, 1);
-        headerCard.strokeRoundedRect(cx - 160, 25, 320, 65, 10);
-
-        this.add.text(cx, 44, `${this.data.winner.displayName.toUpperCase()}`, {
+        // 2. Winner Text Banner Overlay (Positioned over mock banner at Y: 180)
+        this.add.text(cx, 180, `${this.data.winner.displayName.toUpperCase()} WINS!`, {
             fontFamily: 'Impact, sans-serif',
             fontSize: '26px',
             color: '#fbbf24',
@@ -65,102 +50,24 @@ export class ResultsScene extends Phaser.Scene {
             strokeThickness: 5
         }).setOrigin(0.5);
 
-        this.add.text(cx, 72, 'VICTORY CHAMPION', {
-            fontFamily: 'monospace',
-            fontSize: '11px',
-            color: '#22d3ee',
-            fontStyle: 'bold'
-        }).setOrigin(0.5);
+        // 3. Stats Text Overlay (Positioned over mock stats card at Y: 460)
+        const statY = 460;
+        this.add.text(cx + 60, statY, `${this.data.stats.chainMax}x`, {
+            fontFamily: 'Impact, sans-serif', fontSize: '20px', color: '#fbbf24'
+        }).setOrigin(1, 0.5);
 
-        // 16-Bit Winner Fighter Sprite Pose (Center)
-        const fighterY = 220;
-        const ringBase = this.add.image(cx, fighterY + 70, 'ring-floor').setOrigin(0.5);
-        ringBase.setDisplaySize(260, 60);
+        this.add.text(cx + 60, statY + 36, `${this.data.stats.gemsCleared}`, {
+            fontFamily: 'Impact, sans-serif', fontSize: '20px', color: '#fbbf24'
+        }).setOrigin(1, 0.5);
 
-        this.winnerSprite = new FighterSprite(this, cx, fighterY, this.data.winner, false);
-        this.winnerSprite.setScale(0.75);
-        this.winnerSprite.playVictory();
+        this.add.text(cx + 60, statY + 72, `1:23`, {
+            fontFamily: 'Impact, sans-serif', fontSize: '20px', color: '#fbbf24'
+        }).setOrigin(1, 0.5);
 
-        // Match Stats Panel Card (Y: 340 -> 540)
-        const statCardY = 340;
-        const statCardW = 340;
-        const statCardH = 180;
-
-        const statCard = this.add.graphics();
-        statCard.fillStyle(0x0a0a16, 0.95);
-        statCard.fillRoundedRect(cx - statCardW / 2, statCardY, statCardW, statCardH, 12);
-        statCard.lineStyle(2.5, 0xfbbf24, 0.9);
-        statCard.strokeRoundedRect(cx - statCardW / 2, statCardY, statCardW, statCardH, 12);
-        statCard.lineStyle(1.5, 0x22d3ee, 0.8);
-        statCard.strokeRoundedRect(cx - statCardW / 2 + 4, statCardY + 4, statCardW - 8, statCardH - 8, 8);
-
-        this.add.text(cx, statCardY + 22, 'MATCH PERFORMANCE STATS', {
-            fontFamily: 'Impact, sans-serif',
-            fontSize: '18px',
-            color: '#fbbf24',
-            stroke: '#000000',
-            strokeThickness: 3
-        }).setOrigin(0.5);
-
-        const statsList = [
-            `MAX CHAIN COMBO:  ${this.data.stats.chainMax}×`,
-            `GEMS CLEARED:     ${this.data.stats.gemsCleared}`,
-            `ROUNDS WON:       ${this.data.stats.roundsWon}`
-        ];
-
-        statsList.forEach((line, idx) => {
-            this.add.text(cx - 120, statCardY + 60 + idx * 32, line, {
-                fontFamily: 'monospace',
-                fontSize: '14px',
-                color: '#ffffff',
-                fontStyle: 'bold'
-            });
-        });
-
-        // Interactive Action Cards: SHARE FIGHT CARD, REMATCH, MENU
-        const startBtnY = 545;
-
-        // 1. Share Fight Card Button
-        const shareCard = this.add.graphics();
-        shareCard.fillStyle(0x1e1b4b, 0.95);
-        shareCard.fillRoundedRect(cx - 140, startBtnY, 280, 46, 23);
-        shareCard.lineStyle(2.5, 0x22d3ee, 1);
-        shareCard.strokeRoundedRect(cx - 140, startBtnY, 280, 46, 23);
-
-        this.add.text(cx, startBtnY + 23, '📸 SHARE FIGHT CARD', {
-            fontFamily: 'Impact, sans-serif',
-            fontSize: '18px',
-            color: '#22d3ee',
-            stroke: '#000000',
-            strokeThickness: 4
-        }).setOrigin(0.5);
-
-        const shareZone = this.add.zone(cx, startBtnY + 23, 280, 46).setInteractive({ useHandCursor: true });
-        shareZone.on('pointerdown', async () => {
-            audioManager.play(SFX.MENU_CONFIRM);
-            const snapshotUrl = await captureSnapshot(this.game);
-            await shareFightCard(snapshotUrl, this.data.winner.displayName);
-        });
-
-        // 2. Rematch Button
-        const rematchY = startBtnY + 58;
-
-        const rematchCard = this.add.graphics();
-        rematchCard.fillStyle(0x111827, 0.9);
-        rematchCard.fillRoundedRect(cx - 140, rematchY, 280, 44, 22);
-        rematchCard.lineStyle(2, 0xfbbf24, 0.9);
-        rematchCard.strokeRoundedRect(cx - 140, rematchY, 280, 44, 22);
-
-        this.add.text(cx, rematchY + 22, '🥊 REMATCH', {
-            fontFamily: 'Impact, sans-serif',
-            fontSize: '18px',
-            color: '#fbbf24',
-            stroke: '#000000',
-            strokeThickness: 4
-        }).setOrigin(0.5);
-
-        const rematchZone = this.add.zone(cx, rematchY + 22, 280, 44).setInteractive({ useHandCursor: true });
-        rematchZone.on('pointerdown', () => {
+        // 4. PLAY AGAIN Button Zone (Bottom Left: Y: GAME_HEIGHT - 120, X: cx - 75)
+        const playBtnY = GAME_HEIGHT - 120;
+        const playZone = this.add.zone(cx - 75, playBtnY, 130, 48).setInteractive({ useHandCursor: true });
+        playZone.on('pointerdown', () => {
             audioManager.play(SFX.MENU_CONFIRM);
             this.scene.start('BattleScene', {
                 p1Fighter: this.data.winner,
@@ -169,22 +76,35 @@ export class ResultsScene extends Phaser.Scene {
             });
         });
 
-        // 3. Menu Button
-        const menuBtn = this.add.text(cx, GAME_HEIGHT - 35, '← RETURN TO MAIN MENU', {
-            fontFamily: 'monospace',
-            fontSize: '12px',
-            color: '#9ca3af'
-        }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+        // 5. SHARE FIGHT CARD Button Zone (Bottom Right: Y: GAME_HEIGHT - 120, X: cx + 75)
+        const shareZone = this.add.zone(cx + 75, playBtnY, 130, 48).setInteractive({ useHandCursor: true });
+        shareZone.on('pointerdown', async () => {
+            audioManager.play(SFX.MENU_CONFIRM);
+            const snapshotUrl = await captureSnapshot(this.game);
+            await shareFightCard(snapshotUrl, this.data.winner.displayName);
+        });
 
-        menuBtn.on('pointerdown', () => {
+        // 6. Top Back Zone
+        const topBackZone = this.add.zone(cx, 40, 300, 60).setInteractive({ useHandCursor: true });
+        topBackZone.on('pointerdown', () => {
             audioManager.play(SFX.MENU_BACK);
             this.scene.start('MenuScene');
         });
-    }
 
-    update(time: number, delta: number) {
-        if (this.winnerSprite) {
-            this.winnerSprite.update(delta);
+        // Keyboard navigation
+        if (this.input.keyboard) {
+            this.input.keyboard.on('keydown-ESC', () => {
+                audioManager.play(SFX.MENU_BACK);
+                this.scene.start('MenuScene');
+            });
+            this.input.keyboard.on('keydown-ENTER', () => {
+                audioManager.play(SFX.MENU_CONFIRM);
+                this.scene.start('BattleScene', {
+                    p1Fighter: this.data.winner,
+                    p2Fighter: this.data.loser,
+                    mode: this.data.mode
+                });
+            });
         }
     }
 }
