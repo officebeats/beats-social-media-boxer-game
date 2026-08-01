@@ -1,6 +1,6 @@
 # GAME DESIGN DOCUMENT: CRASH OUT: RING RUSH — PUZZLE BOXING
 
-**Document Version:** 5.0.0 (AAA Production Standard — Single Player Arcade & Complete Visual Spec)  
+**Document Version:** 5.1.0 (AAA Production Standard — Dynamic Idle & Fidget Engine Spec)  
 **Studio:** Antigravity Studios — Executive Production Division  
 **Lead Game Producer:** AAA Competitive Game Systems Producer  
 **Principal Game Designer:** Senior Puzzle-Fighter & 2D Combat Systems Architect  
@@ -1014,51 +1014,76 @@ Each fighter's visual design, idle animation loop, and signature SUPER finisher 
 
 ---
 
-## 6. FIGHTER ANIMATION STATE MACHINE & TIMING
+## 6. DYNAMIC FIGHTER ANIMATION ENGINE & RANDOMIZED IDLE SYSTEM
 
-### 6.1 Animation States
-
-The fighter sprite renderer maintains a finite state machine. Each state maps to a row/column range on the sprite sheet and a specific frame timing sequence.
+To prevent fighter sprites from appearing static or robotic during puzzle play, **Crash Out: Ring Rush** implements a **Randomized Dynamic Idle Engine**. Fighters are never frozen in place; their idle stance is a multi-layered state machine combining continuous rhythm bouncing with weighted persona-authentic fidget triggers and reactive taunts.
 
 ```
-                ┌──────────┐
-                │   IDLE   │◀──────────────────────────────┐
-                └────┬─────┘                               │
-                     │                                     │
-         (puzzle event detected)                    (animation complete)
-                     │                                     │
-          ┌──────────┼──────────┐                          │
-          ▼          ▼          ▼                          │
-     ┌────────┐ ┌────────┐ ┌──────────┐                   │
-     │  JAB   │ │  HOOK  │ │ UPPERCUT │───────────────────┘
-     └────────┘ └────────┘ └──────────┘
-                                                           │
-     ┌────────┐ ┌────────┐ ┌──────────┐                   │
-     │ FLINCH │ │   KO   │ │  SUPER   │───────────────────┘
-     └────────┘ └────┬───┘ └──────────┘
-                     │
-                     ▼
-               ┌───────────┐
-               │  WIN POSE │ (only on match end)
-               └───────────┘
+                         ┌───────────────────────┐
+                         │   IDLE_BOUNCE BASE    │
+                         │ (4-frame 12 FPS loop) │
+                         └───────────┬───────────┘
+                                     │
+                    ┌────────────────┴────────────────┐
+                    │ Weighted Random Timer (3s–6s)   │
+                    ▼                                 ▼
+         ┌───────────────────┐               ┌───────────────────┐
+         │   FIDGET_A LOOP   │               │   FIDGET_B LOOP   │
+         │ (Persona Quirk A) │               │ (Persona Quirk B) │
+         └──────────┬────────┘               └────────┬──────────┘
+                    │                                 │
+                    └────────────────┬────────────────┘
+                                     │ (Return to base)
+                                     ▼
+                         ┌───────────────────────┐
+                         │   IDLE_BOUNCE BASE    │
+                         └───────────────────────┘
 ```
 
-### 6.2 Frame Timing Matrix
+### 6.1 Dynamic Idle Sub-States
 
-All animations run at discrete step rates (no interpolation) for the classic arcade feel.
+1. **`IDLE_BOUNCE` (Base Rhythm, Frames 0–3)**: Continuous 4-frame weight-shift bounce at 12 FPS (90ms per frame). Keeps the sprite visually active with chest breathing, foot shuffling, and glove pulsing.
+2. **`FIDGET_A` (Persona Quirk A, Frames 4–5)**: A fast persona-authentic action (e.g. hairbrushing, headband fix, cross necklace tap) triggered randomly every **3,000ms – 5,000ms**.
+3. **`FIDGET_B` (Persona Quirk B, Frames 6–7)**: A showboat or chat-react action (e.g. money stack flash, chair spin, mace bottle check, coin toss) triggered randomly every **4,000ms – 6,000ms**.
+4. **`TAUNT_INTERRUPT` (Reactive Taunt)**: Immediately interrupts idle state whenever the player lands a 3+ chain combo or 2×2 Power Gem detonation.
+
+### 6.2 Complete 14-Fighter Idle & Fidget Catalog
+
+| Fighter | Base Bounce (`IDLE_BOUNCE`) | Fidget Variant A (`FIDGET_A`) | Fidget Variant B (`FIDGET_B`) |
+| :--- | :--- | :--- | :--- |
+| **Adrien Broner** | Low Philly Shell shoulder-dip bounce. | Pulls out gold hairbrush, brushes beard twice. | Flashes money stack to camera, winks. |
+| **Deen The Great** | High-guard southpaw rhythm shuffle. | Adjusts blue headband with right glove. | Taps gloves together, points at rival. |
+| **Ryan Garcia** | Flamboyant orthodox stance bounce. | Touches gold cross necklace, shadow-jabs. | Taps gloves to chin, winks at camera. |
+| **Ray J** | Relaxed stance with blue LED glasses. | Taps glasses (glow blue LED pulse). | Adjusts jacket lapels, pitches to camera. |
+| **N3ON** | Hyperactive step-shuffle fidget. | Adjusts gaming headset/mic, checks chat. | Screams up at stream chat, jumps twice. |
+| **Blueface** | Asymmetric off-beat shoulder shrug. | Taps cheek face tattoo, flexes bicep. | Off-beat shoulder-roll dance move. |
+| **Chrisean Rock** | Forward-leaning brawler stance. | Chews gum, double-taps canvas with foot. | Cracks knuckles, roars at rival. |
+| **Rampage Jackson**| Heavy broad MMA stance. | Holds heavy metal neck chain, tilts head. | Slaps chest with gloves, howls at ceiling. |
+| **Adin Ross** | Upright stance with purple Kick mic. | Spins 180° on invisible gaming chair. | Yells "IS THAT A W?!", points at camera. |
+| **Charleston White**| Frantic expressive talker stance. | Speech bubble ("LISTEN HERE!") pops. | Pulls out yellow mace spray, checks cap. |
+| **Walid Sharks** | Fluid bob-and-weave shuffle. | Rapid micro speed-bag shadow punch. | Slips backward, snaps back into stance. |
+| **Antonio Brown** | Showboat stance with gold chains. | Points to chest "84", shrugs shoulders. | Viral shoulder-shrug dance gesture. |
+| **Gervonta Davis** | Menacing southpaw hood-up stance. | Adjusts gold championship belt around waist. | Narrows eyes under hood, weight shift. |
+| **Floyd Mayweather**| Untouchable Philly Shell roll. | Flips gold coin into air, catches it. | Smooth 360° shoulder-roll matrix dodge. |
+
+### 6.3 Frame Timing & State Matrix
+
+All animations run at discrete step rates (no linear interpolation) for authentic 16-bit Capcom arcade responsiveness.
 
 | State | Frames | Per-Frame Timing | Total Duration | Trigger Condition |
 | :--- | :--- | :--- | :--- | :--- |
-| **Idle** | 4 | 90ms each | 360ms (loop) | Default / return state |
+| **Idle Bounce** | 4 | 90ms each | 360ms (loop) | Default stance loop |
+| **Fidget A** | 2 | 120ms each | 240ms | Random timer (3s–5s) |
+| **Fidget B** | 2 | 150ms each | 300ms | Random timer (4s–6s) |
 | **Jab** | 3 | 60 / 120 / 80 ms | 260ms | 1–2 gems cleared |
 | **Hook** | 3 | 80 / 140 / 80 ms | 300ms | 3–5 gems cleared |
 | **Uppercut** | 4 | 80 / 100 / 140 / 80 ms | 400ms | Power Gem detonation |
-| **Super** | 4 | 80ms each | 320ms | SUPER finisher activated |
+| **SUPER** | 4 | 80ms each | 320ms | SUPER finisher activated |
 | **Flinch** | 3 | 120 / 100 / 80 ms | 300ms | Receiving counter gems |
 | **KO Fall** | 3 | 140ms each | 420ms | HP reaches 0 |
 | **Win Pose** | 2 | 200ms each | 400ms (loop) | Opponent KO'd |
-| **Guard** | 2 | 100ms each | 200ms | Blocking (AI idle defense) |
-| **Taunt** | 2 | 150ms each | 300ms | Chain 4+ combo |
+| **Guard** | 2 | 100ms each | 200ms | Blocking (AI defense) |
+| **Taunt** | 2 | 150ms each | 300ms | Chain 3+ combo |
 
 ### 6.3 Sprite Rendering Code Contract
 
