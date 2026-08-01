@@ -1336,10 +1336,22 @@ button {
 }
 
 .next-pair {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   gap: 3px;
-  height: 34px;
+  height: 64px;
+  padding: 3px;
+  border: 1px solid rgba(255, 190, 41, 0.45);
+  border-radius: 6px;
+  background: rgba(4, 7, 16, 0.88);
+  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.8);
+}
+
+.next-pair .gem {
+  width: 26px;
+  height: 26px;
 }
 
 .chain-readout {
@@ -1360,6 +1372,8 @@ button {
   position: relative;
   display: grid;
   overflow: hidden;
+  min-width: 52px;
+  min-height: 52px;
   aspect-ratio: 1;
   place-items: center;
   border: 3px solid var(--gold);
@@ -1369,6 +1383,15 @@ button {
   font-size: 0.76rem;
   font-weight: 1000;
   box-shadow: inset 0 0 0 3px #120b02, 0 0 22px rgba(255, 160, 0, 0.48);
+  touch-action: manipulation;
+  user-select: none;
+  cursor: pointer;
+  transition: transform 120ms ease, filter 120ms ease;
+}
+
+.super-button:active {
+  transform: scale(0.92);
+  filter: brightness(1.3);
 }
 
 .super-button span {
@@ -1397,28 +1420,39 @@ button {
 .touch-controls {
   position: absolute;
   z-index: 12;
-  right: 8px;
-  bottom: var(--safe-bottom);
-  left: 8px;
+  right: 12px;
+  bottom: max(env(safe-area-inset-bottom, 12px), 12px);
+  left: 12px;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 7px;
-  height: 62px;
+  gap: 9px;
+  height: 64px;
 }
 
 .touch-controls button {
-  border: 1px solid rgba(255, 190, 41, 0.52);
-  border-radius: 10px;
-  background: linear-gradient(180deg, rgba(31, 40, 58, 0.92), rgba(5, 8, 15, 0.96));
+  min-height: 52px;
+  border: 1.5px solid rgba(255, 190, 41, 0.58);
+  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(38, 50, 74, 0.94), rgba(7, 11, 22, 0.98));
   color: white;
-  font-size: 1.5rem;
+  font-size: 1.6rem;
   font-weight: 900;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 4px 10px rgba(0, 0, 0, 0.6);
   touch-action: manipulation;
   user-select: none;
+  transition: transform 80ms ease, background 80ms ease, border-color 80ms ease, box-shadow 80ms ease;
+}
+
+.touch-controls button:active {
+  transform: scale(0.93) translateY(2px);
+  border-color: var(--gold);
+  background: linear-gradient(180deg, rgba(255, 190, 41, 0.45), rgba(14, 20, 36, 0.98));
+  box-shadow: inset 0 0 12px rgba(255, 190, 41, 0.7), 0 2px 4px rgba(0, 0, 0, 0.8);
 }
 
 .touch-controls .drop {
   border-color: var(--gold);
+  background: linear-gradient(180deg, rgba(75, 52, 10, 0.94), rgba(18, 12, 2, 0.98));
   color: var(--gold);
 }
 
