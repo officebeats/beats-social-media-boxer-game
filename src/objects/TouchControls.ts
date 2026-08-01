@@ -20,10 +20,11 @@ export class TouchControls extends Phaser.GameObjects.Container {
         this.createButton(dpadX, baseY, '▼', InputAction.DOWN);
         this.createButton(dpadX + spacing / 1.2, baseY, '►', InputAction.RIGHT);
 
-        // Bottom Right Action Controls (Rotate, Hard Drop)
-        const actionX = screenW - 60;
-        this.createButton(actionX - spacing / 1.2, baseY, '↻', InputAction.ROTATE_CW);
-        this.createButton(actionX, baseY, 'DROP', InputAction.HARD_DROP, true);
+        // Bottom Right Action Controls (Rotate, Hard Drop, SUPER)
+        const actionX = screenW - 75;
+        this.createButton(actionX - 110, baseY, 'ROTATE', InputAction.ROTATE_CW, true);
+        this.createButton(actionX - 45, baseY, 'DROP', InputAction.HARD_DROP, false);
+        this.createButton(actionX + 25, baseY, 'SUPER', InputAction.SUPER, false);
 
         scene.add.existing(this);
 

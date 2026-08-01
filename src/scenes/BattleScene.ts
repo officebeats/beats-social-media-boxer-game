@@ -335,6 +335,7 @@ export class BattleScene extends Phaser.Scene {
                     this.isSoftDropping = true;
                     break;
                 }
+                case InputAction.UP:
                 case InputAction.ROTATE_CW: {
                     state.activePair = rotateGemPair(state.board, state.activePair, 'cw');
                     this.p1PairDisplay.updatePair(state.activePair);
@@ -352,16 +353,55 @@ export class BattleScene extends Phaser.Scene {
                     audioManager.play(SFX.HARD_DROP);
                     break;
                 }
+                case InputAction.SUPER: {
+                    if (state.superReady) {
+                        this.activateSuper('p1');
+                    }
+                    break;
+                }
             }
+        }
+    }
+
+    /** Activate signature SUPER finisher */
+    private activateSuper(player: 'p1' | 'p2'): void {
+        const attackerState = player === 'p1' ? this.matchState.p1 : this.matchState.p2;
+        const defenderState = player === 'p1' ? this.matchState.p2 : this.matchState.p1;
+        const attackerSprite = player === 'p1' ? this.p1Fighter : this.p2Fighter;
+        const defenderSprite = player === 'p1' ? this.p2Fighter : this.p1Fighter;
+
+        attackerState.superMeter = 0;
+        attackerState.superReady = false;
+        this.hud.updateSuper(player, 0, SUPER_METER_MAX);
+
+        audioManager.play(SFX.SUPER_ACTIVATED);
+        this.cameraController.shake(12, 600);
+
+        attackerSprite.playSuper();
+        defenderSprite.playFlinch();
+
+        // 4 rows of garbage sent + 35 HP damage
+        const garbagePayload = { rows: 4, pattern: [0, 1, 2, 3, 4, 5], counterTurns: 3 };
+        defenderState.board = placeGarbage(defenderState.board, garbagePayload);
+        const defenderGrid = player === 'p1' ? this.p2Grid : this.p1Grid;
+        defenderGrid.updateBoard(defenderState.board);
+
+        defenderState.hp = Math.max(0, defenderState.hp - SUPER_DAMAGE);
+        this.hud.updateHP(player === 'p1' ? 'p2' : 'p1', defenderState.hp, MAX_HP);
+
+        if (defenderState.hp <= 0) {
+            this.triggerKO(player);
         }
     }
 
     /** Process P2 AI moves */
     private processAI(delta: number): void {
         const state = this.matchState.p2;
-        if (!state.activePair) return;
-
-        this.aiTimer += delta;
+        // AI activates SUPER if ready
+        if (state.superReady) {
+            this.activateSuper('p2');
+            return;
+        }
 
         // AI decides placement on first tick
         if (!this.aiHasPlaced && this.aiTimer > 200) {

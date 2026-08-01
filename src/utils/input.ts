@@ -19,6 +19,8 @@ const KEY_BINDINGS: Record<string, InputAction> = {
     KeyZ: InputAction.ROTATE_CW,
     KeyX: InputAction.ROTATE_CCW,
     Space: InputAction.HARD_DROP,
+    KeyC: InputAction.SUPER,
+    ShiftLeft: InputAction.SUPER,
     Escape: InputAction.PAUSE,
     Enter: InputAction.CONFIRM,
     Backspace: InputAction.BACK,

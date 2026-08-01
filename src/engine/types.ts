@@ -162,6 +162,8 @@ export enum InputAction {
     BACK = 'BACK',
     /** D-pad up for menu navigation */
     UP = 'UP',
+    /** Activate signature SUPER finisher */
+    SUPER = 'SUPER',
 }
 
 // ─── Fighter Data ──────────────────────────────────────────────────────────────
