@@ -238,41 +238,109 @@ button {
 
 .faceoff {
   position: absolute;
-  z-index: 6;
-  top: 23%;
+  z-index: 5;
+  top: 26%;
   left: 50%;
-  width: min(110vw, 760px);
-  height: 48%;
+  width: min(94vw, 700px);
+  height: 44%;
   transform: translateX(-50%);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
 }
 
 .title-fighter {
-  position: absolute;
-  bottom: 0;
-  width: 58%;
-  height: 100%;
-  background-size: 400% 100%;
+  position: relative;
+  width: 44%;
+  height: 94%;
+  transform-origin: 50% 100%;
+  will-change: transform;
+}
+
+.title-fighter .fighter-sprite {
+  filter: drop-shadow(0 14px 16px rgba(0, 0, 0, 0.72)) brightness(1.04);
 }
 
 .title-fighter.broner {
-  left: -7%;
+  animation: title-shadow-broner 3.4s cubic-bezier(0.38, 0, 0.62, 1) infinite;
 }
 
 .title-fighter.deen {
-  right: -7%;
+  animation: title-shadow-deen 3.4s cubic-bezier(0.38, 0, 0.62, 1) infinite -1.7s;
 }
 
 .versus {
   position: absolute;
-  z-index: 3;
-  top: 44%;
+  z-index: 8;
+  top: 38%;
   left: 50%;
-  transform: translate(-50%, -50%) rotate(-8deg);
+  transform: translate(-50%, -50%) rotate(-6deg);
   color: white;
-  font-size: clamp(2rem, 8vw, 4rem);
+  font-size: clamp(2.2rem, 9vw, 4.2rem);
   font-style: italic;
   font-weight: 1000;
-  text-shadow: 0 0 18px var(--gold), 4px 4px 0 #101522;
+  text-shadow: 0 0 20px var(--gold), 4px 4px 0 #0b0e18;
+  pointer-events: none;
+}
+
+.title-ring-front {
+  position: absolute;
+  z-index: 6;
+  inset: 0;
+  background-image: var(--arena-ring-fg);
+  background-position: center 84%;
+  background-size: cover;
+  background-repeat: no-repeat;
+  opacity: 0.85;
+  pointer-events: none;
+}
+
+@keyframes title-shadow-broner {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
+  }
+  14% {
+    transform: translate3d(4%, -1.2%, 0) rotate(-1.5deg) scale(1.02); /* Shadow jab extension */
+  }
+  28% {
+    transform: translate3d(-3%, 1.5%, 0) rotate(2deg) scale(0.98); /* Slip left & shoulder roll */
+  }
+  42% {
+    transform: translate3d(6%, -2%, 0) rotate(-2.2deg) scale(1.03); /* Counter hook thrust */
+  }
+  58% {
+    transform: translate3d(-1%, 2.2%, 0) rotate(1.2deg) scale(0.97); /* Duck under punch */
+  }
+  74% {
+    transform: translate3d(3%, -0.8%, 0) rotate(-1deg) scale(1.01); /* Body jab pop */
+  }
+  88% {
+    transform: translate3d(-2%, 0.5%, 0) rotate(1.8deg) scale(0.99); /* Philly shell reset */
+  }
+}
+
+@keyframes title-shadow-deen {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
+  }
+  14% {
+    transform: translate3d(-4%, -1.4%, 0) rotate(1.8deg) scale(1.02); /* Shadow straight jab */
+  }
+  28% {
+    transform: translate3d(3%, 1.2%, 0) rotate(-2deg) scale(0.98); /* High guard slip right */
+  }
+  42% {
+    transform: translate3d(-7%, -2.2%, 0) rotate(2.4deg) scale(1.04); /* Double jab forward */
+  }
+  58% {
+    transform: translate3d(1.5%, 2.5%, 0) rotate(-1.4deg) scale(0.96); /* Bob and weave duck */
+  }
+  74% {
+    transform: translate3d(-3.5%, -0.9%, 0) rotate(1deg) scale(1.01); /* Right cross snap */
+  }
+  88% {
+    transform: translate3d(2%, 0.6%, 0) rotate(-1.6deg) scale(0.99); /* Toe bounce reset */
+  }
 }
 
 .title-actions {

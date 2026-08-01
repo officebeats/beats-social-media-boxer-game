@@ -135,6 +135,7 @@ function titleMarkup(): string {
         <div class="versus">VS</div>
         ${fighterVisual("deen", "idle", "title-fighter deen", "left")}
       </div>
+      <div class="title-ring-front" aria-hidden="true"></div>
       <nav class="title-actions" aria-label="Main menu">
         <button class="primary-button" data-action="fight">FIGHT</button>
         <button class="secondary-button" data-action="options">AUDIO: ${muted ? "OFF" : "ON"}</button>
