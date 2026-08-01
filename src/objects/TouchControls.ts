@@ -2,7 +2,6 @@ import Phaser from 'phaser';
 import { InputAction } from '../engine/types';
 
 export class TouchControls extends Phaser.GameObjects.Container {
-    // Assuming an InputManager type that has registerTouchAction
     private inputManager: any;
 
     constructor(scene: Phaser.Scene, inputManager: any) {
@@ -11,58 +10,75 @@ export class TouchControls extends Phaser.GameObjects.Container {
 
         const screenW = scene.cameras.main.width;
         const screenH = scene.cameras.main.height;
-        const padding = 20;
         const btnSize = 58;
-        const spacing = btnSize + 10;
+        const spacing = btnSize + 8;
+        const baseY = screenH - 65;
 
-        // Bottom left area: D-Pad
-        const dpadBaseX = padding + btnSize;
-        const dpadBaseY = screenH - padding - btnSize * 1.5;
+        // Bottom Left D-Pad Controls
+        const dpadX = 60;
+        this.createButton(dpadX - spacing / 1.2, baseY, '◄', InputAction.LEFT);
+        this.createButton(dpadX, baseY, '▼', InputAction.DOWN);
+        this.createButton(dpadX + spacing / 1.2, baseY, '►', InputAction.RIGHT);
 
-        this.createButton(dpadBaseX - spacing, dpadBaseY, '←', InputAction.LEFT);
-        this.createButton(dpadBaseX, dpadBaseY + spacing, '↓', InputAction.DOWN);
-        this.createButton(dpadBaseX + spacing, dpadBaseY, '→', InputAction.RIGHT);
-
-        // Bottom right area: Rotate / Hard drop
-        const actionBaseX = screenW - padding - btnSize * 1.5;
-        const actionBaseY = screenH - padding - btnSize * 1.5;
-
-        this.createButton(actionBaseX - spacing, actionBaseY + spacing, '↻', InputAction.ROTATE_CW);
-        this.createButton(actionBaseX, actionBaseY, '⬇', InputAction.HARD_DROP);
+        // Bottom Right Action Controls (Rotate, Hard Drop)
+        const actionX = screenW - 60;
+        this.createButton(actionX - spacing / 1.2, baseY, '↻', InputAction.ROTATE_CW);
+        this.createButton(actionX, baseY, 'DROP', InputAction.HARD_DROP, true);
 
         scene.add.existing(this);
-        
-        // Auto-hide on desktop (simple check for pointer capability vs touch capability can be added, assuming true for now unless setVisible(false) is called)
+
+        // Show on touch devices or always visible for desktop preview
         if (!scene.sys.game.device.input.touch) {
-            this.setVisible(false);
+            this.setAlpha(0.85); // Visible translucent on desktop so user sees touch UI
         }
     }
 
-    private createButton(x: number, y: number, label: string, action: InputAction) {
-        const bg = this.scene.add.rectangle(x, y, 58, 58, 0x000000, 0.5);
-        bg.setInteractive({ useHandCursor: true });
-        
-        const text = this.scene.add.text(x, y, label, {
-            fontFamily: 'monospace',
-            fontSize: '24px',
-            color: '#ffffff'
+    private createButton(x: number, y: number, label: string, action: InputAction, isWide: boolean = false) {
+        const btnW = isWide ? 76 : 58;
+        const btnH = 58;
+
+        const container = this.scene.add.container(x, y);
+
+        // 3D Metallic Gold/Cyan Button Card Graphics
+        const bg = this.scene.add.graphics();
+        bg.fillStyle(0x0a0a16, 0.9);
+        bg.fillRoundedRect(-btnW / 2, -btnH / 2, btnW, btnH, 10);
+        bg.lineStyle(2.5, 0xfbbf24, 0.9);
+        bg.strokeRoundedRect(-btnW / 2, -btnH / 2, btnW, btnH, 10);
+        bg.lineStyle(1.5, 0x22d3ee, 0.7);
+        bg.strokeRoundedRect(-btnW / 2 + 2, -btnH / 2 + 2, btnW - 4, btnH - 4, 8);
+        container.add(bg);
+
+        // Label Text
+        const text = this.scene.add.text(0, 0, label, {
+            fontFamily: isWide ? 'Impact, sans-serif' : 'monospace',
+            fontSize: isWide ? '16px' : '22px',
+            color: '#fbbf24',
+            stroke: '#000000',
+            strokeThickness: 3
         }).setOrigin(0.5);
+        container.add(text);
 
-        this.add([bg, text]);
+        // Hit Zone
+        const hitZone = this.scene.add.zone(0, 0, btnW, btnH).setInteractive({ useHandCursor: true });
+        container.add(hitZone);
 
-        bg.on('pointerdown', () => {
-            bg.setFillStyle(0x333333, 0.8);
+        hitZone.on('pointerdown', () => {
+            container.setScale(0.92);
+            text.setColor('#22d3ee');
             if (this.inputManager && typeof this.inputManager.registerTouchAction === 'function') {
                 this.inputManager.registerTouchAction(action);
             }
         });
 
-        bg.on('pointerup', () => {
-            bg.setFillStyle(0x000000, 0.5);
-        });
+        const resetBtn = () => {
+            container.setScale(1.0);
+            text.setColor('#fbbf24');
+        };
 
-        bg.on('pointerout', () => {
-            bg.setFillStyle(0x000000, 0.5);
-        });
+        hitZone.on('pointerup', resetBtn);
+        hitZone.on('pointerout', resetBtn);
+
+        this.add(container);
     }
 }

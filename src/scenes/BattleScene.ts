@@ -135,7 +135,7 @@ export class BattleScene extends Phaser.Scene {
         const cellSize = 28; // Fits 6 columns in ~170px
         const gridWidth = 6 * cellSize;
         const gridHeight = 12 * cellSize;
-        const gridY = 200; // Below HUD area
+        const gridY = 240; // Below top arena zone
 
         // P1 grid on the left
         this.p1Grid = new GemGrid(this, 10, gridY, cellSize);
@@ -156,30 +156,31 @@ export class BattleScene extends Phaser.Scene {
         this.p2PairDisplay.setDepth(4);
         this.add.existing(this.p2PairDisplay);
 
-        // ─── Fighters ──────────────────────────────────────────────────
-        const fighterY = gridY + gridHeight + 50;
+        // ─── Fighters in Top Arena Zone (30% area) ─────────────────────
+        const fighterY = 175;
         this.p1Fighter = new FighterSprite(
             this,
-            GAME_WIDTH * 0.25,
+            GAME_WIDTH * 0.28,
             fighterY,
             this.sceneData.p1Fighter,
             false,
         );
         this.p1Fighter.setDepth(2);
-        this.p1Fighter.setScale(0.5);
+        this.p1Fighter.setScale(0.6);
 
         this.p2Fighter = new FighterSprite(
             this,
-            GAME_WIDTH * 0.75,
+            GAME_WIDTH * 0.72,
             fighterY,
             this.sceneData.p2Fighter,
             true,
         );
         this.p2Fighter.setDepth(2);
-        this.p2Fighter.setScale(0.5);
+        this.p2Fighter.setScale(0.6);
 
         // ─── HUD ───────────────────────────────────────────────────────
         this.hud = new HUD(this, GAME_WIDTH);
+        this.hud.setFighterNames(this.sceneData.p1Fighter.displayName, this.sceneData.p2Fighter.displayName);
         this.hud.setDepth(5);
         this.add.existing(this.hud);
 

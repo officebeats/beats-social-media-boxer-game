@@ -11,6 +11,7 @@ import { GAME_WIDTH, GAME_HEIGHT, COLORS } from './config';
 import { BootScene } from './scenes/BootScene';
 import { TitleScene } from './scenes/TitleScene';
 import { MenuScene } from './scenes/MenuScene';
+import { ArcadeScene } from './scenes/ArcadeScene';
 import { SelectScene } from './scenes/SelectScene';
 import { BattleScene } from './scenes/BattleScene';
 import { PauseScene } from './scenes/PauseScene';
@@ -36,6 +37,7 @@ const config: Phaser.Types.Core.GameConfig = {
         BootScene,
         TitleScene,
         MenuScene,
+        ArcadeScene,
         SelectScene,
         BattleScene,
         PauseScene,
