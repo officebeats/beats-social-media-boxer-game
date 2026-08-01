@@ -693,10 +693,10 @@ button {
 .fight-plane {
   position: absolute;
   z-index: 6;
-  top: 6.4%;
+  top: 7.2%;
   left: 50%;
   width: min(96vw, 680px);
-  height: clamp(154px, 27vh, 248px);
+  height: clamp(165px, 28vh, 250px);
   transform: translateX(-50%);
   pointer-events: none;
 }
