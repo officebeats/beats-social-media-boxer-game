@@ -1,6 +1,6 @@
 # GAME DESIGN DOCUMENT: CRASH OUT: RING RUSH — PUZZLE BOXING
 
-**Document Version:** 6.0.0 (AAA Production Standard — Unified Active Battle Visual Benchmark)  
+**Document Version:** 7.0.0 (AAA Production Standard — Complete 14-Fighter Sprite Catalog)  
 **Studio:** Antigravity Studios — Executive Production Division  
 **Lead Game Producer:** AAA Competitive Game Systems Producer  
 **Principal Game Designer:** Senior Puzzle-Fighter & 2D Combat Systems Architect  
