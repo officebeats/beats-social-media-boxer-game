@@ -1,11 +1,11 @@
 # GAME DESIGN DOCUMENT: RING RUSH — PUZZLE BOXING
 
-**Document Version:** 3.0.0 (AAA Production Standard — Viral Release Candidate)  
+**Document Version:** 3.1.0 (AAA Production Standard — Full Input & Navigation Spec)  
 **Studio:** Antigravity Studios — Executive Production Division  
 **Lead Game Producer:** AAA Competitive Game Systems Producer  
 **Principal Game Designer:** Senior Puzzle-Fighter & 2D Combat Systems Architect  
 **Art Director:** Pixel Art & UI/UX Visual Production Lead  
-**Target Platform:** Mobile Web (iOS Safari / Android Chrome) & Desktop Browsers  
+**Target Platform:** Mobile Web (iOS Safari / Android Chrome), Desktop Browsers, Gamepad (Bluetooth / USB)  
 **Aspect Ratios:** 19.5:9 (iPhone 16 Pro), 20:9 (Galaxy S24), 16:9 (Desktop)  
 **Tech Stack:** TypeScript, Vite, HTML5 Canvas (layered multi-canvas), Web Audio API, Vitest, Playwright  
 **Target FPS:** 60 FPS render / 12 FPS sprite step rate  
@@ -206,67 +206,495 @@ All VFX are procedurally generated on the `fighters` canvas — zero external as
 
 ---
 
-## 3. GAME FLOW & SCREEN ARCHITECTURE
+## 3. GAME FLOW, MENUS & SCREEN ARCHITECTURE
+
+Every screen in Ring Rush is navigable via **touch**, **gamepad**, or **keyboard/mouse**. All interactive elements participate in a unified **focus cursor** system: a visible gold highlight ring (3px `outline`, `outline-offset: 4px`, color `#fbbf24`) that wraps the currently focused element. This cursor is driven by the input abstraction layer (Section 10) so all three input methods share identical navigation topology.
 
 ### 3.1 Complete Screen Flow State Machine
 
 ```
-                    ┌───────────────────┐
-                    │                   │
-                    ▼                   │
-              ┌──────────┐             │
-              │  TITLE   │──(START)──▶┌──────────────┐
-              │  SCREEN  │            │  CHARACTER   │
-              └──────────┘            │  SELECT      │
-                    ▲                 └──────┬───────┘
-                    │                        │ (CONFIRM)
-              (PLAY AGAIN)                   ▼
-                    │                 ┌──────────────┐
-              ┌──────────┐           │  ROUND INTRO │
-              │ RESULTS  │◀──(KO)──  │  "ROUND 1"   │
-              │ SCREEN   │           │  "FIGHT!"    │
-              └──────────┘           └──────┬───────┘
-                                            │
-                                            ▼
-                                     ┌─────────────┐
-                                     │   ACTIVE    │
-                                     │   BATTLE    │──(SUPER)──▶ [ SUPER CINEMATIC ]
-                                     │   (60 FPS)  │◀───────────
-                                     └─────────────┘
+┌────────────────────────────────────────────────────────────────────────────┐
+│                                                                            │
+│   ┌──────────┐        ┌──────────┐       ┌──────────────┐                 │
+│   │  BOOT /  │──────▶│  TITLE   │──────▶│  MAIN MENU   │                 │
+│   │  SPLASH  │        │  SCREEN  │ START │              │                 │
+│   └──────────┘        └──────────┘       └──────┬───────┘                 │
+│        (1.5s auto)       (any input)            │                         │
+│                                                  │                         │
+│                          ┌───────────────────────┼─────────────┐           │
+│                          ▼                       ▼             ▼           │
+│                   ┌────────────┐         ┌────────────┐ ┌───────────┐     │
+│                   │  VS CPU    │         │  SETTINGS  │ │  HOW TO   │     │
+│                   │ (Fighter   │         │            │ │  PLAY     │     │
+│                   │  Select)   │         └────────────┘ └───────────┘     │
+│                   └─────┬──────┘               ▲              ▲           │
+│                         │ CONFIRM              │ BACK         │ BACK      │
+│                         ▼                      │              │           │
+│                  ┌──────────────┐               │              │           │
+│                  │ DIFFICULTY   │               │              │           │
+│                  │ SELECT       │               │              │           │
+│                  └──────┬───────┘               │              │           │
+│                         │ CONFIRM               │              │           │
+│                         ▼                       │              │           │
+│                  ┌──────────────┐               │              │           │
+│                  │ ROUND INTRO  │               │              │           │
+│                  │ "ROUND 1"    │               │              │           │
+│                  │ "FIGHT!"     │               │              │           │
+│                  └──────┬───────┘               │              │           │
+│                         │ (auto 1.5s)           │              │           │
+│                         ▼                       │              │           │
+│                  ┌──────────────┐               │              │           │
+│                  │ ACTIVE       │               │              │           │
+│                  │ BATTLE       │──▶ SUPER ──┐  │              │           │
+│                  │ (60 FPS)     │◀───────────┘  │              │           │
+│                  └──────┬───────┘    PAUSE ──▶┌──────────┐     │           │
+│                         │                     │ PAUSE    │     │           │
+│                         │ KO                  │ MENU     │     │           │
+│                         ▼                     └──────────┘     │           │
+│                  ┌──────────────┐                              │           │
+│                  │ RESULTS /    │──(PLAY AGAIN)──▶ Fighter Select           │
+│                  │ VICTORY      │──(MAIN MENU)──▶ Main Menu    │           │
+│                  │ SCREEN       │──(SHARE)──▶ Share Card Gen   │           │
+│                  └──────────────┘                              │           │
+└────────────────────────────────────────────────────────────────────────────┘
 ```
 
-### 3.2 Screen Specifications
+### 3.2 Screen-by-Screen Specification
 
-#### Title Screen
-- **Background**: Parallax arena at rest (centered camera, no drift), spotlights slowly oscillating color temperature.
-- **Fighter Preview**: Broner (left) and Deen (right) in continuous 4-frame idle stance animations on the ring floor.
-- **Typography**: "RING RUSH" in Teko 900 weight, 72px, gold (#fbbf24) with 3px text-stroke black and `text-shadow: 0 0 30px rgba(251, 191, 36, 0.6)`. "PUZZLE BOXING" subtitle in 32px Teko 600, cyan (#06b6d4).
-- **CTA Button**: "PRESS START" — gold gradient button, 58px height, 14px radius, pulsing `box-shadow` glow animation (0.8s ease-in-out infinite alternate).
-- **Audio Toggle**: Top-right icon button, 🔊/🔇 state.
+---
 
-#### Character Select Screen
-- **Layout**: Scrollable grid of fighter cards (4 columns on mobile, 5 on desktop). Each card shows fighter avatar circle (initials + theme color border), name, and nickname.
-- **Selection Detail Panel**: Below the grid — selected fighter's full stats (HP bar, Speed bar, Power bar, Super Rate bar) rendered as animated fill bars. Passive ability name + description. SUPER finisher name + description. Counter Gem drop pattern visualized as 6 colored squares.
-- **P2 Selection**: AI opponent auto-selected as random rival (or tap a second card to choose). Displayed in mirrored panel on right (desktop) or below (mobile).
-- **Confirm Button**: "FIGHT!" — red gradient, 58px height, triggers match intro.
+#### 3.2.1 Boot / Splash Screen
 
-#### Round Intro Sequence (1.5 seconds)
-1. **0ms–600ms**: "ROUND 1" text scales from 0→1.2→1.0 (overshoot ease), centered on screen, white Teko 900 80px with black stroke.
-2. **600ms–1200ms**: "ROUND 1" fades out, "FIGHT!" scales in with same animation, gold color.
-3. **1200ms–1500ms**: "FIGHT!" fades out. Arena camera centers. Game loop begins.
+**Duration**: 1.5 seconds (auto-advance, not skippable).
 
-#### Active Battle Screen (Primary Gameplay)
-- **Top Zone** (0–30% of viewport): Parallax arena with fighter sprites, HP bars, SUPER meters, fighter names.
-- **Mid Zone** (30–80% of viewport): Dual 6×12 puzzle grids side by side. P1 left, P2 right. NEXT piece preview boxes above each grid. Chain combo text floats here.
-- **Bottom Zone** (80–100%): Mobile touch controls (D-pad left/right, Rotate, Soft Drop, Hard Drop, SUPER button). Desktop: keyboard only, this zone collapses.
+```
+┌──────────────────────────────────────┐
+│                                      │
+│                                      │
+│          ⚡ ANTIGRAVITY ⚡           │
+│              STUDIOS                 │
+│                                      │
+│           ▓▓▓▓░░░░░░░░              │
+│           (loading bar)              │
+│                                      │
+└──────────────────────────────────────┘
+```
 
-#### Results / Victory Screen
-- **Overlay**: Full-screen dark backdrop (rgba(0,0,0,0.88)) with backdrop-filter blur.
-- **Victory Card**: Gold-bordered card (3px border, 20px radius, `box-shadow: 0 0 45px rgba(255, 190, 41, 0.48)`) containing:
-  - "KNOCKOUT!" in 52px Teko gold.
-  - Winner's name in 28px Outfit 800 white.
-  - Stats table: Max Chain, Total Clears, Match Time.
-  - "PLAY AGAIN" button and "SHARE" button (generates fight card image via `canvas.toDataURL()`).
+- Studio logo fades in over 600ms, holds 600ms, fades out 300ms.
+- Loading bar shows asset preload progress (arena PNGs, sprite sheets, gem sheet).
+- Web Audio context is created here (needs user gesture on iOS — handled by Title Screen).
+
+---
+
+#### 3.2.2 Title Screen
+
+```
+┌──────────────────────────────────────┐
+│  [🔊]                          [⚙️]  │  ← Top Bar (48px)
+│                                      │
+│            R I N G  R U S H          │  ← Teko 900, 72px, Gold
+│           P U Z Z L E               │
+│            B O X I N G               │  ← Teko 600, 32px, Cyan
+│                                      │
+│   ┌──────────────────────────────┐   │
+│   │   [BRONER]   VS   [DEEN]    │   │  ← Sparring Plane (180px)
+│   │   (idle anim)  (idle anim)  │   │    Fighters in 4-frame idle loop
+│   └──────────────────────────────┘   │
+│                                      │
+│         ▶ PRESS START ◀              │  ← Gold pulsing CTA (58px)
+│                                      │
+│     🎮 Controller Detected           │  ← Shows if gamepad connected
+│                                      │
+└──────────────────────────────────────┘
+```
+
+**Navigation Focus Order**: `PRESS START` (only one focusable element).
+
+| Input | Action |
+| :--- | :--- |
+| Touch: Tap anywhere / Tap START | Proceed to Main Menu + unlock Web Audio |
+| Gamepad: Any button (A/B/X/Y/Start) | Proceed to Main Menu |
+| Keyboard: Enter / Space / any key | Proceed to Main Menu |
+
+**Visual Details**:
+- Background: Parallax arena at rest, spotlights slowly cycling amber/cyan hue.
+- "PRESS START" button pulses with `box-shadow: 0 0 20px rgba(251, 191, 36, 0.5)` on 0.8s infinite alternate.
+- If a gamepad is connected, a subtle "🎮 Controller Detected" label appears below the CTA.
+- Audio toggle (🔊) in top-left; Settings gear (⚙️) in top-right — both 44px touch targets.
+
+---
+
+#### 3.2.3 Main Menu
+
+```
+┌──────────────────────────────────────┐
+│  [🔊]    RING RUSH              [⚙️] │  ← Top Bar
+│                                      │
+│                                      │
+│        ┌──────────────────┐          │
+│        │  ▶ VS CPU        │ ◀ focus  │  ← Menu Item (58px, gold border)
+│        └──────────────────┘          │
+│        ┌──────────────────┐          │
+│        │    HOW TO PLAY   │          │  ← Menu Item (58px)
+│        └──────────────────┘          │
+│        ┌──────────────────┐          │
+│        │    SETTINGS      │          │  ← Menu Item (58px)
+│        └──────────────────┘          │
+│                                      │
+│                                      │
+│    ◄/► D-Pad  ⓐ Select  ⓑ Back     │  ← Input legend (auto-detected)
+│                                      │
+└──────────────────────────────────────┘
+```
+
+**Navigation Focus Order** (vertical list, wraps): `VS CPU` → `HOW TO PLAY` → `SETTINGS`.
+
+| Input | Action |
+| :--- | :--- |
+| Touch: Tap menu item | Select that item |
+| Gamepad: D-Pad Up/Down or Left Stick | Move focus cursor up/down |
+| Gamepad: A / Cross (×) | Confirm focused item |
+| Gamepad: B / Circle (○) | Back to Title Screen |
+| Keyboard: ↑/↓ or W/S | Move focus cursor up/down |
+| Keyboard: Enter / Space | Confirm focused item |
+| Keyboard: Escape / Backspace | Back to Title Screen |
+| Mouse: Hover over item | Move focus to that item |
+| Mouse: Click item | Select that item |
+
+**Visual Details**:
+- Menu items are 280px wide (mobile) / 360px wide (desktop), centered, 58px height.
+- Background: `var(--bg-card)` (#12131c) with 2px border `rgba(255,255,255,0.12)`.
+- Focused item: Border becomes gold (#fbbf24), glow `box-shadow: 0 0 16px var(--gold-glow)`, subtle `scale(1.03)` transform.
+- Input legend at bottom auto-detects active input method: shows gamepad glyphs when gamepad is active, keyboard shortcuts when keyboard is active, hidden on touch-only.
+
+---
+
+#### 3.2.4 Character Select Screen
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│  [◀ BACK]         CHOOSE YOUR FIGHTER         [⚙️]          │
+│                                                              │
+│  ┌────┐ ┌────┐ ┌────┐ ┌────┐ ┌────┐                        │
+│  │ AB │ │DEEN│ │RYAN│ │RAYJ│ │N3ON│    ← Row 1 (5 cols)    │
+│  └────┘ └────┘ └────┘ └────┘ └────┘                        │
+│  ┌────┐ ┌────┐ ┌────┐ ┌────┐ ┌────┐                        │
+│  │BLUE│ │CHRI│ │RAMP│ │ADIN│ │CHAR│    ← Row 2             │
+│  └────┘ └────┘ └────┘ └────┘ └────┘                        │
+│  ┌────┐ ┌────┐ ┌────┐ ┌────┐                               │
+│  │WALI│ │ AB │ │🔒GD│ │🔒FM│              ← Row 3 (bosses) │
+│  └────┘ └────┘ └────┘ └────┘                               │
+│                                                              │
+│  ┌──────────────────────────────────────────────────────┐    │
+│  │  ADRIEN BRONER  "The Problem"     HP ████████░░ 1100│    │
+│  │  Stream Host / COB                PWR ██████████ 1.25│   │
+│  │                                   SPD █████░░░░░ 1.0 │   │
+│  │  PASSIVE: Philly Armor            SUP █████░░░░░ 1.0 │   │
+│  │  −15% Counter Gems, Power +30%                       │    │
+│  │                                                       │    │
+│  │  DROP: [Gold][Gold][Red][Red][Gold][Gold]             │    │
+│  └──────────────────────────────────────────────────────┘    │
+│                                                              │
+│   P1: ADRIEN BRONER        P2: (random) DEEN THE GREAT      │
+│                                                              │
+│              ┌──────────────────────┐                        │
+│              │     ▶ FIGHT! ◀       │  ← Confirm (58px)     │
+│              └──────────────────────┘                        │
+│                                                              │
+│    ◄/►/▲/▼ Navigate  ⓐ Select  ⓑ Back  Ⓨ Toggle P2       │
+└──────────────────────────────────────────────────────────────┘
+```
+
+**Navigation Focus Order**: 2D grid navigation (rows × columns) for fighter cards. Focus wraps horizontally within each row. D-Pad down from last row reaches the FIGHT! button. BACK button is accessible via B/Escape/Backspace.
+
+| Input | Action |
+| :--- | :--- |
+| Touch: Tap fighter card | Select P1 fighter (auto-assigns random P2 rival) |
+| Touch: Tap selected P1 card again | Deselect |
+| Touch: Long-press a card (500ms) | Select as P2 opponent instead |
+| Touch: Tap FIGHT! | Confirm and proceed to Difficulty Select |
+| Gamepad: D-Pad / Left Stick (4-way) | Navigate fighter grid (2D cursor) |
+| Gamepad: A / Cross (×) | Select highlighted fighter as P1 |
+| Gamepad: Y / Triangle (△) | Toggle: select highlighted fighter as P2 |
+| Gamepad: B / Circle (○) | Back to Main Menu |
+| Gamepad: Start | Confirm selection (same as FIGHT!) |
+| Keyboard: Arrow keys / WASD | Navigate fighter grid (2D cursor) |
+| Keyboard: Enter / Space | Select highlighted fighter as P1 |
+| Keyboard: Tab | Toggle: select highlighted fighter as P2 |
+| Keyboard: Escape / Backspace | Back to Main Menu |
+| Mouse: Hover card | Focus moves to hovered card |
+| Mouse: Click card | Select as P1 |
+| Mouse: Right-click card | Select as P2 |
+
+**Visual Details**:
+- Fighter cards: 100px × 120px (mobile), 110px × 130px (desktop). Contains avatar circle (56px diameter), name (13px Outfit 700), nickname (10px gold).
+- Selected P1 card: Gold border, `scale(1.06)`, gold glow shadow.
+- Selected P2 card: Cyan border, `scale(1.06)`, cyan glow shadow.
+- Locked boss cards (🔒): Grayscale filter, lock icon overlay, tooltip on hover "Beat Hard AI to unlock."
+- Stats panel fills dynamically based on focused card — animated fill bars ease-out over 300ms.
+- Drop pattern row: 6 × 24px colored squares matching the fighter's Counter Gem pattern.
+
+---
+
+#### 3.2.5 Difficulty Select
+
+```
+┌──────────────────────────────────────┐
+│  [◀ BACK]      DIFFICULTY            │
+│                                      │
+│        ┌──────────────────┐          │
+│        │  ▶ EASY          │ ◀ focus  │
+│        │  "Learn the ropes"│          │
+│        └──────────────────┘          │
+│        ┌──────────────────┐          │
+│        │    NORMAL        │          │
+│        │  "Fair fight"    │          │
+│        └──────────────────┘          │
+│        ┌──────────────────┐          │
+│        │    HARD          │          │
+│        │  "You sure?"     │          │
+│        └──────────────────┘          │
+│                                      │
+│  ADRIEN BRONER  vs  DEEN THE GREAT   │  ← Fighter preview
+│    [idle anim]      [idle anim]      │
+│                                      │
+└──────────────────────────────────────┘
+```
+
+**Navigation**: Same vertical list pattern as Main Menu. Confirm → Round Intro. Back → Character Select.
+
+---
+
+#### 3.2.6 Round Intro Sequence (1.5 seconds, non-interactive)
+
+| Time | Visual | Audio |
+| :--- | :--- | :--- |
+| **0–600ms** | "ROUND 1" scales 0→1.2→1.0 (overshoot ease), centered, white Teko 900 80px, 3px black stroke. Arena fades in behind. | Low rumble sweep (80Hz → 40Hz, 600ms). |
+| **600–1200ms** | "ROUND 1" fades out. "FIGHT!" scales in same animation, gold color + gold glow. | Synth bell sting (800Hz + 1200Hz, 200ms). |
+| **1200–1500ms** | "FIGHT!" fades out. Camera centers. HP bars fill from 0→100%. | — |
+
+All input is ignored during this sequence. Game loop starts at 1500ms.
+
+---
+
+#### 3.2.7 Active Battle Screen (Primary Gameplay)
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│  [II]  BRONER 1100/1100  ████████████  SUPER ██░░░░  [🔊]  │ ← HUD Top
+│        DEEN    950/950   ████████████  SUPER ██░░░░        │
+│                                                              │
+│  ┌────────────────── PARALLAX ARENA ──────────────────┐      │
+│  │                                                     │      │
+│  │      [BRONER]              [DEEN]                   │      │ ← Fighter Plane
+│  │      (idle)                (idle)                   │      │
+│  │  ════════════ RING FLOOR ═══════════════            │      │
+│  └─────────────────────────────────────────────────────┘      │
+│                                                              │
+│  ┌─NEXT─┐                              ┌─NEXT─┐            │
+│  │ [R]  │  ┌──────────────┐            │ [B]  │             │
+│  │ [B]  │  │              │ ┌────────┐ │ [G]  │             │
+│  └──────┘  │   P1 BOARD   │ │P2 BOARD│ └──────┘             │
+│            │   6 × 12     │ │ 6 × 12 │                      │
+│            │              │ │        │                      │
+│            │              │ │        │                      │
+│            └──────────────┘ └────────┘                      │
+│                                                              │
+│  ┌──── D-PAD ─────┐    ┌────── ACTIONS ──────┐              │ ← Touch Controls
+│  │  ◄  │  ↻  │  ► │    │  ▼  │ ⚡DROP │🔥SUP │              │   (mobile only)
+│  │ 58px  58px 58px│    │ 58px  70px    70px  │              │
+│  └────────────────┘    └─────────────────────┘              │
+│   bottom: max(env(safe-area-inset-bottom) + 12px, 14px)     │
+└──────────────────────────────────────────────────────────────┘
+```
+
+**Layout Zones**:
+
+| Zone | Viewport % | Content |
+| :--- | :--- | :--- |
+| **HUD Top** | 0–7% | Fighter names, HP bars, SUPER meters, pause button, audio toggle |
+| **Arena** | 7–32% | 3-layer parallax arena with fighter sprites |
+| **Puzzle Zone** | 32–82% | Dual 6×12 gem grids + NEXT preview boxes + chain text |
+| **Controls** | 82–100% | Mobile touch panel (collapses on desktop/gamepad) |
+
+**Pause Behavior**: Tapping the ⏸ button (top-left), pressing Start on gamepad, or pressing Escape on keyboard opens the Pause Menu overlay.
+
+---
+
+#### 3.2.8 Pause Menu (Overlay)
+
+```
+┌──────────────────────────────────────┐
+│  ░░░░░░░░░░ (dimmed game) ░░░░░░░░░ │
+│                                      │
+│        ┌──────────────────┐          │
+│        │    ▶ RESUME      │ ◀ focus  │
+│        └──────────────────┘          │
+│        ┌──────────────────┐          │
+│        │    RESTART       │          │
+│        └──────────────────┘          │
+│        ┌──────────────────┐          │
+│        │    SETTINGS      │          │
+│        └──────────────────┘          │
+│        ┌──────────────────┐          │
+│        │    QUIT MATCH    │          │
+│        └──────────────────┘          │
+│                                      │
+│    ⓐ Select   ⓑ Resume              │
+└──────────────────────────────────────┘
+```
+
+- Background: `rgba(0, 0, 0, 0.80)` overlay with `backdrop-filter: blur(6px)` over the frozen game state.
+- Game loop is fully paused (no gravity drops, no AI moves, no timers tick).
+- Navigation: Same vertical list pattern. B / Escape always resumes.
+- RESUME: Close overlay, unpause game loop.
+- RESTART: Confirmation prompt ("Are you sure?"), then restart match with same fighters.
+- SETTINGS: Opens Settings sub-screen (same as Main Menu settings, overlaid).
+- QUIT MATCH: Confirmation prompt, then return to Main Menu.
+
+---
+
+#### 3.2.9 Results / Victory Screen
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│  ░░░░░░░░░░░░░░░░░ (dark overlay 88%) ░░░░░░░░░░░░░░░░░░░ │
+│                                                              │
+│         ╔══════════════════════════════════╗                  │
+│         ║                                  ║                  │
+│         ║      ⭐  K N O C K O U T !  ⭐   ║  ← 52px Gold    │
+│         ║                                  ║                  │
+│         ║     ADRIEN BRONER WINS!          ║  ← 28px White   │
+│         ║                                  ║                  │
+│         ║     Max Chain ........... 4×     ║                  │
+│         ║     Total Clears ........ 87     ║                  │
+│         ║     Match Time ......... 1:23    ║                  │
+│         ║                                  ║                  │
+│         ║   ┌───────────┐ ┌───────────┐   ║                  │
+│         ║   │▶PLAY AGAIN│ │  📤 SHARE │   ║  ← 2 buttons     │
+│         ║   └───────────┘ └───────────┘   ║                  │
+│         ║   ┌─────────────────────────┐   ║                  │
+│         ║   │      🏠 MAIN MENU      │   ║                  │
+│         ║   └─────────────────────────┘   ║                  │
+│         ║                                  ║                  │
+│         ╚══════════════════════════════════╝                  │
+│              3px gold border, 20px radius                    │
+│           box-shadow: 0 0 45px gold glow                     │
+└──────────────────────────────────────────────────────────────┘
+```
+
+**Navigation Focus Order**: `PLAY AGAIN` → `SHARE` → `MAIN MENU` (horizontal on first row, then wrap to second row).
+
+| Input | Action |
+| :--- | :--- |
+| Touch: Tap button | Execute that action |
+| Gamepad: D-Pad ←/→/↓ | Navigate between buttons |
+| Gamepad: A / Cross (×) | Confirm focused button |
+| Keyboard: ←/→/↓ / Tab | Navigate between buttons |
+| Keyboard: Enter / Space | Confirm focused button |
+
+- **PLAY AGAIN**: Returns to Character Select with previous fighters pre-selected.
+- **SHARE**: Generates a 1080×1920 fight card image via offscreen canvas → `canvas.toDataURL('image/png')` → triggers native share sheet (`navigator.share()`) or downloads PNG.
+- **MAIN MENU**: Returns to Main Menu.
+
+---
+
+#### 3.2.10 Settings Screen
+
+```
+┌──────────────────────────────────────┐
+│  [◀ BACK]        SETTINGS            │
+│                                      │
+│  SOUND           ┌──────────────┐    │
+│                   │  ██████░░ 80%│   │  ← Slider (drag/D-Pad ←/→)
+│                   └──────────────┘    │
+│                                      │
+│  MUSIC           ┌──────────────┐    │
+│                   │  ████░░░░ 50%│   │  ← Slider
+│                   └──────────────┘    │
+│                                      │
+│  SCREEN SHAKE    ┌──────┐            │
+│                   │  ON  │  OFF      │  ← Toggle
+│                   └──────┘            │
+│                                      │
+│  SHOW FPS        ┌──────┐            │
+│                   │  OFF │   ON      │  ← Toggle
+│                   └──────┘            │
+│                                      │
+│  INPUT DISPLAY   ┌──────┐            │
+│                   │ AUTO │ TOUCH │   │  ← Selector
+│                   │GMPD │  KB   │   │
+│                   └──────┘            │
+│                                      │
+│  CONTROLS        ▶ VIEW BINDINGS     │  ← Opens bindings sub-screen
+│                                      │
+└──────────────────────────────────────┘
+```
+
+**Navigation**: Vertical focus through setting rows. ←/→ adjusts sliders and toggles. Confirm opens sub-screens. Back returns to previous screen.
+
+Settings persist to `localStorage` under the key `ringrush_settings`.
+
+---
+
+#### 3.2.11 How To Play Screen
+
+```
+┌──────────────────────────────────────┐
+│  [◀ BACK]      HOW TO PLAY           │
+│                                      │
+│  ┌──────────────────────────────┐    │
+│  │  PAGE 1/4: BASICS            │    │  ← Carousel slides
+│  │                               │    │
+│  │  Drop gem pairs into the     │    │
+│  │  6×12 grid. Match colors to  │    │
+│  │  build Power Gems.           │    │
+│  │                               │    │
+│  │  [animated gem diagram]       │    │
+│  │                               │    │
+│  └──────────────────────────────┘    │
+│                                      │
+│       ◄  ● ○ ○ ○  ►                │  ← Page dots + arrows
+│                                      │
+│     ◄/► Pages   ⓑ Back              │
+└──────────────────────────────────────┘
+```
+
+**Pages**: 4 tutorial slides:
+1. **BASICS** — Drop pairs, stack, gravity.
+2. **POWER GEMS** — 2×2+ fusion, detonation multiplier.
+3. **CRASH & CHAINS** — Crash Orb detonation, chain cascade combos.
+4. **SUPER & COUNTER** — SUPER meter, Counter Gem garbage, fighter abilities.
+
+Each page has an animated diagram showing the mechanic in action (rendered via a small looping canvas animation).
+
+**Navigation**: ←/→ to page through. B/Escape to go back.
+
+---
+
+### 3.3 Screen Transition Choreography
+
+All screen transitions use a consistent **wipe** system for premium feel:
+
+| Transition | Animation | Duration |
+| :--- | :--- | :--- |
+| **Forward (deeper into menus)** | Current screen slides left + fades to 0. New screen slides in from right + fades to 1. | 250ms, `ease-out` |
+| **Back (returning up)** | Current screen slides right + fades to 0. Previous screen slides in from left + fades to 1. | 250ms, `ease-out` |
+| **To Battle (from Difficulty Select)** | Full-screen black wipe (left→right diagonal) | 400ms |
+| **KO → Results** | White flash (100% opacity → 0% over 400ms), then results card scales in from 0.8→1.0 with `ease-out-back`. | 600ms total |
+| **Modal overlays (Pause, Settings)** | Backdrop darkens 0→80% opacity. Content scales in from 0.95→1.0 + fades in. | 200ms, `ease-out` |
+
+### 3.4 Input Legend System
+
+Every screen with interactive elements displays a contextual **input legend bar** at the bottom. The legend auto-detects the active input method and shows the correct glyphs:
+
+| Context | Touch (hidden by default) | Gamepad | Keyboard |
+| :--- | :--- | :--- | :--- |
+| **Menu navigation** | *(no legend shown)* | `◄/► D-Pad` `ⓐ Select` `ⓑ Back` | `↑/↓ Navigate` `↵ Select` `Esc Back` |
+| **Fighter Select** | *(no legend shown)* | `◄/►/▲/▼ Navigate` `ⓐ P1` `Ⓨ P2` `ⓑ Back` `Start Fight` | `↑/↓/←/→ Navigate` `↵ P1` `Tab P2` `Esc Back` |
+| **Battle** | *(touch buttons are the legend)* | `◄/► Move` `▲ Rotate` `▼ Drop` `ⓐ Hard Drop` `Ⓨ SUPER` `Start Pause` | `←/→ Move` `↑/X Rotate` `↓ Soft` `Space Drop` `Z SUPER` `Esc Pause` |
+
+The legend uses 12px Outfit 600, color `rgba(255, 255, 255, 0.5)`, and fades in/out over 200ms when the input method changes.
 
 ---
 
@@ -527,31 +955,190 @@ All audio is procedurally generated using the Web Audio API. Zero external files
 
 ---
 
-## 10. MOBILE ERGONOMICS & TOUCH SYSTEM
+## 10. UNIFIED INPUT SYSTEM — MOBILE, GAMEPAD & DESKTOP
 
-### 10.1 Touch Control Layout
+Ring Rush supports three simultaneous input methods. The active method is auto-detected based on which device sends input most recently. The game seamlessly switches UI hints (input legends, focus cursor visibility, touch control panel visibility) without any manual configuration.
+
+### 10.1 Input Abstraction Layer
+
+All input methods are normalized into a single **Action** enum consumed by the game state machine. No game system ever reads raw keyboard/gamepad/touch events directly — everything passes through this abstraction.
+
+```typescript
+enum InputAction {
+    // Navigation (menus)
+    NAV_UP, NAV_DOWN, NAV_LEFT, NAV_RIGHT,
+    CONFIRM, BACK, 
+    // Gameplay (battle)
+    MOVE_LEFT, MOVE_RIGHT,
+    ROTATE_CW, ROTATE_CCW,
+    SOFT_DROP, HARD_DROP,
+    ACTIVATE_SUPER,
+    PAUSE,
+    // System
+    TOGGLE_AUDIO
+}
+```
+
+**Detection Priority**: If multiple input devices are active, the most recently used one determines UI display mode (legend glyphs, touch panel visibility). There is no conflict — all inputs feed the same action queue.
+
+### 10.2 Mobile Touch Controls
+
+#### Layout
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│                    GAME AREA                             │
-│                                                          │
-├──────────────────────────────────────────────────────────┤
-│  ◄  │  ↻  │  ►  │           │  ▼  │ ⚡DROP │ 🔥SUPER  │
-│ 58px  58px  58px              58px   70px     70px       │
-│  ◄────── D-PAD ──────►       ◄──── ACTION BUTTONS ────► │
-│  gap: 8px                    gap: 8px                    │
-│                                                          │
-│  bottom: max(env(safe-area-inset-bottom) + 12px, 14px)  │
-└─────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────┐
+│                         GAME AREA                            │
+│                                                              │
+├──────────────────────────────────────────────────────────────┤
+│                                                              │
+│  ┌──────── D-PAD ────────┐     ┌──────── ACTIONS ────────┐  │
+│  │                        │     │                          │  │
+│  │  ┌──────┐              │     │              ┌────────┐  │  │
+│  │  │  ↻   │   ROTATE     │     │              │  ⚡    │  │  │
+│  │  │ 58px │              │     │              │  DROP  │  │  │
+│  │  └──────┘              │     │              │  70px  │  │  │
+│  │  ┌──────┐   ┌──────┐  │     │  ┌──────┐   └────────┘  │  │
+│  │  │  ◄   │   │  ►   │  │     │  │  ▼   │   ┌────────┐  │  │
+│  │  │ 58px │   │ 58px │  │     │  │ 58px │   │  🔥    │  │  │
+│  │  └──────┘   └──────┘  │     │  │      │   │ SUPER  │  │  │
+│  │          8px gap       │     │  └──────┘   │  70px  │  │  │
+│  └────────────────────────┘     │              └────────┘  │  │
+│                                  └────────────────────────┘  │
+│   ◄─ thumb arc left ─►             ◄─ thumb arc right ─►    │
+│                                                              │
+│   bottom: max(env(safe-area-inset-bottom) + 12px, 14px)     │
+└──────────────────────────────────────────────────────────────┘
 ```
 
-### 10.2 Touch Requirements
+#### Button Specifications
 
-- **Minimum target size**: 58px × 58px (WCAG AAA / Apple HIG compliant).
+| Button | Size | Label | Style | Action |
+| :--- | :--- | :--- | :--- | :--- |
+| **◄ Left** | 58 × 58 px | `◄` | Gold border, dark bg | `MOVE_LEFT` |
+| **► Right** | 58 × 58 px | `►` | Gold border, dark bg | `MOVE_RIGHT` |
+| **↻ Rotate** | 58 × 58 px | `↻` | Gold border, dark bg | `ROTATE_CW` |
+| **▼ Soft Drop** | 58 × 58 px | `▼` | Gold border, dark bg | `SOFT_DROP` |
+| **⚡ Hard Drop** | 70 × 58 px | `⚡ DROP` | Gold border, amber bg | `HARD_DROP` |
+| **🔥 SUPER** | 70 × 58 px | `🔥 SUPER` | Red gradient when ready, gray when locked | `ACTIVATE_SUPER` |
+
+#### Touch Engineering Requirements
+
+- **Minimum target**: 58px × 58px (WCAG AAA / Apple HIG / Material Design minimum).
 - **Border radius**: 14px with 2px gold (#fbbf24) border.
-- **Active feedback**: `transform: scale(0.92)` on `:active` pseudo-class (or pointerdown).
-- **Event delegation**: ALL touch handlers attached to `#app` container via single `pointerdown` listener using `event.target.closest('[data-action]')`. No per-button listeners. This prevents iOS Safari dropped-tap issues after DOM mutations.
-- **SUPER button**: Only enabled (red glow + pulse animation) when SUPER meter = 100%. Grayed out otherwise.
+- **Active press feedback**: `transform: scale(0.92)` applied on `pointerdown`, released on `pointerup`.
+- **Event delegation**: A single persistent `pointerdown` listener on the `#app` container routes events via `event.target.closest('[data-action]')`. No per-button listeners. This prevents iOS Safari dropped-tap bugs after DOM mutations.
+- **Repeat fire**: ◄ and ► support hold-to-repeat after 180ms initial delay, then 80ms repeat interval (DAS/ARR matching competitive puzzle fighters).
+- **SUPER button states**:
+  - **Locked** (meter < 100%): `opacity: 0.4`, `pointer-events: none`, gray gradient background.
+  - **Ready** (meter = 100%): Red gradient (`#ef4444` → `#b91c1c`), pulsing `box-shadow: 0 0 18px rgba(239, 68, 68, 0.6)` at 0.6s infinite alternate, `pointer-events: auto`.
+- **Safe area**: Bottom padding uses `bottom: max(calc(env(safe-area-inset-bottom) + 12px), 14px)` for iPhone home indicator clearance.
+- **Landscape detection**: If `window.innerWidth > window.innerHeight × 1.3`, controls split to left and right edges of screen (D-pad on far left, actions on far right) for landscape thumb ergonomics.
+- **Visibility**: Touch controls panel is hidden when gamepad or keyboard is the active input method. Re-appears instantly on any touch event.
+
+### 10.3 Gamepad / Controller Support
+
+The Gamepad API (`navigator.getGamepads()`) is polled every frame inside the game loop. The system supports **any standard mapping gamepad** (Xbox, PlayStation, Switch Pro, generic Bluetooth controllers).
+
+#### Gamepad Button Mapping
+
+| Gamepad Button | Standard Index | Menu Action | Battle Action |
+| :--- | :--- | :--- | :--- |
+| **D-Pad Up** | `buttons[12]` | `NAV_UP` | `ROTATE_CW` |
+| **D-Pad Down** | `buttons[13]` | `NAV_DOWN` | `SOFT_DROP` |
+| **D-Pad Left** | `buttons[14]` | `NAV_LEFT` | `MOVE_LEFT` |
+| **D-Pad Right** | `buttons[15]` | `NAV_RIGHT` | `MOVE_RIGHT` |
+| **A / Cross (×)** | `buttons[0]` | `CONFIRM` | `HARD_DROP` |
+| **B / Circle (○)** | `buttons[1]` | `BACK` | `ROTATE_CW` |
+| **X / Square (□)** | `buttons[2]` | — | `ROTATE_CCW` |
+| **Y / Triangle (△)** | `buttons[3]` | Toggle P2 select | `ACTIVATE_SUPER` |
+| **Left Bumper (LB)** | `buttons[4]` | — | `ROTATE_CCW` |
+| **Right Bumper (RB)** | `buttons[5]` | — | `ACTIVATE_SUPER` |
+| **Start** | `buttons[9]` | `CONFIRM` (title) | `PAUSE` |
+| **Select / Back** | `buttons[8]` | `BACK` | `PAUSE` |
+| **Left Stick** | `axes[0]`, `axes[1]` | Same as D-Pad (deadzone 0.3) | Same as D-Pad |
+
+#### Gamepad Engineering Requirements
+
+- **Polling**: Read `navigator.getGamepads()` once per `requestAnimationFrame` tick.
+- **Deadzone**: Analog stick deadzone = 0.3 (ignore values between −0.3 and +0.3).
+- **Digital conversion**: Analog stick values beyond ±0.5 are converted to digital press events with the same DAS/ARR repeat logic as keyboard (180ms delay, 80ms repeat).
+- **Connection events**: Listen for `gamepadconnected` / `gamepaddisconnected` events. On connect, flash "🎮 Controller Connected" toast (bottom-center, 2s duration, fade). On disconnect during battle, auto-pause.
+- **Vibration** (if supported): `gamepad.vibrationActuator.playEffect()` on Power Gem detonation (200ms, 0.5 intensity) and SUPER activation (400ms, 1.0 intensity). Gated by Settings toggle.
+- **Multi-gamepad**: First gamepad = P1. Second gamepad = P2 (enables local couch versus — future milestone). Currently, P2 is always AI.
+
+### 10.4 Desktop Keyboard & Mouse
+
+#### Keyboard Mapping
+
+| Key | Menu Action | Battle Action |
+| :--- | :--- | :--- |
+| **← Arrow Left** | `NAV_LEFT` | `MOVE_LEFT` |
+| **→ Arrow Right** | `NAV_RIGHT` | `MOVE_RIGHT` |
+| **↑ Arrow Up** | `NAV_UP` | `ROTATE_CW` |
+| **↓ Arrow Down** | `NAV_DOWN` | `SOFT_DROP` |
+| **W** | `NAV_UP` | `ROTATE_CW` |
+| **A** | `NAV_LEFT` | `MOVE_LEFT` |
+| **S** | `NAV_DOWN` | `SOFT_DROP` |
+| **D** | `NAV_RIGHT` | `MOVE_RIGHT` |
+| **X** | — | `ROTATE_CW` |
+| **Z** | — | `ACTIVATE_SUPER` |
+| **Space** | `CONFIRM` | `HARD_DROP` |
+| **Enter** | `CONFIRM` | `HARD_DROP` |
+| **Escape** | `BACK` | `PAUSE` |
+| **Backspace** | `BACK` | — |
+| **Tab** | Toggle P2 select | — |
+| **M** | `TOGGLE_AUDIO` | `TOGGLE_AUDIO` |
+
+#### Keyboard Engineering Requirements
+
+- **DAS (Delayed Auto Shift)**: For `MOVE_LEFT` and `MOVE_RIGHT` — initial delay 180ms, then repeat every 80ms while held. This matches competitive puzzle fighter standards (Tetris Guideline DAS).
+- **Key repeat suppression**: Use `event.repeat` to detect OS key repeat and suppress it. DAS is implemented internally using timestamps, not OS repeat.
+- **Simultaneous keys**: Left + Right pressed simultaneously = no movement (cancel). Down + Left/Right = diagonal soft drop + slide (both actions fire).
+- **Prevent defaults**: Arrow keys, Space, Tab, and Escape have `event.preventDefault()` called during gameplay to prevent page scroll, tab-focus-ring, and back-navigation.
+
+#### Mouse Support
+
+| Mouse Action | Menu Behavior | Battle Behavior |
+| :--- | :--- | :--- |
+| **Hover** | Moves focus cursor to hovered element | No effect |
+| **Left Click** | `CONFIRM` on focused/hovered element | Clicks touch control buttons if visible |
+| **Right Click** | Select as P2 (Character Select only) | No effect |
+| **Scroll Wheel** | Scrolls fighter grid (if overflowed) | No effect |
+
+- Mouse movement causes the touch control panel to hide (switches to keyboard mode).
+- Moving the mouse over a menu item instantly moves the focus cursor to that item (no delay).
+- Clicking a button triggers its action — identical to tapping on mobile.
+
+### 10.5 Input Method Auto-Detection
+
+```
+Active Input Method = most recently used device
+
+On any touch event:        → activeInput = 'touch'
+    Show touch control panel. Hide input legend. Hide focus cursor outline.
+
+On any gamepad button:     → activeInput = 'gamepad'
+    Hide touch control panel. Show gamepad input legend. Show focus cursor.
+
+On any keyboard keypress:  → activeInput = 'keyboard'
+    Hide touch control panel. Show keyboard input legend. Show focus cursor.
+
+On any mouse movement:     → activeInput = 'keyboard' (mouse uses keyboard mode)
+    Hide touch control panel. Show keyboard input legend. Show focus cursor.
+```
+
+Transitions between input methods are instant (single frame). No confirmation dialogs or settings required.
+
+### 10.6 Focus Cursor System
+
+The focus cursor is a visible gold highlight ring rendered around the currently focused interactive element:
+
+- **Style**: `outline: 3px solid #fbbf24; outline-offset: 4px; border-radius: inherit;`
+- **Animation**: Subtle pulse `outline-color` between `#fbbf24` and `#fde047` at 1.2s infinite alternate.
+- **Visibility**: Only visible when `activeInput` is `'gamepad'` or `'keyboard'`. Hidden during touch (touch has its own `:active` press feedback).
+- **Movement**: Focus moves instantly (no tween). A brief `scale(1.03)` pulse plays on the newly focused element over 150ms `ease-out`.
+- **Wrapping**: Focus wraps at list boundaries (bottom of list → top, right of grid → next row left).
+- **Memory**: Each screen remembers which element was last focused. Returning to a screen restores the previous focus position.
 
 ---
 
