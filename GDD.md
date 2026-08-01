@@ -1,6 +1,6 @@
-# GAME DESIGN DOCUMENT: RING RUSH — PUZZLE BOXING
+# GAME DESIGN DOCUMENT: CRASH OUT: RING RUSH — PUZZLE BOXING
 
-**Document Version:** 3.2.0 (AAA Production Standard — Fighter Persona & Animation Spec)  
+**Document Version:** 4.0.0 (AAA Production Standard — Official Title Rebrand Release)  
 **Studio:** Antigravity Studios — Executive Production Division  
 **Lead Game Producer:** AAA Competitive Game Systems Producer  
 **Principal Game Designer:** Senior Puzzle-Fighter & 2D Combat Systems Architect  
@@ -16,7 +16,7 @@
 
 ### 1.1 Elevator Pitch
 
-**Ring Rush: Puzzle Boxing** is a fast-session arcade versus puzzle-fighter that fuses the head-to-head mechanics of Capcom's *Super Puzzle Fighter II Turbo* with the viral spectacle of the 2026 Kick warehouse streams ("Locked In-A-Thon" / "Crash Out Boyz") hosted by **Adrien "The Problem" Broner** and **Deen The Great**. Players choose from 14 celebrity fighters — all real guests from the Broner & Deen streams — then drop, fuse, and detonate gems to trigger real-time punches, counter-attacks, and cinematic SUPER finishers against a parallax-scrolling 3-layer boxing arena rendered entirely inside a stacked HTML5 Canvas system.
+**Crash Out: Ring Rush** is a fast-session arcade versus puzzle-fighter that fuses the head-to-head mechanics of Capcom's *Super Puzzle Fighter II Turbo* with the viral spectacle of the 2026 Kick warehouse streams ("Locked In-A-Thon" / "Crash Out Boyz") hosted by **Adrien "The Problem" Broner** and **Deen The Great**. Players choose from 14 celebrity fighters — all real guests from the Broner & Deen streams — then drop, fuse, and detonate gems to trigger real-time punches, counter-attacks, and cinematic SUPER finishers against a parallax-scrolling 3-layer boxing arena rendered entirely inside a stacked HTML5 Canvas system.
 
 ### 1.2 Why This Goes Viral
 
@@ -208,7 +208,7 @@ All VFX are procedurally generated on the `fighters` canvas — zero external as
 
 ## 3. GAME FLOW, MENUS & SCREEN ARCHITECTURE
 
-Every screen in Ring Rush is navigable via **touch**, **gamepad**, or **keyboard/mouse**. All interactive elements participate in a unified **focus cursor** system: a visible gold highlight ring (3px `outline`, `outline-offset: 4px`, color `#fbbf24`) that wraps the currently focused element. This cursor is driven by the input abstraction layer (Section 10) so all three input methods share identical navigation topology.
+Every screen in Crash Out: Ring Rush is navigable via **touch**, **gamepad**, or **keyboard/mouse**. All interactive elements participate in a unified **focus cursor** system: a visible gold highlight ring (3px `outline`, `outline-offset: 4px`, color `#fbbf24`) that wraps the currently focused element. This cursor is driven by the input abstraction layer (Section 10) so all three input methods share identical navigation topology.
 
 ### 3.1 Complete Screen Flow State Machine
 
@@ -292,6 +292,7 @@ Every screen in Ring Rush is navigable via **touch**, **gamepad**, or **keyboard
 ┌──────────────────────────────────────┐
 │  [🔊]                          [⚙️]  │  ← Top Bar (48px)
 │                                      │
+│          C R A S H  O U T           │  ← Red/Gold 3D Bevel, 56px
 │            R I N G  R U S H          │  ← Teko 900, 72px, Gold
 │           P U Z Z L E               │
 │            B O X I N G               │  ← Teko 600, 32px, Cyan
@@ -328,7 +329,7 @@ Every screen in Ring Rush is navigable via **touch**, **gamepad**, or **keyboard
 
 ```
 ┌──────────────────────────────────────┐
-│  [🔊]    RING RUSH              [⚙️] │  ← Top Bar
+│  [🔊]   CRASH OUT: RING RUSH    [⚙️] │  ← Top Bar
 │                                      │
 │                                      │
 │        ┌──────────────────┐          │
@@ -633,7 +634,7 @@ All input is ignored during this sequence. Game loop starts at 1500ms.
 
 **Navigation**: Vertical focus through setting rows. ←/→ adjusts sliders and toggles. Confirm opens sub-screens. Back returns to previous screen.
 
-Settings persist to `localStorage` under the key `ringrush_settings`.
+Settings persist to `localStorage` under the key `crashout_ringrush_settings`.
 
 ---
 
@@ -1116,7 +1117,7 @@ All audio is procedurally generated using the Web Audio API. Zero external files
 
 ## 10. UNIFIED INPUT SYSTEM — MOBILE, GAMEPAD & DESKTOP
 
-Ring Rush supports three simultaneous input methods. The active method is auto-detected based on which device sends input most recently. The game seamlessly switches UI hints (input legends, focus cursor visibility, touch control panel visibility) without any manual configuration.
+Crash Out: Ring Rush supports three simultaneous input methods. The active method is auto-detected based on which device sends input most recently. The game seamlessly switches UI hints (input legends, focus cursor visibility, touch control panel visibility) without any manual configuration.
 
 ### 10.1 Input Abstraction Layer
 
