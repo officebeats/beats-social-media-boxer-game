@@ -214,7 +214,7 @@
   <div class="arcade-cabinet">
     <div class="cabinet-header">
       <div class="brand-title">CRASH OUT: RING RUSH</div>
-      <div class="badge-pico8">BOXING ART ENGINE v1.6.0</div>
+      <div class="badge-pico8">VISUAL PUNCHES v1.7.0</div>
     </div>
 
     <div class="viewport-container">
@@ -250,13 +250,13 @@
 
   <script>
     // =========================================================================
-    // CAPCOM 16-BIT HEAVYWEIGHT BOXING ART ENGINE v1.6.0
-    // - 3 Distinct Heavyweight Punch Animations: JAB, HOOK, UPPERCUT
-    //   * JAB: Fast stiff lead extension with shoulder chin protection
-    //   * HOOK: Wide curving power arc with heavy 18° torso rotation torque
-    //   * UPPERCUT: Upward skyward scooping explosion rising from crouching knees
-    // - Grounded 72-Frame Pacing (~1.2s per punch): Weighty, clear, zero flicking
-    // - Distinct Hit Knockback Reactions for each punch type
+    // CAPCOM 16-BIT PUNCH OVERLAY & POSE ENGINE v1.7.0
+    // - LEGIT EXTENDING GLOVES & ARMS rendered on top of boxer bodies!
+    //   * JAB: Straight horizontal lead arm & glove extension with speed trail
+    //   * STRAIGHT: Heavy rear power arm & glove pushing straight across chest
+    //   * HOOK: Wide 180° curving arm & glove sweeping around jaw line
+    //   * UPPERCUT: Vertical skyward arm & glove exploding upward to chin height
+    // - Heavyweight 72-frame (~1.2s) grounded pacing: Weighty, readable, zero flicking
     // =========================================================================
 
     const PICO_PALETTE = [
@@ -433,6 +433,18 @@
           gain.connect(audioCtx.destination);
           osc.start(t);
           osc.stop(t + 0.08);
+        } else if (type === 'straight') {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(320, t);
+          osc.frequency.exponentialRampToValueAtTime(80, t + 0.14);
+          gain.gain.setValueAtTime(0.4, t);
+          gain.gain.linearRampToValueAtTime(0.01, t + 0.14);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(t);
+          osc.stop(t + 0.14);
         } else if (type === 'hook') {
           const osc = audioCtx.createOscillator();
           const gain = audioCtx.createGain();
@@ -1017,24 +1029,29 @@
 
         flashFrames = 3;
 
-        // TRIGGER DISTINCT HEAVYWEIGHT PUNCH ANIMATION TYPES (JAB, HOOK, UPPERCUT)
-        if (powerGemCleared || this.comboCount >= 3) { // SKYWARD UPPERCUT EXPLOSION
+        // TRIGGER DISTINCT PUNCH TYPES (JAB, STRAIGHT, HOOK, UPPERCUT)
+        if (powerGemCleared || this.comboCount >= 3) {
           this.anim = 'UPPERCUT';
           opponent.anim = 'FLINCH';
           cameraShake = 14;
           play808Sfx('uppercut');
-        } else if (isSecondaryCluster || this.comboCount >= 2 || clearCount >= 5) { // CURVING HOOK POWER ARC
+        } else if (this.comboCount === 2 || clearCount >= 5) {
           this.anim = 'HOOK';
           opponent.anim = 'FLINCH';
           cameraShake = 10;
           play808Sfx('hook');
-        } else { // QUICK TECHNICAL JAB STIFF LEAD
+        } else if (clearCount === 4) {
+          this.anim = 'STRAIGHT';
+          opponent.anim = 'FLINCH';
+          cameraShake = 8;
+          play808Sfx('straight');
+        } else {
           this.anim = 'JAB';
           opponent.anim = 'FLINCH';
           cameraShake = 6;
           play808Sfx('jab');
         }
-        this.animTimer = 72; // Grounded 72-Frame (~1.2s) Pacing for Heavyweight Boxing Visuals!
+        this.animTimer = 72; // Grounded 72-Frame (~1.2s) Pacing
         opponent.animTimer = 72;
 
         this.pendingClear = null;
@@ -1338,11 +1355,122 @@
     }
 
     // =========================================================================
-    // CAPCOM 16-BIT DISTINCT PUNCH RENDERER v1.6.0
-    // - JAB: Straight stiff lead extension ($14px$ lunge across floor)
-    // - HOOK: Wide curving power arc ($18px$ lunge, $dy = -3px$, $18^\circ$ torque)
-    // - UPPERCUT: Skyward scooping explosion ($fy+4 \rightarrow fy-6$, $-0.18$ rad scoop)
+    // CAPCOM 16-BIT VISUAL PUNCH OVERLAY RENDERER v1.7.0
+    // - Renders actual extended arms, 16-bit boxing gloves, and speed trails
     // =========================================================================
+    function drawPunchOverlay(ctx, fx, fy, isP1, punchType, extProgress) {
+      const skinColor = isP1 ? PICO_PALETTE[4] : PICO_PALETTE[15]; // Broner skin vs Deen skin
+      const gloveColor = isP1 ? PICO_PALETTE[8] : PICO_PALETTE[12]; // Red glove vs Blue glove
+      const gloveBorder = PICO_PALETTE[0];
+      const shineColor = PICO_PALETTE[7];
+
+      if (punchType === 'JAB') {
+        // Straight horizontal lead arm extension
+        const armLen = extProgress * 16.0;
+        const startX = fx + 14;
+        const startY = fy + 14;
+        const endX = startX + armLen;
+
+        // Motion speed trail behind jab glove
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+        ctx.fillRect(startX + 4, startY - 1, armLen, 3);
+
+        // Extended muscular forearm
+        ctx.fillStyle = skinColor;
+        ctx.fillRect(startX, startY, armLen, 4);
+
+        // Lead Boxing Glove popping out straight!
+        const gx = endX;
+        const gy = startY - 2;
+        ctx.fillStyle = gloveBorder;
+        ctx.fillRect(gx, gy, 7, 7);
+        ctx.fillStyle = gloveColor;
+        ctx.fillRect(gx + 1, gy + 1, 5, 5);
+        ctx.fillStyle = shineColor;
+        ctx.fillRect(gx + 2, gy + 1, 2, 2);
+
+      } else if (punchType === 'STRAIGHT') {
+        // Heavy rear power punch pushing straight across chest
+        const armLen = extProgress * 18.0;
+        const startX = fx + 10;
+        const startY = fy + 15;
+        const endX = startX + armLen;
+
+        // Double white shockwave line
+        ctx.fillStyle = PICO_PALETTE[10];
+        ctx.fillRect(startX + 2, startY - 2, armLen + 2, 1);
+        ctx.fillRect(startX + 4, startY + 5, armLen, 1);
+
+        // Rear power forearm
+        ctx.fillStyle = skinColor;
+        ctx.fillRect(startX, startY, armLen, 5);
+
+        // Heavy Power Glove
+        const gx = endX;
+        const gy = startY - 3;
+        ctx.fillStyle = gloveBorder;
+        ctx.fillRect(gx, gy, 8, 8);
+        ctx.fillStyle = gloveColor;
+        ctx.fillRect(gx + 1, gy + 1, 6, 6);
+        ctx.fillStyle = PICO_PALETTE[10]; // Gold wristband
+        ctx.fillRect(gx - 1, gy + 1, 2, 6);
+        ctx.fillStyle = shineColor;
+        ctx.fillRect(gx + 2, gy + 2, 2, 2);
+
+      } else if (punchType === 'HOOK') {
+        // Wide 180° curving power hook arm
+        const arc = extProgress * Math.PI;
+        const armX = fx + 12 + Math.sin(arc) * 16.0;
+        const armY = fy + 16 - Math.cos(arc) * 4.0;
+
+        // Yellow curving power arc trail
+        ctx.strokeStyle = PICO_PALETTE[10];
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(fx + 12, fy + 16, 14, -Math.PI / 2, arc - Math.PI / 2);
+        ctx.stroke();
+
+        // Curved forearm
+        ctx.fillStyle = skinColor;
+        ctx.fillRect(fx + 12, fy + 14, Math.max(2, armX - (fx + 12)), 5);
+
+        // Curving Hook Glove
+        const gx = armX;
+        const gy = armY - 2;
+        ctx.fillStyle = gloveBorder;
+        ctx.fillRect(gx, gy, 8, 8);
+        ctx.fillStyle = gloveColor;
+        ctx.fillRect(gx + 1, gy + 1, 6, 6);
+        ctx.fillStyle = shineColor;
+        ctx.fillRect(gx + 2, gy + 2, 2, 2);
+
+      } else if (punchType === 'UPPERCUT') {
+        // Vertical skyward scooping arm
+        const lift = extProgress * 18.0;
+        const startX = fx + 13;
+        const startY = fy + 26;
+        const endY = startY - lift;
+
+        // Vertical speed trail
+        ctx.fillStyle = PICO_PALETTE[10];
+        ctx.fillRect(startX + 1, endY + 4, 3, lift);
+
+        // Vertical forearm
+        ctx.fillStyle = skinColor;
+        ctx.fillRect(startX, endY, 5, lift);
+
+        // Skyward Inverted Glove
+        const gx = startX - 1;
+        const gy = endY - 7;
+        ctx.fillStyle = gloveBorder;
+        ctx.fillRect(gx, gy, 8, 8);
+        ctx.fillStyle = gloveColor;
+        ctx.fillRect(gx + 1, gy + 1, 6, 6);
+        ctx.fillStyle = shineColor;
+        ctx.fillRect(gx + 2, gy + 2, 2, 2);
+      }
+    }
+
     function drawBoxer(x, y, isP1, anim, animTimer) {
       let fx = x;
       let fy = 50; // Feet strictly grounded on ring floor canvas (50 + 40 = 90)
@@ -1356,87 +1484,44 @@
       let flinchTilt = 0;
       let dyOffset = 0;
       let isHitFlash = false;
+      let extProgress = 0;
 
       const timerVal = animTimer || 0;
       const progress = 1.0 - (timerVal / 72.0); // 0.0 to 1.0 over 72 frames (~1.2s)
 
       // --- DISTINCT PUNCH ANIMATION TYPES ---
-      if (anim === 'JAB') {
+      if (anim === 'JAB' || anim === 'STRAIGHT' || anim === 'HOOK' || anim === 'UPPERCUT') {
         currentPose = 3;
-        let lungeProgress = 0;
         if (progress < 0.35) {
-          lungeProgress = smoothstep(0.0, 0.35, progress) * 0.70;
+          extProgress = smoothstep(0.0, 0.35, progress) * 0.70;
         } else if (progress < 0.50) {
-          lungeProgress = 0.70 + smoothstep(0.35, 0.50, progress) * 0.30;
+          extProgress = 0.70 + smoothstep(0.35, 0.50, progress) * 0.30;
         } else if (progress < 0.70) {
-          lungeProgress = 1.0;
+          extProgress = 1.0;
         } else {
-          lungeProgress = 1.0 - smoothstep(0.70, 1.00, progress);
+          extProgress = 1.0 - smoothstep(0.70, 1.00, progress);
         }
 
-        const lungeDist = lungeProgress * 14.0;
+        const lungeDist = extProgress * (anim === 'HOOK' ? 18.0 : 14.0);
         fx += isP1 ? lungeDist : -lungeDist;
-        punchTilt = isP1 ? 0.05 : -0.05;
+
+        if (anim === 'HOOK') {
+          dyOffset = -Math.sin(extProgress * Math.PI) * 3.5;
+          punchTilt = isP1 ? (extProgress * 0.30) : (-extProgress * 0.30);
+        } else if (anim === 'UPPERCUT') {
+          dyOffset = -extProgress * 6.0;
+          punchTilt = isP1 ? -0.18 : 0.18;
+        } else if (anim === 'STRAIGHT') {
+          punchTilt = isP1 ? 0.10 : -0.10;
+        } else {
+          punchTilt = isP1 ? 0.05 : -0.05;
+        }
 
         if (progress >= 0.45 && progress < 0.55 && !impactTriggeredThisPunch) {
           impactTriggeredThisPunch = true;
-          triggerImpactBurst(55, 56);
-        } else if (progress >= 0.95) {
-          impactTriggeredThisPunch = false;
-        }
-
-      } else if (anim === 'HOOK') { // WIDE CURVING POWER ARC
-        currentPose = 3;
-        let lungeProgress = 0;
-        if (progress < 0.35) {
-          lungeProgress = smoothstep(0.0, 0.35, progress) * 0.65;
-        } else if (progress < 0.50) {
-          lungeProgress = 0.65 + smoothstep(0.35, 0.50, progress) * 0.35;
-        } else if (progress < 0.70) {
-          lungeProgress = 1.0;
-        } else {
-          lungeProgress = 1.0 - smoothstep(0.70, 1.00, progress);
-        }
-
-        const lungeDist = lungeProgress * 18.0;
-        fx += isP1 ? lungeDist : -lungeDist;
-
-        // Curving Arc & Torque Rotation (18 degrees / 0.30 rad)
-        dyOffset = -Math.sin(lungeProgress * Math.PI) * 3.5;
-        const torqueAmt = Math.sin(lungeProgress * Math.PI) * 0.30;
-        punchTilt = isP1 ? torqueAmt : -torqueAmt;
-
-        if (progress >= 0.45 && progress < 0.55 && !impactTriggeredThisPunch) {
-          impactTriggeredThisPunch = true;
-          triggerImpactBurst(59, 53);
-        } else if (progress >= 0.95) {
-          impactTriggeredThisPunch = false;
-        }
-
-      } else if (anim === 'UPPERCUT') { // SKYWARD SCOOPING EXPLOSION
-        currentPose = 3;
-        let lungeProgress = 0;
-        if (progress < 0.35) {
-          lungeProgress = smoothstep(0.0, 0.35, progress) * 0.70;
-          dyOffset = smoothstep(0.0, 0.35, progress) * 4.0; // Knee Dip Crouch
-        } else if (progress < 0.50) {
-          lungeProgress = 0.70 + smoothstep(0.35, 0.50, progress) * 0.30;
-          dyOffset = 4.0 - smoothstep(0.35, 0.50, progress) * 10.0; // Skyward Lift (-6px)
-        } else if (progress < 0.70) {
-          lungeProgress = 1.0;
-          dyOffset = -6.0;
-        } else {
-          lungeProgress = 1.0 - smoothstep(0.70, 1.00, progress);
-          dyOffset = -6.0 + smoothstep(0.70, 1.00, progress) * 6.0;
-        }
-
-        const lungeDist = lungeProgress * 16.0;
-        fx += isP1 ? lungeDist : -lungeDist;
-        punchTilt = isP1 ? -0.18 : 0.18; // Backward leverage
-
-        if (progress >= 0.45 && progress < 0.55 && !impactTriggeredThisPunch) {
-          impactTriggeredThisPunch = true;
-          triggerImpactBurst(57, 48);
+          const hitX = (anim === 'HOOK' ? 59 : anim === 'UPPERCUT' ? 57 : 56);
+          const hitY = (anim === 'UPPERCUT' ? 46 : anim === 'HOOK' ? 52 : 56);
+          triggerImpactBurst(hitX, hitY);
         } else if (progress >= 0.95) {
           impactTriggeredThisPunch = false;
         }
@@ -1456,7 +1541,6 @@
         const flinchDist = flinchProgress * 14.0;
         fx += isP1 ? -flinchDist : flinchDist;
 
-        // Head Knockback Tilt (20 degrees / 0.35 rad)
         const tiltAmt = flinchProgress * 0.35;
         flinchTilt = isP1 ? -tiltAmt : tiltAmt;
 
@@ -1488,10 +1572,14 @@
           ctx.filter = 'brightness(2.2)';
         }
 
-        if (anim === 'JAB' || anim === 'HOOK' || anim === 'UPPERCUT') { // DISTINCT PUNCH RENDERING
+        if (anim === 'JAB' || anim === 'STRAIGHT' || anim === 'HOOK' || anim === 'UPPERCUT') { // DISTINCT PUNCH RENDERING
           ctx.translate(fx + 11, fy + 38);
           ctx.rotate(punchTilt);
           ctx.drawImage(singleCanvas, -11, -38, 22, 40);
+
+          // RENDER LEGIT 16-BIT EXTENDED ARM & BOXING GLOVE OVERLAY!
+          drawPunchOverlay(ctx, -11, -38, isP1, anim, extProgress);
+
         } else if (anim === 'FLINCH') { // HEAD KNOCKBACK TILT
           ctx.translate(fx + 11, fy + 38);
           ctx.rotate(flinchTilt);
