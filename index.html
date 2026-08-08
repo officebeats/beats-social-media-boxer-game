@@ -1456,11 +1456,24 @@
       offCtx.drawImage(img, 0, 0);
       const imgData = offCtx.getImageData(0, 0, w, h);
       const data = imgData.data;
+
+      // Sample background color from the top-left corner
+      const bgR = data[0], bgG = data[1], bgB = data[2];
+
       for (let i = 0; i < data.length; i += 4) {
         const r = data[i], g = data[i+1], b = data[i+2];
-        const isWhite = (r > 210 && g > 210 && b > 210);
-        const isBlack = (r < 25 && g < 25 && b < 25);
-        if (isWhite || isBlack) data[i+3] = 0;
+        
+        // Euclidean distance from background color
+        const dist = Math.sqrt(Math.pow(r - bgR, 2) + Math.pow(g - bgG, 2) + Math.pow(b - bgB, 2));
+
+        // Original strict thresholds for true black/white just in case
+        const isWhite = (r > 230 && g > 230 && b > 230);
+        const isBlack = (r < 15 && g < 15 && b < 15);
+
+        // If it's within a tolerance of the corner color, or it's extreme black/white, make it transparent
+        if (dist < 35 || isWhite || isBlack) {
+          data[i+3] = 0; // Alpha = 0
+        }
       }
       offCtx.putImageData(imgData, 0, 0);
       return offCanvas;
@@ -1641,10 +1654,29 @@
       const fObj = isP1 ? ROSTER[p1SelectIdx] : ROSTER[p2SelectIdx];
       const fId = fObj ? fObj.id : (isP1 ? 'broner' : 'deen');
 
-      // All sprite assets (idle + punch) face LEFT natively.
-      // P1 (left side) → flip to face RIGHT toward center.
-      // P2 (right side) → no flip, already faces LEFT toward center.
-      const needsFlip = isP1;
+      // Map of native orientations in the source image files
+      const NATIVE_FACE = {
+        broner:     { idle: 'L', punch: 'R' },
+        deen:       { idle: 'R', punch: 'L' },
+        ryan:       { idle: 'L', punch: 'L' },
+        n3on:       { idle: 'R', punch: 'R' },
+        rayj:       { idle: 'R', punch: 'R' },
+        blueface:   { idle: 'R', punch: 'R' },
+        chrisean:   { idle: 'R', punch: 'R' },
+        rampage:    { idle: 'L', punch: 'R' },
+        adin:       { idle: 'L', punch: 'R' },
+        charleston: { idle: 'R', punch: 'R' },
+        walid:      { idle: 'R', punch: 'L' },
+        abrown:     { idle: 'L', punch: 'R' },
+        tank:       { idle: 'R', punch: 'R' },
+        floyd:      { idle: 'L', punch: 'R' }
+      };
+
+      const nativeDir = usePunch ? (NATIVE_FACE[fId]?.punch || 'L') : (NATIVE_FACE[fId]?.idle || 'L');
+      // P1 (left side) must face RIGHT toward the center.
+      // P2 (right side) must face LEFT toward the center.
+      const targetDir = isP1 ? 'R' : 'L';
+      const needsFlip = (nativeDir !== targetDir);
 
       ctx.translate(fx + 11, fy + 20);
       if (needsFlip) {
