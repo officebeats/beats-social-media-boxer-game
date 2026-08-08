@@ -1634,10 +1634,10 @@
       const fObj = isP1 ? ROSTER[p1SelectIdx] : ROSTER[p2SelectIdx];
       const fId = fObj ? fObj.id : (isP1 ? 'broner' : 'deen');
 
-      // Per-character flip logic based on source sprite directions:
-      // Deen IDLE & PUNCHES face RIGHT -> flip to LEFT for P2.
-      // Other fighters (Broner, Adin, Ryan, Floyd, etc.) IDLE faces LEFT (needs flip), PUNCHES face RIGHT (no flip).
-      const needsFlip = (fId === 'deen') ? true : !usePunch;
+      // All sprite assets (idle + punch) face LEFT natively.
+      // P1 (left side) → flip to face RIGHT toward center.
+      // P2 (right side) → no flip, already faces LEFT toward center.
+      const needsFlip = isP1;
 
       ctx.translate(fx + 11, fy + 20);
       if (needsFlip) {
