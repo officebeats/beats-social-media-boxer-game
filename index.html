@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>CRASH OUT: RING RUSH (v1.1-alpha) — PICO-8 Native Transparent Boxing</title>
+  <title>CRASH OUT: RING RUSH (v1.2-alpha) — PICO-8 Native Transparent Boxing</title>
   <style>
     :root {
       --pico-black: #000000;
@@ -1676,13 +1676,13 @@
     const rosterIds = ['broner', 'deen', 'ryan', 'n3on', 'rayj', 'blueface', 'chrisean', 'rampage', 'adin', 'charleston', 'walid', 'abrown', 'tank', 'floyd'];
     rosterIds.forEach(id => {
       const imgIdle = new Image();
-      imgIdle.src = 'assets/' + id + '_sprite.jpg?v=11';
+      imgIdle.src = 'assets/' + id + '_sprite.jpg?v=12';
       imgIdle.onload = () => {
         ROSTER_IDLE_CANVASES[id] = createTransparentCanvas(imgIdle);
       };
 
       const imgPunch = new Image();
-      imgPunch.src = 'assets/' + id + '_punches.jpg?v=11';
+      imgPunch.src = 'assets/' + id + '_punches.jpg?v=12';
       imgPunch.onload = () => {
         ROSTER_PUNCH_CANVASES[id] = createTransparentCanvas(imgPunch);
       };
@@ -1946,7 +1946,7 @@
 
       ctx.fillStyle = getPalColor(7);
       ctx.font = '6px monospace';
-      ctx.fillText('PICO-8 PUZZLE BOXING v1.1-alpha', 64, 62);
+      ctx.fillText('PICO-8 PUZZLE BOXING v1.2-alpha', 64, 62);
 
       // Flashing press prompt
       if (Math.floor(globalFrameCount / 25) % 2 === 0) {
