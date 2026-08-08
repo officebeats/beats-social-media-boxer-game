@@ -1583,39 +1583,28 @@
     }
 
     let lastTime = performance.now();
-    let accumulator = 0;
-    const step = 1000 / 60; // 16.66ms per 60Hz tick
+    const step = 1000 / 60; // 16.66ms per 60Hz frame
 
-    function loop(now) {
-      const current = now || performance.now();
-      let frameDelta = current - lastTime;
-      if (frameDelta > 250) frameDelta = 250; // Cap max delta to prevent explosion after tab switch
-      lastTime = current;
+    function tick() {
+      const now = performance.now();
+      let delta = now - lastTime;
+      if (delta > 250) delta = 250;
 
-      accumulator += frameDelta;
-      while (accumulator >= step) {
+      while (delta >= step) {
         update();
-        accumulator -= step;
+        lastTime += step;
+        delta -= step;
       }
       render();
-      requestAnimationFrame(loop);
     }
 
-    // Bulletproof Heartbeat Fallback for Throttled / Background Tabs
-    setInterval(() => {
-      const current = performance.now();
-      let frameDelta = current - lastTime;
-      if (frameDelta >= 30) {
-        if (frameDelta > 250) frameDelta = 250;
-        lastTime = current;
-        accumulator += frameDelta;
-        while (accumulator >= step) {
-          update();
-          accumulator -= step;
-        }
-        render();
-      }
-    }, 30);
+    // High-frequency 60Hz interval guarantees execution in all browser environments
+    setInterval(tick, 16);
+    function loop() {
+      tick();
+      requestAnimationFrame(loop);
+    }
+    requestAnimationFrame(loop);
 
     window.addEventListener('keydown', (e) => {
       initAudio();
