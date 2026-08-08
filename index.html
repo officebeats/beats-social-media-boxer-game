@@ -214,7 +214,7 @@
   <div class="arcade-cabinet">
     <div class="cabinet-header">
       <div class="brand-title">CRASH OUT: RING RUSH</div>
-      <div class="badge-pico8">16-BIT SPRITE ENGINE v2.0.0</div>
+      <div class="badge-pico8">SHOULDER PUNCH v2.1.0</div>
     </div>
 
     <div class="viewport-container">
@@ -250,15 +250,17 @@
 
   <script>
     // =========================================================================
-    // CAPCOM 16-BIT REAL PIXEL ART BOXING ENGINE v2.0.0
-    // - ZERO CANVAS OVERLAY BOXES OR RECTANGULAR SLABS!
-    // - True 16-Bit Pixel Art Fighter Sprites rendered layer-by-layer for EACH pose:
-    //   * STANCE: Authentic Philly Shell / High Guard stance with feet grounded
-    //   * JAB: Real pixel art sprite with lead arm fully extended horizontally & fist out
-    //   * STRAIGHT CROSS: Real pixel art sprite driving rear punch forward with rotated hips
-    //   * HOOK: Real pixel art sprite with lead elbow raised, 90° horizontal arc sweep
-    //   * UPPERCUT: Real pixel art sprite crouching low and exploding skyward with vertical scoop
-    //   * FLINCH: Real pixel art sprite reeling backward with head snapped back
+    // CAPCOM AUTHENTIC SHOULDER-LEVEL BOXING PUNCH ENGINE v2.1.0
+    // - ZERO CANVAS OVERLAY BOXES!
+    // - ALL PUNCHES ORIGINATE HIGH FROM THE SHOULDER LINE (fy + 2) DIRECTLY TO CHIN LEVEL!
+    // - CONSTANT NATURAL 16-BIT PROPORTIONS:
+    //   * Glove size fixed to consistent 6x6 pixel art gloves
+    //   * Arm width fixed to natural 3px muscular forearms
+    // - REAL-LIFE BOXING POSE MECHANICS:
+    //   * JAB: Lead shoulder rolls up to chin, lead arm extends horizontally from fy+2 to chin
+    //   * STRAIGHT CROSS: Rear shoulder drives forward from fy+2 across chest to chin
+    //   * HOOK: Lead elbow raised high at fy+0, 90° horizontal arc sweep at jaw level
+    //   * UPPERCUT: Body crouches to fy+6, exploding skyward from waist to chin level fy-6
     // =========================================================================
 
     const PICO_PALETTE = [
@@ -1357,9 +1359,10 @@
     }
 
     // =========================================================================
-    // CAPCOM 16-BIT REAL PIXEL ART FIGHTER SPRITE RENDERER v2.0.0
+    // CAPCOM AUTHENTIC SHOULDER-LEVEL PIXEL ART FIGHTER SPRITE RENDERER v2.1.0
     // - NO CANVAS OVERLAY BOXES! NO RECTANGULAR SLABS!
-    // - Draws authentic 16-bit pixel art boxer body poses layer-by-layer!
+    // - ALL PUNCHES ORIGINATE HIGH FROM THE SHOULDER LINE (fy + 2) DIRECTLY TO CHIN LEVEL!
+    // - GLOVE SIZE MATCHES IDLE STANCE (6x6 pixels) & NATURAL 3px ARM THICKNESS!
     // =========================================================================
     function drawPixelBoxerSprite(ctx, fx, fy, isP1, anim, animTimer, frameIndex) {
       const skinTone = isP1 ? PICO_PALETTE[4] : PICO_PALETTE[15];     // Broner skin vs Deen skin
@@ -1368,7 +1371,6 @@
       const beltColor = PICO_PALETTE[10];                            // Gold belt
       const gloveColor = isP1 ? PICO_PALETTE[8] : PICO_PALETTE[12];  // Red glove vs Blue glove
       const bootColor = isP1 ? PICO_PALETTE[8] : PICO_PALETTE[12];   // Red boots vs Blue boots
-      const outline = PICO_PALETTE[0];
 
       const timerVal = animTimer || 0;
       const progress = 1.0 - (timerVal / 72.0); // 0.0 to 1.0
@@ -1418,101 +1420,103 @@
       ctx.fillStyle = PICO_PALETTE[7]; // Specular Eye Glint
       ctx.fillRect(fx + 12, fy - 1, 2, 2);
 
-      // --- LAYER 6: DISTINCT 16-BIT PUNCH ANIMATIONS ---
-      if (anim === 'JAB') {
+      // --- LAYER 6: AUTHENTIC SHOULDER-LEVEL PUNCH ANIMATIONS ---
+      // Shoulder Line is located at (fy + 2) right under chin!
+
+      if (anim === 'JAB') { // JAB ORIGINATING HIGH FROM SHOULDER (fy + 2)
         const extX = extProgress * 16.0;
 
-        // Lead Shoulder extended forward
+        // Lead Shoulder Socket rolled high
         ctx.fillStyle = skinTone;
-        ctx.fillRect(fx + 14, fy + 6, 4, 4);
+        ctx.fillRect(fx + 14, fy + 2, 4, 4);
 
-        // Extended 16-Bit Muscular Lead Arm & Glove
-        ctx.fillRect(fx + 14, fy + 6, extX, 4);
+        // Extended 3px Muscular Arm & Consistent 6x6 Boxing Glove at Chin Level (fy + 1)
+        ctx.fillRect(fx + 14, fy + 2, extX, 3);
         ctx.fillStyle = gloveColor;
-        ctx.fillRect(fx + 14 + extX, fy + 4, 8, 8); // Crisp 16-Bit Boxing Glove
+        ctx.fillRect(fx + 14 + extX, fy + 1, 6, 6); // Consistent 6x6 Glove!
         ctx.fillStyle = PICO_PALETTE[7];
-        ctx.fillRect(fx + 16 + extX, fy + 5, 2, 2);
+        ctx.fillRect(fx + 16 + extX, fy + 2, 2, 2);
 
         // Speed Blur Streak
         ctx.fillStyle = 'rgba(255,255,255,0.4)';
-        ctx.fillRect(fx + 12, fy + 7, extX, 2);
+        ctx.fillRect(fx + 12, fy + 3, extX, 1);
 
-        // Rear Guard Glove protecting chin
+        // Rear Guard Glove at chin
         ctx.fillStyle = gloveColor;
-        ctx.fillRect(fx + 3, fy + 4, 6, 6);
+        ctx.fillRect(fx + 3, fy + 2, 6, 6);
 
-      } else if (anim === 'STRAIGHT') {
+      } else if (anim === 'STRAIGHT') { // STRAIGHT CROSS FROM REAR SHOULDER (fy + 2)
         const extX = extProgress * 18.0;
 
-        // Rear Shoulder & Chest Rotation
+        // Rear Shoulder & Rotated Torso
         ctx.fillStyle = skinTone;
-        ctx.fillRect(fx + 2, fy + 5, 5, 5);
+        ctx.fillRect(fx + 2, fy + 2, 5, 4);
 
-        // Extended Rear Power Arm & Power Glove
-        ctx.fillRect(fx + 2, fy + 6, extX + 12, 4);
+        // Rear Power Arm at Shoulder Level (fy + 2)
+        ctx.fillRect(fx + 2, fy + 2, extX + 12, 3);
         ctx.fillStyle = gloveColor;
-        ctx.fillRect(fx + 14 + extX, fy + 4, 9, 9); // Oversized Power Glove
+        ctx.fillRect(fx + 14 + extX, fy + 1, 6, 6); // Consistent 6x6 Glove!
         ctx.fillStyle = beltColor; // Gold Wristband
-        ctx.fillRect(fx + 13 + extX, fy + 4, 2, 9);
+        ctx.fillRect(fx + 13 + extX, fy + 1, 1, 6);
         ctx.fillStyle = PICO_PALETTE[7];
-        ctx.fillRect(fx + 16 + extX, fy + 5, 2, 2);
+        ctx.fillRect(fx + 16 + extX, fy + 2, 2, 2);
 
         // Shockwave Trail
         ctx.fillStyle = PICO_PALETTE[10];
-        ctx.fillRect(fx + 6, fy + 4, extX, 1);
-        ctx.fillRect(fx + 8, fy + 11, extX, 1);
+        ctx.fillRect(fx + 6, fy + 1, extX, 1);
+        ctx.fillRect(fx + 8, fy + 5, extX, 1);
 
         // Lead Guard Glove tucked
         ctx.fillStyle = gloveColor;
-        ctx.fillRect(fx + 10, fy + 10, 6, 6);
+        ctx.fillRect(fx + 10, fy + 6, 6, 6);
 
-      } else if (anim === 'HOOK') {
+      } else if (anim === 'HOOK') { // WIDE HORIZONTAL HOOK SWEEPING AT JAW LEVEL (fy + 0)
         const arc = extProgress * Math.PI;
         const armX = Math.sin(arc) * 16.0;
-        const armY = -Math.cos(arc) * 4.0;
+        const armY = -Math.cos(arc) * 3.0;
 
         // Yellow Power Arc Trail
         ctx.strokeStyle = PICO_PALETTE[10];
-        ctx.lineWidth = 2;
+        ctx.lineWidth = 1;
         ctx.beginPath();
-        ctx.arc(fx + 12, fy + 8, 14, -Math.PI / 2, arc - Math.PI / 2);
+        ctx.arc(fx + 12, fy + 2, 14, -Math.PI / 2, arc - Math.PI / 2);
         ctx.stroke();
 
-        // Lead Elbow Raised & Bent 90° Arc Arm
+        // Lead Elbow Raised High & Bent 90° Arc Arm at Shoulder Level (fy + 2)
         ctx.fillStyle = skinTone;
-        ctx.fillRect(fx + 12, fy + 6, Math.max(2, armX), 5);
-        ctx.fillRect(fx + 12 + armX, fy + 6 + armY, 5, 5);
+        ctx.fillRect(fx + 12, fy + 2, Math.max(2, armX), 3);
+        ctx.fillRect(fx + 12 + armX, fy + 2 + armY, 4, 4);
 
-        // Sweeping Horizontal Hook Glove
+        // Horizontal Hook 6x6 Glove at Jaw Level
         ctx.fillStyle = gloveColor;
-        ctx.fillRect(fx + 14 + armX, fy + 4 + armY, 8, 8);
+        ctx.fillRect(fx + 14 + armX, fy + 0 + armY, 6, 6);
         ctx.fillStyle = PICO_PALETTE[7];
-        ctx.fillRect(fx + 16 + armX, fy + 5 + armY, 2, 2);
+        ctx.fillRect(fx + 16 + armX, fy + 1 + armY, 2, 2);
 
         // Rear Guard Glove
         ctx.fillStyle = gloveColor;
-        ctx.fillRect(fx + 3, fy + 5, 6, 6);
+        ctx.fillRect(fx + 3, fy + 2, 6, 6);
 
-      } else if (anim === 'UPPERCUT') {
+      } else if (anim === 'UPPERCUT') { // UPPERCUT EXPLODING SKYWARD TO CHIN LEVEL (fy - 6)
         const liftY = extProgress * 18.0;
 
         // Skyward Speed Trail
         ctx.fillStyle = PICO_PALETTE[10];
-        ctx.fillRect(fx + 14, fy + 12 - liftY, 3, liftY);
+        ctx.fillRect(fx + 14, fy + 10 - liftY, 2, liftY);
 
-        // Vertical Scooping Arm
+        // Vertical Arm Scooping Upward
         ctx.fillStyle = skinTone;
-        ctx.fillRect(fx + 13, fy + 8 - liftY, 5, Math.max(4, liftY));
+        ctx.fillRect(fx + 13, fy + 6 - liftY, 4, Math.max(3, liftY));
 
-        // Skyward Inverted Glove
+        // Skyward Inverted 6x6 Glove
         ctx.fillStyle = gloveColor;
-        ctx.fillRect(fx + 12, fy - 1 - liftY, 8, 8);
+        ctx.fillRect(fx + 12, fy - 6 - liftY, 6, 6);
         ctx.fillStyle = PICO_PALETTE[7];
-        ctx.fillRect(fx + 14, fy + 1 - liftY, 2, 2);
+        ctx.fillRect(fx + 14, fy - 5 - liftY, 2, 2);
 
         // Rear Guard Glove
         ctx.fillStyle = gloveColor;
-        ctx.fillRect(fx + 3, fy + 5, 6, 6);
+        ctx.fillRect(fx + 3, fy + 2, 6, 6);
 
       } else if (anim === 'FLINCH') { // REEL KNOCKBACK POSE
         // Head Reeling Back
@@ -1524,16 +1528,16 @@
         // Broken Guard Gloves thrown wide
         ctx.fillStyle = gloveColor;
         ctx.fillRect(fx - 2, fy + 2, 6, 6);
-        ctx.fillRect(fx + 15, fy + 6, 6, 6);
+        ctx.fillRect(fx + 15, fy + 4, 6, 6);
 
       } else { // DEFAULT GUARD STANCE (Philly Shell / High Guard)
         ctx.fillStyle = gloveColor;
         if (isP1) { // Broner Philly Shell Guard
-          ctx.fillRect(fx + 4, fy + 10, 6, 6); // Lead glove low
+          ctx.fillRect(fx + 4, fy + 8, 6, 6);  // Lead glove low
           ctx.fillRect(fx + 12, fy + 2, 6, 6); // Rear glove at chin
         } else { // Deen High Guard
-          ctx.fillRect(fx + 10, fy + 3, 6, 6);
-          ctx.fillRect(fx + 14, fy + 5, 6, 6);
+          ctx.fillRect(fx + 10, fy + 2, 6, 6);
+          ctx.fillRect(fx + 14, fy + 4, 6, 6);
         }
       }
     }
@@ -1637,7 +1641,7 @@
       ctx.rotate(anim === 'FLINCH' ? flinchTilt : punchTilt);
       ctx.translate(-(fx + 11), -(fy + 38));
 
-      // RENDER TRUE 16-BIT PIXEL ART FIGHTER SPRITE POSES! (NO OVERLAY BOXES!)
+      // RENDER AUTHENTIC SHOULDER-LEVEL 16-BIT PIXEL ART FIGHTER SPRITES!
       drawPixelBoxerSprite(ctx, fx, fy, isP1, anim, animTimer, frameIndex);
 
       ctx.restore();
