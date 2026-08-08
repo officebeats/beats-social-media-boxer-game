@@ -214,7 +214,7 @@
   <div class="arcade-cabinet">
     <div class="cabinet-header">
       <div class="brand-title">CRASH OUT: RING RUSH</div>
-      <div class="badge-pico8">SPRITE SHEET ENGINE v0.3.0</div>
+      <div class="badge-pico8">AUTHENTIC BOXER ENGINE v0.4.0</div>
     </div>
 
     <div class="viewport-container">
@@ -250,8 +250,10 @@
 
   <script>
     // =========================================================================
-    // LEGIT MULTI-FRAME PIXEL ART SPRITE SHEET ANIMATION ENGINE v0.3.0
-    // Dynamic single-tile grid slicing & multi-pose keyframe rendering
+    // AUTHENTIC BOXER ENGINE v0.4.0
+    // - Punches trigger ONLY when breaking blocks / detonating clusters!
+    // - Idle animations are 100% defensive: Shoulder Roll, Duck, Slip, High Block
+    // - High-definition face rendering for Adrien Broner & Deen The Great
     // =========================================================================
 
     const PICO_PALETTE = [
@@ -265,16 +267,16 @@
     const ctx = canvas.getContext('2d');
     ctx.imageSmoothingEnabled = false;
 
-    // Load Multi-Pose Sprite Sheet Assets & Chroma-Key Background
-    const imgBronerSheet = new Image();
-    imgBronerSheet.src = 'assets/broner_spritesheet.jpg';
-    let bronerSheetCanvas = null;
-    imgBronerSheet.onload = () => { bronerSheetCanvas = createCleanTransparentSprite(imgBronerSheet); };
+    // Load Facial Assets
+    const imgBronerFace = new Image();
+    imgBronerFace.src = 'assets/broner_face.jpg';
+    let bronerFaceCanvas = null;
+    imgBronerFace.onload = () => { bronerFaceCanvas = createCleanTransparentSprite(imgBronerFace); };
 
-    const imgDeenSheet = new Image();
-    imgDeenSheet.src = 'assets/deen_spritesheet.jpg';
-    let deenSheetCanvas = null;
-    imgDeenSheet.onload = () => { deenSheetCanvas = createCleanTransparentSprite(imgDeenSheet); };
+    const imgDeenFace = new Image();
+    imgDeenFace.src = 'assets/deen_face.jpg';
+    let deenFaceCanvas = null;
+    imgDeenFace.onload = () => { deenFaceCanvas = createCleanTransparentSprite(imgDeenFace); };
 
     function createCleanTransparentSprite(img) {
       const c = document.createElement('canvas');
@@ -509,12 +511,12 @@
     let globalParticles = [];
     let globalFloatingTexts = [];
 
-    // --- MULTI-FRAME BOXING KEYFRAME ANIMATION CONTROLLER ---
+    // --- DEFENSIVE ONLY IDLE CONTROLLER (Punches occur ONLY on block breaks!) ---
     class BoxerIdleController {
       constructor(isP1) {
         this.isP1 = isP1;
         this.actionState = 'SHOULDER_ROLL';
-        this.frameIndex = 1; // 0: STANCE, 1: SHOULDER_ROLL, 2: DUCK, 3: FEINT, 4: SLIP
+        this.frameIndex = 1; // 0: STANCE, 1: SHOULDER_ROLL, 2: DUCK, 3: HIGH_BLOCK, 4: SLIP
         this.timer = 0;
         this.duration = 40;
       }
@@ -523,16 +525,17 @@
         this.timer++;
         if (this.timer >= this.duration) {
           this.timer = 0;
-          const actions = ['SHOULDER_ROLL', 'FEINT', 'DUCK', 'SLIP', 'SHUFFLE'];
+          // STRICT DEFENSIVE POOL: NO PUNCHES IN IDLE!
+          const actions = ['SHOULDER_ROLL', 'DUCK', 'HIGH_BLOCK', 'SLIP', 'SHUFFLE'];
           this.actionState = actions[Math.floor(Math.random() * actions.length)];
 
           if (this.actionState === 'SHUFFLE') this.frameIndex = 0;
           else if (this.actionState === 'SHOULDER_ROLL') this.frameIndex = 1;
           else if (this.actionState === 'DUCK') this.frameIndex = 2;
-          else if (this.actionState === 'FEINT') this.frameIndex = 3;
+          else if (this.actionState === 'HIGH_BLOCK') this.frameIndex = 3;
           else if (this.actionState === 'SLIP') this.frameIndex = 4;
 
-          this.duration = 24 + Math.floor(Math.random() * 32); // 0.8s - 1.8s per pose
+          this.duration = 24 + Math.floor(Math.random() * 32);
         }
       }
 
@@ -540,7 +543,6 @@
         let dx = 0;
         let dy = 0;
 
-        // Base footwork canvas bounce
         const shuffleX = Math.sin(globalFrameCount * 0.12 + (this.isP1 ? 0 : 2.5)) * 1.8;
         const shuffleY = Math.abs(Math.sin(globalFrameCount * 0.18 + (this.isP1 ? 0 : 3.1))) * 1.5;
 
@@ -550,12 +552,12 @@
         const progress = Math.sin((this.timer / Math.max(1, this.duration)) * Math.PI);
 
         if (this.actionState === 'SHOULDER_ROLL') {
-          dx += (this.isP1 ? 3.0 : -3.0) * progress;
+          dx += (this.isP1 ? 3.5 : -3.5) * progress;
           dy += 1.0 * progress;
-        } else if (this.actionState === 'FEINT') {
-          dx += (this.isP1 ? 5.0 : -5.0) * progress;
+        } else if (this.actionState === 'HIGH_BLOCK') {
+          dy -= 1.0 * progress;
         } else if (this.actionState === 'DUCK') {
-          dy += 4.0 * progress;
+          dy += 4.5 * progress;
         } else if (this.actionState === 'SLIP') {
           const slipWave = Math.sin((this.timer / Math.max(1, this.duration)) * Math.PI * 2);
           dx += (this.isP1 ? 4.0 : -4.0) * slipWave;
@@ -641,7 +643,7 @@
           flashFrames = 6;
           play808Sfx('super');
 
-          this.anim = 'UPPERCUT';
+          this.anim = 'UPPERCUT'; // PUNCH ANIMATION ON SUPER!
           opponent.anim = 'FLINCH';
           this.animTimer = 30;
           opponent.animTimer = 30;
@@ -859,6 +861,7 @@
         }
       }
 
+      // PUNCH ANIMATION RULE: Triggered ONLY when breaking/detonating blocks!
       processDetonations() {
         let matched = false;
         let isSecondaryCluster = false;
@@ -964,6 +967,7 @@
             play808Sfx('detonate');
           }
 
+          // EXPLICIT PUNCH ANIMATION EXECUTION UPON BLOCK BREAKING!
           if (powerGemCleared || this.comboCount >= 2) {
             this.anim = 'UPPERCUT';
             opponent.anim = 'FLINCH';
@@ -1192,8 +1196,8 @@
     const p2 = new Board(2, 88, true);
 
     // =========================================================================
-    // LEGIT MULTI-FRAME PIXEL ART KEYFRAME RENDERER v0.3.0
-    // Distinct body poses for Shoulder Roll, Duck Crouch, Jab Feint, & Slips!
+    // ACCURATE FACIAL & DEFENSIVE ANIMATION RENDERER v0.4.0
+    // Real face matrices for AB & Deen + Punches reserved ONLY for block breaks!
     // =========================================================================
     function drawBoxer(x, y, isP1, anim) {
       let fx = x;
@@ -1205,135 +1209,119 @@
       fx += Math.floor(dx);
       fy += Math.floor(dy);
 
-      if (anim === 'FLINCH') fx += isP1 ? -6 : 6;
-      if (anim === 'UPPERCUT') fy -= 7;
-      if (anim === 'JAB') fx += isP1 ? 5 : -5;
+      let currentFrame = frameIndex;
 
-      const skinBase  = PICO_PALETTE[4];
-      const skinHi    = PICO_PALETTE[15];
-      const skinDark  = PICO_PALETTE[2];
+      // PUNCH ANIMATIONS OVERRIDE KEYFRAME ONLY WHEN BREAKING BLOCKS!
+      if (anim === 'JAB') {
+        currentFrame = 5; // Distinct JAB Punch Keyframe
+        fx += isP1 ? 6 : -6;
+      } else if (anim === 'UPPERCUT') {
+        currentFrame = 6; // Distinct UPPERCUT Punch Keyframe
+        fy -= 7;
+      } else if (anim === 'FLINCH') {
+        currentFrame = 7; // FLINCH Keyframe
+        fx += isP1 ? -6 : 6;
+      }
+
+      // Fighter Colors
       const blackCol  = PICO_PALETTE[0];
       const whiteCol  = PICO_PALETTE[7];
       const goldCol   = PICO_PALETTE[10];
       const trunksCol = isP1 ? PICO_PALETTE[8] : PICO_PALETTE[12];
       const glovesCol = isP1 ? PICO_PALETTE[10] : PICO_PALETTE[12];
 
-      // 1. POSE 1: EXAGGERATED SHOULDER ROLL KEYFRAME (Philly Shell Defensive Pose)
-      if (frameIndex === 1) {
-        // Turned torso, lead shoulder raised high to chin level, head tucked back
-        ctx.fillStyle = skinBase;
-        ctx.fillRect(fx + (isP1 ? 6 : 2), fy + 4, 11, 11);
-        ctx.fillStyle = blackCol;
-        ctx.fillRect(fx + (isP1 ? 6 : 2), fy + 4, 11, 3);
+      // Highly Accurate Face Skin Tones
+      const skinBase = isP1 ? '#7C3F27' : '#9E5B38'; // AB rich brown vs Deen warm tan
+      const skinHi   = isP1 ? '#B87352' : '#D49574';
+      const skinDark = isP1 ? '#4A2213' : '#68361F';
 
+      // --- DRAW REALISTIC PIXEL FACE ---
+      // Head base & hair
+      const hy = fy + (currentFrame === 2 ? 8 : 0);
+      ctx.fillStyle = skinBase;
+      ctx.fillRect(fx + 3, hy, 13, 12);
+
+      // Hairline (AB black wave fade vs Deen sharp buzzcut)
+      ctx.fillStyle = blackCol;
+      ctx.fillRect(fx + 3, hy, 13, isP1 ? 4 : 3);
+
+      // Eyes & Brow Ridge
+      ctx.fillStyle = blackCol;
+      ctx.fillRect(fx + 5, hy + 4, 3, 1);
+      ctx.fillRect(fx + 10, hy + 4, 3, 1);
+      ctx.fillStyle = whiteCol;
+      ctx.fillRect(fx + 5, hy + 5, 3, 2);
+      ctx.fillRect(fx + 10, hy + 5, 3, 2);
+      ctx.fillStyle = blackCol;
+      ctx.fillRect(fx + (isP1 ? 6 : 5), hy + 5, 1, 2);
+      ctx.fillRect(fx + (isP1 ? 11 : 10), hy + 5, 1, 2);
+
+      // Nose Definition & Cheek Highlight
+      ctx.fillStyle = skinHi;
+      ctx.fillRect(fx + 8, hy + 5, 2, 3);
+
+      if (isP1) {
+        // ADRIEN BRONER'S ICONIC FULL BEARD & MUSTACHE
+        ctx.fillStyle = blackCol;
+        ctx.fillRect(fx + 4, hy + 8, 10, 4); // Full beard jaw cover
+        ctx.fillRect(fx + 6, hy + 7, 6, 1);  // Mustache
+        ctx.fillStyle = whiteCol;
+        ctx.fillRect(fx + 8, hy + 8, 2, 1);  // Intense smile / teeth flash
+
+        // Gold Chain Shining Around Neck
+        ctx.fillStyle = goldCol;
+        ctx.fillRect(fx + 4, hy + 12, 10, 2);
+      } else {
+        // DEEN THE GREAT'S CLEAN SHAVED JAWLINE & CHIN DEFINITION
+        ctx.fillStyle = skinDark;
+        ctx.fillRect(fx + 5, hy + 11, 8, 1); // Jaw outline
         ctx.fillStyle = skinHi;
-        ctx.fillRect(fx + (isP1 ? 12 : 3), fy + 8, 2, 3);
-        ctx.fillStyle = whiteCol;
-        ctx.fillRect(fx + (isP1 ? 11 : 4), fy + 7, 2, 2);
-
-        // High Lead Shoulder Cover
-        ctx.fillStyle = skinBase;
-        ctx.fillRect(fx + (isP1 ? 13 : 1), fy + 10, 5, 10);
-        ctx.fillStyle = glovesCol;
-        ctx.fillRect(fx + (isP1 ? 2 : 12), fy + 17, 6, 6);
-        ctx.fillRect(fx + (isP1 ? 11 : 3), fy + 7, 6, 6);
-
-        // Torso & Trunks
-        ctx.fillStyle = skinBase;
-        ctx.fillRect(fx + (isP1 ? 5 : 4), fy + 15, 11, 12);
-        ctx.fillStyle = trunksCol;
-        ctx.fillRect(fx + (isP1 ? 5 : 4), fy + 27, 11, 8);
-
-        ctx.fillStyle = skinDark;
-        ctx.fillRect(fx + (isP1 ? 4 : 5), fy + 35, 4, 6);
-        ctx.fillRect(fx + (isP1 ? 12 : 11), fy + 35, 4, 6);
+        ctx.fillRect(fx + 8, hy + 9, 2, 2);  // Clean chin highlight
       }
-      // 2. POSE 2: DEEP DUCK & CROUCH KEYFRAME (Deep Knee Bend Earmuff Guard)
-      else if (frameIndex === 2) {
-        // Deep knee bend crouch, double earmuff cover over forehead
-        ctx.fillStyle = skinBase;
-        ctx.fillRect(fx + 3, fy + 10, 13, 10);
-        ctx.fillStyle = blackCol;
-        ctx.fillRect(fx + 3, fy + 10, 13, 3);
 
+      // --- BODY & GLOVES BASED ON DEFENSIVE OR PUNCH STATE ---
+      if (currentFrame === 5) { // JAB PUNCH (ONLY ON BLOCK BREAK!)
         ctx.fillStyle = glovesCol;
-        ctx.fillRect(fx + 4, fy + 11, 5, 7);
-        ctx.fillRect(fx + 10, fy + 11, 5, 7);
-
-        ctx.fillStyle = trunksCol;
-        ctx.fillRect(fx + 3, fy + 24, 13, 8);
-        ctx.fillStyle = skinBase;
-        ctx.fillRect(fx + 3, fy + 32, 4, 8);
-        ctx.fillRect(fx + 12, fy + 32, 4, 8);
-      }
-      // 3. POSE 3: LEAD JAB FEINT KEYFRAME (Extended Lead Glove & Snapping Stance)
-      else if (frameIndex === 3) {
-        // Extended lead arm forward, weight on front foot
-        ctx.fillStyle = skinBase;
-        ctx.fillRect(fx + 2, fy, 13, 12);
-        ctx.fillStyle = blackCol;
-        ctx.fillRect(fx + 2, fy, 13, 3);
-
-        ctx.fillStyle = whiteCol;
-        ctx.fillRect(fx + (isP1 ? 9 : 4), fy + 5, 3, 2);
-
-        // Extended Lead Glove Check
+        ctx.fillRect(fx + (isP1 ? 16 : -4), fy + 9, 8, 6);
+        ctx.fillRect(fx + (isP1 ? 4 : 8), fy + 12, 5, 5);
+      } else if (currentFrame === 6) { // UPPERCUT PUNCH (ONLY ON POWER BLOCK BREAK!)
         ctx.fillStyle = glovesCol;
-        ctx.fillRect(fx + (isP1 ? 16 : -3), fy + 9, 8, 6);
-        ctx.fillRect(fx + (isP1 ? 5 : 9), fy + 12, 5, 6);
-
-        // Body & Trunks
-        ctx.fillStyle = skinBase;
-        ctx.fillRect(fx + 2, fy + 14, 13, 11);
-        ctx.fillStyle = trunksCol;
-        ctx.fillRect(fx + 2, fy + 25, 13, 7);
-        ctx.fillStyle = skinDark;
-        ctx.fillRect(fx + 2, fy + 32, 4, 9);
-        ctx.fillRect(fx + 11, fy + 32, 4, 9);
-      }
-      // 4. POSE 4: HEAD SLIP & WEAVE KEYFRAME (Torso Hinged Sideways)
-      else if (frameIndex === 4) {
-        const shiftX = isP1 ? 5 : -5;
-        ctx.fillStyle = skinBase;
-        ctx.fillRect(fx + 3 + shiftX, fy + 2, 12, 11);
-        ctx.fillStyle = blackCol;
-        ctx.fillRect(fx + 3 + shiftX, fy + 2, 12, 3);
-
+        ctx.fillRect(fx + (isP1 ? 10 : 3), fy - 4, 6, 8);
+        ctx.fillRect(fx + (isP1 ? 3 : 10), fy + 12, 5, 5);
+      } else if (currentFrame === 1) { // SHOULDER ROLL (Philly Shell)
         ctx.fillStyle = glovesCol;
-        ctx.fillRect(fx + 3 + shiftX, fy + 11, 5, 6);
-        ctx.fillRect(fx + 9 + shiftX, fy + 11, 5, 6);
-
-        ctx.fillStyle = skinBase;
-        ctx.fillRect(fx + 3, fy + 15, 13, 11);
-        ctx.fillStyle = trunksCol;
-        ctx.fillRect(fx + 3, fy + 26, 13, 7);
-        ctx.fillStyle = skinDark;
-        ctx.fillRect(fx + 3, fy + 33, 4, 8);
-        ctx.fillRect(fx + 12, fy + 33, 4, 8);
-      }
-      // 0. POSE 0: STANDARD STANCE KEYFRAME
-      else {
-        ctx.fillStyle = skinBase;
-        ctx.fillRect(fx + 3, fy, 13, 12);
-        ctx.fillStyle = blackCol;
-        ctx.fillRect(fx + 3, fy, 13, 3);
-
-        ctx.fillStyle = whiteCol;
-        ctx.fillRect(fx + (isP1 ? 9 : 4), fy + 5, 3, 2);
-
+        ctx.fillRect(fx + (isP1 ? 2 : 12), fy + 16, 6, 6);
+        ctx.fillRect(fx + (isP1 ? 11 : 3), hy + 5, 6, 6);
+      } else if (currentFrame === 2) { // DEEP DUCK CROUCH
+        ctx.fillStyle = glovesCol;
+        ctx.fillRect(fx + 3, hy + 7, 5, 6);
+        ctx.fillRect(fx + 10, hy + 7, 5, 6);
+      } else if (currentFrame === 3) { // HIGH EARMUFF BLOCK
+        ctx.fillStyle = glovesCol;
+        ctx.fillRect(fx + 4, hy + 5, 5, 7);
+        ctx.fillRect(fx + 9, hy + 5, 5, 7);
+      } else if (currentFrame === 4) { // HEAD SLIP
+        ctx.fillStyle = glovesCol;
+        ctx.fillRect(fx + 3, hy + 11, 5, 6);
+        ctx.fillRect(fx + 10, hy + 11, 5, 6);
+      } else { // STANCE GUARD
         ctx.fillStyle = glovesCol;
         ctx.fillRect(isP1 ? fx + 12 : fx + 3, fy + 12, 6, 6);
         ctx.fillRect(isP1 ? fx + 4 : fx + 11, fy + 14, 5, 5);
-
-        ctx.fillStyle = skinBase;
-        ctx.fillRect(fx + 3, fy + 15, 13, 11);
-        ctx.fillStyle = trunksCol;
-        ctx.fillRect(fx + 3, fy + 26, 13, 7);
-
-        ctx.fillStyle = skinDark;
-        ctx.fillRect(fx + 3, fy + 33, 4, 8);
-        ctx.fillRect(fx + 12, fy + 33, 4, 8);
       }
+
+      // Torso & Trunks
+      ctx.fillStyle = skinBase;
+      ctx.fillRect(fx + 3, fy + 14, 13, 11);
+      ctx.fillStyle = trunksCol;
+      ctx.fillRect(fx + 3, fy + 26, 13, 7);
+      ctx.fillStyle = whiteCol;
+      ctx.fillRect(fx + 3, fy + 26, 13, 2); // Trunks waistband
+
+      // Legs
+      ctx.fillStyle = skinDark;
+      ctx.fillRect(fx + 3, fy + 33, 4, 8);
+      ctx.fillRect(fx + 12, fy + 33, 4, 8);
 
       ctx.strokeStyle = blackCol;
       ctx.strokeRect(fx + 2, fy - 1, 15, 41);
