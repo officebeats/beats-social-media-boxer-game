@@ -214,7 +214,7 @@
   <div class="arcade-cabinet">
     <div class="cabinet-header">
       <div class="brand-title">CRASH OUT: RING RUSH</div>
-      <div class="badge-pico8">HIGH-DEF SPRITE ENGINE v0.6.0</div>
+      <div class="badge-pico8">SMART AI ENGINE v0.7.0</div>
     </div>
 
     <div class="viewport-container">
@@ -250,11 +250,11 @@
 
   <script>
     // =========================================================================
-    // HIGH-DEFINITION CAPCOM ARCADE SPRITE ENGINE v0.6.0
-    // - Restored original detailed 16-bit Capcom boxer figures from v0.1.0!
+    // SMART AI AUTO-PLAY & HIGH-DEF CAPCOM SPRITE ENGINE v0.7.0
+    // - Fixed AI pause bug: Continuous pair spawning & intelligent AI column targeting
+    // - Restored original detailed 16-bit Capcom boxer figures from v0.1.0
     // - 100% clean transparent chroma keying — ZERO background boxes!
     // - Punches trigger ONLY on block breaking / cluster detonation!
-    // - Defensive idle movements: Shoulder Roll, Duck, High Block, Head Slip
     // =========================================================================
 
     const PICO_PALETTE = [
@@ -303,7 +303,6 @@
         const g = d[i+1];
         const b = d[i+2];
 
-        // High precision transparency filter for pure white/light/gray background
         const isLight = (r > 120 && g > 120 && b > 120);
         const isGray = (Math.abs(r - g) < 25 && Math.abs(g - b) < 25 && r > 80);
         if (isLight || isGray) {
@@ -584,7 +583,7 @@
     const idleP1 = new BoxerIdleController(true);
     const idleP2 = new BoxerIdleController(false);
 
-    // --- PUZZLE BOARD ENGINE ---
+    // --- PUZZLE BOARD ENGINE WITH GUARANTEED CONTINUOUS AI AUTO-PLAY ---
     class Board {
       constructor(id, offsetX, isAi = true) {
         this.id = id;
@@ -605,29 +604,52 @@
         this.pulseAngle = 0;
 
         this.pair = null;
-        this.spawnPair();
-
         this.dropTimer = 0;
-        this.dropInterval = 44;
+        this.dropInterval = 28; // FAST AI PACING!
         this.lockDelay = 0;
 
         this.anim = 'IDLE';
         this.animTimer = 0;
+
+        this.aiTargetCol = 2;
+        this.aiTimer = 0;
+
+        this.spawnPair();
       }
 
       spawnPair() {
         this.dropCount++;
+        this.dropTimer = 0;
+        this.lockDelay = 0;
+
+        // Choose smart AI column target (Column with lowest height)
+        const colHeights = Array(COLS).fill(0);
+        for (let c = 0; c < COLS; c++) {
+          for (let r = 0; r < ROWS; r++) {
+            if (this.grid[r][c] !== 0) {
+              colHeights[c] = ROWS - r;
+              break;
+            }
+          }
+        }
+        let minH = 99;
+        let bestC = 2;
+        for (let c = 0; c < COLS; c++) {
+          if (colHeights[c] < minH) {
+            minH = colHeights[c];
+            bestC = c;
+          }
+        }
+        this.aiTargetCol = Math.random() < 0.3 ? Math.floor(Math.random() * COLS) : bestC;
 
         if (this.dropCount % 12 === 0) {
           this.pair = { x: 2, y: 0, rot: 0, g1: 9, g2: Math.floor(Math.random() * 4) + 1, vy: 0 };
-          return;
+        } else {
+          const g1 = Math.floor(Math.random() * 4) + 1;
+          const isCrash = Math.random() < 0.35;
+          const g2 = isCrash ? (Math.floor(Math.random() * 4) + 5) : (Math.floor(Math.random() * 4) + 1);
+          this.pair = { x: 2, y: 0, rot: 0, g1: g1, g2: g2, vy: 0 };
         }
-
-        const g1 = Math.floor(Math.random() * 4) + 1;
-        const isCrash = Math.random() < 0.35;
-        const g2 = isCrash ? (Math.floor(Math.random() * 4) + 5) : (Math.floor(Math.random() * 4) + 1);
-
-        this.pair = { x: 2, y: 0, rot: 0, g1: g1, g2: g2, vy: 0 };
 
         if (this.grid[0][2] !== 0 || this.grid[1][2] !== 0) {
           this.hp = 0;
@@ -669,12 +691,14 @@
       }
 
       getSubX() {
+        if (!this.pair) return 2;
         if (this.pair.rot === 1) return this.pair.x + 1;
         if (this.pair.rot === 3) return this.pair.x - 1;
         return this.pair.x;
       }
 
       getSubY() {
+        if (!this.pair) return 0;
         if (this.pair.rot === 0) return this.pair.y - 1;
         if (this.pair.rot === 2) return this.pair.y + 1;
         return this.pair.y;
@@ -766,7 +790,6 @@
         this.pair = null;
 
         this.updateCounterGems();
-
         this.applyGravity();
         this.processRainbowDiamond();
         this.detectPowerGems();
@@ -953,7 +976,6 @@
             play808Sfx('detonate');
           }
 
-          // EXPLICIT PUNCH ANIMATION EXECUTION UPON BLOCK BREAKING!
           if (powerGemCleared || this.comboCount >= 2) {
             this.anim = 'UPPERCUT';
             opponent.anim = 'FLINCH';
@@ -976,7 +998,7 @@
 
         } else {
           this.comboCount = 0;
-          this.spawnPair();
+          this.spawnPair(); // ALWAYS GUARANTEES NEW PAIR SPAWN!
         }
       }
 
@@ -1040,15 +1062,24 @@
           if (this.animTimer === 0) this.anim = 'IDLE';
         }
 
+        // FAILSAFE SPAWNER: If pair is null, force spawn immediately!
+        if (!this.pair) {
+          this.spawnPair();
+        }
+
+        // CONTINUOUS RELIABLE AI AUTO-PLAY TICK LOGIC
         if (this.isAi && this.pair) {
-          if (Math.random() < 0.22) {
-            const targetX = Math.floor(Math.random() * COLS);
-            if (this.pair.x < targetX) this.move(1);
-            else if (this.pair.x > targetX) this.move(-1);
+          this.aiTimer++;
+          if (this.aiTimer >= 4) { // Act every 4 frames (~15 actions/sec)
+            this.aiTimer = 0;
+
+            if (this.pair.x < this.aiTargetCol) this.move(1);
+            else if (this.pair.x > this.aiTargetCol) this.move(-1);
+            else if (Math.random() < 0.45) this.dropSoft();
+
+            if (Math.random() < 0.25) this.rotate(1);
+            if (this.superMeter >= 100) this.triggerSuper();
           }
-          if (Math.random() < 0.12) this.rotate(1);
-          if (Math.random() < 0.15) this.dropSoft();
-          if (this.superMeter >= 100 && Math.random() < 0.25) this.triggerSuper();
         }
 
         if (this.pair) {
@@ -1059,7 +1090,7 @@
               this.pair.y++;
             } else {
               this.lockDelay++;
-              if (this.lockDelay >= 4) {
+              if (this.lockDelay >= 2) {
                 this.lockDelay = 0;
                 this.lockPair();
               }
@@ -1179,8 +1210,8 @@
       }
     }
 
-    const p1 = new Board(1, 4, true);
-    const p2 = new Board(2, 88, true);
+    const p1 = new Board(1, 4, true);  // AI P1
+    const p2 = new Board(2, 88, true); // AI P2
 
     // =========================================================================
     // HIGH-DEFINITION CAPCOM ARCADE SPRITE RENDERER
@@ -1200,13 +1231,13 @@
 
       // PUNCH ANIMATIONS OVERRIDE KEYFRAME ONLY WHEN BREAKING BLOCKS!
       if (anim === 'JAB') {
-        currentPose = 3; // Jab Punch Keyframe
+        currentPose = 3;
         fx += isP1 ? 6 : -6;
       } else if (anim === 'UPPERCUT') {
-        currentPose = 3; // Uppercut Keyframe
+        currentPose = 3;
         fy -= 6;
       } else if (anim === 'FLINCH') {
-        currentPose = 4; // Flinch / Slip Keyframe
+        currentPose = 4;
         fx += isP1 ? -5 : 5;
       }
 
@@ -1216,7 +1247,6 @@
       ctx.ellipse(fx + 10, 89, 9, 3, 0, 0, Math.PI * 2);
       ctx.fill();
 
-      // Render Clean Transparent High-Definition Sprite Sheets
       const sheetCanvas = isP1 ? bronerSheetCanvas : deenSheetCanvas;
       const singleCanvas = isP1 ? bronerCanvas : deenCanvas;
 
@@ -1232,7 +1262,6 @@
       } else if (singleCanvas) {
         ctx.drawImage(singleCanvas, fx, fy, 22, 40);
       } else {
-        // High-definition fallback
         ctx.fillStyle = isP1 ? '#AB5236' : '#29ADFF';
         ctx.fillRect(fx + 3, fy, 14, 38);
       }
