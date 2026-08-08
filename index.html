@@ -271,7 +271,7 @@
     <!-- HEADER MARQUEE -->
     <div class="cabinet-header">
       <div class="brand-title">CRASH OUT: RING RUSH</div>
-      <div class="badge-pico8">CAPCOM 16-BIT v6.0.0</div>
+      <div class="badge-pico8">CAPCOM HD SPRITES v7.0.0</div>
     </div>
 
     <!-- ABSOLUTE MAXIMUM REAL ESTATE GAME VIEWPORT CANVAS -->
@@ -306,12 +306,11 @@
 
   <script>
     // =========================================================================
-    // CAPCOM REALISTIC 16-BIT PIXEL ART FIGHTER ENGINE v6.0.0
-    // - Highly detailed, sculpted, non-blocky 16-bit arcade pixel art boxers!
-    // - Broner: Warm dark brown (#8C4A27) with muscle highlights (#A65B32) & red trunks!
-    // - Deen: Golden bronze tan (#C58C5D) with muscle highlights (#D89E6F) & blue trunks!
-    // - Sculpted deltoids, chest pecs, 6-pack abs, anatomical shoulder socket at Y = -24!
-    // - Palette Swapping, Checkerboard Dithering, LocalStorage High Score & Chiptune BGM!
+    // RESTORED CAPCOM HD SPRITE ENGINE v7.0.0
+    // - Restored original high-quality Capcom 16-bit fighter sprites!
+    // - Anatomical Shoulder Joint Punch Extension at local Y = -24!
+    // - Skin Color Matching (#8C4A27 Broner vs #C58C5D Deen)!
+    // - 100% Max Real Estate Viewport + 16-Bit Pixel Art Controls!
     // =========================================================================
 
     const PICO_PALETTE = [
@@ -342,6 +341,17 @@
     }
     let highScore = dget(0);
     let maxComboTrack = dget(1);
+
+    // LOAD ORIGINAL HIGH QUALITY CAPCOM FIGHTER SPRITES
+    const bronerImg = new Image();
+    bronerImg.src = 'assets/broner_sprite.jpg';
+    let bronerLoaded = false;
+    bronerImg.onload = () => { bronerLoaded = true; };
+
+    const deenImg = new Image();
+    deenImg.src = 'assets/deen_sprite.jpg';
+    let deenLoaded = false;
+    deenImg.onload = () => { deenLoaded = true; };
 
     function smoothstep(edge0, edge1, x) {
       const t = Math.max(0, Math.min(1, (x - edge0) / (edge1 - edge0)));
@@ -550,7 +560,7 @@
     const ROWS = 12;
     const CELL_W = 6;
     const CELL_H = 8;
-    const GEM_COLORS = [8, 12, 11, 10]; // Red, Blue, Green, Yellow
+    const GEM_COLORS = [8, 12, 11, 10];
 
     let gameMode = 'AI_VS_AI';
     let cameraShake = 0;
@@ -610,7 +620,6 @@
     var p1 = null;
     var p2 = null;
 
-    // --- DEFENSIVE ONLY IDLE CONTROLLER ---
     class BoxerIdleController {
       constructor(isP1) {
         this.isP1 = isP1;
@@ -626,13 +635,6 @@
           this.timer = 0;
           const actions = ['SHOULDER_ROLL', 'DUCK', 'HIGH_BLOCK', 'SLIP', 'SHUFFLE'];
           this.actionState = actions[Math.floor(Math.random() * actions.length)];
-
-          if (this.actionState === 'SHUFFLE') this.frameIndex = 0;
-          else if (this.actionState === 'SHOULDER_ROLL') this.frameIndex = 1;
-          else if (this.actionState === 'DUCK') this.frameIndex = 2;
-          else if (this.actionState === 'HIGH_BLOCK') this.frameIndex = 3;
-          else if (this.actionState === 'SLIP') this.frameIndex = 4;
-
           this.duration = 80 + Math.floor(Math.random() * 90);
         }
       }
@@ -641,7 +643,6 @@
         let dx = 0;
         const shuffleX = Math.sin(globalFrameCount * 0.04 + (this.isP1 ? 0 : 2.5)) * 1.2;
         dx += shuffleX;
-
         const progress = Math.sin((this.timer / Math.max(1, this.duration)) * Math.PI);
 
         if (this.actionState === 'SHOULDER_ROLL') {
@@ -651,14 +652,13 @@
           dx += (this.isP1 ? 3.0 : -3.0) * slipWave;
         }
 
-        return { dx, dy: 0, frameIndex: this.frameIndex };
+        return { dx, dy: 0 };
       }
     }
 
     const idleP1 = new BoxerIdleController(true);
     const idleP2 = new BoxerIdleController(false);
 
-    // --- DETERMINISTIC BOARD STATE MACHINE ENGINE ---
     class Board {
       constructor(id, offsetX, isAi = true) {
         this.id = id;
@@ -1429,166 +1429,8 @@
     }
 
     // =========================================================================
-    // HIGH-DEFINITION CAPCOM 16-BIT PIXEL ART BOXER SPRITE ENGINE (NON-BLOCKY!)
+    // RESTORED CAPCOM HD FIGHTER RENDERER (SPRITESHEET + ANATOMICAL PUNCHES)
     // =========================================================================
-
-    function drawCapcomDetailedBoxerSprite(ctx, isP1, pose, extProgress, isHitFlash) {
-      // Sculpted 16-bit Realistic Skin & Trunks Colors
-      const skinBase = isP1 ? '#8C4A27' : '#C58C5D';     // Broner Warm Brown vs Deen Golden Tan
-      const skinLight = isP1 ? '#A65B32' : '#D89E6F';    // Muscle Highlight
-      const skinShadow = isP1 ? '#5C2D13' : '#96633B';   // Muscle Shadow Contour
-      const trunksBase = isP1 ? '#FF004D' : '#29ADFF';   // Red vs Blue
-      const trunksDark = isP1 ? '#A0002F' : '#1468A3';   // Trunks Shadow
-      const beltColor = isP1 ? '#FFEC27' : '#FFF1E8';    // Gold vs White Belt
-      const gloveBase = isP1 ? '#FF004D' : '#29ADFF';    // Red vs Blue Glove
-      const gloveShine = '#FFF1E8';
-      const bootColor = isP1 ? '#D0003A' : '#1B85D0';
-      const hairColor = '#100C1E';
-
-      if (isHitFlash) {
-        ctx.fillStyle = getPalColor(7);
-      }
-
-      // --- 1. DETAILED BOOTS & ANKLES ---
-      ctx.fillStyle = isHitFlash ? getPalColor(7) : bootColor;
-      ctx.fillRect(-7, 32, 5, 8);
-      ctx.fillRect(2, 32, 5, 8);
-      ctx.fillStyle = isHitFlash ? getPalColor(7) : '#FFF1E8';
-      ctx.fillRect(-6, 33, 3, 2); // Boot Laces
-      ctx.fillRect(3, 33, 3, 2);
-
-      // --- 2. CONTOURED MUSCULAR LEGS ---
-      ctx.fillStyle = isHitFlash ? getPalColor(7) : skinBase;
-      ctx.fillRect(-6, 24, 4, 8);
-      ctx.fillRect(2, 24, 4, 8);
-      ctx.fillStyle = isHitFlash ? getPalColor(7) : skinLight;
-      ctx.fillRect(-6, 24, 1, 7); // Leg highlight
-      ctx.fillRect(2, 24, 1, 7);
-
-      // --- 3. SHADED BOXING TRUNKS & GOLD BELT ---
-      ctx.fillStyle = isHitFlash ? getPalColor(7) : beltColor;
-      ctx.fillRect(-8, 12, 16, 4); // Chunky 16-bit Belt
-      ctx.fillStyle = isHitFlash ? getPalColor(7) : trunksBase;
-      ctx.fillRect(-8, 16, 16, 9);
-      ctx.fillStyle = isHitFlash ? getPalColor(7) : trunksDark;
-      ctx.fillRect(-8, 20, 16, 5); // Trunks bottom shadow
-      ctx.fillStyle = isHitFlash ? getPalColor(7) : '#100C1E';
-      ctx.fillRect(-1, 16, 2, 9); // Central split line
-
-      // --- 4. SCULPTED MUSCULAR TORSO (Pecs, 6-Pack Abs, Lats) ---
-      ctx.fillStyle = isHitFlash ? getPalColor(7) : skinBase;
-      ctx.fillRect(-7, -18, 14, 30);
-      
-      // Muscle Highlights & Shading Contours
-      ctx.fillStyle = isHitFlash ? getPalColor(7) : skinLight;
-      ctx.fillRect(-6, -16, 5, 6);  // Right Pec
-      ctx.fillRect(1, -16, 5, 6);   // Left Pec
-      ctx.fillRect(-4, -8, 3, 3);   // Upper Ab
-      ctx.fillRect(1, -8, 3, 3);
-      ctx.fillRect(-4, -4, 3, 3);   // Mid Ab
-      ctx.fillRect(1, -4, 3, 3);
-
-      ctx.fillStyle = isHitFlash ? getPalColor(7) : skinShadow;
-      ctx.fillRect(-1, -18, 2, 30); // Sternum / Linea Alba centerline
-      ctx.fillRect(-7, -10, 14, 1); // Sub-Pec line
-      ctx.fillRect(-5, -5, 10, 1);  // Sub-Ab line
-
-      // --- 5. DETAILED SCULPTED HEAD & FACE ---
-      ctx.fillStyle = isHitFlash ? getPalColor(7) : hairColor;
-      ctx.fillRect(-6, -38, 12, 10); // Hair & Head top
-      ctx.fillStyle = isHitFlash ? getPalColor(7) : skinBase;
-      ctx.fillRect(-5, -30, 10, 10); // Face
-      ctx.fillStyle = isHitFlash ? getPalColor(7) : skinLight;
-      ctx.fillRect(-4, -29, 4, 3);  // Forehead highlight
-
-      ctx.fillStyle = isHitFlash ? getPalColor(7) : '#FFF1E8';
-      ctx.fillRect(isP1 ? 0 : -3, -27, 3, 2); // Eye socket
-      ctx.fillStyle = isHitFlash ? getPalColor(7) : '#000000';
-      ctx.fillRect(isP1 ? 1 : -2, -27, 1, 2); // Pupil
-
-      if (isP1) { // Broner Signature Beard & Stubble
-        ctx.fillStyle = isHitFlash ? getPalColor(7) : hairColor;
-        ctx.fillRect(-5, -23, 10, 4);
-        ctx.fillRect(-3, -20, 6, 2);
-      }
-
-      // --- 6. REAR GUARD ARM (At Chin Level) ---
-      if (pose === 'IDLE' || pose === 'FLINCH') {
-        ctx.fillStyle = isHitFlash ? getPalColor(7) : skinBase;
-        ctx.fillRect(-9, -24, 5, 12);
-        ctx.fillStyle = isHitFlash ? getPalColor(7) : gloveBase;
-        ctx.fillRect(-10, -28, 7, 7);
-        ctx.fillStyle = gloveShine;
-        ctx.fillRect(-9, -27, 2, 2);
-      }
-
-      // --- 7. DYNAMIC EXTENDED PUNCH ARM FROM SHOULDER JOINT (-24 Y) ---
-      if (pose === 'JAB' || pose === 'STRAIGHT' || pose === 'HOOK' || pose === 'UPPERCUT') {
-        const sockX = 4;
-        const sockY = -24; // ANATOMICAL SHOULDER SOCKET ORIGIN!
-
-        if (pose === 'JAB') {
-          const extX = extProgress * 12.0;
-          ctx.fillStyle = isHitFlash ? getPalColor(7) : skinBase;
-          ctx.fillRect(sockX, sockY - 2, extX, 5);
-          ctx.fillStyle = isHitFlash ? getPalColor(7) : skinLight;
-          ctx.fillRect(sockX, sockY - 2, extX, 2);
-
-          ctx.fillStyle = isHitFlash ? getPalColor(7) : gloveBase;
-          ctx.fillRect(sockX + extX, sockY - 4, 7, 8);
-          ctx.fillStyle = gloveShine;
-          ctx.fillRect(sockX + extX + 2, sockY - 3, 2, 2);
-
-        } else if (pose === 'STRAIGHT') {
-          const extX = extProgress * 15.0;
-          ctx.fillStyle = isHitFlash ? getPalColor(7) : skinBase;
-          ctx.fillRect(sockX - 4, sockY - 2, extX + 4, 5);
-          ctx.fillStyle = isHitFlash ? getPalColor(7) : skinLight;
-          ctx.fillRect(sockX - 4, sockY - 2, extX + 4, 2);
-
-          ctx.fillStyle = isHitFlash ? getPalColor(7) : gloveBase;
-          ctx.fillRect(sockX + extX, sockY - 4, 8, 8);
-          ctx.fillStyle = '#FFF1E8'; // Wristband
-          ctx.fillRect(sockX + extX - 2, sockY - 4, 2, 8);
-          ctx.fillStyle = gloveShine;
-          ctx.fillRect(sockX + extX + 3, sockY - 3, 2, 2);
-
-        } else if (pose === 'HOOK') {
-          const arc = extProgress * Math.PI;
-          const armX = Math.sin(arc) * 12.0;
-          const armY = -Math.cos(arc) * 3.0;
-
-          ctx.fillStyle = isHitFlash ? getPalColor(7) : skinBase;
-          ctx.fillRect(sockX, sockY - 2, Math.max(3, armX), 5);
-          ctx.fillRect(sockX + armX, sockY - 2 + armY, 5, 5);
-
-          ctx.fillStyle = isHitFlash ? getPalColor(7) : gloveBase;
-          ctx.fillRect(sockX + armX + 2, sockY - 4 + armY, 8, 8);
-          ctx.fillStyle = gloveShine;
-          ctx.fillRect(sockX + armX + 4, sockY - 3 + armY, 2, 2);
-
-        } else if (pose === 'UPPERCUT') {
-          const liftY = extProgress * 15.0;
-          ctx.fillStyle = isHitFlash ? getPalColor(7) : skinBase;
-          ctx.fillRect(sockX - 1, sockY - liftY, 5, Math.max(5, liftY + 6));
-          ctx.fillStyle = isHitFlash ? getPalColor(7) : skinLight;
-          ctx.fillRect(sockX - 1, sockY - liftY, 2, Math.max(5, liftY + 6));
-
-          ctx.fillStyle = isHitFlash ? getPalColor(7) : gloveBase;
-          ctx.fillRect(sockX - 2, sockY - 7 - liftY, 8, 8);
-          ctx.fillStyle = gloveShine;
-          ctx.fillRect(sockX + 1, sockY - 6 - liftY, 2, 2);
-        }
-      } else {
-        // LEAD STANCE GLOVE AT SHOULDER
-        ctx.fillStyle = isHitFlash ? getPalColor(7) : skinBase;
-        ctx.fillRect(4, -24, 5, 12);
-        ctx.fillStyle = isHitFlash ? getPalColor(7) : gloveBase;
-        ctx.fillRect(4, -28, 7, 7);
-        ctx.fillStyle = gloveShine;
-        ctx.fillRect(5, -27, 2, 2);
-      }
-    }
 
     function drawBoxer(x, y, isP1, anim, animTimer) {
       let fx = x;
@@ -1676,14 +1518,85 @@
         ctx.translate(fx + 11, fy + 20 + dyOffset);
       }
 
-      if (anim === 'JAB' || anim === 'STRAIGHT' || anim === 'HOOK' || anim === 'UPPERCUT') {
-        ctx.rotate(punchTilt);
-        drawCapcomDetailedBoxerSprite(ctx, isP1, anim, extProgress, isHitFlash);
-      } else if (anim === 'FLINCH') {
-        ctx.rotate(flinchTilt);
-        drawCapcomDetailedBoxerSprite(ctx, isP1, 'FLINCH', 0, isHitFlash);
+      if (isHitFlash) {
+        ctx.filter = 'brightness(2.5) contrast(1.5)';
+      }
+
+      // RENDER THE ORIGINAL HIGH QUALITY CAPCOM SPRITE!
+      const spriteImg = isP1 ? bronerImg : deenImg;
+      const isLoaded = isP1 ? bronerLoaded : deenLoaded;
+
+      if (isLoaded) {
+        ctx.drawImage(spriteImg, -11, -20, 22, 40);
       } else {
-        drawCapcomDetailedBoxerSprite(ctx, isP1, 'IDLE', 0, isHitFlash);
+        // Fallback skin base
+        ctx.fillStyle = isP1 ? '#8C4A27' : '#C58C5D';
+        ctx.fillRect(-6, -20, 12, 38);
+      }
+
+      // RESET FILTER AFTER SPRITE
+      ctx.filter = 'none';
+
+      // --- DYNAMIC ANATOMICAL SHOULDER PUNCH EXTENSION (Y = -24) ---
+      if (anim === 'JAB' || anim === 'STRAIGHT' || anim === 'HOOK' || anim === 'UPPERCUT') {
+        const sockX = 3;
+        const sockY = -24; // ANATOMICAL SHOULDER SOCKET ORIGIN!
+        const skinColor = isP1 ? '#8C4A27' : '#C58C5D'; // Skin matching
+        const skinHighlight = isP1 ? '#A65B32' : '#D89E6F';
+        const gloveColor = isP1 ? '#FF004D' : '#29ADFF'; // Red vs Blue
+
+        if (anim === 'JAB') {
+          const extX = extProgress * 12.0;
+          ctx.fillStyle = skinColor;
+          ctx.fillRect(sockX, sockY - 2, extX, 5);
+          ctx.fillStyle = skinHighlight;
+          ctx.fillRect(sockX, sockY - 2, extX, 2);
+
+          ctx.fillStyle = gloveColor;
+          ctx.fillRect(sockX + extX, sockY - 4, 7, 8);
+          ctx.fillStyle = '#FFF1E8';
+          ctx.fillRect(sockX + extX + 2, sockY - 3, 2, 2);
+
+        } else if (anim === 'STRAIGHT') {
+          const extX = extProgress * 15.0;
+          ctx.fillStyle = skinColor;
+          ctx.fillRect(sockX - 4, sockY - 2, extX + 4, 5);
+          ctx.fillStyle = skinHighlight;
+          ctx.fillRect(sockX - 4, sockY - 2, extX + 4, 2);
+
+          ctx.fillStyle = gloveColor;
+          ctx.fillRect(sockX + extX, sockY - 4, 8, 8);
+          ctx.fillStyle = '#FFF1E8'; // Wristband
+          ctx.fillRect(sockX + extX - 2, sockY - 4, 2, 8);
+          ctx.fillStyle = '#FFF1E8';
+          ctx.fillRect(sockX + extX + 3, sockY - 3, 2, 2);
+
+        } else if (anim === 'HOOK') {
+          const arc = extProgress * Math.PI;
+          const armX = Math.sin(arc) * 12.0;
+          const armY = -Math.cos(arc) * 3.0;
+
+          ctx.fillStyle = skinColor;
+          ctx.fillRect(sockX, sockY - 2, Math.max(3, armX), 5);
+          ctx.fillRect(sockX + armX, sockY - 2 + armY, 5, 5);
+
+          ctx.fillStyle = gloveColor;
+          ctx.fillRect(sockX + armX + 2, sockY - 4 + armY, 8, 8);
+          ctx.fillStyle = '#FFF1E8';
+          ctx.fillRect(sockX + armX + 4, sockY - 3 + armY, 2, 2);
+
+        } else if (anim === 'UPPERCUT') {
+          const liftY = extProgress * 15.0;
+          ctx.fillStyle = skinColor;
+          ctx.fillRect(sockX - 1, sockY - liftY, 5, Math.max(5, liftY + 6));
+          ctx.fillStyle = skinHighlight;
+          ctx.fillRect(sockX - 1, sockY - liftY, 2, Math.max(5, liftY + 6));
+
+          ctx.fillStyle = gloveColor;
+          ctx.fillRect(sockX - 2, sockY - 7 - liftY, 8, 8);
+          ctx.fillStyle = '#FFF1E8';
+          ctx.fillRect(sockX + 1, sockY - 6 - liftY, 2, 2);
+        }
       }
 
       ctx.restore();
