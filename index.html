@@ -1582,28 +1582,38 @@
       }
     }
 
-    let lastTick = performance.now();
+    let lastTime = performance.now();
+    let accumulator = 0;
+    const step = 1000 / 60; // 16.66ms per 60Hz tick
+
     function loop(now) {
       const current = now || performance.now();
-      const delta = current - lastTick;
+      let frameDelta = current - lastTime;
+      if (frameDelta > 250) frameDelta = 250; // Cap max delta to prevent explosion after tab switch
+      lastTime = current;
 
-      if (delta >= 15) {
+      accumulator += frameDelta;
+      while (accumulator >= step) {
         update();
-        render();
-        lastTick = current;
-      } else {
-        render();
+        accumulator -= step;
       }
+      render();
       requestAnimationFrame(loop);
     }
 
-    // Bulletproof background heartbeat fallback
+    // Bulletproof Heartbeat Fallback for Throttled / Background Tabs
     setInterval(() => {
-      const now = performance.now();
-      if (now - lastTick >= 30) {
-        update();
+      const current = performance.now();
+      let frameDelta = current - lastTime;
+      if (frameDelta >= 30) {
+        if (frameDelta > 250) frameDelta = 250;
+        lastTime = current;
+        accumulator += frameDelta;
+        while (accumulator >= step) {
+          update();
+          accumulator -= step;
+        }
         render();
-        lastTick = now;
       }
     }, 30);
 
