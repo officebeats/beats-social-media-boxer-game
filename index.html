@@ -214,7 +214,7 @@
   <div class="arcade-cabinet">
     <div class="cabinet-header">
       <div class="brand-title">CRASH OUT: RING RUSH</div>
-      <div class="badge-pico8">HD BOXER SPRITES v0.1.0</div>
+      <div class="badge-pico8">FLAWLESS SPRITES v0.1.0</div>
     </div>
 
     <div class="viewport-container">
@@ -250,7 +250,7 @@
 
   <script>
     // =========================================================================
-    // CAPCOM-GRADE HD BOXER ART & RANDOMIZED BOXING IDLE ENGINE
+    // PERFECT CHROMA-KEYED TRANSPARENT SPRITES & MULTI-JOINT BODY IDLE ENGINE
     // =========================================================================
 
     const PICO_PALETTE = [
@@ -276,19 +276,19 @@
     const ctx = canvas.getContext('2d');
     ctx.imageSmoothingEnabled = false;
 
-    // Load Sprite Images & Create Transparent Canvas Sprite Buffers
+    // Load Sprite Images & Create Clean Transparent Canvas Buffers
     const imgBroner = new Image();
     imgBroner.src = 'assets/broner_sprite.jpg';
     let bronerCanvas = null;
-    imgBroner.onload = () => { bronerCanvas = createTransparentSprite(imgBroner); };
+    imgBroner.onload = () => { bronerCanvas = createCleanTransparentSprite(imgBroner); };
 
     const imgDeen = new Image();
     imgDeen.src = 'assets/deen_sprite.jpg';
     let deenCanvas = null;
-    imgDeen.onload = () => { deenCanvas = createTransparentSprite(imgDeen); };
+    imgDeen.onload = () => { deenCanvas = createCleanTransparentSprite(imgDeen); };
 
-    // Function to strip white backgrounds from JPEG images and create crisp transparent PNG canvas
-    function createTransparentSprite(img) {
+    // PERFECT CHROMA-KEYING: Strips ALL background colors (white, gray, gridlines, light pixels)
+    function createCleanTransparentSprite(img) {
       const c = document.createElement('canvas');
       c.width = img.width;
       c.height = img.height;
@@ -296,10 +296,18 @@
       cCtx.drawImage(img, 0, 0);
       const imgData = cCtx.getImageData(0, 0, c.width, c.height);
       const d = imgData.data;
+
       for (let i = 0; i < d.length; i += 4) {
-        // Chroma key white background out
-        if (d[i] > 235 && d[i+1] > 235 && d[i+2] > 235) {
-          d[i+3] = 0;
+        const r = d[i];
+        const g = d[i+1];
+        const b = d[i+2];
+
+        // Strip ALL white, light gray, off-white, and checkerboard grid pixels
+        const isLight = (r > 165 && g > 165 && b > 165);
+        const isGray = (Math.abs(r - g) < 18 && Math.abs(g - b) < 18 && r > 140);
+        
+        if (isLight || isGray) {
+          d[i+3] = 0; // Set Alpha = 0 (100% Transparent!)
         }
       }
       cCtx.putImageData(imgData, 0, 0);
@@ -575,7 +583,6 @@
           this.superMeter = 0;
           const opponent = (this.id === 1) ? p2 : p1;
 
-          // Clear bottom 3 rows of gems
           for (let r = ROWS - 3; r < ROWS; r++) {
             for (let c = 0; c < COLS; c++) {
               if (this.grid[r][c] !== 0) {
@@ -1143,26 +1150,26 @@
     const p2 = new Board(2, 88, true);
 
     // =========================================================================
-    // CAPCOM-GRADE HD BOXER ART & RANDOMIZED BOXING IDLE ENGINE
-    // Transparent-buffered 16-bit arcade pixel art sprites with combat physics
+    // MULTI-JOINT BODY MOVEMENT IDLE ANIMATION & PERFECT TRANSPARENT SPRITES
     // =========================================================================
     function drawBoxer(x, y, isP1, anim) {
       let fx = x;
       let fy = y;
 
-      // 1. RANDOMIZED BOXER FOOTWORK & SWAY IDLE ANIMATION
-      const swayOffset = Math.sin(globalFrameCount * 0.08 + (isP1 ? 0 : 2.1)) * 1.5;
-      const bounceOffset = Math.abs(Math.sin(globalFrameCount * 0.12 + (isP1 ? 0 : 3.4))) * 1.2;
-      const breathChest = (Math.floor(globalFrameCount / 14) % 2 === 0) ? 0 : -1;
+      // 1. DYNAMIC MULTI-JOINT BODY MOVEMENT IDLE ANIMATION
+      const swayOffset = Math.sin(globalFrameCount * 0.08 + (isP1 ? 0 : 2.1)) * 1.8; // Lateral Hips Sway
+      const bounceOffset = Math.abs(Math.sin(globalFrameCount * 0.14 + (isP1 ? 0 : 3.4))) * 1.5; // Vertical Foot Bounce
+      const headBobY = Math.sin(globalFrameCount * 0.16 + (isP1 ? 0 : 1.2)) * 1.0; // Head Bobbing
+      const chestSwellY = (Math.floor(globalFrameCount / 12) % 2 === 0) ? 0 : -1.0; // Chest Breathing
 
-      // Randomized Micro-Taunt (Shoulder Roll / Southpaw Feint) every ~100 frames
-      const tauntCycle = Math.floor((globalFrameCount + (isP1 ? 0 : 50)) / 100) % 3;
-      const tauntFrame = (globalFrameCount % 100);
+      // Randomized Micro-Actions (Philly Shell Shoulder Slip / Southpaw Guard Check)
+      const tauntCycle = Math.floor((globalFrameCount + (isP1 ? 0 : 50)) / 90) % 3;
+      const tauntFrame = (globalFrameCount % 90);
       let microDodge = 0;
       let microFeint = 0;
-      if (tauntFrame < 18) {
-        if (tauntCycle === 1) microDodge = (isP1 ? 2 : -2); // Philly Shell Shoulder Slip
-        if (tauntCycle === 2) microFeint = (isP1 ? 3 : -3); // Southpaw Guard Check Feint
+      if (tauntFrame < 20) {
+        if (tauntCycle === 1) microDodge = (isP1 ? 2.5 : -2.5); // Philly Shell Shoulder Slip
+        if (tauntCycle === 2) microFeint = (isP1 ? 3.5 : -3.5); // Southpaw Guard Check Feint
       }
 
       fx += Math.floor(swayOffset + microDodge);
@@ -1177,7 +1184,6 @@
       if (sprCanvas) {
         ctx.save();
         if (!isP1) {
-          // Flip horizontally for P2 Deen
           ctx.translate(fx + 22, fy);
           ctx.scale(-1, 1);
           ctx.drawImage(sprCanvas, 0, 0, 22, 40);
@@ -1196,46 +1202,44 @@
         const trunksCol = isP1 ? PICO_PALETTE[8] : PICO_PALETTE[12];
         const glovesCol = isP1 ? PICO_PALETTE[10] : PICO_PALETTE[12];
 
-        // Head Base
+        // Head (Independent Head Bobbing)
+        const hy = fy + Math.floor(headBobY);
         ctx.fillStyle = skinBase;
-        ctx.fillRect(fx + 3, fy, 13, 12);
+        ctx.fillRect(fx + 3, hy, 13, 12);
         ctx.fillStyle = blackCol;
-        ctx.fillRect(fx + 3, fy, 13, 3); // Hairline
+        ctx.fillRect(fx + 3, hy, 13, 3);
 
-        // Eyes & Brows
         ctx.fillStyle = blackCol;
-        ctx.fillRect(fx + 6, fy + 4, 3, 1);
-        ctx.fillRect(fx + 11, fy + 3, 3, 1);
+        ctx.fillRect(fx + 6, hy + 4, 3, 1);
+        ctx.fillRect(fx + 11, hy + 3, 3, 1);
         ctx.fillStyle = whiteCol;
-        ctx.fillRect(fx + 6, fy + 5, 3, 2);
-        ctx.fillRect(fx + 11, fy + 5, 3, 2);
+        ctx.fillRect(fx + 6, hy + 5, 3, 2);
+        ctx.fillRect(fx + 11, hy + 5, 3, 2);
         ctx.fillStyle = blackCol;
-        ctx.fillRect(fx + 7, fy + 5, 1, 2);
-        ctx.fillRect(fx + 12, fy + 5, 1, 2);
+        ctx.fillRect(fx + 7, hy + 5, 1, 2);
+        ctx.fillRect(fx + 12, hy + 5, 1, 2);
 
-        // Nose Bridge
         ctx.fillStyle = skinHi;
-        ctx.fillRect(fx + 9, fy + 5, 2, 3);
+        ctx.fillRect(fx + 9, hy + 5, 2, 3);
 
         if (isP1) {
-          // Broner Beard & Gold Chain
           ctx.fillStyle = blackCol;
-          ctx.fillRect(fx + 5, fy + 9, 9, 4); // Beard
+          ctx.fillRect(fx + 5, hy + 9, 9, 4);
           ctx.fillStyle = whiteCol;
-          ctx.fillRect(fx + 9, fy + 9, 3, 1);  // Teeth
+          ctx.fillRect(fx + 9, hy + 9, 3, 1);
           ctx.fillStyle = goldCol;
-          ctx.fillRect(fx + 5, fy + 13, 9, 2); // Chain
+          ctx.fillRect(fx + 5, hy + 13, 9, 2);
         }
 
-        // Torso
+        // Torso & Breathing Expansion
         ctx.fillStyle = skinBase;
-        ctx.fillRect(fx + 3, fy + 15 + breathChest, 13, 11);
+        ctx.fillRect(fx + 3, fy + 15 + Math.floor(chestSwellY), 13, 11);
         ctx.fillStyle = trunksCol;
         ctx.fillRect(fx + 3, fy + 26, 13, 7);
 
         // Gloves
         ctx.fillStyle = glovesCol;
-        ctx.fillRect(isP1 ? fx + 12 : fx + 3, fy + 12, 6, 6);
+        ctx.fillRect(isP1 ? fx + 12 + Math.floor(microFeint) : fx + 3 + Math.floor(microFeint), fy + 12, 6, 6);
 
         ctx.strokeStyle = blackCol;
         ctx.strokeRect(fx + 2, fy - 1, 15, 41);
@@ -1297,7 +1301,7 @@
       ctx.fillStyle = PICO_PALETTE[7];
       ctx.fillRect(41, 90, 46, 23);
 
-      // Draw HD Boxer Pixel Art & Randomized Idle Animations!
+      // Draw Perfectly Chroma-Keyed Boxer Sprites & Multi-Joint Body Idle Animations!
       drawBoxer(41, 50, true, p1.anim);  // Adrien Broner
       drawBoxer(65, 50, false, p2.anim); // Deen The Great
 
