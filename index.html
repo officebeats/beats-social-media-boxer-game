@@ -214,7 +214,7 @@
   <div class="arcade-cabinet">
     <div class="cabinet-header">
       <div class="brand-title">CRASH OUT: RING RUSH</div>
-      <div class="badge-pico8">SMART AI ENGINE v0.7.0</div>
+      <div class="badge-pico8">FAST AI MATCH v0.8.0</div>
     </div>
 
     <div class="viewport-container">
@@ -250,8 +250,8 @@
 
   <script>
     // =========================================================================
-    // SMART AI AUTO-PLAY & HIGH-DEF CAPCOM SPRITE ENGINE v0.7.0
-    // - Fixed AI pause bug: Continuous pair spawning & intelligent AI column targeting
+    // FAST AI MATCH & HIGH-DEF CAPCOM SPRITE ENGINE v0.8.0
+    // - Fast AI hard-drop execution: Zero pauses between block drops!
     // - Restored original detailed 16-bit Capcom boxer figures from v0.1.0
     // - 100% clean transparent chroma keying — ZERO background boxes!
     // - Punches trigger ONLY on block breaking / cluster detonation!
@@ -583,7 +583,7 @@
     const idleP1 = new BoxerIdleController(true);
     const idleP2 = new BoxerIdleController(false);
 
-    // --- PUZZLE BOARD ENGINE WITH GUARANTEED CONTINUOUS AI AUTO-PLAY ---
+    // --- PUZZLE BOARD ENGINE WITH FAST NON-STOP AI AUTO-PLAY ---
     class Board {
       constructor(id, offsetX, isAi = true) {
         this.id = id;
@@ -605,7 +605,7 @@
 
         this.pair = null;
         this.dropTimer = 0;
-        this.dropInterval = 28; // FAST AI PACING!
+        this.dropInterval = 20; // FAST PUZZLE PACING!
         this.lockDelay = 0;
 
         this.anim = 'IDLE';
@@ -622,7 +622,7 @@
         this.dropTimer = 0;
         this.lockDelay = 0;
 
-        // Choose smart AI column target (Column with lowest height)
+        // Smart AI column targeting
         const colHeights = Array(COLS).fill(0);
         for (let c = 0; c < COLS; c++) {
           for (let r = 0; r < ROWS; r++) {
@@ -640,7 +640,7 @@
             bestC = c;
           }
         }
-        this.aiTargetCol = Math.random() < 0.3 ? Math.floor(Math.random() * COLS) : bestC;
+        this.aiTargetCol = Math.random() < 0.2 ? Math.floor(Math.random() * COLS) : bestC;
 
         if (this.dropCount % 12 === 0) {
           this.pair = { x: 2, y: 0, rot: 0, g1: 9, g2: Math.floor(Math.random() * 4) + 1, vy: 0 };
@@ -994,11 +994,11 @@
             this.applyGravity();
             this.detectPowerGems();
             this.processDetonations();
-          }, 260);
+          }, 200);
 
         } else {
           this.comboCount = 0;
-          this.spawnPair(); // ALWAYS GUARANTEES NEW PAIR SPAWN!
+          this.spawnPair();
         }
       }
 
@@ -1062,22 +1062,27 @@
           if (this.animTimer === 0) this.anim = 'IDLE';
         }
 
-        // FAILSAFE SPAWNER: If pair is null, force spawn immediately!
+        // Failsafe pair spawner
         if (!this.pair) {
           this.spawnPair();
         }
 
-        // CONTINUOUS RELIABLE AI AUTO-PLAY TICK LOGIC
+        // FAST AI AUTO-PLAY LOGIC: HARD DROPS WHEN ALIGNED WITH TARGET COLUMN!
         if (this.isAi && this.pair) {
           this.aiTimer++;
-          if (this.aiTimer >= 4) { // Act every 4 frames (~15 actions/sec)
+          if (this.aiTimer >= 3) {
             this.aiTimer = 0;
 
-            if (this.pair.x < this.aiTargetCol) this.move(1);
-            else if (this.pair.x > this.aiTargetCol) this.move(-1);
-            else if (Math.random() < 0.45) this.dropSoft();
+            if (this.pair.x < this.aiTargetCol) {
+              this.move(1);
+            } else if (this.pair.x > this.aiTargetCol) {
+              this.move(-1);
+            } else {
+              // Target reached -> HARD DROP IMMEDIATELY!
+              this.dropHard();
+            }
 
-            if (Math.random() < 0.25) this.rotate(1);
+            if (Math.random() < 0.3) this.rotate(1);
             if (this.superMeter >= 100) this.triggerSuper();
           }
         }
