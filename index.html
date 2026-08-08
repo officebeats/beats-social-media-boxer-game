@@ -271,7 +271,7 @@
     <!-- HEADER MARQUEE -->
     <div class="cabinet-header">
       <div class="brand-title">CRASH OUT: RING RUSH</div>
-      <div class="badge-pico8">PICO-8 SKILLS v5.0.0</div>
+      <div class="badge-pico8">CAPCOM 16-BIT v6.0.0</div>
     </div>
 
     <!-- ABSOLUTE MAXIMUM REAL ESTATE GAME VIEWPORT CANVAS -->
@@ -306,12 +306,12 @@
 
   <script>
     // =========================================================================
-    // TRENDING PICO-8 GAMEDEV SKILLS ENGINE v5.0.0
-    // - Palette Swapping (`pal()`): Dynamic color swapping during hit flashes & super mode!
-    // - PICO-8 Dithering Patterns: 16-color checkerboard dithering for ring shadows & crowd!
-    // - Persistent High Score (`dset`/`dget`): LocalStorage high score & max combo tracking!
-    // - Procedural 8-Bit Chiptune Synth: Dual-channel chiptune bassline + 808 impact SFX!
-    // - 100% Full-Screen Max Real Estate Canvas (Zero Black Empty Gaps)!
+    // CAPCOM REALISTIC 16-BIT PIXEL ART FIGHTER ENGINE v6.0.0
+    // - Highly detailed, sculpted, non-blocky 16-bit arcade pixel art boxers!
+    // - Broner: Warm dark brown (#8C4A27) with muscle highlights (#A65B32) & red trunks!
+    // - Deen: Golden bronze tan (#C58C5D) with muscle highlights (#D89E6F) & blue trunks!
+    // - Sculpted deltoids, chest pecs, 6-pack abs, anatomical shoulder socket at Y = -24!
+    // - Palette Swapping, Checkerboard Dithering, LocalStorage High Score & Chiptune BGM!
     // =========================================================================
 
     const PICO_PALETTE = [
@@ -321,7 +321,6 @@
       '#29ADFF', '#83769C', '#FF77A8', '#FFCCAA'
     ];
 
-    // PICO-8 Palette Swapping Map Function (`pal()`)
     let activePalMap = Array.from({length: 16}, (_, i) => i);
     function pal(c0, c1) {
       if (c0 === undefined) {
@@ -334,7 +333,6 @@
       return PICO_PALETTE[activePalMap[c] || c];
     }
 
-    // PICO-8 High Score System (`dset` & `dget`)
     function dget(index) {
       const val = localStorage.getItem('pico8_cart_' + index);
       return val ? parseInt(val, 10) : 0;
@@ -1431,117 +1429,164 @@
     }
 
     // =========================================================================
-    // 100% PURE PICO-8 PIXEL ART BOXER RENDERER WITH PALETTE SWAPPING
+    // HIGH-DEFINITION CAPCOM 16-BIT PIXEL ART BOXER SPRITE ENGINE (NON-BLOCKY!)
     // =========================================================================
 
-    function drawPurePicoBoxerSprite(ctx, isP1, pose, extProgress, isHitFlash) {
-      const skinColor = isP1 ? getPalColor(4) : getPalColor(15);
-      const skinDark = isP1 ? getPalColor(0) : getPalColor(4);
-      const trunksColor = isP1 ? getPalColor(8) : getPalColor(12);
-      const beltColor = isP1 ? getPalColor(10) : getPalColor(7);
-      const gloveColor = isP1 ? getPalColor(8) : getPalColor(12);
-      const hairColor = getPalColor(0);
+    function drawCapcomDetailedBoxerSprite(ctx, isP1, pose, extProgress, isHitFlash) {
+      // Sculpted 16-bit Realistic Skin & Trunks Colors
+      const skinBase = isP1 ? '#8C4A27' : '#C58C5D';     // Broner Warm Brown vs Deen Golden Tan
+      const skinLight = isP1 ? '#A65B32' : '#D89E6F';    // Muscle Highlight
+      const skinShadow = isP1 ? '#5C2D13' : '#96633B';   // Muscle Shadow Contour
+      const trunksBase = isP1 ? '#FF004D' : '#29ADFF';   // Red vs Blue
+      const trunksDark = isP1 ? '#A0002F' : '#1468A3';   // Trunks Shadow
+      const beltColor = isP1 ? '#FFEC27' : '#FFF1E8';    // Gold vs White Belt
+      const gloveBase = isP1 ? '#FF004D' : '#29ADFF';    // Red vs Blue Glove
+      const gloveShine = '#FFF1E8';
+      const bootColor = isP1 ? '#D0003A' : '#1B85D0';
+      const hairColor = '#100C1E';
 
       if (isHitFlash) {
         ctx.fillStyle = getPalColor(7);
       }
 
-      // --- 1. LEGS & BOOTS ---
-      ctx.fillStyle = isHitFlash ? getPalColor(7) : getPalColor(0);
-      ctx.fillRect(-6, 34, 4, 6);
-      ctx.fillRect(2, 34, 4, 6);
-      ctx.fillStyle = isHitFlash ? getPalColor(7) : skinColor;
-      ctx.fillRect(-5, 26, 3, 8);
-      ctx.fillRect(2, 26, 3, 8);
+      // --- 1. DETAILED BOOTS & ANKLES ---
+      ctx.fillStyle = isHitFlash ? getPalColor(7) : bootColor;
+      ctx.fillRect(-7, 32, 5, 8);
+      ctx.fillRect(2, 32, 5, 8);
+      ctx.fillStyle = isHitFlash ? getPalColor(7) : '#FFF1E8';
+      ctx.fillRect(-6, 33, 3, 2); // Boot Laces
+      ctx.fillRect(3, 33, 3, 2);
 
-      // --- 2. TRUNKS & BELT ---
+      // --- 2. CONTOURED MUSCULAR LEGS ---
+      ctx.fillStyle = isHitFlash ? getPalColor(7) : skinBase;
+      ctx.fillRect(-6, 24, 4, 8);
+      ctx.fillRect(2, 24, 4, 8);
+      ctx.fillStyle = isHitFlash ? getPalColor(7) : skinLight;
+      ctx.fillRect(-6, 24, 1, 7); // Leg highlight
+      ctx.fillRect(2, 24, 1, 7);
+
+      // --- 3. SHADED BOXING TRUNKS & GOLD BELT ---
       ctx.fillStyle = isHitFlash ? getPalColor(7) : beltColor;
-      ctx.fillRect(-7, 14, 14, 3);
-      ctx.fillStyle = isHitFlash ? getPalColor(7) : trunksColor;
-      ctx.fillRect(-7, 17, 14, 9);
-      ctx.fillStyle = isHitFlash ? getPalColor(7) : getPalColor(0);
-      ctx.fillRect(-1, 17, 2, 9);
+      ctx.fillRect(-8, 12, 16, 4); // Chunky 16-bit Belt
+      ctx.fillStyle = isHitFlash ? getPalColor(7) : trunksBase;
+      ctx.fillRect(-8, 16, 16, 9);
+      ctx.fillStyle = isHitFlash ? getPalColor(7) : trunksDark;
+      ctx.fillRect(-8, 20, 16, 5); // Trunks bottom shadow
+      ctx.fillStyle = isHitFlash ? getPalColor(7) : '#100C1E';
+      ctx.fillRect(-1, 16, 2, 9); // Central split line
 
-      // --- 3. MUSCULAR TORSO ---
-      ctx.fillStyle = isHitFlash ? getPalColor(7) : skinColor;
-      ctx.fillRect(-6, -18, 12, 32);
-      ctx.fillStyle = isHitFlash ? getPalColor(7) : skinDark;
-      ctx.fillRect(-1, -14, 2, 28);
+      // --- 4. SCULPTED MUSCULAR TORSO (Pecs, 6-Pack Abs, Lats) ---
+      ctx.fillStyle = isHitFlash ? getPalColor(7) : skinBase;
+      ctx.fillRect(-7, -18, 14, 30);
+      
+      // Muscle Highlights & Shading Contours
+      ctx.fillStyle = isHitFlash ? getPalColor(7) : skinLight;
+      ctx.fillRect(-6, -16, 5, 6);  // Right Pec
+      ctx.fillRect(1, -16, 5, 6);   // Left Pec
+      ctx.fillRect(-4, -8, 3, 3);   // Upper Ab
+      ctx.fillRect(1, -8, 3, 3);
+      ctx.fillRect(-4, -4, 3, 3);   // Mid Ab
+      ctx.fillRect(1, -4, 3, 3);
 
-      // --- 4. HEAD & FACE ---
+      ctx.fillStyle = isHitFlash ? getPalColor(7) : skinShadow;
+      ctx.fillRect(-1, -18, 2, 30); // Sternum / Linea Alba centerline
+      ctx.fillRect(-7, -10, 14, 1); // Sub-Pec line
+      ctx.fillRect(-5, -5, 10, 1);  // Sub-Ab line
+
+      // --- 5. DETAILED SCULPTED HEAD & FACE ---
       ctx.fillStyle = isHitFlash ? getPalColor(7) : hairColor;
-      ctx.fillRect(-5, -36, 10, 8);
-      ctx.fillStyle = isHitFlash ? getPalColor(7) : skinColor;
-      ctx.fillRect(-4, -28, 8, 8);
-      ctx.fillStyle = isHitFlash ? getPalColor(7) : getPalColor(7);
-      ctx.fillRect(isP1 ? 0 : -2, -26, 2, 2);
-      if (isP1) {
+      ctx.fillRect(-6, -38, 12, 10); // Hair & Head top
+      ctx.fillStyle = isHitFlash ? getPalColor(7) : skinBase;
+      ctx.fillRect(-5, -30, 10, 10); // Face
+      ctx.fillStyle = isHitFlash ? getPalColor(7) : skinLight;
+      ctx.fillRect(-4, -29, 4, 3);  // Forehead highlight
+
+      ctx.fillStyle = isHitFlash ? getPalColor(7) : '#FFF1E8';
+      ctx.fillRect(isP1 ? 0 : -3, -27, 3, 2); // Eye socket
+      ctx.fillStyle = isHitFlash ? getPalColor(7) : '#000000';
+      ctx.fillRect(isP1 ? 1 : -2, -27, 1, 2); // Pupil
+
+      if (isP1) { // Broner Signature Beard & Stubble
         ctx.fillStyle = isHitFlash ? getPalColor(7) : hairColor;
-        ctx.fillRect(-4, -22, 8, 3);
+        ctx.fillRect(-5, -23, 10, 4);
+        ctx.fillRect(-3, -20, 6, 2);
       }
 
-      // --- 5. REAR GUARD ARM ---
+      // --- 6. REAR GUARD ARM (At Chin Level) ---
       if (pose === 'IDLE' || pose === 'FLINCH') {
-        ctx.fillStyle = isHitFlash ? getPalColor(7) : skinColor;
-        ctx.fillRect(-8, -24, 4, 10);
-        ctx.fillStyle = isHitFlash ? getPalColor(7) : gloveColor;
-        ctx.fillRect(-9, -26, 5, 5);
+        ctx.fillStyle = isHitFlash ? getPalColor(7) : skinBase;
+        ctx.fillRect(-9, -24, 5, 12);
+        ctx.fillStyle = isHitFlash ? getPalColor(7) : gloveBase;
+        ctx.fillRect(-10, -28, 7, 7);
+        ctx.fillStyle = gloveShine;
+        ctx.fillRect(-9, -27, 2, 2);
       }
 
-      // --- 6. DYNAMIC PUNCH EXTENSION FROM SHOULDER JOINT (-24 Y) ---
+      // --- 7. DYNAMIC EXTENDED PUNCH ARM FROM SHOULDER JOINT (-24 Y) ---
       if (pose === 'JAB' || pose === 'STRAIGHT' || pose === 'HOOK' || pose === 'UPPERCUT') {
-        const sockX = 3;
-        const sockY = -24; // EXACT ANATOMICAL SHOULDER JOINT!
+        const sockX = 4;
+        const sockY = -24; // ANATOMICAL SHOULDER SOCKET ORIGIN!
 
         if (pose === 'JAB') {
           const extX = extProgress * 12.0;
-          ctx.fillStyle = isHitFlash ? getPalColor(7) : skinColor;
-          ctx.fillRect(sockX, sockY - 1, extX, 3);
-          ctx.fillStyle = isHitFlash ? getPalColor(7) : gloveColor;
-          ctx.fillRect(sockX + extX, sockY - 3, 6, 6);
-          ctx.fillStyle = getPalColor(7);
-          ctx.fillRect(sockX + extX + 2, sockY - 2, 2, 2);
+          ctx.fillStyle = isHitFlash ? getPalColor(7) : skinBase;
+          ctx.fillRect(sockX, sockY - 2, extX, 5);
+          ctx.fillStyle = isHitFlash ? getPalColor(7) : skinLight;
+          ctx.fillRect(sockX, sockY - 2, extX, 2);
+
+          ctx.fillStyle = isHitFlash ? getPalColor(7) : gloveBase;
+          ctx.fillRect(sockX + extX, sockY - 4, 7, 8);
+          ctx.fillStyle = gloveShine;
+          ctx.fillRect(sockX + extX + 2, sockY - 3, 2, 2);
 
         } else if (pose === 'STRAIGHT') {
-          const extX = extProgress * 14.0;
-          ctx.fillStyle = isHitFlash ? getPalColor(7) : skinColor;
-          ctx.fillRect(sockX - 4, sockY - 1, extX + 4, 3);
-          ctx.fillStyle = isHitFlash ? getPalColor(7) : gloveColor;
-          ctx.fillRect(sockX + extX, sockY - 3, 6, 6);
-          ctx.fillStyle = getPalColor(10);
-          ctx.fillRect(sockX + extX - 1, sockY - 3, 1, 6);
-          ctx.fillStyle = getPalColor(7);
-          ctx.fillRect(sockX + extX + 2, sockY - 2, 2, 2);
+          const extX = extProgress * 15.0;
+          ctx.fillStyle = isHitFlash ? getPalColor(7) : skinBase;
+          ctx.fillRect(sockX - 4, sockY - 2, extX + 4, 5);
+          ctx.fillStyle = isHitFlash ? getPalColor(7) : skinLight;
+          ctx.fillRect(sockX - 4, sockY - 2, extX + 4, 2);
+
+          ctx.fillStyle = isHitFlash ? getPalColor(7) : gloveBase;
+          ctx.fillRect(sockX + extX, sockY - 4, 8, 8);
+          ctx.fillStyle = '#FFF1E8'; // Wristband
+          ctx.fillRect(sockX + extX - 2, sockY - 4, 2, 8);
+          ctx.fillStyle = gloveShine;
+          ctx.fillRect(sockX + extX + 3, sockY - 3, 2, 2);
 
         } else if (pose === 'HOOK') {
           const arc = extProgress * Math.PI;
           const armX = Math.sin(arc) * 12.0;
           const armY = -Math.cos(arc) * 3.0;
 
-          ctx.fillStyle = isHitFlash ? getPalColor(7) : skinColor;
-          ctx.fillRect(sockX, sockY - 1, Math.max(2, armX), 3);
-          ctx.fillRect(sockX + armX, sockY - 1 + armY, 4, 4);
+          ctx.fillStyle = isHitFlash ? getPalColor(7) : skinBase;
+          ctx.fillRect(sockX, sockY - 2, Math.max(3, armX), 5);
+          ctx.fillRect(sockX + armX, sockY - 2 + armY, 5, 5);
 
-          ctx.fillStyle = isHitFlash ? getPalColor(7) : gloveColor;
-          ctx.fillRect(sockX + armX + 2, sockY - 3 + armY, 6, 6);
-          ctx.fillStyle = getPalColor(7);
-          ctx.fillRect(sockX + armX + 4, sockY - 2 + armY, 2, 2);
+          ctx.fillStyle = isHitFlash ? getPalColor(7) : gloveBase;
+          ctx.fillRect(sockX + armX + 2, sockY - 4 + armY, 8, 8);
+          ctx.fillStyle = gloveShine;
+          ctx.fillRect(sockX + armX + 4, sockY - 3 + armY, 2, 2);
 
         } else if (pose === 'UPPERCUT') {
-          const liftY = extProgress * 14.0;
-          ctx.fillStyle = isHitFlash ? getPalColor(7) : skinColor;
-          ctx.fillRect(sockX, sockY - liftY, 3, Math.max(4, liftY + 6));
+          const liftY = extProgress * 15.0;
+          ctx.fillStyle = isHitFlash ? getPalColor(7) : skinBase;
+          ctx.fillRect(sockX - 1, sockY - liftY, 5, Math.max(5, liftY + 6));
+          ctx.fillStyle = isHitFlash ? getPalColor(7) : skinLight;
+          ctx.fillRect(sockX - 1, sockY - liftY, 2, Math.max(5, liftY + 6));
 
-          ctx.fillStyle = isHitFlash ? getPalColor(7) : gloveColor;
-          ctx.fillRect(sockX - 1, sockY - 6 - liftY, 6, 6);
-          ctx.fillStyle = getPalColor(7);
-          ctx.fillRect(sockX + 1, sockY - 5 - liftY, 2, 2);
+          ctx.fillStyle = isHitFlash ? getPalColor(7) : gloveBase;
+          ctx.fillRect(sockX - 2, sockY - 7 - liftY, 8, 8);
+          ctx.fillStyle = gloveShine;
+          ctx.fillRect(sockX + 1, sockY - 6 - liftY, 2, 2);
         }
       } else {
-        ctx.fillStyle = isHitFlash ? getPalColor(7) : skinColor;
-        ctx.fillRect(4, -24, 4, 10);
-        ctx.fillStyle = isHitFlash ? getPalColor(7) : gloveColor;
-        ctx.fillRect(4, -26, 5, 5);
+        // LEAD STANCE GLOVE AT SHOULDER
+        ctx.fillStyle = isHitFlash ? getPalColor(7) : skinBase;
+        ctx.fillRect(4, -24, 5, 12);
+        ctx.fillStyle = isHitFlash ? getPalColor(7) : gloveBase;
+        ctx.fillRect(4, -28, 7, 7);
+        ctx.fillStyle = gloveShine;
+        ctx.fillRect(5, -27, 2, 2);
       }
     }
 
@@ -1633,23 +1678,21 @@
 
       if (anim === 'JAB' || anim === 'STRAIGHT' || anim === 'HOOK' || anim === 'UPPERCUT') {
         ctx.rotate(punchTilt);
-        drawPurePicoBoxerSprite(ctx, isP1, anim, extProgress, isHitFlash);
+        drawCapcomDetailedBoxerSprite(ctx, isP1, anim, extProgress, isHitFlash);
       } else if (anim === 'FLINCH') {
         ctx.rotate(flinchTilt);
-        drawPurePicoBoxerSprite(ctx, isP1, 'FLINCH', 0, isHitFlash);
+        drawCapcomDetailedBoxerSprite(ctx, isP1, 'FLINCH', 0, isHitFlash);
       } else {
-        drawPurePicoBoxerSprite(ctx, isP1, 'IDLE', 0, isHitFlash);
+        drawCapcomDetailedBoxerSprite(ctx, isP1, 'IDLE', 0, isHitFlash);
       }
 
       ctx.restore();
     }
 
-    // DRAW PICO-8 DITHERED BACKGROUND CROWD PATTERN
     function drawPicoDitheredCrowd() {
       ctx.fillStyle = getPalColor(1);
       ctx.fillRect(41, 15, 46, 30);
 
-      // 4-step PICO-8 Checkerboard Dithering Pattern
       ctx.fillStyle = getPalColor(2);
       for (let y = 15; y < 45; y += 2) {
         for (let x = 41; x < 87; x += 2) {
@@ -1706,7 +1749,6 @@
       ctx.fillText('DEEN', 98, 13);
       ctx.fillText(roundTimer < 10 ? '0' + roundTimer : roundTimer, 58, 10);
 
-      // PICO-8 DITHERED CROWD BACKGROUND
       drawPicoDitheredCrowd();
 
       ctx.fillStyle = getPalColor(0);
@@ -1750,7 +1792,6 @@
       ctx.fillText('SP', 46, 123);
       ctx.fillText('SP', 74, 123);
 
-      // PICO-8 HIGH SCORE & MAX COMBO HUD DISPLAY
       ctx.fillStyle = getPalColor(10);
       ctx.font = '7px monospace';
       ctx.fillText('HI:' + highScore, 4, 22);
