@@ -214,7 +214,7 @@
   <div class="arcade-cabinet">
     <div class="cabinet-header">
       <div class="brand-title">CRASH OUT: RING RUSH</div>
-      <div class="badge-pico8">JUICY PICO-8 v0.1.0</div>
+      <div class="badge-pico8">HIP HOP 808 v0.1.0</div>
     </div>
 
     <div class="viewport-container">
@@ -240,7 +240,7 @@
     <div class="options-bar">
       <button class="btn-opt" id="btnMode">MODE: VS AI</button>
       <button class="btn-opt" id="btnReset">RESET MATCH</button>
-      <button class="btn-opt" id="btnAudio">AUDIO: ON</button>
+      <button class="btn-opt" id="btnAudio">AUDIO: 808 ON</button>
     </div>
 
     <div class="instructions">
@@ -250,7 +250,7 @@
 
   <script>
     // =========================================================================
-    // HIGHLY POLISHED & JUICY PICO-8 PUZZLE BOXING ENGINE
+    // 808 HIP HOP SYNTHESIZER & POLISHED PUZZLE FIGHTER ENGINE
     // =========================================================================
 
     const PICO_PALETTE = [
@@ -259,7 +259,7 @@
       '#7E2553', // 2: Dark Purple
       '#008751', // 3: Dark Green
       '#AB5236', // 4: Brown (Skin)
-      '#5F574F', // 5: Dark Gray
+      '#5F574F', // 5: Dark Gray (Counter Shield)
       '#C2C3C7', // 6: Light Gray
       '#FFF1E8', // 7: White
       '#FF004D', // 8: Red
@@ -276,7 +276,7 @@
     const ctx = canvas.getContext('2d');
     ctx.imageSmoothingEnabled = false;
 
-    // --- WebAudio Synthesizer for Chiptune SFX ---
+    // --- WebAudio 808 & Hip-Hop Sound Synthesizer ---
     let audioEnabled = true;
     let audioCtx = null;
 
@@ -286,84 +286,128 @@
       }
     }
 
-    function playSfx(type) {
+    // Authentic 808 Kick, 808 Snare, Hi-Hat, vinyl scratch, and 808 Sub-Boom!
+    function play808Sfx(type) {
       if (!audioEnabled || !audioCtx) return;
       try {
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
         const t = audioCtx.currentTime;
 
         if (type === 'step') {
-          osc.type = 'square';
-          osc.frequency.setValueAtTime(320, t);
-          osc.frequency.exponentialRampToValueAtTime(480, t + 0.04);
-          gain.gain.setValueAtTime(0.12, t);
-          gain.gain.linearRampToValueAtTime(0.01, t + 0.04);
-          osc.start(t);
-          osc.stop(t + 0.04);
-        } else if (type === 'rotate') {
+          // 808 Closed Hi-Hat / Rimshot
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
           osc.type = 'triangle';
-          osc.frequency.setValueAtTime(420, t);
-          osc.frequency.exponentialRampToValueAtTime(700, t + 0.05);
+          osc.frequency.setValueAtTime(800, t);
+          osc.frequency.exponentialRampToValueAtTime(200, t + 0.03);
+          gain.gain.setValueAtTime(0.12, t);
+          gain.gain.linearRampToValueAtTime(0.01, t + 0.03);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(t);
+          osc.stop(t + 0.03);
+        } else if (type === 'rotate') {
+          // Hip-Hop Vinyl Scratch Pitch Sweep
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(300, t);
+          osc.frequency.exponentialRampToValueAtTime(900, t + 0.05);
           gain.gain.setValueAtTime(0.15, t);
           gain.gain.linearRampToValueAtTime(0.01, t + 0.05);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
           osc.start(t);
           osc.stop(t + 0.05);
         } else if (type === 'land') {
-          // Exaggerated Squish Thud
-          osc.type = 'sawtooth';
-          osc.frequency.setValueAtTime(220, t);
-          osc.frequency.exponentialRampToValueAtTime(50, t + 0.08);
-          gain.gain.setValueAtTime(0.25, t);
-          gain.gain.linearRampToValueAtTime(0.01, t + 0.08);
-          osc.start(t);
-          osc.stop(t + 0.08);
-        } else if (type === 'fuse') {
-          // Gold Power Gem Fusion Chime
-          osc.type = 'triangle';
-          osc.frequency.setValueAtTime(523, t); // C5
-          osc.frequency.setValueAtTime(659, t + 0.06); // E5
-          osc.frequency.setValueAtTime(783, t + 0.12); // G5
-          gain.gain.setValueAtTime(0.2, t);
-          gain.gain.linearRampToValueAtTime(0.01, t + 0.2);
-          osc.start(t);
-          osc.stop(t + 0.2);
-        } else if (type === 'detonate') {
-          // Explosive Pop Blast
-          osc.type = 'sawtooth';
-          osc.frequency.setValueAtTime(350, t);
-          osc.frequency.exponentialRampToValueAtTime(30, t + 0.3);
+          // 808 Sub Kick Thud
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(140, t);
+          osc.frequency.exponentialRampToValueAtTime(38, t + 0.09);
           gain.gain.setValueAtTime(0.35, t);
-          gain.gain.linearRampToValueAtTime(0.01, t + 0.3);
-          osc.start(t);
-          osc.stop(t + 0.3);
-        } else if (type === 'jab') {
-          osc.type = 'square';
-          osc.frequency.setValueAtTime(550, t);
-          osc.frequency.exponentialRampToValueAtTime(120, t + 0.09);
-          gain.gain.setValueAtTime(0.25, t);
           gain.gain.linearRampToValueAtTime(0.01, t + 0.09);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
           osc.start(t);
           osc.stop(t + 0.09);
-        } else if (type === 'uppercut') {
-          osc.type = 'sawtooth';
-          osc.frequency.setValueAtTime(140, t);
-          osc.frequency.exponentialRampToValueAtTime(850, t + 0.22);
-          gain.gain.setValueAtTime(0.35, t);
-          gain.gain.linearRampToValueAtTime(0.01, t + 0.22);
+        } else if (type === 'fuse') {
+          // Heavy 808 Bass Slide Chime
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(110, t);
+          osc.frequency.exponentialRampToValueAtTime(440, t + 0.18);
+          gain.gain.setValueAtTime(0.3, t);
+          gain.gain.linearRampToValueAtTime(0.01, t + 0.18);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
           osc.start(t);
-          osc.stop(t + 0.22);
-        } else if (type === 'ko') {
+          osc.stop(t + 0.18);
+        } else if (type === 'detonate') {
+          // Deep 808 Sub-Boom Blast (60Hz -> 20Hz Sub Drop)
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(120, t);
+          osc.frequency.exponentialRampToValueAtTime(25, t + 0.35);
+          gain.gain.setValueAtTime(0.5, t);
+          gain.gain.linearRampToValueAtTime(0.01, t + 0.35);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(t);
+          osc.stop(t + 0.35);
+        } else if (type === 'garbage') {
+          // Garbage Counter Gem Drop Crash (808 Snare Roll)
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
           osc.type = 'square';
-          osc.frequency.setValueAtTime(880, t);
-          osc.frequency.setValueAtTime(659, t + 0.12);
-          osc.frequency.setValueAtTime(1046, t + 0.24);
-          gain.gain.setValueAtTime(0.4, t);
-          gain.gain.linearRampToValueAtTime(0.01, t + 0.5);
+          osc.frequency.setValueAtTime(250, t);
+          osc.frequency.exponentialRampToValueAtTime(80, t + 0.15);
+          gain.gain.setValueAtTime(0.3, t);
+          gain.gain.linearRampToValueAtTime(0.01, t + 0.15);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
           osc.start(t);
-          osc.stop(t + 0.5);
+          osc.stop(t + 0.15);
+        } else if (type === 'jab') {
+          // Punch Impact Hit
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'square';
+          osc.frequency.setValueAtTime(400, t);
+          osc.frequency.exponentialRampToValueAtTime(90, t + 0.08);
+          gain.gain.setValueAtTime(0.3, t);
+          gain.gain.linearRampToValueAtTime(0.01, t + 0.08);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(t);
+          osc.stop(t + 0.08);
+        } else if (type === 'uppercut') {
+          // Explosive Knockout Punch Hit
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(180, t);
+          osc.frequency.exponentialRampToValueAtTime(750, t + 0.25);
+          gain.gain.setValueAtTime(0.4, t);
+          gain.gain.linearRampToValueAtTime(0.01, t + 0.25);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(t);
+          osc.stop(t + 0.25);
+        } else if (type === 'ko') {
+          // Heavy Boxing Championship Bell Ring
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(987, t); // B5
+          gain.gain.setValueAtTime(0.5, t);
+          gain.gain.exponentialRampToValueAtTime(0.01, t + 0.8);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(t);
+          osc.stop(t + 0.8);
         }
       } catch (e) {}
     }
@@ -380,9 +424,8 @@
     let flashFrames = 0;
     let roundTimer = 99;
     let timerFrameCounter = 0;
-    let gameState = 'PLAYING'; // PLAYING, KO
+    let gameState = 'PLAYING';
 
-    // Particle Class for Dust, Explosion Shards, and Connecting Glow
     class Particle {
       constructor(x, y, vx, vy, color, life, size = 1) {
         this.x = x;
@@ -391,17 +434,14 @@
         this.vy = vy;
         this.color = color;
         this.life = life;
-        this.maxLife = life;
         this.size = size;
       }
-
       update() {
         this.x += this.vx;
         this.y += this.vy;
-        this.vy += 0.15; // Gravity
+        this.vy += 0.12;
         this.life--;
       }
-
       draw() {
         if (this.life <= 0) return;
         ctx.fillStyle = PICO_PALETTE[this.color];
@@ -409,26 +449,21 @@
       }
     }
 
-    // Floating Text Class (Popups like "BOOM!", "2-CHAIN!", "POWER!")
     class FloatingText {
       constructor(text, x, y, color) {
         this.text = text;
         this.x = x;
         this.y = y;
         this.color = color;
-        this.life = 35;
-        this.scale = 1.4;
+        this.life = 40;
       }
-
       update() {
-        this.y -= 0.5;
+        this.y -= 0.4;
         this.life--;
-        if (this.scale > 1.0) this.scale -= 0.04;
       }
-
       draw() {
         if (this.life <= 0) return;
-        ctx.fillStyle = PICO_PALETTE[0]; // Shadow
+        ctx.fillStyle = PICO_PALETTE[0];
         ctx.font = 'bold 9px monospace';
         ctx.fillText(this.text, Math.floor(this.x) + 1, Math.floor(this.y) + 1);
         ctx.fillStyle = PICO_PALETTE[this.color];
@@ -439,7 +474,7 @@
     let globalParticles = [];
     let globalFloatingTexts = [];
 
-    // --- BOARD CLASS WITH JUICY SQUISH, BOUNCE & FUSION ---
+    // --- PUZZLE FIGHTER BOARD ENGINE ---
     class Board {
       constructor(id, offsetX, isAi = false) {
         this.id = id;
@@ -447,21 +482,30 @@
         this.offsetY = 16;
         this.isAi = isAi;
 
+        // Grid values:
+        // 0: Empty
+        // 1..4: Normal Gems (Red, Blue, Green, Yellow)
+        // 5..8: Crash Orbs (Red, Blue, Green, Yellow)
+        // 9: Rainbow Diamond Gem
+        // 10: Counter Gem (Garbage Shield)
         this.grid = Array(ROWS).fill(null).map(() => Array(COLS).fill(0));
         this.powerGems = Array(ROWS).fill(null).map(() => Array(COLS).fill(false));
-        this.squish = Array(ROWS).fill(null).map(() => Array(COLS).fill(0)); // 0..1 squish factor
-        this.pulseAngle = 0;
+        this.counterTimers = Array(ROWS).fill(null).map(() => Array(COLS).fill(3)); // Countdown 3..0
+        this.squish = Array(ROWS).fill(null).map(() => Array(COLS).fill(0));
 
         this.hp = 100;
         this.superMeter = 0;
         this.score = 0;
         this.comboCount = 0;
+        this.dropCount = 0;
+        this.pulseAngle = 0;
 
         this.pair = null;
         this.spawnPair();
 
+        // 25% SLOWER DROP SPEED (36 frames vs 28 frames)
         this.dropTimer = 0;
-        this.dropInterval = 28; // frames
+        this.dropInterval = 36;
         this.lockDelay = 0;
 
         this.anim = 'IDLE';
@@ -469,23 +513,25 @@
       }
 
       spawnPair() {
-        const g1 = Math.floor(Math.random() * 4) + 1; // 1..4
-        const isCrash = Math.random() < 0.26; // 26% crash orb
+        this.dropCount++;
+
+        // 10% chance for Rainbow Diamond Gem
+        if (this.dropCount % 10 === 0) {
+          this.pair = { x: 2, y: 0, rot: 0, g1: 9, g2: Math.floor(Math.random() * 4) + 1, vy: 0 };
+          return;
+        }
+
+        const g1 = Math.floor(Math.random() * 4) + 1;
+        // HIGH FREQUENCY CRASH ORBS (35% drop rate!) so players can reliably detonate & send garbage
+        const isCrash = Math.random() < 0.35;
         const g2 = isCrash ? (Math.floor(Math.random() * 4) + 5) : (Math.floor(Math.random() * 4) + 1);
 
-        this.pair = {
-          x: 2,
-          y: 0,
-          rot: 0,
-          g1: g1,
-          g2: g2,
-          vy: 0 // speed line velocity
-        };
+        this.pair = { x: 2, y: 0, rot: 0, g1: g1, g2: g2, vy: 0 };
 
         if (this.grid[0][2] !== 0 || this.grid[1][2] !== 0) {
           this.hp = 0;
           gameState = 'KO';
-          playSfx('ko');
+          play808Sfx('ko');
         }
       }
 
@@ -522,7 +568,7 @@
         if (!this.pair) return;
         if (this.isValid(this.pair.x + dir, this.pair.y, this.pair.rot)) {
           this.pair.x += dir;
-          playSfx('step');
+          play808Sfx('step');
         }
       }
 
@@ -532,7 +578,6 @@
         let newX = this.pair.x;
         let newY = this.pair.y;
 
-        // Wall kick
         if (!this.isValid(newX, newY, newRot)) {
           if (this.isValid(newX - 1, newY, newRot)) newX -= 1;
           else if (this.isValid(newX + 1, newY, newRot)) newX += 1;
@@ -543,7 +588,7 @@
           this.pair.x = newX;
           this.pair.y = newY;
           this.pair.rot = newRot;
-          playSfx('rotate');
+          play808Sfx('rotate');
         }
       }
 
@@ -574,29 +619,46 @@
 
         if (this.pair.y >= 0) {
           this.grid[this.pair.y][this.pair.x] = this.pair.g1;
-          this.squish[this.pair.y][this.pair.x] = 1.0; // Trigger Impact Squish
+          this.squish[this.pair.y][this.pair.x] = 1.0;
           this.spawnImpactParticles(this.pair.x, this.pair.y);
         }
         if (subY >= 0) {
           this.grid[subY][subX] = this.pair.g2;
-          this.squish[subY][subX] = 1.0; // Trigger Impact Squish
+          this.squish[subY][subX] = 1.0;
           this.spawnImpactParticles(subX, subY);
         }
 
-        playSfx('land');
+        play808Sfx('land');
         cameraShake = Math.max(cameraShake, 2);
         this.pair = null;
 
-        // Process physics: Gravity -> Fusion -> Detonation
+        // Tick down Counter Gems (Garbage)
+        this.updateCounterGems();
+
+        // Process Physics: Gravity -> Rainbow Diamond -> Fusion -> Detonation
         this.applyGravity();
+        this.processRainbowDiamond();
         this.detectPowerGems();
         this.processDetonations();
+      }
+
+      updateCounterGems() {
+        for (let r = 0; r < ROWS; r++) {
+          for (let c = 0; c < COLS; c++) {
+            if (this.grid[r][c] === 10) {
+              this.counterTimers[r][c]--;
+              if (this.counterTimers[r][c] <= 0) {
+                // Convert Counter Gem to Normal Colored Gem!
+                this.grid[r][c] = Math.floor(Math.random() * 4) + 1;
+              }
+            }
+          }
+        }
       }
 
       spawnImpactParticles(col, row) {
         const px = this.offsetX + col * CELL_W + CELL_W / 2;
         const py = this.offsetY + row * CELL_H + CELL_H;
-        // Dust Cloud Shards
         for (let i = 0; i < 4; i++) {
           const vx = (Math.random() - 0.5) * 1.5;
           const vy = -Math.random() * 0.8;
@@ -612,22 +674,58 @@
               while (r < ROWS - 1 && this.grid[r + 1][col] === 0) {
                 this.grid[r + 1][col] = this.grid[r][col];
                 this.powerGems[r + 1][col] = this.powerGems[r][col];
+                this.counterTimers[r + 1][col] = this.counterTimers[r][col];
                 this.grid[r][col] = 0;
                 this.powerGems[r][col] = false;
                 r++;
               }
-              this.squish[r][col] = 0.8; // Falling Squish
+              this.squish[r][col] = 0.8;
+            }
+          }
+        }
+      }
+
+      processRainbowDiamond() {
+        for (let r = 0; r < ROWS; r++) {
+          for (let c = 0; c < COLS; c++) {
+            if (this.grid[r][c] === 9) { // Diamond Gem
+              // Check gem below or adjacent
+              const adj = [[r+1,c], [r-1,c], [r,c+1], [r,c-1]];
+              let targetColor = 0;
+              adj.forEach(([ar, ac]) => {
+                if (ar >= 0 && ar < ROWS && ac >= 0 && ac < COLS) {
+                  const g = this.grid[ar][ac];
+                  if (g >= 1 && g <= 4) targetColor = g;
+                  else if (g >= 5 && g <= 8) targetColor = g - 4;
+                }
+              });
+
+              if (targetColor > 0 || r === ROWS - 1) {
+                // Clear ALL gems of target color across entire board!
+                this.grid[r][c] = 0;
+                if (targetColor > 0) {
+                  for (let tr = 0; tr < ROWS; tr++) {
+                    for (let tc = 0; tc < COLS; tc++) {
+                      if (this.grid[tr][tc] === targetColor || this.grid[tr][tc] === targetColor + 4) {
+                        this.grid[tr][tc] = 0;
+                      }
+                    }
+                  }
+                }
+                play808Sfx('detonate');
+                globalFloatingTexts.push(new FloatingText('DIAMOND BLAST!', this.offsetX + 2, this.offsetY + 30, 10));
+              }
             }
           }
         }
       }
 
       detectPowerGems() {
-        let newFusion = false;
         for (let r = 0; r < ROWS; r++) {
           for (let c = 0; c < COLS; c++) this.powerGems[r][c] = false;
         }
 
+        let newFusion = false;
         for (let r = 0; r < ROWS - 1; r++) {
           for (let c = 0; c < COLS - 1; c++) {
             const g = this.grid[r][c];
@@ -644,7 +742,7 @@
         }
 
         if (newFusion) {
-          playSfx('fuse');
+          play808Sfx('fuse');
           globalFloatingTexts.push(new FloatingText('POWER FUSION!', this.offsetX + 2, this.offsetY + 40, 10));
         }
       }
@@ -653,11 +751,12 @@
         let matched = false;
         let toClear = Array(ROWS).fill(null).map(() => Array(COLS).fill(false));
 
+        // Scan Crash Orbs (5..8)
         for (let r = 0; r < ROWS; r++) {
           for (let c = 0; c < COLS; c++) {
             const orb = this.grid[r][c];
             if (orb >= 5 && orb <= 8) {
-              const targetColor = orb - 4;
+              const targetColor = orb - 4; // 1..4
               const adj = [[r-1,c], [r+1,c], [r,c-1], [r,c+1]];
               let triggered = false;
 
@@ -686,7 +785,15 @@
                 clearCount++;
                 if (this.powerGems[r][c]) powerGemCleared = true;
 
-                // Spawn Explosion Shard Particles
+                // Also break adjacent Counter Gems (Garbage Shields)!
+                const adj = [[r-1,c], [r+1,c], [r,c-1], [r,c+1]];
+                adj.forEach(([ar, ac]) => {
+                  if (ar >= 0 && ar < ROWS && ac >= 0 && ac < COLS) {
+                    if (this.grid[ar][ac] === 10) toClear[ar][ac] = true;
+                  }
+                });
+
+                // Spawn Particles
                 const px = this.offsetX + c * CELL_W + CELL_W / 2;
                 const py = this.offsetY + r * CELL_H + CELL_H / 2;
                 const gColor = GEM_COLORS[(this.grid[r][c] - 1) % 4] || 8;
@@ -710,13 +817,16 @@
           this.superMeter = Math.min(100, this.superMeter + clearCount * 5);
           this.score += Math.floor(dmg * 10);
 
-          flashFrames = 3; // Screen Flash
+          // PUZZLE FIGHTER GARBAGE ATTACK: Send Counter Gems to Opponent!
+          const garbageToSend = Math.max(2, Math.floor((clearCount - 2) * 1.5 + (this.comboCount * 3)));
+          opponent.receiveGarbage(garbageToSend);
 
-          // Exaggerated Text Popups
+          flashFrames = 3;
+
           if (this.comboCount >= 2) {
             globalFloatingTexts.push(new FloatingText(`${this.comboCount}-CHAIN!`, this.offsetX + 4, this.offsetY + 30, 9));
           } else {
-            globalFloatingTexts.push(new FloatingText(`BOOM! +${clearCount}`, this.offsetX + 4, this.offsetY + 30, 10));
+            globalFloatingTexts.push(new FloatingText(`CRASH! +${clearCount}`, this.offsetX + 4, this.offsetY + 30, 10));
           }
 
           // Fighter Punch Reaction
@@ -724,29 +834,45 @@
             this.anim = 'UPPERCUT';
             opponent.anim = 'FLINCH';
             cameraShake = 9;
-            playSfx('uppercut');
+            play808Sfx('uppercut');
           } else {
             this.anim = 'JAB';
             opponent.anim = 'FLINCH';
             cameraShake = 4;
-            playSfx('jab');
+            play808Sfx('jab');
           }
-          this.animTimer = 22;
-          opponent.animTimer = 22;
+          this.animTimer = 24;
+          opponent.animTimer = 24;
 
-          playSfx('detonate');
+          play808Sfx('detonate');
 
-          // Cascade Loop
+          // Cascading Chain Reaction
           setTimeout(() => {
             this.applyGravity();
             this.detectPowerGems();
             this.processDetonations();
-          }, 240);
+          }, 260);
 
         } else {
           this.comboCount = 0;
           this.spawnPair();
         }
+      }
+
+      receiveGarbage(count) {
+        // Drop Counter Gems (10) into columns
+        let dropped = 0;
+        for (let r = 0; r < 4; r++) {
+          for (let c = 0; c < COLS; c++) {
+            if (dropped < count && this.grid[r][c] === 0) {
+              this.grid[r][c] = 10; // Counter Gem Shield
+              this.counterTimers[r][c] = 3; // 3 turns to convert
+              dropped++;
+            }
+          }
+        }
+        play808Sfx('garbage');
+        globalFloatingTexts.push(new FloatingText(`GARBAGE +${count}!`, this.offsetX + 2, this.offsetY + 20, 8));
       }
 
       floodFillClear(r, c, targetColor, toClear) {
@@ -767,7 +893,6 @@
 
         this.pulseAngle += 0.1;
 
-        // Decaying Squish Physics
         for (let r = 0; r < ROWS; r++) {
           for (let c = 0; c < COLS; c++) {
             if (this.squish[r][c] > 0) {
@@ -777,13 +902,11 @@
           }
         }
 
-        // Fighter anim timer
         if (this.animTimer > 0) {
           this.animTimer--;
           if (this.animTimer === 0) this.anim = 'IDLE';
         }
 
-        // AI Controls
         if (this.isAi && this.pair) {
           if (Math.random() < 0.12) {
             const targetX = Math.floor(Math.random() * COLS);
@@ -793,7 +916,6 @@
           if (Math.random() < 0.06) this.rotate(1);
         }
 
-        // Gravity drop for pair
         if (this.pair) {
           this.dropTimer++;
           if (this.dropTimer >= this.dropInterval) {
@@ -812,55 +934,57 @@
       }
 
       draw() {
-        // Outer Board Frame
         ctx.strokeStyle = PICO_PALETTE[5];
         ctx.lineWidth = 1;
         ctx.strokeRect(this.offsetX - 1, this.offsetY - 1, COLS * CELL_W + 2, ROWS * CELL_H + 2);
 
-        // Grid Background
         ctx.fillStyle = PICO_PALETTE[0];
         ctx.fillRect(this.offsetX, this.offsetY, COLS * CELL_W, ROWS * CELL_H);
 
-        // Draw Locked Grid Gems with Squish Physics
         for (let r = 0; r < ROWS; r++) {
           for (let c = 0; c < COLS; c++) {
             const g = this.grid[r][c];
             if (g !== 0) {
-              this.drawGem(this.offsetX + c * CELL_W, this.offsetY + r * CELL_H, g, this.powerGems[r][c], this.squish[r][c]);
+              this.drawGem(this.offsetX + c * CELL_W, this.offsetY + r * CELL_H, g, this.powerGems[r][c], this.squish[r][c], this.counterTimers[r][c]);
             }
           }
         }
 
-        // Draw Active Falling Pair with Speed Trails
         if (this.pair) {
           const mainX = this.offsetX + this.pair.x * CELL_W;
           const mainY = this.offsetY + this.pair.y * CELL_H;
           const subX = this.offsetX + this.getSubX() * CELL_W;
           const subY = this.offsetY + this.getSubY() * CELL_H;
 
-          // Speed Trail Lines
           if (this.pair.vy > 0) {
             ctx.fillStyle = PICO_PALETTE[6];
             ctx.fillRect(mainX + 2, mainY - 3, 2, 3);
             ctx.fillRect(subX + 2, subY - 3, 2, 3);
           }
 
-          if (this.pair.y >= 0) this.drawGem(mainX, mainY, this.pair.g1, false, 0);
-          if (this.getSubY() >= 0) this.drawGem(subX, subY, this.pair.g2, false, 0);
+          if (this.pair.y >= 0) this.drawGem(mainX, mainY, this.pair.g1, false, 0, 3);
+          if (this.getSubY() >= 0) this.drawGem(subX, subY, this.pair.g2, false, 0, 3);
         }
       }
 
-      drawGem(x, y, type, isPower, squishFactor) {
+      drawGem(x, y, type, isPower, squishFactor, timerVal) {
         let colorIdx = 8;
         let isCrash = false;
+        let isDiamond = false;
+        let isCounter = false;
 
         if (type >= 1 && type <= 4) colorIdx = GEM_COLORS[type - 1];
         else if (type >= 5 && type <= 8) {
           colorIdx = GEM_COLORS[type - 5];
           isCrash = true;
-        } else if (type === 9) colorIdx = 5;
+        } else if (type === 9) {
+          isDiamond = true;
+          colorIdx = 7;
+        } else if (type === 10) {
+          isCounter = true;
+          colorIdx = 5; // Gray Shield
+        }
 
-        // Squish Deformation (Scale X up, Scale Y down on impact)
         const squishY = Math.floor(squishFactor * 2);
         const squishX = Math.floor(squishFactor * 1);
         const drawX = x - squishX / 2;
@@ -868,38 +992,48 @@
         const drawW = CELL_W + squishX;
         const drawH = CELL_H - squishY;
 
-        // Fill & Outer Outline
         ctx.fillStyle = PICO_PALETTE[colorIdx];
         ctx.fillRect(drawX + 1, drawY + 1, drawW - 2, drawH - 2);
 
         ctx.strokeStyle = PICO_PALETTE[0];
         ctx.strokeRect(drawX, drawY, drawW, drawH);
 
-        // Top-Left Beveled Inner Highlight
+        // Top-Left Beveled Highlight
         ctx.fillStyle = PICO_PALETTE[7];
         ctx.fillRect(drawX + 1, drawY + 1, drawW - 3, 1);
         ctx.fillRect(drawX + 1, drawY + 1, 1, drawH - 3);
 
-        // Gold Power Gem Border
         if (isPower) {
           ctx.strokeStyle = PICO_PALETTE[10];
           ctx.strokeRect(drawX + 0.5, drawY + 0.5, drawW - 1, drawH - 1);
         }
 
-        // Pulsing Crash Orb Icon (+)
+        // Crash Orb Center Cross (+)
         if (isCrash) {
           const pulse = Math.floor(Math.sin(this.pulseAngle * 2) * 1);
-          ctx.fillStyle = PICO_PALETTE[7]; // White center
+          ctx.fillStyle = PICO_PALETTE[7];
           ctx.fillRect(drawX + 2 - pulse, drawY + 3 - pulse, 2 + pulse * 2, 2 + pulse * 2);
+        }
+
+        // Rainbow Diamond Pulse
+        if (isDiamond) {
+          const diaCol = Math.floor(this.pulseAngle * 4) % 4;
+          ctx.fillStyle = PICO_PALETTE[GEM_COLORS[diaCol]];
+          ctx.fillRect(drawX + 2, drawY + 2, 2, 4);
+        }
+
+        // Counter Gem Shield Countdown Number
+        if (isCounter) {
+          ctx.fillStyle = PICO_PALETTE[7];
+          ctx.font = '6px monospace';
+          ctx.fillText(timerVal, drawX + 1, drawY + 6);
         }
       }
     }
 
-    // Initialize Boards
     const p1 = new Board(1, 4, false);
     const p2 = new Board(2, 88, true);
 
-    // --- FIGHTER ANIMATIONS SYSTEM ---
     function drawFighter(x, y, isP1, anim) {
       const skinColor = PICO_PALETTE[4];
       const trunksColor = isP1 ? PICO_PALETTE[8] : PICO_PALETTE[12];
@@ -910,28 +1044,23 @@
       if (anim === 'FLINCH') fx += isP1 ? -3 : 3;
       if (anim === 'UPPERCUT') fy -= 4;
 
-      // Head
       ctx.fillStyle = skinColor;
       ctx.fillRect(fx + 4, fy, 8, 7);
 
-      // Hair
       ctx.fillStyle = PICO_PALETTE[0];
       ctx.fillRect(fx + 4, fy, 8, 2);
 
-      // Eyes
       ctx.fillStyle = PICO_PALETTE[7];
       ctx.fillRect(isP1 ? fx + 9 : fx + 5, fy + 3, 2, 2);
       ctx.fillStyle = PICO_PALETTE[0];
       ctx.fillRect(isP1 ? fx + 10 : fx + 5, fy + 3, 1, 2);
 
-      // Body & Trunks
       ctx.fillStyle = skinColor;
       ctx.fillRect(fx + 4, fy + 7, 8, 5);
 
       ctx.fillStyle = trunksColor;
       ctx.fillRect(fx + 4, fy + 12, 8, 4);
 
-      // Gloves & Punch Micro-Animations
       ctx.fillStyle = glovesColor;
       if (anim === 'JAB') {
         ctx.fillRect(isP1 ? fx + 13 : fx - 1, fy + 6, 5, 4);
@@ -941,14 +1070,11 @@
         ctx.fillRect(isP1 ? fx + 10 : fx + 2, fy + 7, 4, 4);
       }
 
-      // Black Outline
       ctx.strokeStyle = PICO_PALETTE[0];
       ctx.strokeRect(fx + 3, fy - 1, 10, 18);
     }
 
-    // --- MAIN RENDER LOOP ---
     function render() {
-      // Screen Flash Effect
       if (flashFrames > 0) {
         flashFrames--;
         ctx.fillStyle = PICO_PALETTE[7];
@@ -956,7 +1082,6 @@
         return;
       }
 
-      // Camera Shake
       ctx.save();
       if (cameraShake > 0) {
         const rx = (Math.random() * cameraShake - cameraShake / 2);
@@ -966,15 +1091,12 @@
         if (cameraShake < 0.5) cameraShake = 0;
       }
 
-      // 1. Arena Background
       ctx.fillStyle = PICO_PALETTE[1];
       ctx.fillRect(0, 0, 128, 128);
 
-      // 2. Top HUD Bar
       ctx.fillStyle = PICO_PALETTE[0];
       ctx.fillRect(0, 0, 128, 15);
 
-      // P1 & P2 HP Bars
       ctx.fillStyle = PICO_PALETTE[8];
       ctx.fillRect(4, 3, 42, 5);
       ctx.fillStyle = PICO_PALETTE[11];
@@ -985,18 +1107,15 @@
       ctx.fillStyle = PICO_PALETTE[11];
       ctx.fillRect(82, 3, 42 * (p2.hp / 100), 5);
 
-      // Header Text & Timer
       ctx.fillStyle = PICO_PALETTE[7];
       ctx.font = '8px monospace';
       ctx.fillText('BRONER', 4, 13);
       ctx.fillText('DEEN', 98, 13);
       ctx.fillText(roundTimer < 10 ? '0' + roundTimer : roundTimer, 58, 10);
 
-      // 3. Center Boxing Ring Arena
       ctx.fillStyle = PICO_PALETTE[0];
       ctx.fillRect(41, 15, 46, 98);
 
-      // Ring Ropes
       ctx.strokeStyle = PICO_PALETTE[6];
       ctx.beginPath();
       ctx.moveTo(41, 45); ctx.lineTo(86, 45);
@@ -1004,25 +1123,18 @@
       ctx.moveTo(41, 85); ctx.lineTo(86, 85);
       ctx.stroke();
 
-      // Ring Floor Canvas
       ctx.fillStyle = PICO_PALETTE[7];
       ctx.fillRect(41, 92, 46, 21);
 
-      // Draw Center Fighters
       drawFighter(44, 74, true, p1.anim);
       drawFighter(68, 74, false, p2.anim);
 
-      // 4. Draw Boards & Active Gems
       p1.draw();
       p2.draw();
 
-      // 5. Draw Explosion Particles
       globalParticles.forEach(p => p.draw());
-
-      // 6. Draw Floating Text Pops
       globalFloatingTexts.forEach(t => t.draw());
 
-      // 7. Bottom SUPER Meter Bar
       ctx.fillStyle = PICO_PALETTE[0];
       ctx.fillRect(0, 114, 128, 14);
 
@@ -1034,7 +1146,6 @@
       ctx.fillText('SP', 46, 123);
       ctx.fillText('SP', 74, 123);
 
-      // KO Screen Overlay
       if (gameState === 'KO') {
         ctx.fillStyle = 'rgba(0,0,0,0.75)';
         ctx.fillRect(0, 45, 128, 38);
@@ -1046,20 +1157,16 @@
       ctx.restore();
     }
 
-    // --- GAME UPDATE LOOP ---
     function update() {
       p1.update();
       p2.update();
 
-      // Update Particles
       globalParticles.forEach(p => p.update());
       globalParticles = globalParticles.filter(p => p.life > 0);
 
-      // Update Floating Texts
       globalFloatingTexts.forEach(t => t.update());
       globalFloatingTexts = globalFloatingTexts.filter(t => t.life > 0);
 
-      // Timer countdown
       if (gameState === 'PLAYING') {
         timerFrameCounter++;
         if (timerFrameCounter >= 30) {
@@ -1075,7 +1182,6 @@
       requestAnimationFrame(loop);
     }
 
-    // --- INPUT HANDLERS ---
     window.addEventListener('keydown', (e) => {
       initAudio();
       if (e.key === 'ArrowLeft') p1.move(-1);
@@ -1086,7 +1192,6 @@
       if (e.key === 'x' || e.key === 'X') p1.rotate(1);
     });
 
-    // Touch Controls
     document.getElementById('btnLeft').onclick = () => { initAudio(); p1.move(-1); };
     document.getElementById('btnRight').onclick = () => { initAudio(); p1.move(1); };
     document.getElementById('btnDown').onclick = () => { initAudio(); p1.dropSoft(); };
@@ -1094,7 +1199,6 @@
     document.getElementById('btnO').onclick = () => { initAudio(); p1.rotate(-1); };
     document.getElementById('btnX').onclick = () => { initAudio(); p1.rotate(1); };
 
-    // Option Buttons
     document.getElementById('btnMode').onclick = () => {
       vsAiMode = !vsAiMode;
       p2.isAi = vsAiMode;
@@ -1107,10 +1211,9 @@
 
     document.getElementById('btnAudio').onclick = () => {
       audioEnabled = !audioEnabled;
-      document.getElementById('btnAudio').innerText = audioEnabled ? 'AUDIO: ON' : 'AUDIO: OFF';
+      document.getElementById('btnAudio').innerText = audioEnabled ? 'AUDIO: 808 ON' : 'AUDIO: OFF';
     };
 
-    // Start Engine Loop
     requestAnimationFrame(loop);
   </script>
 </body>
