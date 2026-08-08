@@ -1403,24 +1403,35 @@
     // Idle: single full-body stance (1024x1024)
     // Punches: 2x2 grid — TL=jab, TR=straight, BL=hook, BR=uppercut (1024x1024)
     const bronerIdleRaw = new Image();
-    bronerIdleRaw.src = 'assets/broner_sprite.jpg?v=4';
+    bronerIdleRaw.src = 'assets/broner_sprite.jpg?v=5';
     let bronerIdleCanvas = null;
     bronerIdleRaw.onload = () => { bronerIdleCanvas = createTransparentCanvas(bronerIdleRaw); };
 
     const deenIdleRaw = new Image();
-    deenIdleRaw.src = 'assets/deen_sprite.jpg?v=4';
+    deenIdleRaw.src = 'assets/deen_sprite.jpg?v=5';
     let deenIdleCanvas = null;
     deenIdleRaw.onload = () => { deenIdleCanvas = createTransparentCanvas(deenIdleRaw); };
 
     const bronerPunchRaw = new Image();
-    bronerPunchRaw.src = 'assets/broner_punches.jpg?v=4';
+    bronerPunchRaw.src = 'assets/broner_punches.jpg?v=5';
     let bronerPunchCanvas = null;
     bronerPunchRaw.onload = () => { bronerPunchCanvas = createTransparentCanvas(bronerPunchRaw); };
 
     const deenPunchRaw = new Image();
-    deenPunchRaw.src = 'assets/deen_punches.jpg?v=4';
+    deenPunchRaw.src = 'assets/deen_punches.jpg?v=5';
     let deenPunchCanvas = null;
     deenPunchRaw.onload = () => { deenPunchCanvas = createTransparentCanvas(deenPunchRaw); };
+
+    // 16-bit Capcom Arcade Sprites Map for ALL 14 Roster Fighters
+    const ROSTER_IDLE_CANVASES = {};
+    const rosterIds = ['broner', 'deen', 'ryan', 'n3on', 'rayj', 'blueface', 'chrisean', 'rampage', 'adin', 'charleston', 'walid', 'abrown', 'tank', 'floyd'];
+    rosterIds.forEach(id => {
+      const img = new Image();
+      img.src = 'assets/' + id + '_sprite.jpg?v=5';
+      img.onload = () => {
+        ROSTER_IDLE_CANVASES[id] = createTransparentCanvas(img);
+      };
+    });
 
     function smoothstep(edge0, edge1, x) {
       const t = Math.max(0, Math.min(1, (x - edge0) / (edge1 - edge0)));
@@ -1573,8 +1584,10 @@
       }
 
       // === DRAW THE SPRITE ===
-      const idleCanvas = isP1 ? bronerIdleCanvas : deenIdleCanvas;
-      const punchCanvas = isP1 ? bronerPunchCanvas : deenPunchCanvas;
+      const fObj = isP1 ? ROSTER[p1SelectIdx] : ROSTER[p2SelectIdx];
+      const fId = fObj ? fObj.id : (isP1 ? 'broner' : 'deen');
+      const idleCanvas = ROSTER_IDLE_CANVASES[fId] || (isP1 ? bronerIdleCanvas : deenIdleCanvas);
+      const punchCanvas = fId === 'deen' ? deenPunchCanvas : bronerPunchCanvas;
 
       const dw = 44;
       const dh = 44 * vertSquash;
@@ -1867,11 +1880,16 @@
         ctx.fillStyle = getPalColor(1);
         ctx.fillRect(cx, cy, cellW, cellH);
 
-        // Draw Fighter Pixel Mini-Avatar
-        drawBoxerAvatar(ctx, f, cx - 1, cy - 2, false);
+        // Draw Fighter 16-bit Arcade Sprite Mini-Avatar
+        const cellCanvas = ROSTER_IDLE_CANVASES[f.id];
+        if (cellCanvas) {
+          ctx.drawImage(cellCanvas, 0, 0, cellCanvas.width, cellCanvas.height, cx, cy - 2, cellW, cellH + 2);
+        } else {
+          drawBoxerAvatar(ctx, f, cx - 1, cy - 2, false);
+        }
 
         // Name Initial Badge at bottom of cell
-        ctx.fillStyle = getPalColor(0);
+        ctx.fillStyle = 'rgba(0,0,0,0.85)';
         ctx.fillRect(cx, cy + 11, cellW, 6);
         ctx.fillStyle = getPalColor(7);
         ctx.font = 'bold 5px monospace';
@@ -1910,11 +1928,10 @@
       ctx.strokeStyle = getPalColor(selectedFighter.color);
       ctx.strokeRect(8, 58, 30, 48);
 
-      // Draw Sprite Preview
-      if (selectedFighter.id === 'broner' && bronerIdleCanvas) {
-        ctx.drawImage(bronerIdleCanvas, 0, 0, bronerIdleCanvas.width, bronerIdleCanvas.height, 10, 60, 26, 44);
-      } else if (selectedFighter.id === 'deen' && deenIdleCanvas) {
-        ctx.drawImage(deenIdleCanvas, 0, 0, deenIdleCanvas.width, deenIdleCanvas.height, 10, 60, 26, 44);
+      // Draw 16-bit Capcom Arcade Sprite Preview
+      const previewCanvas = ROSTER_IDLE_CANVASES[selectedFighter.id];
+      if (previewCanvas) {
+        ctx.drawImage(previewCanvas, 0, 0, previewCanvas.width, previewCanvas.height, 10, 60, 26, 44);
       } else {
         drawBoxerAvatar(ctx, selectedFighter, 8, 60, true);
       }
