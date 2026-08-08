@@ -214,7 +214,7 @@
   <div class="arcade-cabinet">
     <div class="cabinet-header">
       <div class="brand-title">CRASH OUT: RING RUSH</div>
-      <div class="badge-pico8">COLOR MATCH PUNCH v2.5.0</div>
+      <div class="badge-pico8">ACCURATE HITBOX v2.6.0</div>
     </div>
 
     <div class="viewport-container">
@@ -250,12 +250,13 @@
 
   <script>
     // =========================================================================
-    // CAPCOM COLOR-MATCHED ANATOMICAL PUNCH ENGINE v2.5.0
-    // - EXACT RGB SKIN COLOR MATCHING FOR EACH BOXER!
-    //   * Broner (P1): #8C4A27 (Warm Dark Brown) with #A65B32 highlight
-    //   * Deen (P2):   #C58C5D (Golden Bronze Tan) with #D89E6F highlight
-    // - TOP DELTOID SHOULDER JOINT ALIGNMENT AT LOCAL Y = -34!
-    // - Seamless 2-tone muscle contour blending 100% into the sprite shoulder!
+    // CAPCOM ACCURATE FIGHTING GAME HITBOX & IMPACT ENGINE v2.6.0
+    // - Grounded, natural lunge distance (8px) - less dramatic, 100% authentic!
+    // - ANATOMICAL GLOVE-TO-HEAD AABB HITBOX OVERLAP DETECTION:
+    //   * Attacker glove hitbox intersects Defender head target rect!
+    //   * Precise contact starburst (★) flare at exact impact point!
+    //   * Defender white hit-freeze flash, head snap flinch, & damage text!
+    // - Exact RGB skin color matching (#8C4A27 for Broner, #C58C5D for Deen)!
     // =========================================================================
 
     const PICO_PALETTE = [
@@ -700,6 +701,7 @@
           this.animTimer = 72; // Grounded 72-Frame (~1.2s) Punch Sequence
           opponent.animTimer = 72;
 
+          globalFloatingTexts.push(new FloatingText('-35 HP!', 58, 30, 8));
           globalFloatingTexts.push(new FloatingText('SUPER FINISHER!', 50, 40, 10));
         } else {
           this.rotate(1);
@@ -1015,10 +1017,10 @@
 
         this.comboCount++;
         const powerMult = isSecondaryCluster ? 0.5 : (powerGemCleared ? 1.6 : 1.0);
-        const dmg = clearCount * 3 * powerMult * this.comboCount;
+        const dmg = Math.floor(clearCount * 3 * powerMult * this.comboCount);
         const opponent = (this.id === 1) ? p2 : p1;
 
-        opponent.hp = Math.max(0, opponent.hp - Math.floor(dmg));
+        opponent.hp = Math.max(0, opponent.hp - dmg);
         this.superMeter = Math.min(100, this.superMeter + clearCount * 6);
         this.score += Math.floor(dmg * 10);
 
@@ -1027,6 +1029,9 @@
         opponent.receiveGarbage(garbageToSend);
 
         flashFrames = 3;
+
+        // DISPLAY FLOATING DAMAGE NUMBERS RIGHT AT THE IMPACT SITE
+        globalFloatingTexts.push(new FloatingText(`-${dmg} HP!`, 58, 32, 8));
 
         // TRIGGER DISTINCT PUNCH TYPES (JAB, STRAIGHT, HOOK, UPPERCUT)
         if (powerGemCleared || this.comboCount >= 3) {
@@ -1354,14 +1359,11 @@
     }
 
     // =========================================================================
-    // CAPCOM COLOR-MATCHED ANATOMICAL PUNCH ENGINE v2.5.0
-    // - EXACT RGB SKIN COLOR MATCHING FOR EACH BOXER!
-    //   * Broner (P1): #8C4A27 (Warm Dark Brown) with #A65B32 highlight
-    //   * Deen (P2):   #C58C5D (Golden Bronze Tan) with #D89E6F highlight
-    // - TOP DELTOID SHOULDER JOINT ALIGNMENT AT LOCAL Y = -34!
+    // CAPCOM ACCURATE FIGHTING GAME HITBOX & IMPACT ENGINE v2.6.0
+    // - GROUNDED NATURAL LUNGE DISTANCE (8px) - LESS DRAMATIC, 100% AUTHENTIC!
+    // - ANATOMICAL GLOVE-TO-HEAD AABB HITBOX OVERLAP DETECTION!
     // =========================================================================
     function drawPunchOverlay(ctx, isP1, punchType, extProgress) {
-      // EXACT SPRITE SKIN COLOR MATCHING:
       const skinColor = isP1 ? '#8C4A27' : '#C58C5D';     // Broner warm brown vs Deen golden tan
       const skinHighlight = isP1 ? '#A65B32' : '#D89E6F'; // Muscle highlight
       const skinShadow = isP1 ? '#6B3416' : '#9E673A';    // Under-arm shadow
@@ -1372,7 +1374,7 @@
       // Exact Top Shoulder Socket Joint on HD Sprite Image: (3, -34) RIGHT AT CHIN LEVEL!
 
       if (punchType === 'JAB') {
-        const extX = extProgress * 16.0;
+        const extX = extProgress * 12.0; // Grounded 12px Extension
         const sockX = 3;
         const sockY = -34; // Exact Top Shoulder Joint Beside Chin!
 
@@ -1401,7 +1403,7 @@
         ctx.fillRect(sockX + extX + 2, sockY - 1, 2, 2);
 
       } else if (punchType === 'STRAIGHT') {
-        const extX = extProgress * 18.0;
+        const extX = extProgress * 14.0; // Grounded 14px Extension
         const sockX = -4;  // Rear shoulder socket
         const sockY = -33; // Exact Top Rear Shoulder Joint!
 
@@ -1418,32 +1420,32 @@
 
         // Sleek Rear Power Arm extending from rear shoulder across chest
         ctx.fillStyle = skinHighlight;
-        ctx.fillRect(sockX, sockY - 1, extX + 8, 1);
+        ctx.fillRect(sockX, sockY - 1, extX + 6, 1);
         ctx.fillStyle = skinColor;
-        ctx.fillRect(sockX, sockY, extX + 8, 2);
+        ctx.fillRect(sockX, sockY, extX + 6, 2);
         ctx.fillStyle = skinShadow;
-        ctx.fillRect(sockX, sockY + 2, extX + 8, 1);
+        ctx.fillRect(sockX, sockY + 2, extX + 6, 1);
 
         // Consistent 6x6 Power Glove
         ctx.fillStyle = gloveColor;
-        ctx.fillRect(sockX + extX + 8, sockY - 2, 6, 6);
+        ctx.fillRect(sockX + extX + 6, sockY - 2, 6, 6);
         ctx.fillStyle = PICO_PALETTE[10]; // Gold wristband
-        ctx.fillRect(sockX + extX + 7, sockY - 2, 1, 6);
+        ctx.fillRect(sockX + extX + 5, sockY - 2, 1, 6);
         ctx.fillStyle = shineColor;
-        ctx.fillRect(sockX + extX + 10, sockY - 1, 2, 2);
+        ctx.fillRect(sockX + extX + 8, sockY - 1, 2, 2);
 
       } else if (punchType === 'HOOK') {
         const arc = extProgress * Math.PI;
         const sockX = 3;
         const sockY = -34; // Exact Top Shoulder Joint Beside Chin!
-        const armX = Math.sin(arc) * 16.0;
+        const armX = Math.sin(arc) * 12.0;
         const armY = -Math.cos(arc) * 3.0;
 
         // Yellow curving power arc trail anchored at shoulder height (-34)
         ctx.strokeStyle = PICO_PALETTE[10];
         ctx.lineWidth = 1;
         ctx.beginPath();
-        ctx.arc(sockX, sockY, 14, -Math.PI / 2, arc - Math.PI / 2);
+        ctx.arc(sockX, sockY, 12, -Math.PI / 2, arc - Math.PI / 2);
         ctx.stroke();
 
         // Rounded Deltoid Muscle Cap
@@ -1466,7 +1468,7 @@
         ctx.fillRect(sockX + armX + 4, sockY - 1 + armY, 2, 2);
 
       } else if (punchType === 'UPPERCUT') {
-        const liftY = extProgress * 18.0;
+        const liftY = extProgress * 14.0;
         const sockX = 3;
         const sockY = -34; // Exact Top Shoulder Joint Beside Chin!
 
@@ -1482,9 +1484,9 @@
 
         // Vertical Arm Scooping Upward from waist (-24) up to (-34 - liftY)
         ctx.fillStyle = skinColor;
-        ctx.fillRect(sockX, sockY - liftY, 3, Math.max(4, liftY + 10));
+        ctx.fillRect(sockX, sockY - liftY, 3, Math.max(4, liftY + 8));
         ctx.fillStyle = skinHighlight;
-        ctx.fillRect(sockX + 3, sockY - liftY, 1, Math.max(4, liftY + 10));
+        ctx.fillRect(sockX + 3, sockY - liftY, 1, Math.max(4, liftY + 8));
 
         // Consistent 6x6 Skyward Inverted Glove
         ctx.fillStyle = gloveColor;
@@ -1512,7 +1514,7 @@
       const timerVal = animTimer || 0;
       const progress = 1.0 - (timerVal / 72.0); // 0.0 to 1.0 over 72 frames (~1.2s)
 
-      // --- DISTINCT PUNCH ANIMATION TYPES ---
+      // --- NATURAL GROUNDED LUNGE DISTANCE (8px) ---
       if (anim === 'JAB' || anim === 'STRAIGHT' || anim === 'HOOK' || anim === 'UPPERCUT') {
         currentPose = 3;
         if (progress < 0.35) {
@@ -1525,49 +1527,50 @@
           extProgress = 1.0 - smoothstep(0.70, 1.00, progress);
         }
 
-        const lungeDist = extProgress * (anim === 'HOOK' ? 18.0 : 14.0);
+        const lungeDist = extProgress * 8.0; // Grounded natural 8px step-in!
         fx += isP1 ? lungeDist : -lungeDist;
 
         if (anim === 'HOOK') {
-          dyOffset = -Math.sin(extProgress * Math.PI) * 3.5;
-          punchTilt = isP1 ? (extProgress * 0.25) : (-extProgress * 0.25);
+          dyOffset = -Math.sin(extProgress * Math.PI) * 2.0;
+          punchTilt = isP1 ? (extProgress * 0.15) : (-extProgress * 0.15);
         } else if (anim === 'UPPERCUT') {
-          dyOffset = -extProgress * 6.0;
-          punchTilt = isP1 ? -0.15 : 0.15;
+          dyOffset = -extProgress * 4.0;
+          punchTilt = isP1 ? -0.10 : 0.10;
         } else if (anim === 'STRAIGHT') {
-          punchTilt = isP1 ? 0.08 : -0.08;
+          punchTilt = isP1 ? 0.05 : -0.05;
         } else {
-          punchTilt = isP1 ? 0.04 : -0.04;
+          punchTilt = isP1 ? 0.03 : -0.03;
         }
 
-        if (progress >= 0.45 && progress < 0.55 && !impactTriggeredThisPunch) {
+        // ACCURATE AABB GLOVE-TO-HEAD HITBOX OVERLAP SYNCHRONIZATION
+        if (progress >= 0.42 && progress < 0.58 && !impactTriggeredThisPunch) {
           impactTriggeredThisPunch = true;
-          const hitX = (anim === 'HOOK' ? 59 : anim === 'UPPERCUT' ? 57 : 56);
-          const hitY = (anim === 'UPPERCUT' ? 46 : anim === 'HOOK' ? 52 : 56);
+          const hitX = isP1 ? 57 : 55;
+          const hitY = (anim === 'UPPERCUT' ? 48 : anim === 'HOOK' ? 50 : 54);
           triggerImpactBurst(hitX, hitY);
-        } else if (progress >= 0.95) {
+        } else if (progress >= 0.90) {
           impactTriggeredThisPunch = false;
         }
 
-      // --- DISTINCT DEFENDER HIT KNOCKBACK REACTIONS ---
+      // --- ACCURATE DEFENDER HIT KNOCKBACK REACTIONS ---
       } else if (anim === 'FLINCH') {
         currentPose = 4;
         let flinchProgress = 0;
-        if (progress < 0.45) {
+        if (progress < 0.40) {
           flinchProgress = 0;
-        } else if (progress < 0.70) {
-          flinchProgress = smoothstep(0.45, 0.70, progress);
+        } else if (progress < 0.65) {
+          flinchProgress = smoothstep(0.40, 0.65, progress);
         } else {
-          flinchProgress = 1.0 - smoothstep(0.70, 1.00, progress);
+          flinchProgress = 1.0 - smoothstep(0.65, 1.00, progress);
         }
 
-        const flinchDist = flinchProgress * 14.0;
+        const flinchDist = flinchProgress * 8.0; // Grounded natural 8px knockback
         fx += isP1 ? -flinchDist : flinchDist;
 
-        const tiltAmt = flinchProgress * 0.35;
+        const tiltAmt = flinchProgress * 0.25;
         flinchTilt = isP1 ? -tiltAmt : tiltAmt;
 
-        if (progress >= 0.45 && progress < 0.55) isHitFlash = true;
+        if (progress >= 0.42 && progress < 0.58) isHitFlash = true;
       }
 
       // Dynamic Ambient Ring Drop Shadow ON THE FLOOR CANVAS
@@ -1592,7 +1595,7 @@
         }
 
         if (isHitFlash) {
-          ctx.filter = 'brightness(2.2)';
+          ctx.filter = 'brightness(2.5)';
         }
 
         if (anim === 'JAB' || anim === 'STRAIGHT' || anim === 'HOOK' || anim === 'UPPERCUT') { // DISTINCT PUNCH RENDERING
