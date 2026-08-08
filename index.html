@@ -1582,11 +1582,30 @@
       }
     }
 
-    function loop() {
-      update();
-      render();
+    let lastTick = performance.now();
+    function loop(now) {
+      const current = now || performance.now();
+      const delta = current - lastTick;
+
+      if (delta >= 15) {
+        update();
+        render();
+        lastTick = current;
+      } else {
+        render();
+      }
       requestAnimationFrame(loop);
     }
+
+    // Bulletproof background heartbeat fallback
+    setInterval(() => {
+      const now = performance.now();
+      if (now - lastTick >= 30) {
+        update();
+        render();
+        lastTick = now;
+      }
+    }, 30);
 
     window.addEventListener('keydown', (e) => {
       initAudio();
