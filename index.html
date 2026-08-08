@@ -214,7 +214,7 @@
   <div class="arcade-cabinet">
     <div class="cabinet-header">
       <div class="brand-title">CRASH OUT: RING RUSH</div>
-      <div class="badge-pico8">TRUE SHOULDER PUNCH v2.4.0</div>
+      <div class="badge-pico8">COLOR MATCH PUNCH v2.5.0</div>
     </div>
 
     <div class="viewport-container">
@@ -250,11 +250,12 @@
 
   <script>
     // =========================================================================
-    // CAPCOM TRUE ANATOMICAL SHOULDER PUNCH ENGINE v2.4.0
-    // - EXACT TOP SHOULDER JOINT ALIGNMENT AT LOCAL Y = -34 (RIGHT BESIDE THE CHIN)!
-    // - 100% PHYSICALLY ATTACHED TO THE TOP DELTOID SHOULDER JOINT!
-    // - Muscular Deltoid Cap (5x5) + Tapered Bicep & Forearm + Wrist Tape + 6x6 Glove!
-    // - ZERO MIDSECTION / STOMACH LINES! ZERO STICKS!
+    // CAPCOM COLOR-MATCHED ANATOMICAL PUNCH ENGINE v2.5.0
+    // - EXACT RGB SKIN COLOR MATCHING FOR EACH BOXER!
+    //   * Broner (P1): #8C4A27 (Warm Dark Brown) with #A65B32 highlight
+    //   * Deen (P2):   #C58C5D (Golden Bronze Tan) with #D89E6F highlight
+    // - TOP DELTOID SHOULDER JOINT ALIGNMENT AT LOCAL Y = -34!
+    // - Seamless 2-tone muscle contour blending 100% into the sprite shoulder!
     // =========================================================================
 
     const PICO_PALETTE = [
@@ -1353,12 +1354,18 @@
     }
 
     // =========================================================================
-    // CAPCOM TRUE ANATOMICAL SHOULDER PUNCH ENGINE v2.4.0
-    // - EXACT TOP SHOULDER JOINT ALIGNMENT AT LOCAL Y = -34 (RIGHT BESIDE THE CHIN)!
-    // - 100% PHYSICALLY ATTACHED TO THE TOP DELTOID SHOULDER JOINT!
+    // CAPCOM COLOR-MATCHED ANATOMICAL PUNCH ENGINE v2.5.0
+    // - EXACT RGB SKIN COLOR MATCHING FOR EACH BOXER!
+    //   * Broner (P1): #8C4A27 (Warm Dark Brown) with #A65B32 highlight
+    //   * Deen (P2):   #C58C5D (Golden Bronze Tan) with #D89E6F highlight
+    // - TOP DELTOID SHOULDER JOINT ALIGNMENT AT LOCAL Y = -34!
     // =========================================================================
     function drawPunchOverlay(ctx, isP1, punchType, extProgress) {
-      const skinColor = isP1 ? PICO_PALETTE[4] : PICO_PALETTE[15]; // Broner skin vs Deen skin
+      // EXACT SPRITE SKIN COLOR MATCHING:
+      const skinColor = isP1 ? '#8C4A27' : '#C58C5D';     // Broner warm brown vs Deen golden tan
+      const skinHighlight = isP1 ? '#A65B32' : '#D89E6F'; // Muscle highlight
+      const skinShadow = isP1 ? '#6B3416' : '#9E673A';    // Under-arm shadow
+
       const gloveColor = isP1 ? PICO_PALETTE[8] : PICO_PALETTE[12]; // Red glove vs Blue glove
       const shineColor = PICO_PALETTE[7];
 
@@ -1374,11 +1381,18 @@
         ctx.fillRect(sockX + 4, sockY, extX, 2);
 
         // Rounded Deltoid Muscle Shoulder Cap (5x5) Fused to Body
+        ctx.fillStyle = skinHighlight;
+        ctx.fillRect(sockX - 2, sockY - 2, 5, 2);
         ctx.fillStyle = skinColor;
-        ctx.fillRect(sockX - 2, sockY - 2, 5, 5);
+        ctx.fillRect(sockX - 2, sockY, 5, 3);
 
         // Sleek Tapered Muscular Lead Arm extending from top shoulder socket
-        ctx.fillRect(sockX, sockY - 1, extX, 4);
+        ctx.fillStyle = skinHighlight;
+        ctx.fillRect(sockX, sockY - 1, extX, 1);
+        ctx.fillStyle = skinColor;
+        ctx.fillRect(sockX, sockY, extX, 2);
+        ctx.fillStyle = skinShadow;
+        ctx.fillRect(sockX, sockY + 2, extX, 1);
 
         // Consistent 6x6 Boxing Glove Target at Chin Height!
         ctx.fillStyle = gloveColor;
@@ -1397,11 +1411,18 @@
         ctx.fillRect(sockX + 4, sockY + 4, extX, 1);
 
         // Rear Deltoid Muscle Cap
+        ctx.fillStyle = skinHighlight;
+        ctx.fillRect(sockX - 2, sockY - 2, 5, 2);
         ctx.fillStyle = skinColor;
-        ctx.fillRect(sockX - 2, sockY - 2, 5, 5);
+        ctx.fillRect(sockX - 2, sockY, 5, 3);
 
         // Sleek Rear Power Arm extending from rear shoulder across chest
-        ctx.fillRect(sockX, sockY - 1, extX + 8, 4);
+        ctx.fillStyle = skinHighlight;
+        ctx.fillRect(sockX, sockY - 1, extX + 8, 1);
+        ctx.fillStyle = skinColor;
+        ctx.fillRect(sockX, sockY, extX + 8, 2);
+        ctx.fillStyle = skinShadow;
+        ctx.fillRect(sockX, sockY + 2, extX + 8, 1);
 
         // Consistent 6x6 Power Glove
         ctx.fillStyle = gloveColor;
@@ -1426,11 +1447,16 @@
         ctx.stroke();
 
         // Rounded Deltoid Muscle Cap
+        ctx.fillStyle = skinHighlight;
+        ctx.fillRect(sockX - 2, sockY - 2, 5, 2);
         ctx.fillStyle = skinColor;
-        ctx.fillRect(sockX - 2, sockY - 2, 5, 5);
+        ctx.fillRect(sockX - 2, sockY, 5, 3);
 
         // Sleek Bent Elbow Arc Arm from Top Shoulder Joint (3, -34)
-        ctx.fillRect(sockX, sockY - 1, Math.max(2, armX), 4);
+        ctx.fillStyle = skinHighlight;
+        ctx.fillRect(sockX, sockY - 1, Math.max(2, armX), 1);
+        ctx.fillStyle = skinColor;
+        ctx.fillRect(sockX, sockY, Math.max(2, armX), 2);
         ctx.fillRect(sockX + armX, sockY - 1 + armY, 4, 4);
 
         // Consistent 6x6 Sweeping Horizontal Hook Glove at Jaw Level
@@ -1449,11 +1475,16 @@
         ctx.fillRect(sockX + 1, sockY - liftY + 4, 2, liftY);
 
         // Rounded Deltoid Muscle Cap
+        ctx.fillStyle = skinHighlight;
+        ctx.fillRect(sockX - 2, sockY - 2, 5, 2);
         ctx.fillStyle = skinColor;
-        ctx.fillRect(sockX - 2, sockY - 2, 5, 5);
+        ctx.fillRect(sockX - 2, sockY, 5, 3);
 
         // Vertical Arm Scooping Upward from waist (-24) up to (-34 - liftY)
-        ctx.fillRect(sockX, sockY - liftY, 4, Math.max(4, liftY + 10));
+        ctx.fillStyle = skinColor;
+        ctx.fillRect(sockX, sockY - liftY, 3, Math.max(4, liftY + 10));
+        ctx.fillStyle = skinHighlight;
+        ctx.fillRect(sockX + 3, sockY - liftY, 1, Math.max(4, liftY + 10));
 
         // Consistent 6x6 Skyward Inverted Glove
         ctx.fillStyle = gloveColor;
