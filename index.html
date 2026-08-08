@@ -214,7 +214,7 @@
   <div class="arcade-cabinet">
     <div class="cabinet-header">
       <div class="brand-title">CRASH OUT: RING RUSH</div>
-      <div class="badge-pico8">BOXING ACTION IDLE v0.1.0</div>
+      <div class="badge-pico8">EXAGGERATED ACTION v0.1.0</div>
     </div>
 
     <div class="viewport-container">
@@ -250,7 +250,7 @@
 
   <script>
     // =========================================================================
-    // RANDOMIZED BOXING ACTION IDLE SYSTEM (SHOULDER ROLLS, FEINTS, DUCKS, SLIPS)
+    // EXAGGERATED HIGH-VISIBILITY BOXING IDLE ANIMATION STATE MACHINE
     // =========================================================================
 
     const PICO_PALETTE = [
@@ -508,22 +508,23 @@
     let globalParticles = [];
     let globalFloatingTexts = [];
 
-    // --- RANDOMIZED BOXING ACTION IDLE CONTROLLER ---
+    // --- BOLD & EXAGGERATED BOXING IDLE CONTROLLER ---
     class BoxerIdleController {
       constructor(isP1) {
         this.isP1 = isP1;
-        this.actionState = 'SHUFFLE'; // SHUFFLE, SHOULDER_ROLL, FEINT, DUCK, SLIP
+        this.actionState = 'SHOULDER_ROLL';
         this.timer = 0;
-        this.duration = 45;
+        this.duration = 40;
       }
 
       update() {
         this.timer++;
         if (this.timer >= this.duration) {
           this.timer = 0;
-          const actions = ['SHUFFLE', 'SHUFFLE', 'SHOULDER_ROLL', 'FEINT', 'DUCK', 'SLIP'];
+          // Rotate between bold, highly visible boxing moves
+          const actions = ['SHOULDER_ROLL', 'FEINT', 'DUCK', 'SLIP', 'SHUFFLE'];
           this.actionState = actions[Math.floor(Math.random() * actions.length)];
-          this.duration = 24 + Math.floor(Math.random() * 40); // 0.8s to 2.2s per action
+          this.duration = 26 + Math.floor(Math.random() * 35); // 0.8s - 2.0s per move
         }
       }
 
@@ -532,32 +533,33 @@
         let dy = 0;
         let rot = 0;
 
-        // Base footwork shuffle
-        const shuffleX = Math.sin(globalFrameCount * 0.1 + (this.isP1 ? 0 : 2.5)) * 1.5;
-        const shuffleY = Math.abs(Math.sin(globalFrameCount * 0.16 + (this.isP1 ? 0 : 3.1))) * 1.2;
+        // Base footwork canvas bounce
+        const shuffleX = Math.sin(globalFrameCount * 0.12 + (this.isP1 ? 0 : 2.5)) * 2.2;
+        const shuffleY = Math.abs(Math.sin(globalFrameCount * 0.18 + (this.isP1 ? 0 : 3.1))) * 1.8;
 
         dx += shuffleX;
         dy -= shuffleY;
 
+        const progress = Math.sin((this.timer / Math.max(1, this.duration)) * Math.PI);
+
         if (this.actionState === 'SHOULDER_ROLL') {
-          // Adrien Broner's signature Philly Shell Shoulder Roll / Slip
-          const rollProgress = Math.sin((this.timer / this.duration) * Math.PI);
-          dx += (this.isP1 ? 3.5 : -3.5) * rollProgress;
-          dy += 1.5 * rollProgress;
-          rot = (this.isP1 ? 0.08 : -0.08) * rollProgress;
+          // BOLD PHILLY SHELL SHOULDER ROLL (8px displacement + 15 degree rotation)
+          dx += (this.isP1 ? 8.0 : -8.0) * progress;
+          dy += 3.5 * progress;
+          rot = (this.isP1 ? 0.26 : -0.26) * progress; // ~15 degree shoulder dip & turn!
         } else if (this.actionState === 'FEINT') {
-          // Quick lead glove jab feint & head snap
-          const feintProgress = Math.sin((this.timer / this.duration) * Math.PI);
-          dx += (this.isP1 ? 4.5 : -4.5) * feintProgress;
+          // BOLD LEAD JAB FEINT (9px forward extension!)
+          dx += (this.isP1 ? 9.0 : -9.0) * progress;
+          dy -= 1.0 * progress;
         } else if (this.actionState === 'DUCK') {
-          // Duck under hook crouch
-          const duckProgress = Math.sin((this.timer / this.duration) * Math.PI);
-          dy += 4.0 * duckProgress;
+          // BOLD DEEP DUCK CROUCH (8px vertical crouch down!)
+          dy += 8.0 * progress;
+          rot = (this.isP1 ? 0.15 : -0.15) * progress;
         } else if (this.actionState === 'SLIP') {
-          // Head slip left & right
-          const slipProgress = Math.sin((this.timer / this.duration) * Math.PI * 2);
-          dx += (this.isP1 ? 3.0 : -3.0) * slipProgress;
-          dy += 1.0 * Math.abs(slipProgress);
+          // BOLD SIDEWAYS SLIP & WEAVE (7px lateral lean!)
+          const slipWave = Math.sin((this.timer / Math.max(1, this.duration)) * Math.PI * 2);
+          dx += (this.isP1 ? 7.0 : -7.0) * slipWave;
+          dy += 2.5 * Math.abs(slipWave);
         }
 
         return { dx, dy, rot };
@@ -591,7 +593,7 @@
         this.spawnPair();
 
         this.dropTimer = 0;
-        this.dropInterval = 48;
+        this.dropInterval = 48; // Slower drop speed
         this.lockDelay = 0;
 
         this.anim = 'IDLE';
@@ -1191,8 +1193,7 @@
     const p2 = new Board(2, 88, true);
 
     // =========================================================================
-    // RANDOMIZED BOXING ACTION IDLE RENDERER
-    // Renders active shoulder rolls, lead feints, ducking crouches, & head slips
+    // EXAGGERATED HIGH-VISIBILITY RENDERER
     // =========================================================================
     function drawBoxer(x, y, isP1, anim) {
       let fx = x;
@@ -1327,7 +1328,7 @@
       ctx.fillStyle = PICO_PALETTE[7];
       ctx.fillRect(41, 90, 46, 23);
 
-      // Draw Perfectly Chroma-Keyed Boxer Sprites & Active Action Idle Animations!
+      // Draw Perfectly Chroma-Keyed Boxer Sprites & Exaggerated Action Idle Animations!
       drawBoxer(41, 50, true, p1.anim);  // Adrien Broner
       drawBoxer(65, 50, false, p2.anim); // Deen The Great
 
