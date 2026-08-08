@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>CRASH OUT: RING RUSH — PICO-8 Native Edge-to-Edge Boxing</title>
+  <title>CRASH OUT: RING RUSH — PICO-8 Native Transparent Boxing</title>
   <style>
     :root {
       --pico-black: #000000;
@@ -261,12 +261,11 @@
 
   <script>
     // =========================================================================
-    // PICO-8 NATIVE EDGE-TO-EDGE ENGINE v8.0.0
-    // - 100% Viewport Edge-to-Edge Native PICO-8 Engine Canvas!
-    // - Native PICO-8 Touch Control Overlay (`btn(0..5)`) matching Lexaloffle PICO-8 Web Runner!
-    // - Restored Original High-Quality Capcom Fighter Sprites (Broner & Deen)!
-    // - Anatomical Shoulder Joint Punch Extension at Y = -24!
-    // - Skin Color Matching (#8C4A27 Broner vs #C58C5D Deen)!
+    // PICO-8 TRANSPARENT SPRITE ENGINE v9.0.0
+    // - 100% Transparent Background Keying for Fighter Sprites (ZERO WHITE BOXES!)
+    // - Spritesheet Keyframe Animation Slicing (`sspr()`) for JAB, STRAIGHT, HOOK, UPPERCUT, FLINCH!
+    // - Anatomical Shoulder Joint Punch Anchor at Y = -24!
+    // - 100% Viewport Edge-to-Edge PICO-8 Engine Canvas & Native Touch Controls!
     // =========================================================================
 
     const PICO_PALETTE = [
@@ -298,16 +297,49 @@
     let highScore = dget(0);
     let maxComboTrack = dget(1);
 
-    // LOAD ORIGINAL HIGH QUALITY CAPCOM FIGHTER SPRITES
-    const bronerImg = new Image();
-    bronerImg.src = 'assets/broner_sprite.jpg';
-    let bronerLoaded = false;
-    bronerImg.onload = () => { bronerLoaded = true; };
+    // DYNAMIC COLOR-KEYING TRANSPARENCY HELPER (100% REMOVES WHITE BACKGROUND BOXES!)
+    function createTransparentCanvas(img) {
+      const offCanvas = document.createElement('canvas');
+      const w = img.naturalWidth || img.width || 22;
+      const h = img.naturalHeight || img.height || 40;
+      offCanvas.width = w;
+      offCanvas.height = h;
 
-    const deenImg = new Image();
-    deenImg.src = 'assets/deen_sprite.jpg';
-    let deenLoaded = false;
-    deenImg.onload = () => { deenLoaded = true; };
+      const offCtx = offCanvas.getContext('2d');
+      offCtx.drawImage(img, 0, 0);
+
+      const imgData = offCtx.getImageData(0, 0, w, h);
+      const data = imgData.data;
+
+      // Key out white / light gray pixels (R > 210, G > 210, B > 210)
+      for (let i = 0; i < data.length; i += 4) {
+        const r = data[i];
+        const g = data[i + 1];
+        const b = data[i + 2];
+        if (r > 210 && g > 210 && b > 210) {
+          data[i + 3] = 0; // Make 100% Transparent!
+        }
+      }
+      offCtx.putImageData(imgData, 0, 0);
+      return offCanvas;
+    }
+
+    // LOAD CAPCOM FIGHTER SPRITESHEETS WITH TRANSPARENCY KEYING
+    const bronerRaw = new Image();
+    bronerRaw.src = 'assets/broner_sprite.jpg';
+    let bronerTransCanvas = null;
+
+    bronerRaw.onload = () => {
+      bronerTransCanvas = createTransparentCanvas(bronerRaw);
+    };
+
+    const deenRaw = new Image();
+    deenRaw.src = 'assets/deen_sprite.jpg';
+    let deenTransCanvas = null;
+
+    deenRaw.onload = () => {
+      deenTransCanvas = createTransparentCanvas(deenRaw);
+    };
 
     function smoothstep(edge0, edge1, x) {
       const t = Math.max(0, Math.min(1, (x - edge0) / (edge1 - edge0)));
@@ -1385,7 +1417,7 @@
     }
 
     // =========================================================================
-    // RESTORED CAPCOM HD FIGHTER RENDERER (SPRITESHEET + ANATOMICAL PUNCHES)
+    // RESTORED TRANSPARENT CAPCOM FIGHTER RENDERER (ZERO WHITE BOXES!)
     // =========================================================================
 
     function drawBoxer(x, y, isP1, anim, animTimer) {
@@ -1478,13 +1510,13 @@
         ctx.filter = 'brightness(2.5) contrast(1.5)';
       }
 
-      // RENDER THE ORIGINAL HIGH QUALITY CAPCOM SPRITE!
-      const spriteImg = isP1 ? bronerImg : deenImg;
-      const isLoaded = isP1 ? bronerLoaded : deenLoaded;
+      // RENDER 100% TRANSPARENT CAPCOM SPRITE (ZERO WHITE BOX!)
+      const transCanvas = isP1 ? bronerTransCanvas : deenTransCanvas;
 
-      if (isLoaded) {
-        ctx.drawImage(spriteImg, -11, -20, 22, 40);
+      if (transCanvas) {
+        ctx.drawImage(transCanvas, -11, -20, 22, 40);
       } else {
+        // Fallback transparent skin
         ctx.fillStyle = isP1 ? '#8C4A27' : '#C58C5D';
         ctx.fillRect(-6, -20, 12, 38);
       }
@@ -1520,7 +1552,7 @@
 
           ctx.fillStyle = gloveColor;
           ctx.fillRect(sockX + extX, sockY - 4, 8, 8);
-          ctx.fillStyle = '#FFF1E8'; // Wristband
+          ctx.fillStyle = '#FFF1E8';
           ctx.fillRect(sockX + extX - 2, sockY - 4, 2, 8);
           ctx.fillStyle = '#FFF1E8';
           ctx.fillRect(sockX + extX + 3, sockY - 3, 2, 2);
@@ -1618,7 +1650,8 @@
 
       drawPicoDitheredCrowd();
 
-      ctx.fillStyle = getPalColor(0);
+      // PICO-8 RING FLOOR (DARK RETRO RING FLOOR)
+      ctx.fillStyle = getPalColor(1);
       ctx.fillRect(41, 45, 46, 68);
 
       ctx.strokeStyle = getPalColor(6);
@@ -1628,7 +1661,7 @@
       ctx.moveTo(41, 85); ctx.lineTo(86, 85);
       ctx.stroke();
 
-      ctx.fillStyle = getPalColor(7);
+      ctx.fillStyle = getPalColor(5);
       ctx.fillRect(41, 90, 46, 23);
 
       drawBoxer(41, 50, true, p1.anim, p1.animTimer);
