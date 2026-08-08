@@ -519,6 +519,8 @@
 
     let globalParticles = [];
     let globalFloatingTexts = [];
+    var p1 = null;
+    var p2 = null;
 
     // --- DEFENSIVE ONLY IDLE CONTROLLER ---
     class BoxerIdleController {
@@ -1297,8 +1299,8 @@
       }
     }
 
-    const p1 = new Board(1, 4, true);  // AI P1
-    const p2 = new Board(2, 88, true); // AI P2
+    p1 = new Board(1, 4, true);  // AI P1
+    p2 = new Board(2, 88, true); // AI P2
 
     let impactFxTimer = 0;
     let impactTriggeredThisPunch = false;
