@@ -214,7 +214,7 @@
   <div class="arcade-cabinet">
     <div class="cabinet-header">
       <div class="brand-title">CRASH OUT: RING RUSH</div>
-      <div class="badge-pico8">HD SPRITES v0.1.0</div>
+      <div class="badge-pico8">MASTERPIECE BOXER ART v0.1.0</div>
     </div>
 
     <div class="viewport-container">
@@ -250,30 +250,31 @@
 
   <script>
     // =========================================================================
-    // HIGH-QUALITY PRE-RENDERED SPRITE ENGINE (ADRIEN BRONER & DEEN THE GREAT)
+    // CAPCOM-GRADE 16-BIT MASTERPIECE BOXER ART & RANDOMIZED IDLE ENGINE
     // =========================================================================
 
     const PICO_PALETTE = [
-      '#000000', '#1D2B53', '#7E2553', '#008751',
-      '#AB5236', '#5F574F', '#C2C3C7', '#FFF1E8',
-      '#FF004D', '#FFA300', '#FFEC27', '#00E436',
-      '#29ADFF', '#83769C', '#FF77A8', '#FFCCAA'
+      '#000000', // 0: Black
+      '#1D2B53', // 1: Dark Blue
+      '#7E2553', // 2: Dark Purple (Deep Shadow)
+      '#008751', // 3: Dark Green
+      '#AB5236', // 4: Brown (Skin Base)
+      '#5F574F', // 5: Dark Gray
+      '#C2C3C7', // 6: Light Gray
+      '#FFF1E8', // 7: White
+      '#FF004D', // 8: Red
+      '#FFA300', // 9: Orange
+      '#FFEC27', // 10: Yellow (Gold)
+      '#00E436', // 11: Green
+      '#29ADFF', // 12: Blue
+      '#83769C', // 13: Lavender
+      '#FF77A8', // 14: Pink
+      '#FFCCAA'  // 15: Peach (Skin Highlight)
     ];
 
     const canvas = document.getElementById('picoCanvas');
     const ctx = canvas.getContext('2d');
     ctx.imageSmoothingEnabled = false;
-
-    // Load High-Quality Pre-Rendered Sprite Images
-    const imgBroner = new Image();
-    imgBroner.src = 'assets/broner_sprite.jpg';
-    let bronerLoaded = false;
-    imgBroner.onload = () => { bronerLoaded = true; };
-
-    const imgDeen = new Image();
-    imgDeen.src = 'assets/deen_sprite.jpg';
-    let deenLoaded = false;
-    imgDeen.onload = () => { deenLoaded = true; };
 
     // WebAudio 808 Synth
     let audioEnabled = true;
@@ -424,6 +425,7 @@
     let flashFrames = 0;
     let roundTimer = 99;
     let timerFrameCounter = 0;
+    let globalFrameCount = 0;
     let gameState = 'PLAYING';
 
     class Particle {
@@ -984,7 +986,6 @@
         }
       }
 
-      // --- DISTINCTIVE ANIMATED CRASH ORB RENDERING ---
       drawGem(x, y, type, isPower, squishFactor, timerVal) {
         let colorIdx = 8;
         let isCrash = false;
@@ -1011,21 +1012,17 @@
         const drawH = CELL_H - squishY;
 
         if (isCrash) {
-          // 1. Pulsing Outer Radial Aura
           const glowPulse = Math.abs(Math.sin(this.pulseAngle * 4));
           ctx.fillStyle = (glowPulse > 0.5) ? PICO_PALETTE[7] : PICO_PALETTE[10];
           ctx.fillRect(drawX, drawY, drawW, drawH);
 
-          // 2. Circular Orb Body
           ctx.fillStyle = PICO_PALETTE[colorIdx];
           ctx.fillRect(drawX + 1, drawY, drawW - 2, drawH);
           ctx.fillRect(drawX, drawY + 1, drawW, drawH - 2);
 
-          // 3. Inner Crystalline Highlight
           ctx.fillStyle = PICO_PALETTE[7];
           ctx.fillRect(drawX + 1, drawY + 1, 2, 2);
 
-          // 4. Animated Flashing Star Core (★)
           const starFrame = Math.floor(this.pulseAngle * 6) % 2;
           ctx.fillStyle = (starFrame === 0) ? PICO_PALETTE[10] : PICO_PALETTE[7];
           ctx.fillRect(drawX + 2, drawY + 3, 2, 2);
@@ -1070,58 +1067,224 @@
     const p2 = new Board(2, 88, true);
 
     // =========================================================================
-    // HIGH-FIDELITY IMAGE-BASED BOXER SPRITE ENGINE (ADRIEN BRONER vs DEEN)
-    // Renders pre-rendered 16-bit arcade pixel art sprites with combat offsets
+    // CAPCOM 16-BIT MASTERPIECE PIXEL ART & RANDOMIZED BOXING IDLE ENGINE
+    // Explicit 2-tone cell-shaded face, eyes, pupil, nose, mouth, beard, muscles!
     // =========================================================================
-    function drawFighterSprite(x, y, isP1, anim) {
+    function drawMasterpieceBoxer(x, y, isP1, anim) {
       let fx = x;
       let fy = y;
 
-      if (anim === 'FLINCH') fx += isP1 ? -5 : 5;
-      if (anim === 'UPPERCUT') fy -= 6;
-      if (anim === 'JAB') fx += isP1 ? 4 : -4;
+      // 1. RANDOMIZED BOXER FOOTWORK & SWAY IDLE ANIMATION
+      const swayOffset = Math.sin(globalFrameCount * 0.08 + (isP1 ? 0 : 2.1)) * 1.5;
+      const bounceOffset = Math.abs(Math.sin(globalFrameCount * 0.12 + (isP1 ? 0 : 3.4))) * 1.2;
+      const breathChest = (Math.floor(globalFrameCount / 14) % 2 === 0) ? 0 : -1;
 
-      const img = isP1 ? imgBroner : imgDeen;
-      const loaded = isP1 ? bronerLoaded : deenLoaded;
+      // Randomized Micro-Taunt (Shoulder Roll / Southpaw Feint) every ~100 frames
+      const tauntCycle = Math.floor((globalFrameCount + (isP1 ? 0 : 50)) / 100) % 3;
+      const tauntFrame = (globalFrameCount % 100);
+      let microDodge = 0;
+      let microFeint = 0;
+      if (tauntFrame < 18) {
+        if (tauntCycle === 1) microDodge = (isP1 ? 2 : -2); // Philly Shell Shoulder Slip
+        if (tauntCycle === 2) microFeint = (isP1 ? 3 : -3); // Southpaw Guard Check Feint
+      }
 
-      if (loaded && img) {
-        // Draw Pre-Rendered High-Fidelity Pixel Art Sprite
-        ctx.save();
-        if (!isP1) {
-          // Flip horizontally for P2 Deen
-          ctx.translate(fx + 24, fy);
-          ctx.scale(-1, 1);
-          ctx.drawImage(img, 0, 0, 24, 40);
-        } else {
-          ctx.drawImage(img, fx, fy, 24, 40);
-        }
-        ctx.restore();
-      } else {
-        // High-Quality Fallback Shaded Pixel Art
-        const skinBase = PICO_PALETTE[4];
-        const trunksCol = isP1 ? PICO_PALETTE[8] : PICO_PALETTE[12];
-        const glovesCol = isP1 ? PICO_PALETTE[10] : PICO_PALETTE[12];
+      fx += Math.floor(swayOffset + microDodge);
+      fy += Math.floor(-bounceOffset);
 
+      if (anim === 'FLINCH') fx += isP1 ? -6 : 6;
+      if (anim === 'UPPERCUT') fy -= 7;
+      if (anim === 'JAB') fx += isP1 ? 5 : -5;
+
+      const skinBase   = PICO_PALETTE[4];  // Brown #4
+      const skinHi     = PICO_PALETTE[15]; // Peach Highlight #15
+      const skinDark   = PICO_PALETTE[2];  // Deep Shadow #2
+      const blackCol   = PICO_PALETTE[0];  // Black #0
+      const whiteCol   = PICO_PALETTE[7];  // White #7
+      const goldCol    = PICO_PALETTE[10]; // Gold #10
+
+      if (isP1) {
+        // --- ADRIEN "THE PROBLEM" BRONER ---
+        // (Masterpiece Philly Shell, 360 wave fade, beard, gold chain, red trunks, gold gloves)
+        const trunksCol = PICO_PALETTE[8];
+
+        // Head Base (14x13 px)
         ctx.fillStyle = skinBase;
-        ctx.fillRect(fx + 4, fy, 12, 12);
-        ctx.fillStyle = PICO_PALETTE[0];
-        ctx.fillRect(fx + 4, fy, 12, 3);
+        ctx.fillRect(fx + 3, fy, 13, 12);
 
-        ctx.fillStyle = PICO_PALETTE[7];
-        ctx.fillRect(isP1 ? fx + 11 : fx + 5, fy + 5, 3, 2);
-        ctx.fillStyle = PICO_PALETTE[0];
-        ctx.fillRect(isP1 ? fx + 12 : fx + 5, fy + 5, 1, 2);
+        // 360 Wave Fade Hairline
+        ctx.fillStyle = blackCol;
+        ctx.fillRect(fx + 3, fy, 13, 3);
+        ctx.fillRect(fx + 3, fy + 3, 2, 4);
 
+        // Eyes & Pupils (High Definition)
+        ctx.fillStyle = blackCol;
+        ctx.fillRect(fx + 6, fy + 4, 3, 1);    // Left Brow
+        ctx.fillRect(fx + 11, fy + 3, 3, 1);   // Right Cocked Brow!
+        ctx.fillStyle = whiteCol;
+        ctx.fillRect(fx + 6, fy + 5, 3, 2);    // Left Sclera
+        ctx.fillRect(fx + 11, fy + 5, 3, 2);   // Right Sclera
+        ctx.fillStyle = blackCol;
+        ctx.fillRect(fx + 7, fy + 5, 1, 2);    // Left Pupil
+        ctx.fillRect(fx + 12, fy + 5, 1, 2);   // Right Pupil
+
+        // Defined Nose Bridge & Cheek Highlight
+        ctx.fillStyle = skinHi;
+        ctx.fillRect(fx + 9, fy + 5, 2, 3);    // Nose Bridge Highlight
+        ctx.fillStyle = skinDark;
+        ctx.fillRect(fx + 8, fy + 8, 3, 1);    // Nostril Shadow
+
+        // Full Connected Beard & Mustache
+        ctx.fillStyle = blackCol;
+        ctx.fillRect(fx + 7, fy + 8, 5, 1);    // Mustache
+        ctx.fillRect(fx + 5, fy + 9, 9, 4);    // Jawline Beard
+
+        // Smug White Teeth Grin
+        ctx.fillStyle = whiteCol;
+        ctx.fillRect(fx + 9, fy + 9, 3, 1);
+
+        // Gleaming 3D Gold Chain & Pendant
+        ctx.fillStyle = goldCol;
+        ctx.fillRect(fx + 5, fy + 13, 9, 2);
+        ctx.fillStyle = whiteCol;
+        ctx.fillRect(fx + 9, fy + 13, 1, 1);   // Chain Glint
+        ctx.fillStyle = goldCol;
+        ctx.fillRect(fx + 9, fy + 15, 2, 2);   // Pendant
+
+        // Muscular Shaded Torso
         ctx.fillStyle = skinBase;
-        ctx.fillRect(fx + 4, fy + 12, 12, 12);
+        ctx.fillRect(fx + 3, fy + 15 + breathChest, 13, 11);
+        ctx.fillStyle = skinHi;
+        ctx.fillRect(fx + 4, fy + 16 + breathChest, 4, 3); // Left Pec
+        ctx.fillRect(fx + 11, fy + 16 + breathChest, 4, 3); // Right Pec
+        ctx.fillStyle = skinDark;
+        ctx.fillRect(fx + 9, fy + 19 + breathChest, 2, 6); // Ab Center Line
+
+        // Red Boxing Trunks with Gold Waistband
         ctx.fillStyle = trunksCol;
-        ctx.fillRect(fx + 4, fy + 24, 12, 8);
+        ctx.fillRect(fx + 3, fy + 26, 13, 7);
+        ctx.fillStyle = goldCol;
+        ctx.fillRect(fx + 3, fy + 26, 13, 3);
+        ctx.fillStyle = whiteCol;
+        ctx.fillRect(fx + 8, fy + 26, 2, 3);  // AB Waistband Patch
 
+        // Legs & Boxing Boots
+        ctx.fillStyle = skinBase;
+        ctx.fillRect(fx + 4, fy + 33, 4, 4);
+        ctx.fillRect(fx + 11, fy + 33, 4, 4);
+        ctx.fillStyle = blackCol;
+        ctx.fillRect(fx + 3, fy + 35, 5, 4);
+        ctx.fillRect(fx + 11, fy + 35, 5, 4);
+        ctx.fillStyle = whiteCol;
+        ctx.fillRect(fx + 3, fy + 35, 5, 1);
+
+        // Gloves & Philly Shell Position
+        ctx.fillStyle = goldCol;
+        if (anim === 'JAB') {
+          ctx.fillRect(fx + 16, fy + 14, 7, 6);
+          ctx.fillStyle = whiteCol;
+          ctx.fillRect(fx + 15, fy + 14, 2, 6);
+        } else if (anim === 'UPPERCUT') {
+          ctx.fillRect(fx + 12, fy + 2, 6, 7);
+          ctx.fillStyle = whiteCol;
+          ctx.fillRect(fx + 12, fy + 8, 6, 2);
+        } else {
+          // Philly Shell Defensive Stance (Rear glove chin guard, lead glove low)
+          ctx.fillRect(fx + 12, fy + 11, 6, 6); // Chin Guard Glove
+          ctx.fillStyle = whiteCol;
+          ctx.fillRect(fx + 12, fy + 16, 6, 1);
+
+          ctx.fillStyle = goldCol;
+          ctx.fillRect(fx + 6 + microFeint, fy + 18, 6, 5); // Low Lead Glove
+        }
+
+        ctx.strokeStyle = blackCol;
+        ctx.strokeRect(fx + 2, fy - 1, 15, 41);
+
+      } else {
+        // --- DEEN THE GREAT ---
+        // (Masterpiece High Guard Southpaw, Buzzcut, Intense Glare, Blue Trunks, Cyan Gloves)
+        const trunksCol = PICO_PALETTE[12]; // Blue
+        const glovesCol = PICO_PALETTE[12]; // Cyan
+
+        // Head Base
+        ctx.fillStyle = skinBase;
+        ctx.fillRect(fx + 4, fy, 13, 12);
+
+        // Buzzcut Hairline
+        ctx.fillStyle = blackCol;
+        ctx.fillRect(fx + 4, fy, 13, 3);
+        ctx.fillRect(fx + 4, fy + 3, 2, 3);
+
+        // Intense Fight Glare Eyes & Brows
+        ctx.fillStyle = blackCol;
+        ctx.fillRect(fx + 5, fy + 4, 4, 1);    // Left Brow
+        ctx.fillRect(fx + 10, fy + 4, 4, 1);   // Right Brow
+        ctx.fillStyle = whiteCol;
+        ctx.fillRect(fx + 6, fy + 5, 3, 2);
+        ctx.fillRect(fx + 10, fy + 5, 3, 2);
+        ctx.fillStyle = blackCol;
+        ctx.fillRect(fx + 6, fy + 5, 1, 2);
+        ctx.fillRect(fx + 10, fy + 5, 1, 2);
+
+        // Nose Bridge & Jaw Contour
+        ctx.fillStyle = skinHi;
+        ctx.fillRect(fx + 7, fy + 6, 2, 2);
+        ctx.fillStyle = skinDark;
+        ctx.fillRect(fx + 6, fy + 8, 3, 1);
+        ctx.fillRect(fx + 5, fy + 10, 11, 1);  // Shaded Jawline
+
+        // Grit Teeth Line
+        ctx.fillStyle = whiteCol;
+        ctx.fillRect(fx + 7, fy + 9, 3, 1);
+
+        // Muscular Shaded Torso
+        ctx.fillStyle = skinBase;
+        ctx.fillRect(fx + 4, fy + 12 + breathChest, 13, 11);
+        ctx.fillStyle = skinHi;
+        ctx.fillRect(fx + 5, fy + 14 + breathChest, 4, 3);
+        ctx.fillRect(fx + 11, fy + 14 + breathChest, 4, 3);
+        ctx.fillStyle = skinDark;
+        ctx.fillRect(fx + 10, fy + 17 + breathChest, 1, 5);
+
+        // Royal Blue Trunks with White Trim
+        ctx.fillStyle = trunksCol;
+        ctx.fillRect(fx + 4, fy + 23, 13, 8);
+        ctx.fillStyle = whiteCol;
+        ctx.fillRect(fx + 4, fy + 23, 13, 3);  // White Waistband
+
+        // Legs & Boots
+        ctx.fillStyle = skinBase;
+        ctx.fillRect(fx + 5, fy + 31, 4, 4);
+        ctx.fillRect(fx + 12, fy + 31, 4, 4);
+        ctx.fillStyle = blackCol;
+        ctx.fillRect(fx + 4, fy + 33, 5, 4);
+        ctx.fillRect(fx + 12, fy + 33, 5, 4);
+        ctx.fillStyle = whiteCol;
+        ctx.fillRect(fx + 4, fy + 33, 5, 1);
+
+        // Gloves & Southpaw Action
         ctx.fillStyle = glovesCol;
-        ctx.fillRect(isP1 ? fx + 12 : fx, fy + 12, 6, 6);
+        if (anim === 'JAB') {
+          ctx.fillRect(fx - 4, fy + 12, 7, 6); // Southpaw Left Straight
+          ctx.fillStyle = whiteCol;
+          ctx.fillRect(fx + 2, fy + 12, 2, 6);
+        } else if (anim === 'UPPERCUT') {
+          ctx.fillRect(fx + 3, fy + 2, 6, 7);
+          ctx.fillStyle = whiteCol;
+          ctx.fillRect(fx + 3, fy + 8, 6, 2);
+        } else {
+          // High Guard Southpaw
+          ctx.fillRect(fx + 3 + microFeint, fy + 11, 6, 6); // Lead Glove High
+          ctx.fillStyle = whiteCol;
+          ctx.fillRect(fx + 3 + microFeint, fy + 16, 6, 1);
 
-        ctx.strokeStyle = PICO_PALETTE[0];
-        ctx.strokeRect(fx + 3, fy - 1, 14, 40);
+          ctx.fillStyle = glovesCol;
+          ctx.fillRect(fx + 9, fy + 14, 6, 5); // Rear Glove
+        }
+
+        ctx.strokeStyle = blackCol;
+        ctx.strokeRect(fx + 3, fy - 1, 15, 41);
       }
     }
 
@@ -1180,9 +1343,9 @@
       ctx.fillStyle = PICO_PALETTE[7];
       ctx.fillRect(41, 90, 46, 23);
 
-      // Draw Pre-Rendered High-Fidelity Boxer Sprites!
-      drawFighterSprite(41, 50, true, p1.anim);  // Adrien Broner
-      drawFighterSprite(65, 50, false, p2.anim); // Deen The Great
+      // Draw Masterpiece Boxer Pixel Art & Idle Animations!
+      drawMasterpieceBoxer(41, 50, true, p1.anim);  // Adrien Broner
+      drawMasterpieceBoxer(65, 50, false, p2.anim); // Deen The Great
 
       p1.draw();
       p2.draw();
@@ -1213,6 +1376,8 @@
     }
 
     function update() {
+      globalFrameCount++;
+
       p1.update();
       p2.update();
 
