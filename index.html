@@ -214,7 +214,7 @@
   <div class="arcade-cabinet">
     <div class="cabinet-header">
       <div class="brand-title">CRASH OUT: RING RUSH</div>
-      <div class="badge-pico8">DYNAMIC PUNCH v1.4.0</div>
+      <div class="badge-pico8">SMOOTH ANIMATION v1.5.0</div>
     </div>
 
     <div class="viewport-container">
@@ -250,11 +250,11 @@
 
   <script>
     // =========================================================================
-    // DYNAMIC PUNCH LUNGE & DRAMATIC HIT REACTION ENGINE v1.4.0
-    // - Smooth forward lunge across ring stage so gloves physically CONNECT with opponent
-    // - Dramatic head knockback, body tilt, white impact flash & sweat particle spray
-    // - Grounded feet physics on ring floor canvas (0 mid-air floating)
-    // - 60% Slower arcade pacing for clear, readable, rewarding puzzle boxing
+    // SMOOTH KEYFRAMED BOXING PUNCH & HIT ENGINE v1.5.0
+    // - 60-Frame Smoothstep Interpolation: Zero abrupt pops, snapping, or glitches
+    // - 4-Phase Punch Sequence: Wind-up -> Step-in Lunge -> Glove Contact -> Recovery
+    // - Smooth Head Knockback & Body Hinge with Contact Starburst & Sweat Spray
+    // - Feet strictly grounded on ring floor canvas (0 mid-air floating)
     // =========================================================================
 
     const PICO_PALETTE = [
@@ -263,6 +263,11 @@
       '#FF004D', '#FFA300', '#FFEC27', '#00E436',
       '#29ADFF', '#83769C', '#FF77A8', '#FFCCAA'
     ];
+
+    function smoothstep(edge0, edge1, x) {
+      const t = Math.max(0, Math.min(1, (x - edge0) / (edge1 - edge0)));
+      return t * t * (3 - 2 * t);
+    }
 
     const canvas = document.getElementById('picoCanvas');
     const ctx = canvas.getContext('2d');
@@ -665,11 +670,8 @@
 
           this.anim = 'UPPERCUT';
           opponent.anim = 'FLINCH';
-          this.animTimer = 40;
-          opponent.animTimer = 40;
-
-          // Spawn Contact Starburst & Sweat Particle Spray
-          spawnImpactFx(this.id === 1);
+          this.animTimer = 60; // Smooth 60-Frame Sequence
+          opponent.animTimer = 60;
 
           globalFloatingTexts.push(new FloatingText('SUPER FINISHER!', 50, 40, 10));
         } else {
@@ -1010,22 +1012,20 @@
           play808Sfx('detonate');
         }
 
-        // TRIGGER DRAMATIC PUNCH LUNGE & IMPACT REACTION!
+        // TRIGGER SMOOTH 60-FRAME KEYFRAMED PUNCH SEQUENCE
         if (powerGemCleared || this.comboCount >= 2) {
           this.anim = 'UPPERCUT';
           opponent.anim = 'FLINCH';
           cameraShake = 12;
           play808Sfx('uppercut');
-          spawnImpactFx(this.id === 1);
         } else {
           this.anim = 'JAB';
           opponent.anim = 'FLINCH';
           cameraShake = 6;
           play808Sfx('jab');
-          spawnImpactFx(this.id === 1);
         }
-        this.animTimer = 40;
-        opponent.animTimer = 40;
+        this.animTimer = 60; // 1.0 Full Second Smooth Keyframed Sequence
+        opponent.animTimer = 60;
 
         this.pendingClear = null;
       }
@@ -1297,36 +1297,30 @@
       }
     }
 
-    const p1 = new Board(1, 4, true);  // AI P1
-    const p2 = new Board(2, 88, true); // AI P2
-
     let impactFxTimer = 0;
-    let impactFxP1 = true;
+    let impactTriggeredThisPunch = false;
 
-    function spawnImpactFx(isP1Attacker) {
-      impactFxTimer = 6;
-      impactFxP1 = isP1Attacker;
-
+    function triggerImpactBurst() {
+      impactFxTimer = 8;
       const hitX = 58;
       const hitY = 56;
 
       for (let k = 0; k < 12; k++) {
-        const vx = (Math.random() - 0.5) * 4;
-        const vy = (Math.random() - 0.5) * 4;
+        const vx = (Math.random() - 0.5) * 3.5;
+        const vy = (Math.random() - 0.5) * 3.5;
         const pColor = (k % 3 === 0) ? 10 : (k % 3 === 1 ? 8 : 7);
-        globalParticles.push(new Particle(hitX, hitY, vx, vy, pColor, 18, 2));
+        globalParticles.push(new Particle(hitX, hitY, vx, vy, pColor, 20, 2));
       }
     }
 
     // =========================================================================
-    // DYNAMIC PUNCH LUNGE & DRAMATIC HIT REACTION RENDERER v1.4.0
-    // - Attacker lunges 16px across ring floor so glove physically CONNECTS with opponent
-    // - Defender head snaps back 12px with 18-degree tilt and white flash
-    // - Feet strictly grounded on ring floor canvas at Y = 90
+    // SMOOTH KEYFRAMED BOXER ANIMATION & PUNCH RENDERER v1.5.0
+    // - 60-Frame Smoothstep Interpolation for Wind-up -> Step-in -> Contact -> Recovery
+    // - Smooth Head Knockback & Body Hinge with ZERO abrupt pops or glitches
     // =========================================================================
     function drawBoxer(x, y, isP1, anim, animTimer) {
       let fx = x;
-      let fy = 50; // Feet strictly grounded at 50 + 40 = 90 on ring floor canvas
+      let fy = 50; // Feet strictly grounded on ring floor canvas (50 + 40 = 90)
 
       const idleController = isP1 ? idleP1 : idleP2;
       const { dx, frameIndex } = idleController.getOffsets();
@@ -1338,32 +1332,66 @@
       let isHitFlash = false;
 
       const timerVal = animTimer || 0;
-      const progress = 1.0 - (timerVal / 40.0);
+      const progress = 1.0 - (timerVal / 60.0); // 0.0 to 1.0 over 60 frames
 
-      // --- DRAMATIC ATTACKER PUNCH LUNGE ---
+      // --- SMOOTH KEYFRAMED PUNCH LUNGE SEQUENCE ---
       if (anim === 'JAB' || anim === 'UPPERCUT') {
         currentPose = 3;
-        // Smooth sine lunge forward across ring floor by 16px to CONNECT glove to chin!
-        const lungeOffset = Math.sin(Math.min(1.0, progress / 0.5) * Math.PI) * 16.0;
-        fx += isP1 ? lungeOffset : -lungeOffset;
 
-        if (anim === 'UPPERCUT') {
-          punchTilt = isP1 ? 0.14 : -0.14;
+        // Phase 1 (0.0 - 0.35): Wind-up & Step-in
+        // Phase 2 (0.35 - 0.50): Full Extension & Contact (X=58)
+        // Phase 3 (0.50 - 0.70): Contact Hold (Linger at impact point)
+        // Phase 4 (0.70 - 1.00): Smooth Step-Back Recovery
+        let lungeProgress = 0;
+        if (progress < 0.35) {
+          lungeProgress = smoothstep(0.0, 0.35, progress) * 0.75; // Step in 12px
+        } else if (progress < 0.50) {
+          lungeProgress = 0.75 + smoothstep(0.35, 0.50, progress) * 0.25; // Extend 16px to X=58 contact!
+        } else if (progress < 0.70) {
+          lungeProgress = 1.0; // Hold glove at contact point for 12 frames
         } else {
-          punchTilt = isP1 ? 0.08 : -0.08;
+          lungeProgress = 1.0 - smoothstep(0.70, 1.00, progress); // Smooth return to guard
         }
 
-      // --- DRAMATIC DEFENDER HIT REACTION ---
+        const lungeDist = lungeProgress * 16.0;
+        fx += isP1 ? lungeDist : -lungeDist;
+
+        // Smooth torso lean into punch
+        const tiltAmt = Math.sin(lungeProgress * Math.PI) * (anim === 'UPPERCUT' ? 0.12 : 0.07);
+        punchTilt = isP1 ? tiltAmt : -tiltAmt;
+
+        // Trigger Impact Starburst exactly at impact point (progress ≈ 0.45)
+        if (progress >= 0.45 && progress < 0.55 && !impactTriggeredThisPunch) {
+          impactTriggeredThisPunch = true;
+          triggerImpactBurst();
+        } else if (progress >= 0.95) {
+          impactTriggeredThisPunch = false;
+        }
+
+      // --- SMOOTH KEYFRAMED DEFENDER HIT REACTION ---
       } else if (anim === 'FLINCH') {
         currentPose = 4;
-        // Snap head & body back by 13px upon impact!
-        const flinchOffset = Math.sin(Math.min(1.0, progress / 0.5) * Math.PI) * 13.0;
-        fx += isP1 ? -flinchOffset : flinchOffset;
 
-        // Head knockback tilt back by 18 degrees (0.30 rad)
-        flinchTilt = isP1 ? -0.30 : 0.30;
+        // Phase 1 (0.0 - 0.45): High Guard anticipating hit
+        // Phase 2 (0.45 - 0.70): Smooth Head Knockback & Body Hinge (12px back)
+        // Phase 3 (0.70 - 1.00): Smooth Recovery Step-Back to Stance
+        let flinchProgress = 0;
+        if (progress < 0.45) {
+          flinchProgress = 0;
+        } else if (progress < 0.70) {
+          flinchProgress = smoothstep(0.45, 0.70, progress);
+        } else {
+          flinchProgress = 1.0 - smoothstep(0.70, 1.00, progress);
+        }
 
-        if (timerVal > 30) isHitFlash = true;
+        const flinchDist = flinchProgress * 12.0;
+        fx += isP1 ? -flinchDist : flinchDist;
+
+        // Smooth Head Tilt Back (15 degrees / 0.25 rad)
+        const tiltAmt = flinchProgress * 0.25;
+        flinchTilt = isP1 ? -tiltAmt : tiltAmt;
+
+        if (progress >= 0.45 && progress < 0.55) isHitFlash = true;
       }
 
       // Dynamic Ambient Ring Drop Shadow ON THE FLOOR CANVAS
@@ -1386,14 +1414,14 @@
         }
 
         if (isHitFlash) {
-          ctx.filter = 'brightness(2.5)';
+          ctx.filter = 'brightness(2.2)';
         }
 
-        if (anim === 'JAB' || anim === 'UPPERCUT') { // ATTACK LUNGE EXTENSION
+        if (anim === 'JAB' || anim === 'UPPERCUT') { // SMOOTH PUNCH EXTENSION
           ctx.translate(fx + 11, fy + 38);
           ctx.rotate(punchTilt);
           ctx.drawImage(singleCanvas, -11, -38, 22, 40);
-        } else if (anim === 'FLINCH') { // DRAMATIC HEAD KNOCKBACK TILT
+        } else if (anim === 'FLINCH') { // SMOOTH HEAD KNOCKBACK TILT
           ctx.translate(fx + 11, fy + 38);
           ctx.rotate(flinchTilt);
           ctx.drawImage(singleCanvas, -11, -38, 22, 40);
