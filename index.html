@@ -214,7 +214,7 @@
   <div class="arcade-cabinet">
     <div class="cabinet-header">
       <div class="brand-title">CRASH OUT: RING RUSH</div>
-      <div class="badge-pico8">FAST AI MATCH v0.8.0</div>
+      <div class="badge-pico8">AAA PIXEL BLOCKS v0.9.0</div>
     </div>
 
     <div class="viewport-container">
@@ -250,11 +250,11 @@
 
   <script>
     // =========================================================================
-    // FAST AI MATCH & HIGH-DEF CAPCOM SPRITE ENGINE v0.8.0
-    // - Fast AI hard-drop execution: Zero pauses between block drops!
+    // AAA CAPCOM ARCADE PIXEL ART BLOCK & SPRITE ENGINE v0.9.0
+    // - AAA 3D Beveled Bezel Gem Blocks, Pulsing Crystal Orbs, & 2x2 Power Gems
+    // - Fast non-stop AI hard-drop execution with zero pauses
     // - Restored original detailed 16-bit Capcom boxer figures from v0.1.0
     // - 100% clean transparent chroma keying — ZERO background boxes!
-    // - Punches trigger ONLY on block breaking / cluster detonation!
     // =========================================================================
 
     const PICO_PALETTE = [
@@ -306,7 +306,7 @@
         const isLight = (r > 120 && g > 120 && b > 120);
         const isGray = (Math.abs(r - g) < 25 && Math.abs(g - b) < 25 && r > 80);
         if (isLight || isGray) {
-          d[i+3] = 0; // 100% transparent
+          d[i+3] = 0;
         }
       }
       cCtx.putImageData(imgData, 0, 0);
@@ -467,7 +467,7 @@
     const ROWS = 12;
     const CELL_W = 6;
     const CELL_H = 8;
-    const GEM_COLORS = [8, 12, 11, 10];
+    const GEM_COLORS = [8, 12, 11, 10]; // Red, Blue, Green, Yellow
 
     let gameMode = 'AI_VS_AI';
     let cameraShake = 0;
@@ -530,7 +530,7 @@
       constructor(isP1) {
         this.isP1 = isP1;
         this.actionState = 'SHOULDER_ROLL';
-        this.frameIndex = 1; // 0: STANCE, 1: SHOULDER_ROLL, 2: DUCK, 3: HIGH_BLOCK, 4: SLIP
+        this.frameIndex = 1;
         this.timer = 0;
         this.duration = 40;
       }
@@ -605,7 +605,7 @@
 
         this.pair = null;
         this.dropTimer = 0;
-        this.dropInterval = 20; // FAST PUZZLE PACING!
+        this.dropInterval = 20;
         this.lockDelay = 0;
 
         this.anim = 'IDLE';
@@ -622,7 +622,6 @@
         this.dropTimer = 0;
         this.lockDelay = 0;
 
-        // Smart AI column targeting
         const colHeights = Array(COLS).fill(0);
         for (let c = 0; c < COLS; c++) {
           for (let r = 0; r < ROWS; r++) {
@@ -1062,12 +1061,10 @@
           if (this.animTimer === 0) this.anim = 'IDLE';
         }
 
-        // Failsafe pair spawner
         if (!this.pair) {
           this.spawnPair();
         }
 
-        // FAST AI AUTO-PLAY LOGIC: HARD DROPS WHEN ALIGNED WITH TARGET COLUMN!
         if (this.isAi && this.pair) {
           this.aiTimer++;
           if (this.aiTimer >= 3) {
@@ -1078,7 +1075,6 @@
             } else if (this.pair.x > this.aiTargetCol) {
               this.move(-1);
             } else {
-              // Target reached -> HARD DROP IMMEDIATELY!
               this.dropHard();
             }
 
@@ -1138,15 +1134,24 @@
         }
       }
 
+      // =======================================================================
+      // AAA CAPCOM ARCADE 16-BIT PIXEL ART BLOCK RENDERER v0.9.0
+      // 3D Beveled Bezels, Pulsing Crystal Orbs, Gold Power Gems & Granite Counters
+      // =======================================================================
       drawGem(x, y, type, isPower, squishFactor, timerVal) {
         let colorIdx = 8;
+        let darkColorIdx = 0;
         let isCrash = false;
         let isDiamond = false;
         let isCounter = false;
 
-        if (type >= 1 && type <= 4) colorIdx = GEM_COLORS[type - 1];
+        if (type === 1) { colorIdx = 8; darkColorIdx = 2; }       // Red (PICO #FF004D / #7E2553)
+        else if (type === 2) { colorIdx = 12; darkColorIdx = 1; }  // Blue (PICO #29ADFF / #1D2B53)
+        else if (type === 3) { colorIdx = 11; darkColorIdx = 3; }  // Green (PICO #00E436 / #008751)
+        else if (type === 4) { colorIdx = 10; darkColorIdx = 4; }  // Yellow (PICO #FFEC27 / #AB5236)
         else if (type >= 5 && type <= 8) {
           colorIdx = GEM_COLORS[type - 5];
+          darkColorIdx = (type === 5 ? 2 : type === 6 ? 1 : type === 7 ? 3 : 4);
           isCrash = true;
         } else if (type === 9) {
           isDiamond = true;
@@ -1163,53 +1168,94 @@
         const drawW = CELL_W + squishX;
         const drawH = CELL_H - squishY;
 
-        if (isCrash) {
-          const glowPulse = Math.abs(Math.sin(this.pulseAngle * 4));
-          ctx.fillStyle = (glowPulse > 0.5) ? PICO_PALETTE[7] : PICO_PALETTE[10];
+        if (isCrash) { // AAA 3D CRASH ORB (DETONATOR)
+          const glowPulse = Math.abs(Math.sin(this.pulseAngle * 5));
+          const ringColor = (glowPulse > 0.4) ? PICO_PALETTE[10] : PICO_PALETTE[9]; // Gold / Orange glow
+
+          // Outer Pulsing Aura
+          ctx.fillStyle = ringColor;
           ctx.fillRect(drawX, drawY, drawW, drawH);
 
+          // 3D Sphere Core Body
           ctx.fillStyle = PICO_PALETTE[colorIdx];
           ctx.fillRect(drawX + 1, drawY, drawW - 2, drawH);
           ctx.fillRect(drawX, drawY + 1, drawW, drawH - 2);
 
+          // Top-Left Curved Rim Highlight
           ctx.fillStyle = PICO_PALETTE[7];
-          ctx.fillRect(drawX + 1, drawY + 1, 2, 2);
+          ctx.fillRect(drawX + 1, drawY + 1, 2, 1);
+          ctx.fillRect(drawX + 1, drawY + 2, 1, 1);
 
-          const starFrame = Math.floor(this.pulseAngle * 6) % 2;
-          ctx.fillStyle = (starFrame === 0) ? PICO_PALETTE[10] : PICO_PALETTE[7];
-          ctx.fillRect(drawX + 2, drawY + 3, 2, 2);
-          ctx.fillRect(drawX + 1, drawY + 3, 4, 1);
-          ctx.fillRect(drawX + 2, drawY + 2, 1, 4);
+          // Flashing Center Star Rune (★)
+          const starFlash = Math.floor(this.pulseAngle * 8) % 2;
+          ctx.fillStyle = (starFlash === 0) ? PICO_PALETTE[7] : PICO_PALETTE[10];
+          ctx.fillRect(drawX + 2, drawY + 2, 2, 4);
+          ctx.fillRect(drawX + 1, drawY + 3, 4, 2);
 
           ctx.strokeStyle = PICO_PALETTE[0];
           ctx.strokeRect(drawX, drawY, drawW, drawH);
 
-        } else {
+        } else if (isDiamond) { // AAA PRISMATIC RAINBOW DIAMOND
+          const diaCol = Math.floor(this.pulseAngle * 6) % 4;
+          ctx.fillStyle = PICO_PALETTE[GEM_COLORS[diaCol]];
+          ctx.fillRect(drawX, drawY, drawW, drawH);
+
+          ctx.fillStyle = PICO_PALETTE[7];
+          ctx.fillRect(drawX + 1, drawY + 1, drawW - 2, 2);
+          ctx.fillRect(drawX + 2, drawY + 3, 2, 2);
+
+          ctx.strokeStyle = PICO_PALETTE[10];
+          ctx.strokeRect(drawX, drawY, drawW, drawH);
+
+        } else if (isCounter) { // AAA GRANITE STONE COUNTER BLOCK
+          ctx.fillStyle = PICO_PALETTE[5];
+          ctx.fillRect(drawX, drawY, drawW, drawH);
+
+          // Hairline Crack Lines
+          ctx.fillStyle = PICO_PALETTE[6];
+          ctx.fillRect(drawX + 1, drawY + 1, 2, 1);
+          ctx.fillRect(drawX + 3, drawY + 4, 2, 1);
+
+          // Countdown Number with Drop Shadow
+          ctx.fillStyle = PICO_PALETTE[0];
+          ctx.font = 'bold 7px monospace';
+          ctx.fillText(timerVal, drawX + 2, drawY + 7);
+          ctx.fillStyle = PICO_PALETTE[7];
+          ctx.fillText(timerVal, drawX + 1, drawY + 6);
+
+          ctx.strokeStyle = PICO_PALETTE[0];
+          ctx.strokeRect(drawX, drawY, drawW, drawH);
+
+        } else { // AAA 3D BEVELED CRYSTAL GEM BLOCK
+          // Base Pitch Black Border
+          ctx.strokeStyle = PICO_PALETTE[0];
+          ctx.strokeRect(drawX, drawY, drawW, drawH);
+
+          // Inner Color Fill
           ctx.fillStyle = PICO_PALETTE[colorIdx];
           ctx.fillRect(drawX + 1, drawY + 1, drawW - 2, drawH - 2);
 
-          ctx.strokeStyle = PICO_PALETTE[0];
-          ctx.strokeRect(drawX, drawY, drawW, drawH);
-
+          // Top & Left 1px Specular White Highlight Bezel
           ctx.fillStyle = PICO_PALETTE[7];
-          ctx.fillRect(drawX + 1, drawY + 1, drawW - 3, 1);
-          ctx.fillRect(drawX + 1, drawY + 1, 1, drawH - 3);
+          ctx.fillRect(drawX + 1, drawY + 1, drawW - 2, 1);
+          ctx.fillRect(drawX + 1, drawY + 1, 1, drawH - 2);
 
+          // Bottom & Right 1px Dark Bezel Shadow
+          ctx.fillStyle = PICO_PALETTE[darkColorIdx];
+          ctx.fillRect(drawX + 1, drawY + drawH - 2, drawW - 2, 1);
+          ctx.fillRect(drawX + drawW - 2, drawY + 1, 1, drawH - 2);
+
+          // Top-Left Sparkle Flare (★)
+          ctx.fillStyle = PICO_PALETTE[7];
+          ctx.fillRect(drawX + 2, drawY + 2, 1, 1);
+
+          // Fused 2x2 Power Gem Golden Border Accent
           if (isPower) {
             ctx.strokeStyle = PICO_PALETTE[10];
+            ctx.lineWidth = 1;
             ctx.strokeRect(drawX + 0.5, drawY + 0.5, drawW - 1, drawH - 1);
-          }
-
-          if (isDiamond) {
-            const diaCol = Math.floor(this.pulseAngle * 4) % 4;
-            ctx.fillStyle = PICO_PALETTE[GEM_COLORS[diaCol]];
-            ctx.fillRect(drawX + 2, drawY + 2, 2, 4);
-          }
-
-          if (isCounter) {
-            ctx.fillStyle = PICO_PALETTE[7];
-            ctx.font = '6px monospace';
-            ctx.fillText(timerVal, drawX + 1, drawY + 6);
+            ctx.fillStyle = PICO_PALETTE[10];
+            ctx.fillRect(drawX + 2, drawY + 3, 2, 2);
           }
         }
       }
@@ -1234,7 +1280,6 @@
 
       let currentPose = frameIndex;
 
-      // PUNCH ANIMATIONS OVERRIDE KEYFRAME ONLY WHEN BREAKING BLOCKS!
       if (anim === 'JAB') {
         currentPose = 3;
         fx += isP1 ? 6 : -6;
