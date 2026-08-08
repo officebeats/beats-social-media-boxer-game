@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>CRASH OUT: RING RUSH — PICO-8 Puzzle Boxing</title>
   <style>
     :root {
@@ -29,19 +29,21 @@
       user-select: none;
       -webkit-user-select: none;
       touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
     }
 
-    body {
+    html, body {
       margin: 0;
       padding: 0;
-      background-color: #080810;
+      width: 100%;
+      height: 100%;
+      background-color: #05050a;
       color: var(--pico-white);
-      font-family: 'Courier New', Courier, monospace;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Courier New', monospace;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      min-height: 100vh;
+      justify-content: space-between;
       overflow: hidden;
     }
 
@@ -49,25 +51,30 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      background: linear-gradient(180deg, #181428 0%, #0d0a18 100%);
-      border: 4px solid #2a2244;
-      border-radius: 16px;
-      box-shadow: 0 0 40px rgba(0, 0, 0, 0.8), 0 0 15px rgba(41, 173, 255, 0.3);
-      padding: 16px;
-      max-width: 100vw;
+      justify-content: space-between;
+      width: 100%;
+      max-width: 600px;
+      height: 100vh;
+      height: 100dvh;
+      background: linear-gradient(180deg, #141022 0%, #070510 100%);
+      padding: 8px 12px env(safe-area-inset-bottom) 12px;
+      box-shadow: 0 0 50px rgba(0, 0, 0, 0.9);
     }
 
+    /* HEADER MARQUEE */
     .cabinet-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       width: 100%;
-      margin-bottom: 12px;
+      padding: 4px 4px;
+      margin-bottom: 4px;
+      flex-shrink: 0;
     }
 
     .brand-title {
-      font-size: 16px;
-      font-weight: bold;
+      font-size: 15px;
+      font-weight: 900;
       color: var(--pico-yellow);
       text-shadow: 2px 2px 0px var(--pico-red);
       letter-spacing: 1px;
@@ -77,73 +84,81 @@
       background-color: var(--pico-dark-blue);
       color: var(--pico-pink);
       border: 1px solid var(--pico-blue);
-      border-radius: 4px;
-      padding: 2px 6px;
+      border-radius: 6px;
+      padding: 3px 8px;
       font-size: 10px;
-      font-weight: bold;
+      font-weight: 800;
     }
 
+    /* MAXIMIZED GAME VIEWPORT CANVAS */
     .viewport-container {
       position: relative;
+      width: 100%;
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       background-color: #000;
-      border: 4px solid var(--pico-dark-gray);
-      border-radius: 8px;
-      box-shadow: inset 0 0 10px rgba(0,0,0,0.9);
+      border: 3px solid var(--pico-dark-gray);
+      border-radius: 12px;
+      box-shadow: inset 0 0 15px rgba(0,0,0,0.95), 0 4px 15px rgba(0,0,0,0.6);
       overflow: hidden;
+      margin: 2px 0;
     }
 
-    /* Crisp PICO-8 128x128 Pixel Canvas */
+    /* Responsive PICO-8 128x128 Pixel Canvas - Max Real Estate */
     canvas#picoCanvas {
-      width: 512px;
-      height: 512px;
+      width: 100%;
+      height: 100%;
+      max-width: calc(100vh - 220px);
+      max-height: calc(100vh - 220px);
+      aspect-ratio: 1 / 1;
+      object-fit: contain;
       image-rendering: pixelated;
       image-rendering: crisp-edges;
       display: block;
     }
 
-    @media (max-width: 560px) {
-      canvas#picoCanvas {
-        width: 320px;
-        height: 320px;
-      }
-    }
-
-    /* Controls Panel */
+    /* ERGONOMIC MOBILE TOUCH CONTROLS */
     .control-panel {
       display: flex;
       justify-content: space-between;
       align-items: center;
       width: 100%;
-      margin-top: 12px;
-      gap: 12px;
+      padding: 6px 4px 2px 4px;
+      flex-shrink: 0;
+      gap: 8px;
     }
 
+    /* LEFT THUMB D-PAD */
     .dpad-container {
       display: grid;
-      grid-template-columns: repeat(3, 40px);
-      grid-template-rows: repeat(3, 40px);
-      gap: 4px;
+      grid-template-columns: repeat(3, 46px);
+      grid-template-rows: repeat(3, 46px);
+      gap: 3px;
     }
 
     .btn-ctrl {
-      background-color: #241e38;
-      border: 2px solid #4a3e6b;
+      background: linear-gradient(145deg, #2b2444, #1a152d);
+      border: 2px solid #574880;
       color: var(--pico-white);
-      border-radius: 6px;
+      border-radius: 8px;
       font-weight: bold;
-      font-size: 14px;
+      font-size: 16px;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      box-shadow: 0 4px 0 #120e1f;
+      box-shadow: 0 4px 0 #100c1e;
+      transition: background 0.05s, transform 0.05s;
     }
 
     .btn-ctrl:active, .btn-ctrl.active {
       transform: translateY(2px);
-      box-shadow: 0 2px 0 #120e1f;
-      background-color: var(--pico-blue);
+      box-shadow: 0 1px 0 #100c1e;
+      background: var(--pico-blue);
       color: var(--pico-black);
+      border-color: var(--pico-white);
     }
 
     .dpad-up { grid-column: 2; grid-row: 1; }
@@ -151,110 +166,153 @@
     .dpad-down { grid-column: 2; grid-row: 2; }
     .dpad-right { grid-column: 3; grid-row: 2; }
 
+    /* RIGHT THUMB ACTION BUTTONS */
     .action-buttons {
       display: flex;
-      gap: 12px;
+      align-items: center;
+      gap: 14px;
     }
 
     .btn-action {
-      width: 54px;
-      height: 54px;
+      width: 62px;
+      height: 62px;
       border-radius: 50%;
-      font-size: 16px;
-      font-weight: bold;
+      font-size: 18px;
+      font-weight: 900;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 4px 0 #120e1f;
-      border: 2px solid #fff;
+      box-shadow: 0 5px 0 #100c1e;
+      border: 3px solid #ffffff;
+      cursor: pointer;
+      transition: transform 0.05s, box-shadow 0.05s;
+    }
+
+    .btn-action:active, .btn-action.active {
+      transform: translateY(3px);
+      box-shadow: 0 2px 0 #100c1e;
     }
 
     .btn-o {
-      background-color: var(--pico-orange);
+      background: linear-gradient(145deg, #ffb31a, #e68a00);
       color: var(--pico-black);
     }
 
     .btn-x {
-      background-color: var(--pico-pink);
+      background: linear-gradient(145deg, #ff8cb6, #e64d8a);
       color: var(--pico-black);
+    }
+
+    .btn-x.super-ready {
+      animation: pulseSuper 0.8s infinite alternate;
+      border-color: var(--pico-yellow);
+    }
+
+    @keyframes pulseSuper {
+      0% { box-shadow: 0 0 5px var(--pico-yellow), 0 5px 0 #100c1e; }
+      100% { box-shadow: 0 0 20px var(--pico-yellow), 0 5px 0 #100c1e; }
     }
 
     .btn-action span {
       font-size: 8px;
+      font-weight: 800;
       margin-top: 2px;
+      letter-spacing: 0.5px;
     }
 
+    /* COMPACT OPTIONS BAR */
     .options-bar {
       display: flex;
-      gap: 8px;
-      margin-top: 10px;
+      justify-content: space-between;
+      width: 100%;
+      gap: 6px;
+      margin-top: 4px;
+      flex-shrink: 0;
     }
 
     .btn-opt {
-      background: var(--pico-dark-blue);
-      border: 1px solid var(--pico-blue);
+      flex: 1;
+      background: #1d1733;
+      border: 1px solid #413766;
       color: var(--pico-white);
-      padding: 4px 10px;
-      border-radius: 4px;
-      font-size: 11px;
+      padding: 6px 4px;
+      border-radius: 6px;
+      font-size: 10px;
+      font-weight: 700;
       cursor: pointer;
+      text-align: center;
     }
 
-    .instructions {
-      font-size: 10px;
-      color: var(--pico-light-gray);
-      margin-top: 8px;
-      text-align: center;
+    .btn-opt:active {
+      background: var(--pico-dark-blue);
+      border-color: var(--pico-blue);
+    }
+
+    @media (min-width: 601px) {
+      .arcade-cabinet {
+        height: auto;
+        min-height: 95vh;
+        border: 4px solid #2a2244;
+        border-radius: 16px;
+        margin: 20px 0;
+      }
+      canvas#picoCanvas {
+        width: 480px;
+        height: 480px;
+        max-width: 480px;
+        max-height: 480px;
+      }
     }
   </style>
 </head>
 <body>
 
   <div class="arcade-cabinet">
+    <!-- HEADER MARQUEE -->
     <div class="cabinet-header">
       <div class="brand-title">CRASH OUT: RING RUSH</div>
-      <div class="badge-pico8">ANATOMICAL SHOULDER v2.7.0</div>
+      <div class="badge-pico8">MOBILE OPTIMIZED v3.0.0</div>
     </div>
 
+    <!-- MAXIMIZED GAME VIEWPORT CANVAS -->
     <div class="viewport-container">
       <canvas id="picoCanvas" width="128" height="128"></canvas>
     </div>
 
+    <!-- ERGONOMIC TOUCH CONTROLS -->
     <div class="control-panel">
-      <!-- D-PAD -->
+      <!-- LEFT THUMB D-PAD -->
       <div class="dpad-container">
-        <button class="btn-ctrl dpad-up" id="btnUp">▲</button>
-        <button class="btn-ctrl dpad-left" id="btnLeft">◄</button>
-        <button class="btn-ctrl dpad-down" id="btnDown">▼</button>
-        <button class="btn-ctrl dpad-right" id="btnRight">►</button>
+        <button class="btn-ctrl dpad-up" id="btnUp" aria-label="Drop Hard">▲</button>
+        <button class="btn-ctrl dpad-left" id="btnLeft" aria-label="Move Left">◄</button>
+        <button class="btn-ctrl dpad-down" id="btnDown" aria-label="Move Down">▼</button>
+        <button class="btn-ctrl dpad-right" id="btnRight" aria-label="Move Right">►</button>
       </div>
 
-      <!-- ACTION BUTTONS -->
+      <!-- RIGHT THUMB ACTION BUTTONS -->
       <div class="action-buttons">
         <button class="btn-action btn-o" id="btnO">🅾️<span>ROTATE</span></button>
         <button class="btn-action btn-x" id="btnX">❎<span>SUPER</span></button>
       </div>
     </div>
 
+    <!-- COMPACT OPTIONS BAR -->
     <div class="options-bar">
       <button class="btn-opt" id="btnMode">MODE: AI VS AI</button>
       <button class="btn-opt" id="btnReset">RESET MATCH</button>
       <button class="btn-opt" id="btnAudio">AUDIO: 808 ON</button>
     </div>
-
-    <div class="instructions">
-      AI VS AI Auto-Match | Keyboard: Arrows = Move/Drop | Z/X = Action
-    </div>
   </div>
 
   <script>
     // =========================================================================
-    // CAPCOM ANATOMICAL SHOULDER-JOINT ENGINE v2.7.0
-    // - EXACT SHOULDER JOINT COORDINATE AT LOCAL Y = -24 (4px below neck, 10px above waist)!
-    // - ZERO HEAD LINES! ZERO STOMACH LINES!
-    // - 100% physically connected to the top deltoid muscle joint!
-    // - Exact RGB skin color matching (#8C4A27 for Broner, #C58C5D for Deen)
+    // CAPCOM MOBILE-OPTIMIZED ARCADE ENGINE v3.0.0
+    // - Maximized responsive PICO-8 canvas viewport (100% available height/width)!
+    // - Ergonomic 62px touch action buttons + 46px D-pad touch targets!
+    // - Touch haptic vibration feedback (navigator.vibrate)!
+    // - Exact anatomical shoulder joint coordinate (sockY = -24)!
+    // - Exact RGB skin color matching (#8C4A27 for Broner, #C58C5D for Deen)!
     // =========================================================================
 
     const PICO_PALETTE = [
@@ -267,6 +325,12 @@
     function smoothstep(edge0, edge1, x) {
       const t = Math.max(0, Math.min(1, (x - edge0) / (edge1 - edge0)));
       return t * t * (3 - 2 * t);
+    }
+
+    function triggerHaptic(duration = 15) {
+      if (navigator.vibrate) {
+        try { navigator.vibrate(duration); } catch (e) {}
+      }
     }
 
     const canvas = document.getElementById('picoCanvas');
@@ -383,18 +447,6 @@
           gain.connect(audioCtx.destination);
           osc.start(t);
           osc.stop(t + 0.35);
-        } else if (type === 'cluster_pop') {
-          const osc = audioCtx.createOscillator();
-          const gain = audioCtx.createGain();
-          osc.type = 'triangle';
-          osc.frequency.setValueAtTime(300, t);
-          osc.frequency.exponentialRampToValueAtTime(600, t + 0.12);
-          gain.gain.setValueAtTime(0.25, t);
-          gain.gain.linearRampToValueAtTime(0.01, t + 0.12);
-          osc.connect(gain);
-          gain.connect(audioCtx.destination);
-          osc.start(t);
-          osc.stop(t + 0.12);
         } else if (type === 'super') {
           const osc = audioCtx.createOscillator();
           const gain = audioCtx.createGain();
@@ -616,7 +668,7 @@
 
         this.pair = null;
         this.dropTimer = 0;
-        this.dropInterval = 45; // Smooth Steady Soft Falling Speed
+        this.dropInterval = 45;
         this.lockDelay = 0;
 
         this.anim = 'IDLE';
@@ -625,7 +677,7 @@
         this.aiTargetCol = 2;
         this.aiTimer = 0;
 
-        this.state = 'SPAWN'; // 'SPAWN', 'FALLING', 'CLEARING', 'GRAVITY'
+        this.state = 'SPAWN';
         this.clearTimer = 0;
         this.pendingClear = null;
       }
@@ -635,7 +687,6 @@
         this.dropTimer = 0;
         this.lockDelay = 0;
 
-        // Intelligent column targeting
         const colHeights = Array(COLS).fill(0);
         for (let c = 0; c < COLS; c++) {
           for (let r = 0; r < ROWS; r++) {
@@ -693,10 +744,11 @@
           cameraShake = 16;
           flashFrames = 6;
           play808Sfx('super');
+          triggerHaptic(50);
 
           this.anim = 'UPPERCUT';
           opponent.anim = 'FLINCH';
-          this.animTimer = 72; // Grounded 72-Frame (~1.2s) Punch Sequence
+          this.animTimer = 72;
           opponent.animTimer = 72;
 
           globalFloatingTexts.push(new FloatingText('-35 HP!', 58, 30, 8));
@@ -742,6 +794,7 @@
         if (this.isValid(this.pair.x + dir, this.pair.y, this.pair.rot)) {
           this.pair.x += dir;
           play808Sfx('step');
+          triggerHaptic(10);
         }
       }
 
@@ -762,6 +815,7 @@
           this.pair.y = newY;
           this.pair.rot = newRot;
           play808Sfx('rotate');
+          triggerHaptic(15);
         }
       }
 
@@ -771,6 +825,7 @@
           this.pair.y += 1;
           this.pair.vy += 1;
           this.score += 1;
+          triggerHaptic(8);
         } else {
           this.lockPair();
         }
@@ -782,6 +837,7 @@
           this.pair.y += 1;
           this.score += 2;
         }
+        triggerHaptic(25);
         this.lockPair();
       }
 
@@ -810,7 +866,6 @@
         this.processRainbowDiamond();
         this.detectPowerGems();
         
-        // Evaluate Matches Deterministically
         const matchFound = this.evaluateMatches();
         if (matchFound) {
           this.state = 'CLEARING';
@@ -1028,10 +1083,8 @@
 
         flashFrames = 3;
 
-        // DISPLAY FLOATING DAMAGE NUMBERS RIGHT AT THE IMPACT SITE
         globalFloatingTexts.push(new FloatingText(`-${dmg} HP!`, 58, 32, 8));
 
-        // TRIGGER DISTINCT PUNCH TYPES (JAB, STRAIGHT, HOOK, UPPERCUT)
         if (powerGemCleared || this.comboCount >= 3) {
           this.anim = 'UPPERCUT';
           opponent.anim = 'FLINCH';
@@ -1053,7 +1106,7 @@
           cameraShake = 6;
           play808Sfx('jab');
         }
-        this.animTimer = 72; // Grounded 72-Frame (~1.2s) Pacing
+        this.animTimer = 72;
         opponent.animTimer = 72;
 
         this.pendingClear = null;
@@ -1119,7 +1172,6 @@
           if (this.animTimer === 0) this.anim = 'IDLE';
         }
 
-        // --- SYNCHRONOUS STATE MACHINE LOGIC ---
         if (this.state === 'SPAWN') {
           this.spawnPair();
         } else if (this.state === 'CLEARING') {
@@ -1143,7 +1195,6 @@
             }
           }
         } else if (this.state === 'FALLING') {
-          // FAIL-SAFE AI TICK ENGINE (Every 10 frames ~0.16s per decision)
           if (this.isAi && this.pair) {
             this.aiTimer++;
             if (this.aiTimer >= 10) {
@@ -1223,7 +1274,6 @@
         }
       }
 
-      // AAA CAPCOM ARCADE 16-BIT PIXEL ART BLOCK RENDERER
       drawGem(x, y, type, isPower, squishFactor, timerVal) {
         let colorIdx = 8;
         let darkColorIdx = 0;
@@ -1254,7 +1304,7 @@
         const drawW = CELL_W + squishX;
         const drawH = CELL_H - squishY;
 
-        if (isCrash) { // AAA 3D CRASH ORB (DETONATOR)
+        if (isCrash) {
           const glowPulse = Math.abs(Math.sin(this.pulseAngle * 5));
           const ringColor = (glowPulse > 0.4) ? PICO_PALETTE[10] : PICO_PALETTE[9];
 
@@ -1277,7 +1327,7 @@
           ctx.strokeStyle = PICO_PALETTE[0];
           ctx.strokeRect(drawX, drawY, drawW, drawH);
 
-        } else if (isDiamond) { // AAA PRISMATIC RAINBOW DIAMOND
+        } else if (isDiamond) {
           const diaCol = Math.floor(this.pulseAngle * 6) % 4;
           ctx.fillStyle = PICO_PALETTE[GEM_COLORS[diaCol]];
           ctx.fillRect(drawX, drawY, drawW, drawH);
@@ -1289,7 +1339,7 @@
           ctx.strokeStyle = PICO_PALETTE[10];
           ctx.strokeRect(drawX, drawY, drawW, drawH);
 
-        } else if (isCounter) { // AAA GRANITE STONE COUNTER BLOCK
+        } else if (isCounter) {
           ctx.fillStyle = PICO_PALETTE[5];
           ctx.fillRect(drawX, drawY, drawW, drawH);
 
@@ -1306,7 +1356,7 @@
           ctx.strokeStyle = PICO_PALETTE[0];
           ctx.strokeRect(drawX, drawY, drawW, drawH);
 
-        } else { // AAA 3D BEVELED CRYSTAL GEM BLOCK
+        } else {
           ctx.strokeStyle = PICO_PALETTE[0];
           ctx.strokeRect(drawX, drawY, drawW, drawH);
 
@@ -1357,9 +1407,8 @@
     }
 
     // =========================================================================
-    // CAPCOM ANATOMICAL SHOULDER-JOINT ENGINE v2.7.0
+    // CAPCOM ANATOMICAL SHOULDER-JOINT ENGINE v3.0.0
     // - EXACT SHOULDER JOINT COORDINATE AT LOCAL Y = -24 (4px below neck, 10px above waist)!
-    // - ZERO HEAD LINES! ZERO STOMACH LINES!
     // =========================================================================
     function drawPunchOverlay(ctx, isP1, punchType, extProgress) {
       const skinColor = isP1 ? '#8C4A27' : '#C58C5D';     // Broner warm brown vs Deen golden tan
@@ -1369,24 +1418,19 @@
       const gloveColor = isP1 ? PICO_PALETTE[8] : PICO_PALETTE[12]; // Red glove vs Blue glove
       const shineColor = PICO_PALETTE[7];
 
-      // Exact Shoulder Joint on HD Sprite Image: (3, -24) (4px below neck -28, 10px above waist -14)!
-
       if (punchType === 'JAB') {
-        const extX = extProgress * 12.0; // Grounded 12px Extension
+        const extX = extProgress * 12.0;
         const sockX = 3;
-        const sockY = -24; // EXACT SHOULDER JOINT!
+        const sockY = -24;
 
-        // Speed trail behind jab glove
         ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
         ctx.fillRect(sockX + 4, sockY - 2, extX, 2);
 
-        // Rounded Deltoid Muscle Shoulder Cap (5x5) Fused to Body
         ctx.fillStyle = skinHighlight;
         ctx.fillRect(sockX - 2, sockY - 2, 5, 2);
         ctx.fillStyle = skinColor;
         ctx.fillRect(sockX - 2, sockY, 5, 3);
 
-        // Sleek Tapered Muscular Lead Arm extending from shoulder joint
         ctx.fillStyle = skinHighlight;
         ctx.fillRect(sockX, sockY - 1, extX, 1);
         ctx.fillStyle = skinColor;
@@ -1394,29 +1438,25 @@
         ctx.fillStyle = skinShadow;
         ctx.fillRect(sockX, sockY + 2, extX, 1);
 
-        // Consistent 6x6 Boxing Glove Target at Chin Height!
         ctx.fillStyle = gloveColor;
         ctx.fillRect(sockX + extX, sockY - 3, 6, 6);
         ctx.fillStyle = shineColor;
         ctx.fillRect(sockX + extX + 2, sockY - 2, 2, 2);
 
       } else if (punchType === 'STRAIGHT') {
-        const extX = extProgress * 14.0; // Grounded 14px Extension
-        const sockX = -4;  // Rear shoulder socket
-        const sockY = -23; // EXACT REAR SHOULDER JOINT!
+        const extX = extProgress * 14.0;
+        const sockX = -4;
+        const sockY = -23;
 
-        // Double white shockwave line
         ctx.fillStyle = PICO_PALETTE[10];
         ctx.fillRect(sockX + 2, sockY - 3, extX, 1);
         ctx.fillRect(sockX + 4, sockY + 3, extX, 1);
 
-        // Rear Deltoid Muscle Cap
         ctx.fillStyle = skinHighlight;
         ctx.fillRect(sockX - 2, sockY - 2, 5, 2);
         ctx.fillStyle = skinColor;
         ctx.fillRect(sockX - 2, sockY, 5, 3);
 
-        // Sleek Rear Power Arm extending from rear shoulder across chest
         ctx.fillStyle = skinHighlight;
         ctx.fillRect(sockX, sockY - 1, extX + 6, 1);
         ctx.fillStyle = skinColor;
@@ -1424,10 +1464,9 @@
         ctx.fillStyle = skinShadow;
         ctx.fillRect(sockX, sockY + 2, extX + 6, 1);
 
-        // Consistent 6x6 Power Glove
         ctx.fillStyle = gloveColor;
         ctx.fillRect(sockX + extX + 6, sockY - 3, 6, 6);
-        ctx.fillStyle = PICO_PALETTE[10]; // Gold wristband
+        ctx.fillStyle = PICO_PALETTE[10];
         ctx.fillRect(sockX + extX + 5, sockY - 3, 1, 6);
         ctx.fillStyle = shineColor;
         ctx.fillRect(sockX + extX + 8, sockY - 2, 2, 2);
@@ -1435,31 +1474,27 @@
       } else if (punchType === 'HOOK') {
         const arc = extProgress * Math.PI;
         const sockX = 3;
-        const sockY = -24; // EXACT SHOULDER JOINT!
+        const sockY = -24;
         const armX = Math.sin(arc) * 12.0;
         const armY = -Math.cos(arc) * 3.0;
 
-        // Yellow curving power arc trail anchored at shoulder height (-24)
         ctx.strokeStyle = PICO_PALETTE[10];
         ctx.lineWidth = 1;
         ctx.beginPath();
         ctx.arc(sockX, sockY, 12, -Math.PI / 2, arc - Math.PI / 2);
         ctx.stroke();
 
-        // Rounded Deltoid Muscle Cap
         ctx.fillStyle = skinHighlight;
         ctx.fillRect(sockX - 2, sockY - 2, 5, 2);
         ctx.fillStyle = skinColor;
         ctx.fillRect(sockX - 2, sockY, 5, 3);
 
-        // Sleek Bent Elbow Arc Arm from Shoulder Joint (3, -24)
         ctx.fillStyle = skinHighlight;
         ctx.fillRect(sockX, sockY - 1, Math.max(2, armX), 1);
         ctx.fillStyle = skinColor;
         ctx.fillRect(sockX, sockY, Math.max(2, armX), 2);
         ctx.fillRect(sockX + armX, sockY - 1 + armY, 4, 4);
 
-        // Consistent 6x6 Sweeping Horizontal Hook Glove at Jaw Level
         ctx.fillStyle = gloveColor;
         ctx.fillRect(sockX + armX + 2, sockY - 3 + armY, 6, 6);
         ctx.fillStyle = shineColor;
@@ -1468,25 +1503,21 @@
       } else if (punchType === 'UPPERCUT') {
         const liftY = extProgress * 14.0;
         const sockX = 3;
-        const sockY = -24; // EXACT SHOULDER JOINT!
+        const sockY = -24;
 
-        // Skyward Speed Trail
         ctx.fillStyle = PICO_PALETTE[10];
         ctx.fillRect(sockX + 1, sockY - liftY + 2, 2, liftY);
 
-        // Rounded Deltoid Muscle Cap
         ctx.fillStyle = skinHighlight;
         ctx.fillRect(sockX - 2, sockY - 2, 5, 2);
         ctx.fillStyle = skinColor;
         ctx.fillRect(sockX - 2, sockY, 5, 3);
 
-        // Vertical Arm Scooping Upward from waist (-14) up to (-24 - liftY)
         ctx.fillStyle = skinColor;
         ctx.fillRect(sockX, sockY - liftY, 3, Math.max(4, liftY + 6));
         ctx.fillStyle = skinHighlight;
         ctx.fillRect(sockX + 3, sockY - liftY, 1, Math.max(4, liftY + 6));
 
-        // Consistent 6x6 Skyward Inverted Glove
         ctx.fillStyle = gloveColor;
         ctx.fillRect(sockX - 1, sockY - 6 - liftY, 6, 6);
         ctx.fillStyle = shineColor;
@@ -1496,7 +1527,7 @@
 
     function drawBoxer(x, y, isP1, anim, animTimer) {
       let fx = x;
-      let fy = 50; // Feet strictly grounded on ring floor canvas (50 + 40 = 90)
+      let fy = 50;
 
       const idleController = isP1 ? idleP1 : idleP2;
       const { dx, frameIndex } = idleController.getOffsets();
@@ -1510,9 +1541,8 @@
       let extProgress = 0;
 
       const timerVal = animTimer || 0;
-      const progress = 1.0 - (timerVal / 72.0); // 0.0 to 1.0 over 72 frames (~1.2s)
+      const progress = 1.0 - (timerVal / 72.0);
 
-      // --- NATURAL GROUNDED LUNGE DISTANCE (8px) ---
       if (anim === 'JAB' || anim === 'STRAIGHT' || anim === 'HOOK' || anim === 'UPPERCUT') {
         currentPose = 3;
         if (progress < 0.35) {
@@ -1525,7 +1555,7 @@
           extProgress = 1.0 - smoothstep(0.70, 1.00, progress);
         }
 
-        const lungeDist = extProgress * 8.0; // Grounded natural 8px step-in!
+        const lungeDist = extProgress * 8.0;
         fx += isP1 ? lungeDist : -lungeDist;
 
         if (anim === 'HOOK') {
@@ -1540,17 +1570,16 @@
           punchTilt = isP1 ? 0.03 : -0.03;
         }
 
-        // ACCURATE AABB GLOVE-TO-HEAD HITBOX OVERLAP SYNCHRONIZATION
         if (progress >= 0.42 && progress < 0.58 && !impactTriggeredThisPunch) {
           impactTriggeredThisPunch = true;
           const hitX = isP1 ? 57 : 55;
           const hitY = (anim === 'UPPERCUT' ? 48 : anim === 'HOOK' ? 50 : 54);
           triggerImpactBurst(hitX, hitY);
+          triggerHaptic(30);
         } else if (progress >= 0.90) {
           impactTriggeredThisPunch = false;
         }
 
-      // --- ACCURATE DEFENDER HIT KNOCKBACK REACTIONS ---
       } else if (anim === 'FLINCH') {
         currentPose = 4;
         let flinchProgress = 0;
@@ -1562,7 +1591,7 @@
           flinchProgress = 1.0 - smoothstep(0.65, 1.00, progress);
         }
 
-        const flinchDist = flinchProgress * 8.0; // Grounded natural 8px knockback
+        const flinchDist = flinchProgress * 8.0;
         fx += isP1 ? -flinchDist : flinchDist;
 
         const tiltAmt = flinchProgress * 0.25;
@@ -1571,7 +1600,6 @@
         if (progress >= 0.42 && progress < 0.58) isHitFlash = true;
       }
 
-      // Dynamic Ambient Ring Drop Shadow ON THE FLOOR CANVAS
       ctx.fillStyle = 'rgba(0,0,0,0.55)';
       ctx.beginPath();
       ctx.ellipse(fx + 11, 89, 10, 3, 0, 0, Math.PI * 2);
@@ -1582,7 +1610,6 @@
       if (singleCanvas) {
         ctx.save();
 
-        // HORIZONTAL FLIP FOR DEEN (P2) SO BOTH BOXERS FACE EACH OTHER!
         if (!isP1) {
           ctx.translate(fx + 22, fy + dyOffset);
           ctx.scale(-1, 1);
@@ -1596,29 +1623,28 @@
           ctx.filter = 'brightness(2.5)';
         }
 
-        if (anim === 'JAB' || anim === 'STRAIGHT' || anim === 'HOOK' || anim === 'UPPERCUT') { // DISTINCT PUNCH RENDERING
+        if (anim === 'JAB' || anim === 'STRAIGHT' || anim === 'HOOK' || anim === 'UPPERCUT') {
           ctx.translate(fx + 11, fy + 38);
           ctx.rotate(punchTilt);
           ctx.drawImage(singleCanvas, -11, -38, 22, 40);
 
-          // RENDER EXACT SHOULDER-JOINT HD SPRITE PUNCH ARM OVERLAY (-24 local Y)!
           drawPunchOverlay(ctx, isP1, anim, extProgress);
 
-        } else if (anim === 'FLINCH') { // HEAD KNOCKBACK TILT
+        } else if (anim === 'FLINCH') {
           ctx.translate(fx + 11, fy + 38);
           ctx.rotate(flinchTilt);
           ctx.drawImage(singleCanvas, -11, -38, 22, 40);
-        } else if (currentPose === 1) { // SHOULDER ROLL (Philly Shell tilt)
+        } else if (currentPose === 1) {
           ctx.translate(fx + 11, fy + 38);
           ctx.rotate(isP1 ? -0.06 : -0.06);
           ctx.drawImage(singleCanvas, -11, -38, 22, 40);
-        } else if (currentPose === 2) { // DUCK CROUCH
+        } else if (currentPose === 2) {
           ctx.drawImage(singleCanvas, fx, fy + 3, 22, 37);
-        } else if (currentPose === 4) { // HEAD SLIP & WEAVE
+        } else if (currentPose === 4) {
           ctx.translate(fx + 11, fy + 38);
           ctx.rotate(isP1 ? 0.08 : 0.08);
           ctx.drawImage(singleCanvas, -11, -38, 22, 40);
-        } else { // STANCE GUARD
+        } else {
           ctx.drawImage(singleCanvas, fx, fy, 22, 40);
         }
         ctx.restore();
@@ -1629,6 +1655,14 @@
     }
 
     function render() {
+      // Dynamic Mobile Super Button Pulse Indicator
+      const superBtn = document.getElementById('btnX');
+      if (p1 && p1.superMeter >= 100) {
+        superBtn.classList.add('super-ready');
+      } else {
+        superBtn.classList.remove('super-ready');
+      }
+
       if (flashFrames > 0) {
         flashFrames--;
         ctx.fillStyle = PICO_PALETTE[7];
@@ -1667,11 +1701,9 @@
       ctx.fillText('DEEN', 98, 13);
       ctx.fillText(roundTimer < 10 ? '0' + roundTimer : roundTimer, 58, 10);
 
-      // Center Boxing Ring Stage (X: 41..86)
       ctx.fillStyle = PICO_PALETTE[0];
       ctx.fillRect(41, 15, 46, 98);
 
-      // Ring Ropes
       ctx.strokeStyle = PICO_PALETTE[6];
       ctx.beginPath();
       ctx.moveTo(41, 45); ctx.lineTo(86, 45);
@@ -1679,20 +1711,17 @@
       ctx.moveTo(41, 85); ctx.lineTo(86, 85);
       ctx.stroke();
 
-      // Ring Floor Canvas (Y: 90)
       ctx.fillStyle = PICO_PALETTE[7];
       ctx.fillRect(41, 90, 46, 23);
 
-      // Draw Clean Transparent Full-Size Face-to-Face Capcom Boxer Sprites!
-      drawBoxer(41, 50, true, p1.anim, p1.animTimer);   // Adrien Broner
-      drawBoxer(65, 50, false, p2.anim, p2.animTimer); // Deen The Great
+      drawBoxer(41, 50, true, p1.anim, p1.animTimer);
+      drawBoxer(65, 50, false, p2.anim, p2.animTimer);
 
-      // 8-BIT CONTACT STARBURST IMPACT FLARE (★) AT CONTACT POINT
       if (impactFxTimer > 0) {
         impactFxTimer--;
-        ctx.fillStyle = PICO_PALETTE[10]; // Gold star flare
+        ctx.fillStyle = PICO_PALETTE[10];
         ctx.fillRect(impactFxX - 3, impactFxY - 3, 7, 7);
-        ctx.fillStyle = PICO_PALETTE[7]; // Specular white core
+        ctx.fillStyle = PICO_PALETTE[7];
         ctx.fillRect(impactFxX - 1, impactFxY - 1, 3, 3);
       }
 
@@ -1750,7 +1779,7 @@
     }
 
     let lastTime = performance.now();
-    const step = 1000 / 60; // 16.66ms per 60Hz frame
+    const step = 1000 / 60;
 
     function tick() {
       const now = performance.now();
@@ -1765,7 +1794,6 @@
       render();
     }
 
-    // High-frequency 60Hz interval guarantees execution in all browser environments
     setInterval(tick, 16);
     function loop() {
       tick();
@@ -1786,18 +1814,30 @@
       }
     });
 
-    document.getElementById('btnLeft').onclick = () => { initAudio(); p1.move(-1); };
-    document.getElementById('btnRight').onclick = () => { initAudio(); p1.move(1); };
-    document.getElementById('btnDown').onclick = () => { initAudio(); p1.dropSoft(); };
-    document.getElementById('btnUp').onclick = () => { initAudio(); p1.dropHard(); };
-    document.getElementById('btnO').onclick = () => { initAudio(); p1.rotate(-1); };
-    document.getElementById('btnX').onclick = () => {
-      initAudio();
-      if (p1.superMeter >= 100) p1.triggerSuper();
-      else p1.rotate(1);
+    // TOUCH & CLICK HANDLERS WITH HAPTIC VIBRATION
+    const bindBtn = (id, action) => {
+      const btn = document.getElementById(id);
+      if (!btn) return;
+      const handler = (e) => {
+        e.preventDefault();
+        initAudio();
+        action();
+      };
+      btn.addEventListener('touchstart', handler, { passive: false });
+      btn.addEventListener('click', handler);
     };
 
-    document.getElementById('btnMode').onclick = () => {
+    bindBtn('btnLeft', () => p1.move(-1));
+    bindBtn('btnRight', () => p1.move(1));
+    bindBtn('btnDown', () => p1.dropSoft());
+    bindBtn('btnUp', () => p1.dropHard());
+    bindBtn('btnO', () => p1.rotate(-1));
+    bindBtn('btnX', () => {
+      if (p1.superMeter >= 100) p1.triggerSuper();
+      else p1.rotate(1);
+    });
+
+    bindBtn('btnMode', () => {
       if (gameMode === 'AI_VS_AI') {
         gameMode = 'VS_AI';
         p1.isAi = false;
@@ -1809,16 +1849,13 @@
         p2.isAi = true;
         document.getElementById('btnMode').innerText = 'MODE: AI VS AI';
       }
-    };
+    });
 
-    document.getElementById('btnReset').onclick = () => {
-      location.reload();
-    };
-
-    document.getElementById('btnAudio').onclick = () => {
+    bindBtn('btnReset', () => location.reload());
+    bindBtn('btnAudio', () => {
       audioEnabled = !audioEnabled;
       document.getElementById('btnAudio').innerText = audioEnabled ? 'AUDIO: 808 ON' : 'AUDIO: OFF';
-    };
+    });
   </script>
 </body>
 </html>
