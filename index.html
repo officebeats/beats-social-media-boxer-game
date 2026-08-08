@@ -1422,14 +1422,21 @@
     let deenPunchCanvas = null;
     deenPunchRaw.onload = () => { deenPunchCanvas = createTransparentCanvas(deenPunchRaw); };
 
-    // 16-bit Capcom Arcade Sprites Map for ALL 14 Roster Fighters
+    // 16-bit Capcom Arcade Sprites & Punch Grids Map for ALL 14 Roster Fighters
     const ROSTER_IDLE_CANVASES = {};
+    const ROSTER_PUNCH_CANVASES = {};
     const rosterIds = ['broner', 'deen', 'ryan', 'n3on', 'rayj', 'blueface', 'chrisean', 'rampage', 'adin', 'charleston', 'walid', 'abrown', 'tank', 'floyd'];
     rosterIds.forEach(id => {
-      const img = new Image();
-      img.src = 'assets/' + id + '_sprite.jpg?v=5';
-      img.onload = () => {
-        ROSTER_IDLE_CANVASES[id] = createTransparentCanvas(img);
+      const imgIdle = new Image();
+      imgIdle.src = 'assets/' + id + '_sprite.jpg?v=6';
+      imgIdle.onload = () => {
+        ROSTER_IDLE_CANVASES[id] = createTransparentCanvas(imgIdle);
+      };
+
+      const imgPunch = new Image();
+      imgPunch.src = 'assets/' + id + '_punches.jpg?v=6';
+      imgPunch.onload = () => {
+        ROSTER_PUNCH_CANVASES[id] = createTransparentCanvas(imgPunch);
       };
     });
 
@@ -1564,10 +1571,13 @@
 
       ctx.save();
 
+      const fObj = isP1 ? ROSTER[p1SelectIdx] : ROSTER[p2SelectIdx];
+      const fId = fObj ? fObj.id : (isP1 ? 'broner' : 'deen');
+
       // Per-character flip logic based on source sprite directions:
-      //   Broner IDLE faces LEFT → flip to RIGHT.  Broner PUNCHES face RIGHT → no flip.
-      //   Deen IDLE faces RIGHT → flip to LEFT.    Deen PUNCHES face RIGHT → flip to LEFT.
-      const needsFlip = isP1 ? !usePunch : true;
+      // Deen IDLE & PUNCHES face RIGHT -> flip to LEFT for P2.
+      // Other fighters (Broner, Adin, Ryan, Floyd, etc.) IDLE faces LEFT (needs flip), PUNCHES face RIGHT (no flip).
+      const needsFlip = (fId === 'deen') ? true : !usePunch;
 
       ctx.translate(fx + 11, fy + 20);
       if (needsFlip) {
@@ -1584,10 +1594,8 @@
       }
 
       // === DRAW THE SPRITE ===
-      const fObj = isP1 ? ROSTER[p1SelectIdx] : ROSTER[p2SelectIdx];
-      const fId = fObj ? fObj.id : (isP1 ? 'broner' : 'deen');
       const idleCanvas = ROSTER_IDLE_CANVASES[fId] || (isP1 ? bronerIdleCanvas : deenIdleCanvas);
-      const punchCanvas = fId === 'deen' ? deenPunchCanvas : bronerPunchCanvas;
+      const punchCanvas = ROSTER_PUNCH_CANVASES[fId] || (fId === 'deen' ? deenPunchCanvas : bronerPunchCanvas);
 
       const dw = 44;
       const dh = 44 * vertSquash;
