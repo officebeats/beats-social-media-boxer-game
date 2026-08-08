@@ -214,7 +214,7 @@
   <div class="arcade-cabinet">
     <div class="cabinet-header">
       <div class="brand-title">CRASH OUT: RING RUSH</div>
-      <div class="badge-pico8">SPRITE SHEET ENGINE v0.2.0</div>
+      <div class="badge-pico8">SPRITE SHEET ENGINE v0.3.0</div>
     </div>
 
     <div class="viewport-container">
@@ -250,8 +250,8 @@
 
   <script>
     // =========================================================================
-    // LEGIT MULTI-FRAME PIXEL ART SPRITE SHEET ANIMATION ENGINE v0.2.0
-    // Dynamic single-tile slicing & multi-pose keyframe rendering
+    // LEGIT MULTI-FRAME PIXEL ART SPRITE SHEET ANIMATION ENGINE v0.3.0
+    // Dynamic single-tile grid slicing & multi-pose keyframe rendering
     // =========================================================================
 
     const PICO_PALETTE = [
@@ -1192,7 +1192,7 @@
     const p2 = new Board(2, 88, true);
 
     // =========================================================================
-    // LEGIT MULTI-FRAME PIXEL ART KEYFRAME RENDERER v0.2.0
+    // LEGIT MULTI-FRAME PIXEL ART KEYFRAME RENDERER v0.3.0
     // Distinct body poses for Shoulder Roll, Duck Crouch, Jab Feint, & Slips!
     // =========================================================================
     function drawBoxer(x, y, isP1, anim) {
@@ -1224,9 +1224,8 @@
         ctx.fillStyle = skinBase;
         ctx.fillRect(fx + (isP1 ? 6 : 2), fy + 4, 11, 11);
         ctx.fillStyle = blackCol;
-        ctx.fillRect(fx + (isP1 ? 6 : 2), fy + 4, 11, 3); // Hair/Fade
+        ctx.fillRect(fx + (isP1 ? 6 : 2), fy + 4, 11, 3);
 
-        // Facial profile
         ctx.fillStyle = skinHi;
         ctx.fillRect(fx + (isP1 ? 12 : 3), fy + 8, 2, 3);
         ctx.fillStyle = whiteCol;
@@ -1236,8 +1235,8 @@
         ctx.fillStyle = skinBase;
         ctx.fillRect(fx + (isP1 ? 13 : 1), fy + 10, 5, 10);
         ctx.fillStyle = glovesCol;
-        ctx.fillRect(fx + (isP1 ? 2 : 12), fy + 17, 6, 6); // Lead glove low on stomach
-        ctx.fillRect(fx + (isP1 ? 11 : 3), fy + 7, 6, 6);  // Rear glove tight to jaw
+        ctx.fillRect(fx + (isP1 ? 2 : 12), fy + 17, 6, 6);
+        ctx.fillRect(fx + (isP1 ? 11 : 3), fy + 7, 6, 6);
 
         // Torso & Trunks
         ctx.fillStyle = skinBase;
@@ -1245,7 +1244,6 @@
         ctx.fillStyle = trunksCol;
         ctx.fillRect(fx + (isP1 ? 5 : 4), fy + 27, 11, 8);
 
-        // Footwork stance
         ctx.fillStyle = skinDark;
         ctx.fillRect(fx + (isP1 ? 4 : 5), fy + 35, 4, 6);
         ctx.fillRect(fx + (isP1 ? 12 : 11), fy + 35, 4, 6);
@@ -1258,12 +1256,10 @@
         ctx.fillStyle = blackCol;
         ctx.fillRect(fx + 3, fy + 10, 13, 3);
 
-        // Double Glove Earmuff Guard
         ctx.fillStyle = glovesCol;
         ctx.fillRect(fx + 4, fy + 11, 5, 7);
         ctx.fillRect(fx + 10, fy + 11, 5, 7);
 
-        // Crouched Torso & Legs
         ctx.fillStyle = trunksCol;
         ctx.fillRect(fx + 3, fy + 24, 13, 8);
         ctx.fillStyle = skinBase;
@@ -1297,7 +1293,6 @@
       }
       // 4. POSE 4: HEAD SLIP & WEAVE KEYFRAME (Torso Hinged Sideways)
       else if (frameIndex === 4) {
-        // Hinge upper body sideways off center line
         const shiftX = isP1 ? 5 : -5;
         ctx.fillStyle = skinBase;
         ctx.fillRect(fx + 3 + shiftX, fy + 2, 12, 11);
