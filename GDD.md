@@ -141,6 +141,20 @@ The following screen mockups serve as the exact visual targets for the vertical 
 
 ---
 
+### 4.5 Dual Detonation System & Balancing Rules
+
+To prevent players from getting stuck waiting for Crash Orbs while maintaining strategic depth, the game uses a **Dual-Detonation System**:
+
+1. **Primary Detonation (Crash Orbs & Power Gems)**:
+   - Triggered when a Crash Orb or Rainbow Diamond touches a matching color.
+   - **Damage & Garbage**: 100% full attack power + 1.6× Power Gem multiplier + 100% Garbage Counter Gem payload sent to opponent.
+2. **Secondary Detonation (4+ Contiguous Cluster Auto-Pop)**:
+   - Triggered when 4 or more normal gems of the same color connect in a contiguous cluster without a Crash Orb.
+   - **Balancing**: Auto-pops after drop lock-down, dealing 50% attack power and sending 50% Garbage payload to opponent (`garbage = floor(clearCount / 2)`).
+   - **Strategic Choice**: Players can let clusters auto-pop for quick board clears, or hold them to drop a Crash Orb for massive 100% damage!
+
+---
+
 ## 5. CODE STRUCTURE & CARTRIDGE ARCHITECTURE (.p8)
 
 ```lua

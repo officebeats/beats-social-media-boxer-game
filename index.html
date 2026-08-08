@@ -214,7 +214,7 @@
   <div class="arcade-cabinet">
     <div class="cabinet-header">
       <div class="brand-title">CRASH OUT: RING RUSH</div>
-      <div class="badge-pico8">HIP HOP 808 v0.1.0</div>
+      <div class="badge-pico8">DUAL DETONATION v0.1.0</div>
     </div>
 
     <div class="viewport-container">
@@ -250,7 +250,7 @@
 
   <script>
     // =========================================================================
-    // 808 HIP HOP SYNTHESIZER & POLISHED PUZZLE FIGHTER ENGINE
+    // DUAL DETONATION SYSTEM (PRIMARY: CRASH ORB / SECONDARY: 4+ CLUSTER AUTO-POP)
     // =========================================================================
 
     const PICO_PALETTE = [
@@ -286,14 +286,12 @@
       }
     }
 
-    // Authentic 808 Kick, 808 Snare, Hi-Hat, vinyl scratch, and 808 Sub-Boom!
     function play808Sfx(type) {
       if (!audioEnabled || !audioCtx) return;
       try {
         const t = audioCtx.currentTime;
 
         if (type === 'step') {
-          // 808 Closed Hi-Hat / Rimshot
           const osc = audioCtx.createOscillator();
           const gain = audioCtx.createGain();
           osc.type = 'triangle';
@@ -306,7 +304,6 @@
           osc.start(t);
           osc.stop(t + 0.03);
         } else if (type === 'rotate') {
-          // Hip-Hop Vinyl Scratch Pitch Sweep
           const osc = audioCtx.createOscillator();
           const gain = audioCtx.createGain();
           osc.type = 'sawtooth';
@@ -319,7 +316,6 @@
           osc.start(t);
           osc.stop(t + 0.05);
         } else if (type === 'land') {
-          // 808 Sub Kick Thud
           const osc = audioCtx.createOscillator();
           const gain = audioCtx.createGain();
           osc.type = 'sine';
@@ -332,7 +328,6 @@
           osc.start(t);
           osc.stop(t + 0.09);
         } else if (type === 'fuse') {
-          // Heavy 808 Bass Slide Chime
           const osc = audioCtx.createOscillator();
           const gain = audioCtx.createGain();
           osc.type = 'triangle';
@@ -345,7 +340,6 @@
           osc.start(t);
           osc.stop(t + 0.18);
         } else if (type === 'detonate') {
-          // Deep 808 Sub-Boom Blast (60Hz -> 20Hz Sub Drop)
           const osc = audioCtx.createOscillator();
           const gain = audioCtx.createGain();
           osc.type = 'sine';
@@ -357,8 +351,20 @@
           gain.connect(audioCtx.destination);
           osc.start(t);
           osc.stop(t + 0.35);
+        } else if (type === 'cluster_pop') {
+          // Soft Cluster Auto-Pop Chime
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(300, t);
+          osc.frequency.exponentialRampToValueAtTime(600, t + 0.12);
+          gain.gain.setValueAtTime(0.25, t);
+          gain.gain.linearRampToValueAtTime(0.01, t + 0.12);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(t);
+          osc.stop(t + 0.12);
         } else if (type === 'garbage') {
-          // Garbage Counter Gem Drop Crash (808 Snare Roll)
           const osc = audioCtx.createOscillator();
           const gain = audioCtx.createGain();
           osc.type = 'square';
@@ -371,7 +377,6 @@
           osc.start(t);
           osc.stop(t + 0.15);
         } else if (type === 'jab') {
-          // Punch Impact Hit
           const osc = audioCtx.createOscillator();
           const gain = audioCtx.createGain();
           osc.type = 'square';
@@ -384,7 +389,6 @@
           osc.start(t);
           osc.stop(t + 0.08);
         } else if (type === 'uppercut') {
-          // Explosive Knockout Punch Hit
           const osc = audioCtx.createOscillator();
           const gain = audioCtx.createGain();
           osc.type = 'sawtooth';
@@ -397,11 +401,10 @@
           osc.start(t);
           osc.stop(t + 0.25);
         } else if (type === 'ko') {
-          // Heavy Boxing Championship Bell Ring
           const osc = audioCtx.createOscillator();
           const gain = audioCtx.createGain();
           osc.type = 'sine';
-          osc.frequency.setValueAtTime(987, t); // B5
+          osc.frequency.setValueAtTime(987, t);
           gain.gain.setValueAtTime(0.5, t);
           gain.gain.exponentialRampToValueAtTime(0.01, t + 0.8);
           osc.connect(gain);
@@ -412,7 +415,6 @@
       } catch (e) {}
     }
 
-    // --- GAME CONSTANTS & PARTICLE SYSTEMS ---
     const COLS = 6;
     const ROWS = 12;
     const CELL_W = 6;
@@ -474,7 +476,7 @@
     let globalParticles = [];
     let globalFloatingTexts = [];
 
-    // --- PUZZLE FIGHTER BOARD ENGINE ---
+    // --- PUZZLE BOARD ENGINE WITH DUAL DETONATION ---
     class Board {
       constructor(id, offsetX, isAi = false) {
         this.id = id;
@@ -482,15 +484,9 @@
         this.offsetY = 16;
         this.isAi = isAi;
 
-        // Grid values:
-        // 0: Empty
-        // 1..4: Normal Gems (Red, Blue, Green, Yellow)
-        // 5..8: Crash Orbs (Red, Blue, Green, Yellow)
-        // 9: Rainbow Diamond Gem
-        // 10: Counter Gem (Garbage Shield)
         this.grid = Array(ROWS).fill(null).map(() => Array(COLS).fill(0));
         this.powerGems = Array(ROWS).fill(null).map(() => Array(COLS).fill(false));
-        this.counterTimers = Array(ROWS).fill(null).map(() => Array(COLS).fill(3)); // Countdown 3..0
+        this.counterTimers = Array(ROWS).fill(null).map(() => Array(COLS).fill(3));
         this.squish = Array(ROWS).fill(null).map(() => Array(COLS).fill(0));
 
         this.hp = 100;
@@ -503,9 +499,8 @@
         this.pair = null;
         this.spawnPair();
 
-        // 25% SLOWER DROP SPEED (36 frames vs 28 frames)
         this.dropTimer = 0;
-        this.dropInterval = 36;
+        this.dropInterval = 36; // 25% slower drop speed
         this.lockDelay = 0;
 
         this.anim = 'IDLE';
@@ -515,15 +510,13 @@
       spawnPair() {
         this.dropCount++;
 
-        // 10% chance for Rainbow Diamond Gem
-        if (this.dropCount % 10 === 0) {
+        if (this.dropCount % 12 === 0) {
           this.pair = { x: 2, y: 0, rot: 0, g1: 9, g2: Math.floor(Math.random() * 4) + 1, vy: 0 };
           return;
         }
 
         const g1 = Math.floor(Math.random() * 4) + 1;
-        // HIGH FREQUENCY CRASH ORBS (35% drop rate!) so players can reliably detonate & send garbage
-        const isCrash = Math.random() < 0.35;
+        const isCrash = Math.random() < 0.28;
         const g2 = isCrash ? (Math.floor(Math.random() * 4) + 5) : (Math.floor(Math.random() * 4) + 1);
 
         this.pair = { x: 2, y: 0, rot: 0, g1: g1, g2: g2, vy: 0 };
@@ -632,10 +625,9 @@
         cameraShake = Math.max(cameraShake, 2);
         this.pair = null;
 
-        // Tick down Counter Gems (Garbage)
         this.updateCounterGems();
 
-        // Process Physics: Gravity -> Rainbow Diamond -> Fusion -> Detonation
+        // Process Physics: Gravity -> Rainbow Diamond -> 4+ Cluster Pop -> Fusion -> Detonation
         this.applyGravity();
         this.processRainbowDiamond();
         this.detectPowerGems();
@@ -648,7 +640,6 @@
             if (this.grid[r][c] === 10) {
               this.counterTimers[r][c]--;
               if (this.counterTimers[r][c] <= 0) {
-                // Convert Counter Gem to Normal Colored Gem!
                 this.grid[r][c] = Math.floor(Math.random() * 4) + 1;
               }
             }
@@ -688,8 +679,7 @@
       processRainbowDiamond() {
         for (let r = 0; r < ROWS; r++) {
           for (let c = 0; c < COLS; c++) {
-            if (this.grid[r][c] === 9) { // Diamond Gem
-              // Check gem below or adjacent
+            if (this.grid[r][c] === 9) {
               const adj = [[r+1,c], [r-1,c], [r,c+1], [r,c-1]];
               let targetColor = 0;
               adj.forEach(([ar, ac]) => {
@@ -701,7 +691,6 @@
               });
 
               if (targetColor > 0 || r === ROWS - 1) {
-                // Clear ALL gems of target color across entire board!
                 this.grid[r][c] = 0;
                 if (targetColor > 0) {
                   for (let tr = 0; tr < ROWS; tr++) {
@@ -749,14 +738,15 @@
 
       processDetonations() {
         let matched = false;
+        let isSecondaryCluster = false;
         let toClear = Array(ROWS).fill(null).map(() => Array(COLS).fill(false));
 
-        // Scan Crash Orbs (5..8)
+        // 1. PRIMARY DETONATION: Crash Orbs (5..8)
         for (let r = 0; r < ROWS; r++) {
           for (let c = 0; c < COLS; c++) {
             const orb = this.grid[r][c];
             if (orb >= 5 && orb <= 8) {
-              const targetColor = orb - 4; // 1..4
+              const targetColor = orb - 4;
               const adj = [[r-1,c], [r+1,c], [r,c-1], [r,c+1]];
               let triggered = false;
 
@@ -775,6 +765,27 @@
           }
         }
 
+        // 2. SECONDARY DETONATION: 4+ Contiguous Normal Gems Auto-Pop (50% power balancing)
+        if (!matched) {
+          const visited = Array(ROWS).fill(null).map(() => Array(COLS).fill(false));
+
+          for (let r = 0; r < ROWS; r++) {
+            for (let c = 0; c < COLS; c++) {
+              const g = this.grid[r][c];
+              if (g >= 1 && g <= 4 && !visited[r][c]) {
+                const group = [];
+                this.getClusterGroup(r, c, g, visited, group);
+
+                if (group.length >= 4) {
+                  matched = true;
+                  isSecondaryCluster = true;
+                  group.forEach(([gr, gc]) => toClear[gr][gc] = true);
+                }
+              }
+            }
+          }
+        }
+
         if (matched) {
           let clearCount = 0;
           let powerGemCleared = false;
@@ -785,7 +796,6 @@
                 clearCount++;
                 if (this.powerGems[r][c]) powerGemCleared = true;
 
-                // Also break adjacent Counter Gems (Garbage Shields)!
                 const adj = [[r-1,c], [r+1,c], [r,c-1], [r,c+1]];
                 adj.forEach(([ar, ac]) => {
                   if (ar >= 0 && ar < ROWS && ac >= 0 && ac < COLS) {
@@ -793,7 +803,6 @@
                   }
                 });
 
-                // Spawn Particles
                 const px = this.offsetX + c * CELL_W + CELL_W / 2;
                 const py = this.offsetY + r * CELL_H + CELL_H / 2;
                 const gColor = GEM_COLORS[(this.grid[r][c] - 1) % 4] || 8;
@@ -811,22 +820,32 @@
           }
 
           this.comboCount++;
-          const dmg = clearCount * 4 * (powerGemCleared ? 1.6 : 1.0) * this.comboCount;
+
+          // Balancing: Secondary cluster pops deal 50% damage & send 50% garbage!
+          const powerMult = isSecondaryCluster ? 0.5 : (powerGemCleared ? 1.6 : 1.0);
+          const dmg = clearCount * 3 * powerMult * this.comboCount;
           const opponent = (this.id === 1) ? p2 : p1;
+
           opponent.hp = Math.max(0, opponent.hp - Math.floor(dmg));
-          this.superMeter = Math.min(100, this.superMeter + clearCount * 5);
+          this.superMeter = Math.min(100, this.superMeter + clearCount * 4);
           this.score += Math.floor(dmg * 10);
 
-          // PUZZLE FIGHTER GARBAGE ATTACK: Send Counter Gems to Opponent!
-          const garbageToSend = Math.max(2, Math.floor((clearCount - 2) * 1.5 + (this.comboCount * 3)));
+          // Garbage Calculation
+          const baseGarbage = isSecondaryCluster ? Math.floor(clearCount / 2) : Math.max(2, Math.floor((clearCount - 2) * 1.4));
+          const garbageToSend = Math.max(1, baseGarbage + (this.comboCount - 1) * 2);
           opponent.receiveGarbage(garbageToSend);
 
           flashFrames = 3;
 
-          if (this.comboCount >= 2) {
+          if (isSecondaryCluster) {
+            globalFloatingTexts.push(new FloatingText(`CLUSTER POP! +${clearCount}`, this.offsetX + 2, this.offsetY + 30, 11));
+            play808Sfx('cluster_pop');
+          } else if (this.comboCount >= 2) {
             globalFloatingTexts.push(new FloatingText(`${this.comboCount}-CHAIN!`, this.offsetX + 4, this.offsetY + 30, 9));
+            play808Sfx('detonate');
           } else {
             globalFloatingTexts.push(new FloatingText(`CRASH! +${clearCount}`, this.offsetX + 4, this.offsetY + 30, 10));
+            play808Sfx('detonate');
           }
 
           // Fighter Punch Reaction
@@ -844,8 +863,6 @@
           this.animTimer = 24;
           opponent.animTimer = 24;
 
-          play808Sfx('detonate');
-
           // Cascading Chain Reaction
           setTimeout(() => {
             this.applyGravity();
@@ -859,14 +876,27 @@
         }
       }
 
+      getClusterGroup(r, c, targetColor, visited, group) {
+        visited[r][c] = true;
+        group.push([r, c]);
+        const adj = [[r-1,c], [r+1,c], [r,c-1], [r,c+1]];
+
+        adj.forEach(([ar, ac]) => {
+          if (ar >= 0 && ar < ROWS && ac >= 0 && ac < COLS) {
+            if (!visited[ar][ac] && this.grid[ar][ac] === targetColor) {
+              this.getClusterGroup(ar, ac, targetColor, visited, group);
+            }
+          }
+        });
+      }
+
       receiveGarbage(count) {
-        // Drop Counter Gems (10) into columns
         let dropped = 0;
         for (let r = 0; r < 4; r++) {
           for (let c = 0; c < COLS; c++) {
             if (dropped < count && this.grid[r][c] === 0) {
-              this.grid[r][c] = 10; // Counter Gem Shield
-              this.counterTimers[r][c] = 3; // 3 turns to convert
+              this.grid[r][c] = 10;
+              this.counterTimers[r][c] = 3;
               dropped++;
             }
           }
@@ -982,7 +1012,7 @@
           colorIdx = 7;
         } else if (type === 10) {
           isCounter = true;
-          colorIdx = 5; // Gray Shield
+          colorIdx = 5;
         }
 
         const squishY = Math.floor(squishFactor * 2);
@@ -1008,21 +1038,18 @@
           ctx.strokeRect(drawX + 0.5, drawY + 0.5, drawW - 1, drawH - 1);
         }
 
-        // Crash Orb Center Cross (+)
         if (isCrash) {
           const pulse = Math.floor(Math.sin(this.pulseAngle * 2) * 1);
           ctx.fillStyle = PICO_PALETTE[7];
           ctx.fillRect(drawX + 2 - pulse, drawY + 3 - pulse, 2 + pulse * 2, 2 + pulse * 2);
         }
 
-        // Rainbow Diamond Pulse
         if (isDiamond) {
           const diaCol = Math.floor(this.pulseAngle * 4) % 4;
           ctx.fillStyle = PICO_PALETTE[GEM_COLORS[diaCol]];
           ctx.fillRect(drawX + 2, drawY + 2, 2, 4);
         }
 
-        // Counter Gem Shield Countdown Number
         if (isCounter) {
           ctx.fillStyle = PICO_PALETTE[7];
           ctx.font = '6px monospace';
