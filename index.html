@@ -1270,21 +1270,19 @@
       }
 
       drawGem(x, y, type, isPower, squishFactor, timerVal) {
-        // === PIXEL-PERFECT 6×8 GEM RENDERER ===
-        // Integer-only fillRect. Zero strokeRect (avoids sub-pixel blur).
-        const sq = Math.floor(squishFactor * 2);
+        // === FULL-CELL GEM RENDERER — NO BORDER GAPS ===
+        // Gems fill their entire cell. Bevels provide 3D separation.
+        // No squish animation — consistent sizing at all times.
         const dx = x;
-        const dy = y + sq;
-        const w = CELL_W;       // 6
-        const h = CELL_H - sq;  // 8 minus squish
-        if (h <= 0) return;
+        const dy = y;
+        const w = CELL_W;   // 6
+        const h = CELL_H;   // 8
 
         const isCrash   = (type >= 5 && type <= 8);
         const isDiamond = (type === 9);
         const isCounter = (type === 10);
         const cIdx = isCrash ? (type - 4) : type;
 
-        // Per-color palette: [base, highlight, shadow]
         const PAL = {
           1: [8,  14, 2],  // Red:    red / pink / maroon
           2: [12, 13, 1],  // Blue:   blue / lavender / navy
@@ -1295,25 +1293,20 @@
         const base  = getPalColor(c[0]);
         const lite  = getPalColor(c[1]);
         const dark  = getPalColor(c[2]);
-        const black = getPalColor(0);
         const white = getPalColor(7);
 
         if (isCrash) {
-          // ── CRASH ORB: rounded sphere with pulsing star core ──
+          // ── CRASH ORB: full-cell with rounded inner shape ──
           const flash = Math.floor(this.pulseAngle * 8) % 2;
 
-          // Black fill (corners stay black = rounded look)
-          ctx.fillStyle = black;
+          // Dark fill for corners (creates rounded look)
+          ctx.fillStyle = dark;
           ctx.fillRect(dx, dy, w, h);
 
-          // Rounded body — dark shade fills the "pill" shape
-          ctx.fillStyle = dark;
-          ctx.fillRect(dx + 1, dy,     w - 2, h);
-          ctx.fillRect(dx,     dy + 1, w,     h - 2);
-
-          // Core sphere fill
+          // Rounded body
           ctx.fillStyle = base;
-          ctx.fillRect(dx + 1, dy + 1, w - 2, h - 2);
+          ctx.fillRect(dx + 1, dy, w - 2, h);
+          ctx.fillRect(dx, dy + 1, w, h - 2);
 
           // Top specular arc
           ctx.fillStyle = lite;
@@ -1323,7 +1316,6 @@
           // Bottom shadow arc
           ctx.fillStyle = dark;
           ctx.fillRect(dx + 1, dy + h - 2, w - 2, 1);
-          ctx.fillRect(dx + 2, dy + h - 3, w - 4, 1);
 
           // Flashing center cross-star
           ctx.fillStyle = flash ? white : getPalColor(10);
@@ -1338,20 +1330,18 @@
           ctx.fillRect(dx + 1, dy + 1, 1, 1);
 
         } else if (isDiamond) {
-          // ── RAINBOW DIAMOND: cycling colors + facets ──
+          // ── RAINBOW DIAMOND ──
           const phase = Math.floor(this.pulseAngle * 6) % 4;
           const dCols = [8, 12, 11, 10];
 
-          ctx.fillStyle = black;
-          ctx.fillRect(dx, dy, w, h);
-
+          // Full cell base
           ctx.fillStyle = getPalColor(dCols[phase]);
-          ctx.fillRect(dx + 1, dy + 1, w - 2, h - 2);
+          ctx.fillRect(dx, dy, w, h);
 
           // Top-left highlight bevel
           ctx.fillStyle = white;
-          ctx.fillRect(dx + 1, dy + 1, w - 2, 1);
-          ctx.fillRect(dx + 1, dy + 1, 1, h - 2);
+          ctx.fillRect(dx, dy, w, 1);
+          ctx.fillRect(dx, dy, 1, h);
 
           // Inner facet
           ctx.fillStyle = getPalColor(dCols[(phase + 2) % 4]);
@@ -1359,31 +1349,28 @@
 
           // Bottom-right shadow bevel
           ctx.fillStyle = getPalColor(dCols[(phase + 1) % 4]);
-          ctx.fillRect(dx + 1, dy + h - 2, w - 2, 1);
-          ctx.fillRect(dx + w - 2, dy + 1, 1, h - 2);
+          ctx.fillRect(dx, dy + h - 1, w, 1);
+          ctx.fillRect(dx + w - 1, dy, 1, h);
 
           // Sparkle
           ctx.fillStyle = white;
           ctx.fillRect(dx + 2, dy + 2, 1, 1);
 
         } else if (isCounter) {
-          // ── COUNTER BLOCK: heavy concrete slab ──
-          ctx.fillStyle = black;
-          ctx.fillRect(dx, dy, w, h);
-
-          // Stone body
+          // ── COUNTER BLOCK: stone slab ──
+          // Full cell stone fill
           ctx.fillStyle = getPalColor(5);
-          ctx.fillRect(dx + 1, dy + 1, w - 2, h - 2);
+          ctx.fillRect(dx, dy, w, h);
 
           // Top-left highlight bevel
           ctx.fillStyle = getPalColor(6);
-          ctx.fillRect(dx + 1, dy + 1, w - 2, 1);
-          ctx.fillRect(dx + 1, dy + 1, 1, h - 2);
+          ctx.fillRect(dx, dy, w, 1);
+          ctx.fillRect(dx, dy, 1, h);
 
           // Bottom-right shadow bevel
-          ctx.fillStyle = black;
-          ctx.fillRect(dx + 1, dy + h - 2, w - 2, 1);
-          ctx.fillRect(dx + w - 2, dy + 1, 1, h - 2);
+          ctx.fillStyle = getPalColor(1);
+          ctx.fillRect(dx, dy + h - 1, w, 1);
+          ctx.fillRect(dx + w - 1, dy, 1, h);
 
           // Countdown number (centered)
           ctx.fillStyle = white;
@@ -1393,40 +1380,36 @@
           ctx.textAlign = 'left';
 
         } else {
-          // ── NORMAL GEM: 3D beveled crystal block ──
-          // 1px black border
-          ctx.fillStyle = black;
+          // ── NORMAL GEM: full-cell beveled crystal ──
+          // Base color fills entire cell
+          ctx.fillStyle = base;
           ctx.fillRect(dx, dy, w, h);
 
-          // Vibrant body fill
-          ctx.fillStyle = base;
-          ctx.fillRect(dx + 1, dy + 1, w - 2, h - 2);
-
-          // Top highlight edge
+          // Top highlight (1px)
           ctx.fillStyle = lite;
-          ctx.fillRect(dx + 1, dy + 1, w - 2, 1);
+          ctx.fillRect(dx, dy, w, 1);
 
-          // Left highlight edge
-          ctx.fillRect(dx + 1, dy + 2, 1, h - 3);
+          // Left highlight (1px)
+          ctx.fillRect(dx, dy + 1, 1, h - 1);
 
-          // Bottom shadow edge
+          // Bottom shadow (1px)
           ctx.fillStyle = dark;
-          ctx.fillRect(dx + 2, dy + h - 2, w - 3, 1);
+          ctx.fillRect(dx, dy + h - 1, w, 1);
 
-          // Right shadow edge
-          ctx.fillRect(dx + w - 2, dy + 2, 1, h - 3);
+          // Right shadow (1px)
+          ctx.fillRect(dx + w - 1, dy + 1, 1, h - 2);
 
           // Corner glint
           ctx.fillStyle = white;
-          ctx.fillRect(dx + 2, dy + 2, 1, 1);
+          ctx.fillRect(dx + 1, dy + 1, 1, 1);
 
           if (isPower) {
-            // Power gem: gold inner border frame
+            // Power gem: gold border frame
             ctx.fillStyle = getPalColor(10);
-            ctx.fillRect(dx + 1, dy + 1, w - 2, 1);
-            ctx.fillRect(dx + 1, dy + h - 2, w - 2, 1);
-            ctx.fillRect(dx + 1, dy + 1, 1, h - 2);
-            ctx.fillRect(dx + w - 2, dy + 1, 1, h - 2);
+            ctx.fillRect(dx, dy, w, 1);
+            ctx.fillRect(dx, dy + h - 1, w, 1);
+            ctx.fillRect(dx, dy, 1, h);
+            ctx.fillRect(dx + w - 1, dy, 1, h);
             // Gold center pip
             ctx.fillRect(dx + 2, dy + 3, 2, 2);
           }
