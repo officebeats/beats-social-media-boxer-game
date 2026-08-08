@@ -1676,13 +1676,13 @@
     const rosterIds = ['broner', 'deen', 'ryan', 'n3on', 'rayj', 'blueface', 'chrisean', 'rampage', 'adin', 'charleston', 'walid', 'abrown', 'tank', 'floyd'];
     rosterIds.forEach(id => {
       const imgIdle = new Image();
-      imgIdle.src = 'assets/' + id + '_sprite.jpg?v=7';
+      imgIdle.src = 'assets/' + id + '_sprite.jpg?v=11';
       imgIdle.onload = () => {
         ROSTER_IDLE_CANVASES[id] = createTransparentCanvas(imgIdle);
       };
 
       const imgPunch = new Image();
-      imgPunch.src = 'assets/' + id + '_punches.jpg?v=7';
+      imgPunch.src = 'assets/' + id + '_punches.jpg?v=11';
       imgPunch.onload = () => {
         ROSTER_PUNCH_CANVASES[id] = createTransparentCanvas(imgPunch);
       };
