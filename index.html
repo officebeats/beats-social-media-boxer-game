@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>CRASH OUT: RING RUSH — PICO-8 Puzzle Boxing</title>
+  <title>CRASH OUT: RING RUSH — PICO-8 Native Edge-to-Edge Boxing</title>
   <style>
     :root {
       --pico-black: #000000;
@@ -42,116 +42,76 @@
       color: var(--pico-white);
       font-family: 'Courier New', Courier, monospace;
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
       overflow: hidden;
       image-rendering: pixelated;
     }
 
-    /* FULL SCREEN ZERO-MARGIN ARCADE CABINET CONTAINER */
-    .arcade-cabinet {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: space-between;
+    /* 100% NATIVE EDGE-TO-EDGE PICO-8 GAME CONTAINER */
+    .pico8-viewport {
+      position: relative;
       width: 100vw;
       height: 100vh;
       height: 100dvh;
-      background-color: var(--pico-dark-blue);
-      border: 4px solid var(--pico-dark-purple);
-      padding: 4px 6px env(safe-area-inset-bottom) 6px;
-    }
-
-    /* COMPACT HEADER MARQUEE */
-    .cabinet-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      width: 100%;
-      height: 24px;
-      padding: 0 4px;
-      flex-shrink: 0;
-    }
-
-    .brand-title {
-      font-size: 14px;
-      font-weight: 900;
-      color: var(--pico-yellow);
-      text-shadow: 2px 2px 0px var(--pico-red);
-      letter-spacing: 1px;
-    }
-
-    .badge-pico8 {
-      background-color: var(--pico-dark-purple);
-      color: var(--pico-pink);
-      border: 2px solid var(--pico-blue);
-      border-radius: 0px;
-      padding: 2px 6px;
-      font-size: 9px;
-      font-weight: 800;
-      box-shadow: 2px 2px 0px var(--pico-black);
-    }
-
-    /* MAXIMIZED 100% REAL ESTATE VIEWPORT CONTAINER */
-    .viewport-container {
-      position: relative;
-      width: 100%;
-      flex: 1;
       display: flex;
       align-items: center;
       justify-content: center;
       background-color: var(--pico-black);
-      border: 4px solid var(--pico-dark-purple);
-      box-shadow: inset 0 0 10px var(--pico-black);
       overflow: hidden;
-      margin: 2px 0;
     }
 
-    /* ABSOLUTE MAXIMUM REAL ESTATE PICO-8 CANVAS */
+    /* EDGE-TO-EDGE PICO-8 CANVAS (FILLS VIEWPORT DIRECTLY) */
     canvas#picoCanvas {
-      width: min(calc(100vw - 12px), calc(100vh - 145px));
-      height: min(calc(100vw - 12px), calc(100vh - 145px));
-      aspect-ratio: 1 / 1;
+      width: 100vw;
+      height: 100vh;
+      height: 100dvh;
+      max-width: 100vw;
+      max-height: 100vh;
       object-fit: contain;
       image-rendering: pixelated;
       image-rendering: crisp-edges;
       display: block;
+      background-color: var(--pico-dark-blue);
     }
 
-    /* COMPACT 16-BIT PIXEL ART TOUCH CONTROLS */
-    .control-panel {
+    /* PICO-8 NATIVE OVERLAY CONTROLS (SEAMLESS EDGE-TO-EDGE) */
+    .pico8-touch-controls {
+      position: absolute;
+      bottom: max(10px, env(safe-area-inset-bottom));
+      left: 10px;
+      right: 10px;
       display: flex;
       justify-content: space-between;
-      align-items: center;
-      width: 100%;
-      padding: 4px 4px 2px 4px;
-      flex-shrink: 0;
-      gap: 6px;
+      align-items: flex-end;
+      z-index: 20;
+      pointer-events: none;
     }
 
-    /* AUTHENTIC PICO-8 PIXEL D-PAD */
+    /* AUTHENTIC PICO-8 PIXEL D-PAD OVERLAY */
     .dpad-container {
       display: grid;
-      grid-template-columns: repeat(3, min(44px, 12vw));
-      grid-template-rows: repeat(3, min(44px, 12vw));
-      gap: 3px;
+      grid-template-columns: repeat(3, min(48px, 13vw));
+      grid-template-rows: repeat(3, min(48px, 13vw));
+      gap: 4px;
+      pointer-events: auto;
     }
 
     .btn-ctrl {
-      background-color: var(--pico-dark-purple);
+      background-color: rgba(126, 37, 83, 0.85);
       border: 3px solid var(--pico-lavender);
       color: var(--pico-white);
       border-radius: 0px;
       font-family: 'Courier New', monospace;
       font-weight: 900;
-      font-size: 16px;
+      font-size: 18px;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      box-shadow: inset -2px -2px 0px var(--pico-black), inset 2px 2px 0px var(--pico-pink), 2px 2px 0px var(--pico-black);
+      box-shadow: inset -2px -2px 0px var(--pico-black), inset 2px 2px 0px var(--pico-pink), 3px 3px 0px var(--pico-black);
       text-shadow: 1px 1px 0px var(--pico-black);
+      backdrop-filter: blur(2px);
     }
 
     .btn-ctrl:active, .btn-ctrl.active {
@@ -168,25 +128,26 @@
     .dpad-down { grid-column: 2; grid-row: 2; }
     .dpad-right { grid-column: 3; grid-row: 2; }
 
-    /* AUTHENTIC PICO-8 PIXEL ACTION BUTTONS */
+    /* AUTHENTIC PICO-8 PIXEL ACTION BUTTONS OVERLAY */
     .action-buttons {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
+      pointer-events: auto;
     }
 
     .btn-action {
-      width: min(58px, 16vw);
-      height: min(58px, 16vw);
+      width: min(62px, 16vw);
+      height: min(62px, 16vw);
       border-radius: 0px;
       font-family: 'Courier New', monospace;
-      font-size: 15px;
+      font-size: 16px;
       font-weight: 900;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      box-shadow: 2px 2px 0px var(--pico-black);
+      box-shadow: 3px 3px 0px var(--pico-black);
       border: 3px solid var(--pico-white);
       cursor: pointer;
       text-shadow: 1px 1px 0px var(--pico-black);
@@ -198,18 +159,18 @@
     }
 
     .btn-o {
-      background-color: var(--pico-orange);
+      background-color: rgba(255, 163, 0, 0.9);
       border-color: var(--pico-yellow);
       color: var(--pico-black);
-      box-shadow: inset -3px -3px 0px var(--pico-brown), inset 3px 3px 0px var(--pico-yellow), 2px 2px 0px var(--pico-black);
+      box-shadow: inset -3px -3px 0px var(--pico-brown), inset 3px 3px 0px var(--pico-yellow), 3px 3px 0px var(--pico-black);
       text-shadow: none;
     }
 
     .btn-x {
-      background-color: var(--pico-pink);
+      background-color: rgba(255, 119, 168, 0.9);
       border-color: var(--pico-white);
       color: var(--pico-black);
-      box-shadow: inset -3px -3px 0px var(--pico-dark-purple), inset 3px 3px 0px var(--pico-white), 2px 2px 0px var(--pico-black);
+      box-shadow: inset -3px -3px 0px var(--pico-dark-purple), inset 3px 3px 0px var(--pico-white), 3px 3px 0px var(--pico-black);
       text-shadow: none;
     }
 
@@ -225,32 +186,34 @@
     }
 
     .btn-action span {
-      font-size: 7px;
+      font-size: 8px;
       font-weight: 900;
       margin-top: 1px;
       letter-spacing: 0.5px;
     }
 
-    /* COMPACT OPTIONS BAR */
-    .options-bar {
+    /* TOP OPTIONS BAR OVERLAY */
+    .pico8-top-bar {
+      position: absolute;
+      top: max(6px, env(safe-area-inset-top));
+      left: 10px;
+      right: 10px;
       display: flex;
       justify-content: space-between;
-      width: 100%;
-      height: 26px;
-      gap: 4px;
-      margin-top: 2px;
-      flex-shrink: 0;
+      align-items: center;
+      z-index: 20;
+      pointer-events: none;
     }
 
     .btn-opt {
-      flex: 1;
-      background-color: var(--pico-dark-blue);
+      pointer-events: auto;
+      background-color: rgba(29, 43, 83, 0.85);
       border: 2px solid var(--pico-blue);
       color: var(--pico-white);
-      padding: 3px 2px;
+      padding: 4px 8px;
       border-radius: 0px;
       font-family: 'Courier New', monospace;
-      font-size: 9px;
+      font-size: 10px;
       font-weight: 800;
       cursor: pointer;
       text-align: center;
@@ -267,20 +230,19 @@
 </head>
 <body>
 
-  <div class="arcade-cabinet">
-    <!-- HEADER MARQUEE -->
-    <div class="cabinet-header">
-      <div class="brand-title">CRASH OUT: RING RUSH</div>
-      <div class="badge-pico8">CAPCOM HD SPRITES v7.0.0</div>
+  <div class="pico8-viewport">
+    <!-- TOP OPTIONS OVERLAY -->
+    <div class="pico8-top-bar">
+      <button class="btn-opt" id="btnMode">MODE: AI VS AI</button>
+      <button class="btn-opt" id="btnReset">RESET</button>
+      <button class="btn-opt" id="btnAudio">AUDIO: CHIPTUNE ON</button>
     </div>
 
-    <!-- ABSOLUTE MAXIMUM REAL ESTATE GAME VIEWPORT CANVAS -->
-    <div class="viewport-container">
-      <canvas id="picoCanvas" width="128" height="128"></canvas>
-    </div>
+    <!-- 100% EDGE-TO-EDGE PICO-8 ENGINE CANVAS -->
+    <canvas id="picoCanvas" width="128" height="128"></canvas>
 
-    <!-- COMPACT 100% PICO-8 PIXEL ART TOUCH CONTROLS -->
-    <div class="control-panel">
+    <!-- NATIVE PICO-8 TOUCH CONTROLS OVERLAY -->
+    <div class="pico8-touch-controls">
       <!-- LEFT THUMB D-PAD -->
       <div class="dpad-container">
         <button class="btn-ctrl dpad-up" id="btnUp" aria-label="Drop Hard">▲</button>
@@ -295,22 +257,16 @@
         <button class="btn-action btn-x" id="btnX">❎<span>SUPER</span></button>
       </div>
     </div>
-
-    <!-- COMPACT OPTIONS BAR -->
-    <div class="options-bar">
-      <button class="btn-opt" id="btnMode">MODE: AI VS AI</button>
-      <button class="btn-opt" id="btnReset">RESET MATCH</button>
-      <button class="btn-opt" id="btnAudio">AUDIO: CHIPTUNE ON</button>
-    </div>
   </div>
 
   <script>
     // =========================================================================
-    // RESTORED CAPCOM HD SPRITE ENGINE v7.0.0
-    // - Restored original high-quality Capcom 16-bit fighter sprites!
-    // - Anatomical Shoulder Joint Punch Extension at local Y = -24!
+    // PICO-8 NATIVE EDGE-TO-EDGE ENGINE v8.0.0
+    // - 100% Viewport Edge-to-Edge Native PICO-8 Engine Canvas!
+    // - Native PICO-8 Touch Control Overlay (`btn(0..5)`) matching Lexaloffle PICO-8 Web Runner!
+    // - Restored Original High-Quality Capcom Fighter Sprites (Broner & Deen)!
+    // - Anatomical Shoulder Joint Punch Extension at Y = -24!
     // - Skin Color Matching (#8C4A27 Broner vs #C58C5D Deen)!
-    // - 100% Max Real Estate Viewport + 16-Bit Pixel Art Controls!
     // =========================================================================
 
     const PICO_PALETTE = [
@@ -1529,12 +1485,10 @@
       if (isLoaded) {
         ctx.drawImage(spriteImg, -11, -20, 22, 40);
       } else {
-        // Fallback skin base
         ctx.fillStyle = isP1 ? '#8C4A27' : '#C58C5D';
         ctx.fillRect(-6, -20, 12, 38);
       }
 
-      // RESET FILTER AFTER SPRITE
       ctx.filter = 'none';
 
       // --- DYNAMIC ANATOMICAL SHOULDER PUNCH EXTENSION (Y = -24) ---
@@ -1781,7 +1735,6 @@
       }
     });
 
-    // TOUCH & CLICK HANDLERS WITH HAPTIC VIBRATION
     const bindBtn = (id, action) => {
       const btn = document.getElementById(id);
       if (!btn) return;
