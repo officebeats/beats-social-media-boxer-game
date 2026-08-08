@@ -705,10 +705,10 @@
         if (rot === 2) subY = y + 1;
         if (rot === 3) subX = x - 1;
 
-        if (x < 0 || x >= COLS || y < 0 || y >= ROWS) return false;
-        if (subX < 0 || subX >= COLS || subY < 0 || subY >= ROWS) return false;
+        if (x < 0 || x >= COLS || y >= ROWS) return false;
+        if (subX < 0 || subX >= COLS || subY >= ROWS) return false;
 
-        if (this.grid[y][x] !== 0) return false;
+        if (y >= 0 && this.grid[y][x] !== 0) return false;
         if (subY >= 0 && this.grid[subY][subX] !== 0) return false;
 
         return true;
