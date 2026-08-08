@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>CRASH OUT: RING RUSH — PICO-8 Native Transparent Boxing</title>
+  <title>CRASH OUT: RING RUSH (v1.0-alpha) — PICO-8 Native Transparent Boxing</title>
   <style>
     :root {
       --pico-black: #000000;
@@ -297,64 +297,6 @@
     let highScore = dget(0);
     let maxComboTrack = dget(1);
 
-    // DYNAMIC COLOR-KEYING TRANSPARENCY HELPER (100% REMOVES WHITE BACKGROUND BOXES!)
-    function createTransparentCanvas(img) {
-      const offCanvas = document.createElement('canvas');
-      const w = img.naturalWidth || img.width || 22;
-      const h = img.naturalHeight || img.height || 40;
-      offCanvas.width = w;
-      offCanvas.height = h;
-
-      const offCtx = offCanvas.getContext('2d');
-      offCtx.drawImage(img, 0, 0);
-
-      const imgData = offCtx.getImageData(0, 0, w, h);
-      const data = imgData.data;
-
-      // Key out white / light gray pixels (R > 210, G > 210, B > 210)
-      for (let i = 0; i < data.length; i += 4) {
-        const r = data[i];
-        const g = data[i + 1];
-        const b = data[i + 2];
-        if (r > 210 && g > 210 && b > 210) {
-          data[i + 3] = 0; // Make 100% Transparent!
-        }
-      }
-      offCtx.putImageData(imgData, 0, 0);
-      return offCanvas;
-    }
-
-    // LOAD CAPCOM FIGHTER SPRITESHEETS WITH TRANSPARENCY KEYING
-    const bronerRaw = new Image();
-    bronerRaw.src = 'assets/broner_sprite.jpg';
-    let bronerTransCanvas = null;
-
-    bronerRaw.onload = () => {
-      bronerTransCanvas = createTransparentCanvas(bronerRaw);
-    };
-
-    const deenRaw = new Image();
-    deenRaw.src = 'assets/deen_sprite.jpg';
-    let deenTransCanvas = null;
-
-    deenRaw.onload = () => {
-      deenTransCanvas = createTransparentCanvas(deenRaw);
-    };
-
-    function smoothstep(edge0, edge1, x) {
-      const t = Math.max(0, Math.min(1, (x - edge0) / (edge1 - edge0)));
-      return t * t * (3 - 2 * t);
-    }
-
-    function triggerHaptic(duration = 15) {
-      if (navigator.vibrate) {
-        try { navigator.vibrate(duration); } catch (e) {}
-      }
-    }
-
-    const canvas = document.getElementById('picoCanvas');
-    const ctx = canvas.getContext('2d');
-    ctx.imageSmoothingEnabled = false;
 
     // WebAudio PICO-8 Chiptune Synth
     let audioEnabled = true;
@@ -557,6 +499,7 @@
     let timerFrameCounter = 0;
     let globalFrameCount = 0;
     let gameState = 'PLAYING';
+    let koMessage = 'K.O.!';
 
     class Particle {
       constructor(x, y, vx, vy, color, life, size = 1) {
@@ -1097,27 +1040,41 @@
 
         if (powerGemCleared || this.comboCount >= 3) {
           this.anim = 'UPPERCUT';
-          opponent.anim = 'FLINCH';
           cameraShake = 14;
           play808Sfx('uppercut');
         } else if (this.comboCount === 2 || clearCount >= 5) {
           this.anim = 'HOOK';
-          opponent.anim = 'FLINCH';
           cameraShake = 10;
           play808Sfx('hook');
         } else if (clearCount === 4) {
           this.anim = 'STRAIGHT';
-          opponent.anim = 'FLINCH';
           cameraShake = 8;
           play808Sfx('straight');
         } else {
           this.anim = 'JAB';
-          opponent.anim = 'FLINCH';
           cameraShake = 6;
           play808Sfx('jab');
         }
         this.animTimer = 72;
-        opponent.animTimer = 72;
+
+        // BUG-003 FIX: Opponent randomly blocks/dodges instead of always flinching
+        const defenseRoll = Math.random();
+        if (defenseRoll < 0.15) {
+          opponent.anim = 'BLOCK';
+          opponent.animTimer = 72;
+        } else if (defenseRoll < 0.25) {
+          opponent.anim = 'DODGE';
+          opponent.animTimer = 72;
+        } else if (defenseRoll < 0.32) {
+          opponent.anim = 'LEAN';
+          opponent.animTimer = 72;
+        } else if (defenseRoll < 0.38) {
+          opponent.anim = 'SHOULDER_ROLL';
+          opponent.animTimer = 72;
+        } else {
+          opponent.anim = 'FLINCH';
+          opponent.animTimer = 72;
+        }
 
         this.pendingClear = null;
       }
@@ -1136,8 +1093,9 @@
       }
 
       receiveGarbage(count) {
+        // BUG-006 FIX: Place garbage in bottom rows (not top) to prevent instant KO
         let dropped = 0;
-        for (let r = 0; r < 4; r++) {
+        for (let r = ROWS - 1; r >= 4; r--) {
           for (let c = 0; c < COLS; c++) {
             if (dropped < count && this.grid[r][c] === 0) {
               this.grid[r][c] = 10;
@@ -1179,7 +1137,11 @@
 
         if (this.animTimer > 0) {
           this.animTimer--;
-          if (this.animTimer === 0) this.anim = 'IDLE';
+          // BUG-004 FIX: Allow retract phase to complete before snapping to IDLE
+          if (this.animTimer <= 0) {
+            this.animTimer = 0;
+            this.anim = 'IDLE';
+          }
         }
 
         if (this.state === 'SPAWN') {
@@ -1401,13 +1363,13 @@
     let impactFxTimer = 0;
     let impactFxX = 58;
     let impactFxY = 56;
-    let impactTriggeredThisPunch = false;
+    let impactTriggeredP1 = false;
+    let impactTriggeredP2 = false;
 
     function triggerImpactBurst(hitX = 58, hitY = 56) {
       impactFxTimer = 10;
       impactFxX = hitX;
       impactFxY = hitY;
-
       for (let k = 0; k < 14; k++) {
         const vx = (Math.random() - 0.5) * 4;
         const vy = (Math.random() - 0.5) * 4;
@@ -1416,82 +1378,174 @@
       }
     }
 
+    // DYNAMIC COLOR-KEYING TRANSPARENCY HELPER
+    function createTransparentCanvas(img) {
+      const offCanvas = document.createElement('canvas');
+      const w = img.naturalWidth || img.width || 22;
+      const h = img.naturalHeight || img.height || 40;
+      offCanvas.width = w;
+      offCanvas.height = h;
+      const offCtx = offCanvas.getContext('2d');
+      offCtx.drawImage(img, 0, 0);
+      const imgData = offCtx.getImageData(0, 0, w, h);
+      const data = imgData.data;
+      for (let i = 0; i < data.length; i += 4) {
+        const r = data[i], g = data[i+1], b = data[i+2];
+        const isWhite = (r > 210 && g > 210 && b > 210);
+        const isBlack = (r < 25 && g < 25 && b < 25);
+        if (isWhite || isBlack) data[i+3] = 0;
+      }
+      offCtx.putImageData(imgData, 0, 0);
+      return offCanvas;
+    }
+
+    // === LOAD ONLY 2 CLEAN SOURCE IMAGES PER BOXER ===
+    // Idle: single full-body stance (1024x1024)
+    // Punches: 2x2 grid — TL=jab, TR=straight, BL=hook, BR=uppercut (1024x1024)
+    const bronerIdleRaw = new Image();
+    bronerIdleRaw.src = 'assets/broner_sprite.jpg?v=4';
+    let bronerIdleCanvas = null;
+    bronerIdleRaw.onload = () => { bronerIdleCanvas = createTransparentCanvas(bronerIdleRaw); };
+
+    const deenIdleRaw = new Image();
+    deenIdleRaw.src = 'assets/deen_sprite.jpg?v=4';
+    let deenIdleCanvas = null;
+    deenIdleRaw.onload = () => { deenIdleCanvas = createTransparentCanvas(deenIdleRaw); };
+
+    const bronerPunchRaw = new Image();
+    bronerPunchRaw.src = 'assets/broner_punches.jpg?v=4';
+    let bronerPunchCanvas = null;
+    bronerPunchRaw.onload = () => { bronerPunchCanvas = createTransparentCanvas(bronerPunchRaw); };
+
+    const deenPunchRaw = new Image();
+    deenPunchRaw.src = 'assets/deen_punches.jpg?v=4';
+    let deenPunchCanvas = null;
+    deenPunchRaw.onload = () => { deenPunchCanvas = createTransparentCanvas(deenPunchRaw); };
+
+    function smoothstep(edge0, edge1, x) {
+      const t = Math.max(0, Math.min(1, (x - edge0) / (edge1 - edge0)));
+      return t * t * (3 - 2 * t);
+    }
+
+    function triggerHaptic(duration = 15) {
+      if (navigator.vibrate) {
+        try { navigator.vibrate(duration); } catch (e) {}
+      }
+    }
+
+    const canvas = document.getElementById('picoCanvas');
+    const ctx = canvas.getContext('2d');
+    ctx.imageSmoothingEnabled = false;
+
     // =========================================================================
-    // RESTORED TRANSPARENT CAPCOM FIGHTER RENDERER (ZERO WHITE BOXES!)
+    // BOXER RENDERER — 2-IMAGE + CANVAS TRANSFORMS (ZERO INCONSISTENCY)
     // =========================================================================
+    // Only 2 source images per boxer guarantees perfect visual consistency.
+    // Idle sprite: used for idle, duck, lean, shoulder roll, block, flinch
+    // Punch grid: used for jab, straight, hook, uppercut
+    // All defensive poses are the SAME idle sprite with Canvas transforms.
+
+    const PUNCH_QUAD = { 'JAB': 0, 'STRAIGHT': 1, 'HOOK': 2, 'UPPERCUT': 3 };
 
     function drawBoxer(x, y, isP1, anim, animTimer) {
       let fx = x;
-      let fy = 50;
+      let fy = 50 + (isP1 ? 0 : 3); // P2 (Deen) source image padding adjustment to align boots on floor level
 
       const idleController = isP1 ? idleP1 : idleP2;
       const { dx } = idleController.getOffsets();
       fx += Math.floor(dx);
 
-      let punchTilt = 0;
-      let flinchTilt = 0;
-      let dyOffset = 0;
       let isHitFlash = false;
       let extProgress = 0;
 
       const timerVal = animTimer || 0;
       const progress = 1.0 - (timerVal / 72.0);
 
+      // === DETERMINE WHAT TO DRAW ===
+      let usePunch = false;      // true = draw from punch grid
+      let punchQuad = 0;         // which quadrant of punch grid
+      let bodyTilt = 0;          // rotation in radians
+      let vertSquash = 1.0;      // vertical scale (< 1 = duck)
+      let horzShift = 0;         // horizontal position offset
+      let vertShift = 0;         // vertical position offset
+
       if (anim === 'JAB' || anim === 'STRAIGHT' || anim === 'HOOK' || anim === 'UPPERCUT') {
-        if (progress < 0.35) {
-          extProgress = smoothstep(0.0, 0.35, progress) * 0.70;
-        } else if (progress < 0.50) {
-          extProgress = 0.70 + smoothstep(0.35, 0.50, progress) * 0.30;
-        } else if (progress < 0.70) {
+        punchQuad = PUNCH_QUAD[anim] || 0;
+
+        // Animation phases: windup → extend → hold → retract
+        if (progress < 0.15) {
+          // Windup: lean back slightly, use idle sprite
+          extProgress = smoothstep(0.0, 0.15, progress) * 0.3;
+          bodyTilt = (isP1 ? -1 : 1) * extProgress * 0.08;
+        } else if (progress < 0.35) {
+          // Extend: switch to punch sprite, lunge forward
+          usePunch = true;
+          extProgress = 0.3 + smoothstep(0.15, 0.35, progress) * 0.7;
+        } else if (progress < 0.65) {
+          // Hold: full extension punch sprite
+          usePunch = true;
           extProgress = 1.0;
         } else {
-          extProgress = 1.0 - smoothstep(0.70, 1.00, progress);
+          // Retract: back to idle
+          extProgress = 1.0 - smoothstep(0.65, 1.00, progress);
+          if (progress < 0.80) usePunch = true;
         }
 
         const lungeDist = extProgress * 8.0;
-        fx += isP1 ? lungeDist : -lungeDist;
+        horzShift = isP1 ? lungeDist : -lungeDist;
 
-        if (anim === 'HOOK') {
-          dyOffset = -Math.sin(extProgress * Math.PI) * 2.0;
-          punchTilt = isP1 ? (extProgress * 0.15) : (-extProgress * 0.15);
-        } else if (anim === 'UPPERCUT') {
-          dyOffset = -extProgress * 4.0;
-          punchTilt = isP1 ? -0.10 : 0.10;
-        } else if (anim === 'STRAIGHT') {
-          punchTilt = isP1 ? 0.05 : -0.05;
-        } else {
-          punchTilt = isP1 ? 0.03 : -0.03;
-        }
-
-        if (progress >= 0.42 && progress < 0.58 && !impactTriggeredThisPunch) {
-          impactTriggeredThisPunch = true;
-          const hitX = isP1 ? 57 : 55;
-          const hitY = (anim === 'UPPERCUT' ? 48 : anim === 'HOOK' ? 50 : 54);
-          triggerImpactBurst(hitX, hitY);
+        // BUG-002 FIX: Per-player impact flags
+        const impactFlag = isP1 ? impactTriggeredP1 : impactTriggeredP2;
+        if (progress >= 0.42 && progress < 0.58 && !impactFlag) {
+          if (isP1) impactTriggeredP1 = true; else impactTriggeredP2 = true;
+          triggerImpactBurst(isP1 ? 57 : 55, anim === 'UPPERCUT' ? 48 : anim === 'HOOK' ? 50 : 54);
           triggerHaptic(30);
         } else if (progress >= 0.90) {
-          impactTriggeredThisPunch = false;
+          if (isP1) impactTriggeredP1 = false; else impactTriggeredP2 = false;
         }
 
       } else if (anim === 'FLINCH') {
-        let flinchProgress = 0;
-        if (progress < 0.40) {
-          flinchProgress = 0;
-        } else if (progress < 0.65) {
-          flinchProgress = smoothstep(0.40, 0.65, progress);
-        } else {
-          flinchProgress = 1.0 - smoothstep(0.65, 1.00, progress);
-        }
-
-        const flinchDist = flinchProgress * 8.0;
-        fx += isP1 ? -flinchDist : flinchDist;
-
-        const tiltAmt = flinchProgress * 0.25;
-        flinchTilt = isP1 ? -tiltAmt : tiltAmt;
-
+        let fp = 0;
+        if (progress < 0.40) fp = 0;
+        else if (progress < 0.65) fp = smoothstep(0.40, 0.65, progress);
+        else fp = 1.0 - smoothstep(0.65, 1.00, progress);
+        horzShift = (isP1 ? -1 : 1) * fp * 8.0;
+        bodyTilt = (isP1 ? -1 : 1) * fp * 0.15;
         if (progress >= 0.42 && progress < 0.58) isHitFlash = true;
-      }
 
+      } else if (anim === 'DODGE' || anim === 'DUCK') {
+        // Duck: squash vertically, shift down
+        let dp = 0;
+        if (progress < 0.25) dp = smoothstep(0.0, 0.25, progress);
+        else if (progress < 0.65) dp = 1.0;
+        else dp = 1.0 - smoothstep(0.65, 1.0, progress);
+        vertSquash = 1.0 - dp * 0.35;  // squash to 65% height
+        vertShift = dp * 14;            // shift down
+
+      } else if (anim === 'LEAN') {
+        // Lean back: tilt torso backward
+        let lp = 0;
+        if (progress < 0.25) lp = smoothstep(0.0, 0.25, progress);
+        else if (progress < 0.65) lp = 1.0;
+        else lp = 1.0 - smoothstep(0.65, 1.0, progress);
+        bodyTilt = (isP1 ? -1 : 1) * lp * 0.2;
+        horzShift = (isP1 ? -1 : 1) * lp * -4;
+
+      } else if (anim === 'BLOCK' || anim === 'SHOULDER_ROLL') {
+        // Shoulder roll: slight crouch + tilt
+        let bp = 0;
+        if (progress < 0.20) bp = smoothstep(0.0, 0.20, progress);
+        else if (progress < 0.70) bp = 1.0;
+        else bp = 1.0 - smoothstep(0.70, 1.0, progress);
+        vertSquash = 1.0 - bp * 0.12;
+        bodyTilt = (isP1 ? -1 : 1) * bp * 0.1;
+        vertShift = bp * 5;
+      }
+      // else: IDLE — no transforms, just the base idle sprite with bounce from idleController
+
+      fx += horzShift;
+
+      // Draw shadow
       ctx.fillStyle = 'rgba(0,0,0,0.55)';
       ctx.beginPath();
       ctx.ellipse(fx + 11, 89, 10, 3, 0, 0, Math.PI * 2);
@@ -1499,92 +1553,50 @@
 
       ctx.save();
 
-      if (!isP1) {
-        ctx.translate(fx + 11, fy + 20 + dyOffset);
+      // Per-character flip logic based on source sprite directions:
+      //   Broner IDLE faces LEFT → flip to RIGHT.  Broner PUNCHES face RIGHT → no flip.
+      //   Deen IDLE faces RIGHT → flip to LEFT.    Deen PUNCHES face RIGHT → flip to LEFT.
+      const needsFlip = isP1 ? !usePunch : true;
+
+      ctx.translate(fx + 11, fy + 20);
+      if (needsFlip) {
         ctx.scale(-1, 1);
-      } else {
-        ctx.translate(fx + 11, fy + 20 + dyOffset);
+      }
+
+      // Apply body tilt (negate when flipped to preserve visual direction)
+      if (bodyTilt !== 0) {
+        ctx.rotate(needsFlip ? -bodyTilt : bodyTilt);
       }
 
       if (isHitFlash) {
         ctx.filter = 'brightness(2.5) contrast(1.5)';
       }
 
-      // RENDER 100% TRANSPARENT CAPCOM SPRITE (ZERO WHITE BOX!)
-      const transCanvas = isP1 ? bronerTransCanvas : deenTransCanvas;
+      // === DRAW THE SPRITE ===
+      const idleCanvas = isP1 ? bronerIdleCanvas : deenIdleCanvas;
+      const punchCanvas = isP1 ? bronerPunchCanvas : deenPunchCanvas;
 
-      if (transCanvas) {
-        ctx.drawImage(transCanvas, -11, -20, 22, 40);
+      const dw = 44;
+      const dh = 44 * vertSquash;
+      const ddx = -22;                    // center horizontally
+      const ddy = -44 + 8 + vertShift;    // anchor at feet, shift down for duck
+
+      if (usePunch && punchCanvas) {
+        // Draw from 2x2 punch grid
+        const pw = punchCanvas.width / 2;
+        const ph = punchCanvas.height / 2;
+        const col = punchQuad % 2;
+        const row = Math.floor(punchQuad / 2);
+        ctx.drawImage(punchCanvas, col * pw, row * ph, pw, ph, ddx, ddy, dw, dh);
+      } else if (idleCanvas) {
+        // Draw idle sprite (same image for ALL non-punch states)
+        ctx.drawImage(idleCanvas, 0, 0, idleCanvas.width, idleCanvas.height, ddx, ddy, dw, dh);
       } else {
-        // Fallback transparent skin
         ctx.fillStyle = isP1 ? '#8C4A27' : '#C58C5D';
         ctx.fillRect(-6, -20, 12, 38);
       }
 
       ctx.filter = 'none';
-
-      // --- DYNAMIC ANATOMICAL SHOULDER PUNCH EXTENSION (Y = -24) ---
-      if (anim === 'JAB' || anim === 'STRAIGHT' || anim === 'HOOK' || anim === 'UPPERCUT') {
-        const sockX = 3;
-        const sockY = -24; // ANATOMICAL SHOULDER SOCKET ORIGIN!
-        const skinColor = isP1 ? '#8C4A27' : '#C58C5D'; // Skin matching
-        const skinHighlight = isP1 ? '#A65B32' : '#D89E6F';
-        const gloveColor = isP1 ? '#FF004D' : '#29ADFF'; // Red vs Blue
-
-        if (anim === 'JAB') {
-          const extX = extProgress * 12.0;
-          ctx.fillStyle = skinColor;
-          ctx.fillRect(sockX, sockY - 2, extX, 5);
-          ctx.fillStyle = skinHighlight;
-          ctx.fillRect(sockX, sockY - 2, extX, 2);
-
-          ctx.fillStyle = gloveColor;
-          ctx.fillRect(sockX + extX, sockY - 4, 7, 8);
-          ctx.fillStyle = '#FFF1E8';
-          ctx.fillRect(sockX + extX + 2, sockY - 3, 2, 2);
-
-        } else if (anim === 'STRAIGHT') {
-          const extX = extProgress * 15.0;
-          ctx.fillStyle = skinColor;
-          ctx.fillRect(sockX - 4, sockY - 2, extX + 4, 5);
-          ctx.fillStyle = skinHighlight;
-          ctx.fillRect(sockX - 4, sockY - 2, extX + 4, 2);
-
-          ctx.fillStyle = gloveColor;
-          ctx.fillRect(sockX + extX, sockY - 4, 8, 8);
-          ctx.fillStyle = '#FFF1E8';
-          ctx.fillRect(sockX + extX - 2, sockY - 4, 2, 8);
-          ctx.fillStyle = '#FFF1E8';
-          ctx.fillRect(sockX + extX + 3, sockY - 3, 2, 2);
-
-        } else if (anim === 'HOOK') {
-          const arc = extProgress * Math.PI;
-          const armX = Math.sin(arc) * 12.0;
-          const armY = -Math.cos(arc) * 3.0;
-
-          ctx.fillStyle = skinColor;
-          ctx.fillRect(sockX, sockY - 2, Math.max(3, armX), 5);
-          ctx.fillRect(sockX + armX, sockY - 2 + armY, 5, 5);
-
-          ctx.fillStyle = gloveColor;
-          ctx.fillRect(sockX + armX + 2, sockY - 4 + armY, 8, 8);
-          ctx.fillStyle = '#FFF1E8';
-          ctx.fillRect(sockX + armX + 4, sockY - 3 + armY, 2, 2);
-
-        } else if (anim === 'UPPERCUT') {
-          const liftY = extProgress * 15.0;
-          ctx.fillStyle = skinColor;
-          ctx.fillRect(sockX - 1, sockY - liftY, 5, Math.max(5, liftY + 6));
-          ctx.fillStyle = skinHighlight;
-          ctx.fillRect(sockX - 1, sockY - liftY, 2, Math.max(5, liftY + 6));
-
-          ctx.fillStyle = gloveColor;
-          ctx.fillRect(sockX - 2, sockY - 7 - liftY, 8, 8);
-          ctx.fillStyle = '#FFF1E8';
-          ctx.fillRect(sockX + 1, sockY - 6 - liftY, 2, 2);
-        }
-      }
-
       ctx.restore();
     }
 
@@ -1700,8 +1712,8 @@
         ctx.fillStyle = 'rgba(0,0,0,0.75)';
         ctx.fillRect(0, 45, 128, 38);
         ctx.fillStyle = getPalColor(10);
-        ctx.font = 'bold 16px monospace';
-        ctx.fillText('K.O.!', 44, 68);
+        ctx.font = 'bold 12px monospace';
+        ctx.fillText(koMessage, 10, 68);
       }
 
       ctx.restore();
@@ -1725,9 +1737,22 @@
 
       if (gameState === 'PLAYING') {
         timerFrameCounter++;
-        if (timerFrameCounter >= 30) {
+        // BUG-005 FIX: 60 frames = 1 second at 60fps (was 30, running 2x fast)
+        if (timerFrameCounter >= 60) {
           timerFrameCounter = 0;
-          if (roundTimer > 0) roundTimer--;
+          if (roundTimer > 0) {
+            roundTimer--;
+          } else {
+            // Timer expired: winner by HP
+            gameState = 'KO';
+            if (p1.health > p2.health) {
+              koMessage = 'TIME! BRONER WINS!';
+            } else if (p2.health > p1.health) {
+              koMessage = 'TIME! DEEN WINS!';
+            } else {
+              koMessage = 'TIME! DRAW!';
+            }
+          }
         }
       }
     }
@@ -1748,7 +1773,7 @@
       render();
     }
 
-    setInterval(tick, 16);
+    // BUG-001 FIX: Removed duplicate setInterval. Only use rAF for single game loop.
     function loop() {
       tick();
       requestAnimationFrame(loop);
@@ -1768,11 +1793,16 @@
       }
     });
 
+    // BUG-007 FIX: Prevent double-fire on touch devices
     const bindBtn = (id, action) => {
       const btn = document.getElementById(id);
       if (!btn) return;
+      let lastFired = 0;
       const handler = (e) => {
         e.preventDefault();
+        const now = performance.now();
+        if (now - lastFired < 80) return; // debounce
+        lastFired = now;
         initAudio();
         action();
       };

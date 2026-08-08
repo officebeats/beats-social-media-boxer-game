@@ -1,8 +1,8 @@
 pico-8 cartridge // http://www.pico-8.com
 version 32
 __lua__
--- crash out: ring rush (v0.1.0)
--- pico-8 puzzle boxing vertical slice
+-- crash out: ring rush (v1.0.0-alpha.1)
+-- pico-8 puzzle boxing alpha 1.0 release
 -- broner vs deen
 
 function _init()
