@@ -214,7 +214,7 @@
   <div class="arcade-cabinet">
     <div class="cabinet-header">
       <div class="brand-title">CRASH OUT: RING RUSH</div>
-      <div class="badge-pico8">SMOOTH ANIMATION v1.5.0</div>
+      <div class="badge-pico8">RELIABLE ENGINE v1.5.1</div>
     </div>
 
     <div class="viewport-container">
@@ -1296,6 +1296,9 @@
         }
       }
     }
+
+    const p1 = new Board(1, 4, true);  // AI P1
+    const p2 = new Board(2, 88, true); // AI P2
 
     let impactFxTimer = 0;
     let impactTriggeredThisPunch = false;
