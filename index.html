@@ -1260,141 +1260,167 @@
       }
 
       drawGem(x, y, type, isPower, squishFactor, timerVal) {
-        const squishY = Math.floor(squishFactor * 2);
-        const squishX = Math.floor(squishFactor * 1);
-        const drawX = x - squishX / 2;
-        const drawY = y + squishY;
-        const drawW = CELL_W + squishX; // CELL_W = 6
-        const drawH = CELL_H - squishY; // CELL_H = 6
+        // === PIXEL-PERFECT 6×8 GEM RENDERER ===
+        // Integer-only fillRect. Zero strokeRect (avoids sub-pixel blur).
+        const sq = Math.floor(squishFactor * 2);
+        const dx = x;
+        const dy = y + sq;
+        const w = CELL_W;       // 6
+        const h = CELL_H - sq;  // 8 minus squish
+        if (h <= 0) return;
 
-        let isCrash = (type >= 5 && type <= 8);
-        let isDiamond = (type === 9);
-        let isCounter = (type === 10);
-        let colorType = isCrash ? (type - 4) : type;
+        const isCrash   = (type >= 5 && type <= 8);
+        const isDiamond = (type === 9);
+        const isCounter = (type === 10);
+        const cIdx = isCrash ? (type - 4) : type;
 
-        // Exact Capcom Arcade Gem Color Tokens (PICO-8 Palette)
-        let baseColor, lightColor, darkColor;
-        if (colorType === 1) { // RED
-          baseColor = getPalColor(8);   // Red
-          lightColor = getPalColor(14); // Pink/Light Highlight
-          darkColor = getPalColor(2);   // Dark Burgundy Shadow
-        } else if (colorType === 2) { // BLUE
-          baseColor = getPalColor(12);  // Blue
-          lightColor = getPalColor(7);  // White/Cyan Highlight
-          darkColor = getPalColor(1);   // Dark Navy Shadow
-        } else if (colorType === 3) { // GREEN
-          baseColor = getPalColor(11);  // Green
-          lightColor = getPalColor(10); // Yellow-Green Highlight
-          darkColor = getPalColor(3);   // Dark Emerald Shadow
-        } else { // YELLOW (Type 4)
-          baseColor = getPalColor(10);  // Yellow
-          lightColor = getPalColor(7);  // White Highlight
-          darkColor = getPalColor(9);   // Gold/Orange Shadow
-        }
-
-        ctx.save();
+        // Per-color palette: [base, highlight, shadow]
+        const PAL = {
+          1: [8,  14, 2],  // Red:    red / pink / maroon
+          2: [12, 13, 1],  // Blue:   blue / lavender / navy
+          3: [11, 10, 3],  // Green:  green / yellow / dark-green
+          4: [10, 7,  9],  // Yellow: yellow / white / orange
+        };
+        const c = PAL[cIdx] || PAL[1];
+        const base  = getPalColor(c[0]);
+        const lite  = getPalColor(c[1]);
+        const dark  = getPalColor(c[2]);
+        const black = getPalColor(0);
+        const white = getPalColor(7);
 
         if (isCrash) {
-          // === CAPCOM CRASH ORB (Pulsing Circle Sphere with Star Core) ===
-          const pulse = Math.floor(this.pulseAngle * 10) % 2;
-          const ringCol = (pulse === 0) ? getPalColor(10) : getPalColor(7);
+          // ── CRASH ORB: rounded sphere with pulsing star core ──
+          const flash = Math.floor(this.pulseAngle * 8) % 2;
 
-          // Outer Glow Circle Ring
-          ctx.fillStyle = ringCol;
-          ctx.fillRect(drawX + 1, drawY, 4, 6);
-          ctx.fillRect(drawX, drawY + 1, 6, 4);
+          // Black fill (corners stay black = rounded look)
+          ctx.fillStyle = black;
+          ctx.fillRect(dx, dy, w, h);
 
-          // Dark Contour Ring
-          ctx.fillStyle = darkColor;
-          ctx.fillRect(drawX + 1, drawY + 1, 4, 4);
+          // Rounded body — dark shade fills the "pill" shape
+          ctx.fillStyle = dark;
+          ctx.fillRect(dx + 1, dy,     w - 2, h);
+          ctx.fillRect(dx,     dy + 1, w,     h - 2);
 
-          // Core Gem Color
-          ctx.fillStyle = baseColor;
-          ctx.fillRect(drawX + 2, drawY + 1, 2, 4);
-          ctx.fillRect(drawX + 1, drawY + 2, 4, 2);
+          // Core sphere fill
+          ctx.fillStyle = base;
+          ctx.fillRect(dx + 1, dy + 1, w - 2, h - 2);
 
-          // Flashing Inner Star Core
-          ctx.fillStyle = (pulse === 0) ? getPalColor(7) : getPalColor(10);
-          ctx.fillRect(drawX + 2, drawY + 2, 2, 2);
-          ctx.fillRect(drawX + 2, drawY + 1, 2, 4);
-          ctx.fillRect(drawX + 1, drawY + 2, 4, 2);
+          // Top specular arc
+          ctx.fillStyle = lite;
+          ctx.fillRect(dx + 1, dy + 1, w - 2, 1);
+          ctx.fillRect(dx + 2, dy + 2, w - 4, 1);
 
-          // Crisp Dark Outline
-          ctx.strokeStyle = getPalColor(0);
-          ctx.strokeRect(drawX, drawY, drawW, drawH);
+          // Bottom shadow arc
+          ctx.fillStyle = dark;
+          ctx.fillRect(dx + 1, dy + h - 2, w - 2, 1);
+          ctx.fillRect(dx + 2, dy + h - 3, w - 4, 1);
+
+          // Flashing center cross-star
+          ctx.fillStyle = flash ? white : getPalColor(10);
+          ctx.fillRect(dx + 2, dy + 3, 2, 2);
+          ctx.fillRect(dx + 1, dy + 4, 1, 1);
+          ctx.fillRect(dx + 4, dy + 4, 1, 1);
+          ctx.fillRect(dx + 2, dy + 2, 2, 1);
+          ctx.fillRect(dx + 2, dy + 5, 2, 1);
+
+          // Corner sparkle
+          ctx.fillStyle = white;
+          ctx.fillRect(dx + 1, dy + 1, 1, 1);
 
         } else if (isDiamond) {
-          // === RAINBOW DIAMOND SUPER GEM ===
-          const diaCol = Math.floor(this.pulseAngle * 8) % 4;
-          const diaColors = [8, 12, 11, 10];
-          ctx.fillStyle = getPalColor(diaColors[diaCol]);
-          ctx.fillRect(drawX, drawY, drawW, drawH);
+          // ── RAINBOW DIAMOND: cycling colors + facets ──
+          const phase = Math.floor(this.pulseAngle * 6) % 4;
+          const dCols = [8, 12, 11, 10];
 
-          // Sparkle Facets
-          ctx.fillStyle = getPalColor(7);
-          ctx.fillRect(drawX + 1, drawY + 1, 4, 1);
-          ctx.fillRect(drawX + 2, drawY + 2, 2, 2);
-          ctx.fillRect(drawX + 2, drawY + 4, 2, 1);
+          ctx.fillStyle = black;
+          ctx.fillRect(dx, dy, w, h);
 
-          ctx.strokeStyle = getPalColor(10);
-          ctx.strokeRect(drawX, drawY, drawW, drawH);
+          ctx.fillStyle = getPalColor(dCols[phase]);
+          ctx.fillRect(dx + 1, dy + 1, w - 2, h - 2);
+
+          // Top-left highlight bevel
+          ctx.fillStyle = white;
+          ctx.fillRect(dx + 1, dy + 1, w - 2, 1);
+          ctx.fillRect(dx + 1, dy + 1, 1, h - 2);
+
+          // Inner facet
+          ctx.fillStyle = getPalColor(dCols[(phase + 2) % 4]);
+          ctx.fillRect(dx + 2, dy + 3, 2, 2);
+
+          // Bottom-right shadow bevel
+          ctx.fillStyle = getPalColor(dCols[(phase + 1) % 4]);
+          ctx.fillRect(dx + 1, dy + h - 2, w - 2, 1);
+          ctx.fillRect(dx + w - 2, dy + 1, 1, h - 2);
+
+          // Sparkle
+          ctx.fillStyle = white;
+          ctx.fillRect(dx + 2, dy + 2, 1, 1);
 
         } else if (isCounter) {
-          // === HEAVY STONE/CONCRETE COUNTER BRICK ===
-          ctx.fillStyle = getPalColor(5); // Dark Stone Gray
-          ctx.fillRect(drawX, drawY, drawW, drawH);
+          // ── COUNTER BLOCK: heavy concrete slab ──
+          ctx.fillStyle = black;
+          ctx.fillRect(dx, dy, w, h);
 
-          // 3D Relief Mortar Bevels
-          ctx.fillStyle = getPalColor(6); // Light Gray Highlight
-          ctx.fillRect(drawX, drawY, drawW, 1);
-          ctx.fillRect(drawX, drawY, 1, drawH);
+          // Stone body
+          ctx.fillStyle = getPalColor(5);
+          ctx.fillRect(dx + 1, dy + 1, w - 2, h - 2);
 
-          ctx.fillStyle = getPalColor(0); // Mortar Shadow
-          ctx.fillRect(drawX, drawY + drawH - 1, drawW, 1);
-          ctx.fillRect(drawX + drawW - 1, drawY, 1, drawH);
+          // Top-left highlight bevel
+          ctx.fillStyle = getPalColor(6);
+          ctx.fillRect(dx + 1, dy + 1, w - 2, 1);
+          ctx.fillRect(dx + 1, dy + 1, 1, h - 2);
 
-          // Countdown Number Etched on Face
-          ctx.fillStyle = getPalColor(0);
-          ctx.font = 'bold 5px monospace';
-          ctx.fillText(timerVal, drawX + 2, drawY + 5);
-          ctx.fillStyle = getPalColor(7);
-          ctx.fillText(timerVal, drawX + 1, drawY + 5);
+          // Bottom-right shadow bevel
+          ctx.fillStyle = black;
+          ctx.fillRect(dx + 1, dy + h - 2, w - 2, 1);
+          ctx.fillRect(dx + w - 2, dy + 1, 1, h - 2);
+
+          // Countdown number (centered)
+          ctx.fillStyle = white;
+          ctx.font = 'bold 6px monospace';
+          ctx.textAlign = 'center';
+          ctx.fillText(timerVal, dx + 3, dy + 6);
+          ctx.textAlign = 'left';
 
         } else {
-          // === 3D CRYSTAL GEM (CAPCOM ARCADE BEVEL STYLE) ===
-          // Dark Outer Outline
-          ctx.fillStyle = getPalColor(0);
-          ctx.fillRect(drawX, drawY, drawW, drawH);
+          // ── NORMAL GEM: 3D beveled crystal block ──
+          // 1px black border
+          ctx.fillStyle = black;
+          ctx.fillRect(dx, dy, w, h);
 
-          // Vibrant Base Gem Body
-          ctx.fillStyle = baseColor;
-          ctx.fillRect(drawX + 1, drawY + 1, drawW - 2, drawH - 2);
+          // Vibrant body fill
+          ctx.fillStyle = base;
+          ctx.fillRect(dx + 1, dy + 1, w - 2, h - 2);
 
-          // Top & Left Specular Highlight (3D Bevel)
-          ctx.fillStyle = lightColor;
-          ctx.fillRect(drawX + 1, drawY + 1, drawW - 2, 1);
-          ctx.fillRect(drawX + 1, drawY + 1, 1, drawH - 2);
+          // Top highlight edge
+          ctx.fillStyle = lite;
+          ctx.fillRect(dx + 1, dy + 1, w - 2, 1);
 
-          // Bottom & Right Deep Shadow (3D Bevel)
-          ctx.fillStyle = darkColor;
-          ctx.fillRect(drawX + 1, drawY + drawH - 2, drawW - 2, 1);
-          ctx.fillRect(drawX + drawW - 2, drawY + 1, 1, drawH - 2);
+          // Left highlight edge
+          ctx.fillRect(dx + 1, dy + 2, 1, h - 3);
 
-          // Inner Crystal Facet Glint
-          ctx.fillStyle = lightColor;
-          ctx.fillRect(drawX + 2, drawY + 2, 1, 1);
+          // Bottom shadow edge
+          ctx.fillStyle = dark;
+          ctx.fillRect(dx + 2, dy + h - 2, w - 3, 1);
+
+          // Right shadow edge
+          ctx.fillRect(dx + w - 2, dy + 2, 1, h - 3);
+
+          // Corner glint
+          ctx.fillStyle = white;
+          ctx.fillRect(dx + 2, dy + 2, 1, 1);
 
           if (isPower) {
-            // Merged Power Gem Gold Bevel Border
-            ctx.strokeStyle = getPalColor(10);
-            ctx.lineWidth = 1;
-            ctx.strokeRect(drawX + 0.5, drawY + 0.5, drawW - 1, drawH - 1);
+            // Power gem: gold inner border frame
             ctx.fillStyle = getPalColor(10);
-            ctx.fillRect(drawX + 2, drawY + 2, 2, 2);
+            ctx.fillRect(dx + 1, dy + 1, w - 2, 1);
+            ctx.fillRect(dx + 1, dy + h - 2, w - 2, 1);
+            ctx.fillRect(dx + 1, dy + 1, 1, h - 2);
+            ctx.fillRect(dx + w - 2, dy + 1, 1, h - 2);
+            // Gold center pip
+            ctx.fillRect(dx + 2, dy + 3, 2, 2);
           }
         }
-
-        ctx.restore();
       }
     }
 
