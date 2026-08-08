@@ -235,7 +235,7 @@
     <div class="pico8-top-bar">
       <button class="btn-opt" id="btnMode">MODE: AI VS AI</button>
       <button class="btn-opt" id="btnReset">RESET</button>
-      <button class="btn-opt" id="btnAudio">AUDIO: CHIPTUNE ON</button>
+      <button class="btn-opt" id="btnAudio">AUDIO: TRAP ON</button>
     </div>
 
     <!-- 100% EDGE-TO-EDGE PICO-8 ENGINE CANVAS -->
@@ -298,40 +298,208 @@
     let maxComboTrack = dget(1);
 
 
-    // WebAudio PICO-8 Chiptune Synth
+    // WebAudio PICO-8 Chiptune Synth -> Chillhop Trap Sequencer
     let audioEnabled = true;
     let audioCtx = null;
+    let musicGainNode = null;
     let musicInterval = null;
-    let musicStep = 0;
+    
+    // Sequencer state
+    let current16thNote = 0;
+    let nextNoteTime = 0.0;
+    let currentTrackIdx = 0;
 
-    const BASS_NOTES = [110, 110, 130, 110, 146, 130, 110, 164];
+    const TRAP_TRACKS = [
+      // Track 1: Midnight Spar (Moody, slow trap)
+      {
+        kick:  [1,0,0,0, 0,0,0,1, 0,0,1,0, 0,0,0,0, 1,0,0,0, 0,0,0,0, 0,0,1,0, 0,0,0,0],
+        snare: [0,0,0,0, 1,0,0,0, 0,0,0,0, 1,0,0,0, 0,0,0,0, 1,0,0,0, 0,0,0,0, 1,0,0,0],
+        hat:   [1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,2,2, 1,1,1,1],
+        chord: [1,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 2,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
+        chordNotes: [[261.63, 311.13, 392.00, 466.16], [293.66, 349.23, 440.00, 523.25]], // Cmin7, Dmin7
+        speed: 130
+      },
+      // Track 2: Lofi Ring Rush (Jazzy chillhop)
+      {
+        kick:  [1,0,0,0, 0,0,1,0, 0,0,0,0, 0,0,0,1, 1,0,0,0, 0,1,0,0, 0,0,0,0, 0,0,0,0],
+        snare: [0,0,0,0, 1,0,0,0, 0,0,0,0, 1,0,0,0, 0,0,0,0, 1,0,0,0, 0,0,0,0, 1,0,0,0],
+        hat:   [1,0,1,0, 1,0,1,0, 1,0,1,0, 1,0,2,2, 1,0,1,0, 1,0,1,0, 1,0,1,0, 1,0,1,2],
+        chord: [1,0,0,0, 0,0,0,0, 1,0,0,0, 0,0,0,0, 2,0,0,0, 0,0,0,0, 2,0,0,0, 0,0,0,0],
+        chordNotes: [[233.08, 293.66, 349.23, 440.00], [207.65, 261.63, 311.13, 392.00]], // Bbmaj7, Abmaj7
+        speed: 110
+      },
+      // Track 3: Crash Out Anthem (Aggressive trap bounce)
+      {
+        kick:  [1,0,0,0, 0,0,0,0, 1,0,1,0, 0,0,0,0, 1,0,0,1, 0,0,0,0, 1,0,1,0, 0,0,0,0],
+        snare: [0,0,0,0, 1,0,0,0, 0,0,0,0, 1,0,0,0, 0,0,0,0, 1,0,0,0, 0,0,0,0, 1,0,0,0],
+        hat:   [1,1,2,2, 1,1,1,1, 1,1,2,2, 1,1,2,2, 1,1,1,1, 1,1,2,2, 1,1,1,1, 1,1,2,2],
+        chord: [1,0,0,0, 0,0,0,0, 1,0,0,0, 0,0,0,0, 2,0,0,0, 0,0,0,0, 2,0,0,0, 0,0,0,0],
+        chordNotes: [[349.23, 415.30, 523.25], [311.13, 392.00, 466.16]], // Fmin, Ebmin
+        speed: 145
+      }
+    ];
+
+    // Helper: Create noise buffer for snares/hats
+    function createNoiseBuffer() {
+      const bufferSize = audioCtx.sampleRate * 2;
+      const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) {
+        data[i] = Math.random() * 2 - 1;
+      }
+      return buffer;
+    }
+    let noiseBuffer = null;
 
     function initAudio() {
       if (!audioCtx) {
         audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        
+        musicGainNode = audioCtx.createGain();
+        musicGainNode.gain.value = 0.12; // Lower volume than SFX
+        musicGainNode.connect(audioCtx.destination);
+        
+        noiseBuffer = createNoiseBuffer();
         startChiptuneMusic();
       }
     }
 
+    function switchMusicTrack() {
+      currentTrackIdx = (currentTrackIdx + 1) % TRAP_TRACKS.length;
+    }
+
+    // Play a single 808 kick
+    function playKick(time) {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sine';
+      
+      // Pitch envelope for that 808 punch
+      osc.frequency.setValueAtTime(150, time);
+      osc.frequency.exponentialRampToValueAtTime(45, time + 0.1);
+      
+      // Volume envelope for long decay
+      gain.gain.setValueAtTime(1, time);
+      gain.gain.exponentialRampToValueAtTime(0.001, time + 0.8);
+      
+      osc.connect(gain);
+      gain.connect(musicGainNode);
+      osc.start(time);
+      osc.stop(time + 0.8);
+    }
+
+    // Play lofi snare
+    function playSnare(time) {
+      const noise = audioCtx.createBufferSource();
+      noise.buffer = noiseBuffer;
+      const noiseFilter = audioCtx.createBiquadFilter();
+      noiseFilter.type = 'highpass';
+      noiseFilter.frequency.value = 1000;
+      const noiseGain = audioCtx.createGain();
+      noiseGain.gain.setValueAtTime(1, time);
+      noiseGain.gain.exponentialRampToValueAtTime(0.01, time + 0.2);
+      noise.connect(noiseFilter);
+      noiseFilter.connect(noiseGain);
+      noiseGain.connect(musicGainNode);
+      
+      const osc = audioCtx.createOscillator();
+      osc.type = 'triangle';
+      const oscGain = audioCtx.createGain();
+      osc.frequency.setValueAtTime(250, time);
+      oscGain.gain.setValueAtTime(0.7, time);
+      oscGain.gain.exponentialRampToValueAtTime(0.01, time + 0.1);
+      osc.connect(oscGain);
+      oscGain.connect(musicGainNode);
+      
+      noise.start(time);
+      osc.start(time);
+      noise.stop(time + 0.2);
+      osc.stop(time + 0.2);
+    }
+
+    // Play trap hi-hat
+    function playHat(time, type) {
+      const noise = audioCtx.createBufferSource();
+      noise.buffer = noiseBuffer;
+      const noiseFilter = audioCtx.createBiquadFilter();
+      noiseFilter.type = 'highpass';
+      noiseFilter.frequency.value = 7000;
+      const noiseGain = audioCtx.createGain();
+      
+      const decay = type === 2 ? 0.15 : 0.05; // 2 = open hat
+      const vol = type === 2 ? 0.7 : 0.4;
+      
+      noiseGain.gain.setValueAtTime(vol, time);
+      noiseGain.gain.exponentialRampToValueAtTime(0.01, time + decay);
+      noise.connect(noiseFilter);
+      noiseFilter.connect(noiseGain);
+      noiseGain.connect(musicGainNode);
+      noise.start(time);
+      noise.stop(time + decay);
+    }
+
+    // Play chillhop chord
+    function playChord(time, notes) {
+      notes.forEach(freq => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        const filter = audioCtx.createBiquadFilter();
+        
+        osc.type = 'triangle';
+        osc.frequency.value = freq;
+        
+        filter.type = 'lowpass';
+        filter.frequency.value = 800;
+        
+        gain.gain.setValueAtTime(0, time);
+        gain.gain.linearRampToValueAtTime(0.2, time + 0.1);
+        gain.gain.exponentialRampToValueAtTime(0.001, time + 1.5);
+        
+        osc.connect(filter);
+        filter.connect(gain);
+        gain.connect(musicGainNode);
+        
+        osc.start(time);
+        osc.stop(time + 1.5);
+      });
+    }
+
+    function scheduleNote() {
+      const track = TRAP_TRACKS[currentTrackIdx];
+      const secondsPerBeat = 60.0 / track.speed;
+      const secondsPer16th = secondsPerBeat * 0.25;
+      
+      const step = current16thNote % 32;
+      
+      if (track.kick[step]) playKick(nextNoteTime);
+      if (track.snare[step]) playSnare(nextNoteTime);
+      if (track.hat[step]) playHat(nextNoteTime, track.hat[step]);
+      
+      const chordVal = track.chord[step];
+      if (chordVal > 0) {
+        playChord(nextNoteTime, track.chordNotes[chordVal - 1]);
+      }
+      
+      nextNoteTime += secondsPer16th;
+      current16thNote++;
+    }
+
     function startChiptuneMusic() {
       if (musicInterval) clearInterval(musicInterval);
+      
+      // Initialize sequencer time (only if not already running smoothly)
+      if (!nextNoteTime || nextNoteTime < audioCtx.currentTime) {
+        nextNoteTime = audioCtx.currentTime + 0.1;
+      }
+      
       musicInterval = setInterval(() => {
         if (!audioEnabled || !audioCtx) return;
-        try {
-          const t = audioCtx.currentTime;
-          const osc = audioCtx.createOscillator();
-          const gain = audioCtx.createGain();
-          osc.type = 'triangle';
-          osc.frequency.setValueAtTime(BASS_NOTES[musicStep % BASS_NOTES.length], t);
-          gain.gain.setValueAtTime(0.04, t);
-          gain.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
-          osc.connect(gain);
-          gain.connect(audioCtx.destination);
-          osc.start(t);
-          osc.stop(t + 0.12);
-          musicStep++;
-        } catch (e) {}
-      }, 150);
+        
+        // Schedule notes ahead to prevent stutter
+        while (nextNoteTime < audioCtx.currentTime + 0.15) {
+          scheduleNote();
+        }
+      }, 50); // Fast lookahead loop
     }
 
     function play808Sfx(type) {
@@ -2214,6 +2382,7 @@
     }
 
     function startMatch() {
+      switchMusicTrack();
       const f1 = ROSTER[p1SelectIdx];
       const f2 = ROSTER[p2SelectIdx];
 
@@ -2448,7 +2617,7 @@
 
     bindBtn('btnAudio', () => {
       audioEnabled = !audioEnabled;
-      document.getElementById('btnAudio').innerText = audioEnabled ? 'AUDIO: CHIPTUNE ON' : 'AUDIO: OFF';
+      document.getElementById('btnAudio').innerText = audioEnabled ? 'AUDIO: TRAP ON' : 'AUDIO: OFF';
     });
 
     // Direct Canvas Click Navigation for Desktop / Mobile
