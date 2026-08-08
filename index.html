@@ -214,7 +214,7 @@
   <div class="arcade-cabinet">
     <div class="cabinet-header">
       <div class="brand-title">CRASH OUT: RING RUSH</div>
-      <div class="badge-pico8">GROUNDED PACING v1.3.0</div>
+      <div class="badge-pico8">DYNAMIC PUNCH v1.4.0</div>
     </div>
 
     <div class="viewport-container">
@@ -250,10 +250,11 @@
 
   <script>
     // =========================================================================
-    // GROUNDED PACING CAPCOM ARCADE PUZZLE ENGINE v1.3.0
-    // - 60% Slower Brick & Animation Pacing: Smooth, readable, relaxing arcade speed
-    // - Grounded Feet Physics: Feet 100% locked to ring floor canvas (NO MID-AIR FLOATING!)
-    // - Deen flipped horizontally to face Broner face-to-face eye-to-eye
+    // DYNAMIC PUNCH LUNGE & DRAMATIC HIT REACTION ENGINE v1.4.0
+    // - Smooth forward lunge across ring stage so gloves physically CONNECT with opponent
+    // - Dramatic head knockback, body tilt, white impact flash & sweat particle spray
+    // - Grounded feet physics on ring floor canvas (0 mid-air floating)
+    // - 60% Slower arcade pacing for clear, readable, rewarding puzzle boxing
     // =========================================================================
 
     const PICO_PALETTE = [
@@ -514,7 +515,7 @@
     let globalParticles = [];
     let globalFloatingTexts = [];
 
-    // --- DEFENSIVE ONLY IDLE CONTROLLER (60% SLOWER SMOOTH ANIMATIONS) ---
+    // --- DEFENSIVE ONLY IDLE CONTROLLER ---
     class BoxerIdleController {
       constructor(isP1) {
         this.isP1 = isP1;
@@ -543,8 +544,6 @@
 
       getOffsets() {
         let dx = 0;
-
-        // 60% Slower Stance Sway (Horizontal Feet Movement ONLY - dy is ZERO so feet stay on floor!)
         const shuffleX = Math.sin(globalFrameCount * 0.04 + (this.isP1 ? 0 : 2.5)) * 1.2;
         dx += shuffleX;
 
@@ -564,7 +563,7 @@
     const idleP1 = new BoxerIdleController(true);
     const idleP2 = new BoxerIdleController(false);
 
-    // --- DETERMINISTIC BOARD STATE MACHINE ENGINE (60% SLOWER BRICK SPEED) ---
+    // --- DETERMINISTIC BOARD STATE MACHINE ENGINE ---
     class Board {
       constructor(id, offsetX, isAi = true) {
         this.id = id;
@@ -660,7 +659,7 @@
           opponent.hp = Math.max(0, opponent.hp - 35);
           opponent.receiveGarbage(10);
 
-          cameraShake = 15;
+          cameraShake = 16;
           flashFrames = 6;
           play808Sfx('super');
 
@@ -669,7 +668,10 @@
           this.animTimer = 40;
           opponent.animTimer = 40;
 
-          globalFloatingTexts.push(new FloatingText('SUPER FINISHER!', this.offsetX + 2, this.offsetY + 30, 10));
+          // Spawn Contact Starburst & Sweat Particle Spray
+          spawnImpactFx(this.id === 1);
+
+          globalFloatingTexts.push(new FloatingText('SUPER FINISHER!', 50, 40, 10));
         } else {
           this.rotate(1);
         }
@@ -783,7 +785,7 @@
         const matchFound = this.evaluateMatches();
         if (matchFound) {
           this.state = 'CLEARING';
-          this.clearTimer = 36; // 60% Slower Clear Animation Flash
+          this.clearTimer = 36;
         } else {
           this.comboCount = 0;
           this.state = 'SPAWN';
@@ -1008,19 +1010,22 @@
           play808Sfx('detonate');
         }
 
+        // TRIGGER DRAMATIC PUNCH LUNGE & IMPACT REACTION!
         if (powerGemCleared || this.comboCount >= 2) {
           this.anim = 'UPPERCUT';
           opponent.anim = 'FLINCH';
-          cameraShake = 9;
+          cameraShake = 12;
           play808Sfx('uppercut');
+          spawnImpactFx(this.id === 1);
         } else {
           this.anim = 'JAB';
           opponent.anim = 'FLINCH';
-          cameraShake = 4;
+          cameraShake = 6;
           play808Sfx('jab');
+          spawnImpactFx(this.id === 1);
         }
-        this.animTimer = 32;
-        opponent.animTimer = 32;
+        this.animTimer = 40;
+        opponent.animTimer = 40;
 
         this.pendingClear = null;
       }
@@ -1295,33 +1300,70 @@
     const p1 = new Board(1, 4, true);  // AI P1
     const p2 = new Board(2, 88, true); // AI P2
 
+    let impactFxTimer = 0;
+    let impactFxP1 = true;
+
+    function spawnImpactFx(isP1Attacker) {
+      impactFxTimer = 6;
+      impactFxP1 = isP1Attacker;
+
+      const hitX = 58;
+      const hitY = 56;
+
+      for (let k = 0; k < 12; k++) {
+        const vx = (Math.random() - 0.5) * 4;
+        const vy = (Math.random() - 0.5) * 4;
+        const pColor = (k % 3 === 0) ? 10 : (k % 3 === 1 ? 8 : 7);
+        globalParticles.push(new Particle(hitX, hitY, vx, vy, pColor, 18, 2));
+      }
+    }
+
     // =========================================================================
-    // GROUNDED CAPCOM ARCADE SPRITE RENDERER v1.3.0
-    // - Feet Y-position STRICTLY LOCKED to Ring Canvas Floor (Y = 50, Feet = 90)
-    // - NO MID-AIR FLOATING! Ambient drop shadow ellipse directly under feet.
+    // DYNAMIC PUNCH LUNGE & DRAMATIC HIT REACTION RENDERER v1.4.0
+    // - Attacker lunges 16px across ring floor so glove physically CONNECTS with opponent
+    // - Defender head snaps back 12px with 18-degree tilt and white flash
+    // - Feet strictly grounded on ring floor canvas at Y = 90
     // =========================================================================
-    function drawBoxer(x, y, isP1, anim) {
+    function drawBoxer(x, y, isP1, anim, animTimer) {
       let fx = x;
-      let fy = 50; // STRICTLY GROUNDED ON RING FLOOR CANVAS (Feet at 50 + 40 = 90)
+      let fy = 50; // Feet strictly grounded at 50 + 40 = 90 on ring floor canvas
 
       const idleController = isP1 ? idleP1 : idleP2;
-      const { dx, dy, frameIndex } = idleController.getOffsets();
-
+      const { dx, frameIndex } = idleController.getOffsets();
       fx += Math.floor(dx);
-      // dy is strictly 0 for feet grounding!
 
       let currentPose = frameIndex;
+      let punchTilt = 0;
+      let flinchTilt = 0;
+      let isHitFlash = false;
 
-      if (anim === 'JAB') {
+      const timerVal = animTimer || 0;
+      const progress = 1.0 - (timerVal / 40.0);
+
+      // --- DRAMATIC ATTACKER PUNCH LUNGE ---
+      if (anim === 'JAB' || anim === 'UPPERCUT') {
         currentPose = 3;
-        fx += isP1 ? 7 : -7;
-      } else if (anim === 'UPPERCUT') {
-        currentPose = 3;
-        // Step forward on floor during uppercut
-        fx += isP1 ? 4 : -4;
+        // Smooth sine lunge forward across ring floor by 16px to CONNECT glove to chin!
+        const lungeOffset = Math.sin(Math.min(1.0, progress / 0.5) * Math.PI) * 16.0;
+        fx += isP1 ? lungeOffset : -lungeOffset;
+
+        if (anim === 'UPPERCUT') {
+          punchTilt = isP1 ? 0.14 : -0.14;
+        } else {
+          punchTilt = isP1 ? 0.08 : -0.08;
+        }
+
+      // --- DRAMATIC DEFENDER HIT REACTION ---
       } else if (anim === 'FLINCH') {
         currentPose = 4;
-        fx += isP1 ? -5 : 5;
+        // Snap head & body back by 13px upon impact!
+        const flinchOffset = Math.sin(Math.min(1.0, progress / 0.5) * Math.PI) * 13.0;
+        fx += isP1 ? -flinchOffset : flinchOffset;
+
+        // Head knockback tilt back by 18 degrees (0.30 rad)
+        flinchTilt = isP1 ? -0.30 : 0.30;
+
+        if (timerVal > 30) isHitFlash = true;
       }
 
       // Dynamic Ambient Ring Drop Shadow ON THE FLOOR CANVAS
@@ -1343,15 +1385,25 @@
           fy = 0;
         }
 
-        if (currentPose === 1) { // SHOULDER ROLL (Philly Shell torso tilt around feet center)
-          ctx.translate(fx + 11, fy + 38); // Pivot near feet
+        if (isHitFlash) {
+          ctx.filter = 'brightness(2.5)';
+        }
+
+        if (anim === 'JAB' || anim === 'UPPERCUT') { // ATTACK LUNGE EXTENSION
+          ctx.translate(fx + 11, fy + 38);
+          ctx.rotate(punchTilt);
+          ctx.drawImage(singleCanvas, -11, -38, 22, 40);
+        } else if (anim === 'FLINCH') { // DRAMATIC HEAD KNOCKBACK TILT
+          ctx.translate(fx + 11, fy + 38);
+          ctx.rotate(flinchTilt);
+          ctx.drawImage(singleCanvas, -11, -38, 22, 40);
+        } else if (currentPose === 1) { // SHOULDER ROLL (Philly Shell tilt)
+          ctx.translate(fx + 11, fy + 38);
           ctx.rotate(isP1 ? -0.06 : -0.06);
           ctx.drawImage(singleCanvas, -11, -38, 22, 40);
-        } else if (currentPose === 2) { // DUCK CROUCH (Body crouches down, feet stay grounded!)
+        } else if (currentPose === 2) { // DUCK CROUCH
           ctx.drawImage(singleCanvas, fx, fy + 3, 22, 37);
-        } else if (currentPose === 3) { // JAB / FEINT EXTENSION
-          ctx.drawImage(singleCanvas, fx + 3, fy, 22, 40);
-        } else if (currentPose === 4) { // HEAD SLIP & WEAVE (Pivot near feet)
+        } else if (currentPose === 4) { // HEAD SLIP & WEAVE
           ctx.translate(fx + 11, fy + 38);
           ctx.rotate(isP1 ? 0.08 : 0.08);
           ctx.drawImage(singleCanvas, -11, -38, 22, 40);
@@ -1420,9 +1472,21 @@
       ctx.fillStyle = PICO_PALETTE[7];
       ctx.fillRect(41, 90, 46, 23);
 
-      // Draw Clean Transparent Full-Size Face-to-Face Capcom Boxer Sprites GROUNDED ON FLOOR!
-      drawBoxer(41, 50, true, p1.anim);  // Adrien Broner (Ground Y=50, Feet=90)
-      drawBoxer(65, 50, false, p2.anim); // Deen The Great (Ground Y=50, Feet=90)
+      // Draw Clean Transparent Full-Size Face-to-Face Capcom Boxer Sprites!
+      drawBoxer(41, 50, true, p1.anim, p1.animTimer);   // Adrien Broner
+      drawBoxer(65, 50, false, p2.anim, p2.animTimer); // Deen The Great
+
+      // 8-BIT CONTACT STARBURST IMPACT FLARE (★) AT CONTACT POINT
+      if (impactFxTimer > 0) {
+        impactFxTimer--;
+        const starX = 58;
+        const starY = 56;
+
+        ctx.fillStyle = PICO_PALETTE[10]; // Gold star flare
+        ctx.fillRect(starX - 3, starY - 3, 7, 7);
+        ctx.fillStyle = PICO_PALETTE[7]; // Specular white core
+        ctx.fillRect(starX - 1, starY - 1, 3, 3);
+      }
 
       p1.draw();
       p2.draw();
