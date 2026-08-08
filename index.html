@@ -214,7 +214,7 @@
   <div class="arcade-cabinet">
     <div class="cabinet-header">
       <div class="brand-title">CRASH OUT: RING RUSH</div>
-      <div class="badge-pico8">FLAWLESS SPRITES v0.1.0</div>
+      <div class="badge-pico8">ZERO-BOX SPRITES v0.1.0</div>
     </div>
 
     <div class="viewport-container">
@@ -250,7 +250,7 @@
 
   <script>
     // =========================================================================
-    // PERFECT CHROMA-KEYED TRANSPARENT SPRITES & MULTI-JOINT BODY IDLE ENGINE
+    // PERFECT ZERO-BOX TRANSPARENT SPRITE & MULTI-JOINT BODY IDLE ENGINE
     // =========================================================================
 
     const PICO_PALETTE = [
@@ -287,7 +287,7 @@
     let deenCanvas = null;
     imgDeen.onload = () => { deenCanvas = createCleanTransparentSprite(imgDeen); };
 
-    // PERFECT CHROMA-KEYING: Strips ALL background colors (white, gray, gridlines, light pixels)
+    // FLAWLESS CHROMA-KEYING: Strips ALL background colors (white, gray, gridlines, shadows)
     function createCleanTransparentSprite(img) {
       const c = document.createElement('canvas');
       c.width = img.width;
@@ -302,12 +302,12 @@
         const g = d[i+1];
         const b = d[i+2];
 
-        // Strip ALL white, light gray, off-white, and checkerboard grid pixels
-        const isLight = (r > 165 && g > 165 && b > 165);
-        const isGray = (Math.abs(r - g) < 18 && Math.abs(g - b) < 18 && r > 140);
+        // Strip any non-fighter background pixel (white, light gray, off-white, gridlines, shadows)
+        const isLight = (r > 130 && g > 130 && b > 130);
+        const isGray = (Math.abs(r - g) < 20 && Math.abs(g - b) < 20 && r > 90);
         
         if (isLight || isGray) {
-          d[i+3] = 0; // Set Alpha = 0 (100% Transparent!)
+          d[i+3] = 0; // Alpha = 0 (100% Transparent!)
         }
       }
       cCtx.putImageData(imgData, 0, 0);
@@ -1150,26 +1150,26 @@
     const p2 = new Board(2, 88, true);
 
     // =========================================================================
-    // MULTI-JOINT BODY MOVEMENT IDLE ANIMATION & PERFECT TRANSPARENT SPRITES
+    // PERFECT ZERO-BOX TRANSPARENT SPRITE & MULTI-JOINT BODY IDLE ENGINE
+    // Dynamic head bobs, chest breathing, hip sways, and guard feints
     // =========================================================================
     function drawBoxer(x, y, isP1, anim) {
       let fx = x;
       let fy = y;
 
-      // 1. DYNAMIC MULTI-JOINT BODY MOVEMENT IDLE ANIMATION
-      const swayOffset = Math.sin(globalFrameCount * 0.08 + (isP1 ? 0 : 2.1)) * 1.8; // Lateral Hips Sway
-      const bounceOffset = Math.abs(Math.sin(globalFrameCount * 0.14 + (isP1 ? 0 : 3.4))) * 1.5; // Vertical Foot Bounce
-      const headBobY = Math.sin(globalFrameCount * 0.16 + (isP1 ? 0 : 1.2)) * 1.0; // Head Bobbing
-      const chestSwellY = (Math.floor(globalFrameCount / 12) % 2 === 0) ? 0 : -1.0; // Chest Breathing
+      // MULTI-JOINT BODY MOVEMENT IDLE ANIMATION
+      const swayOffset = Math.sin(globalFrameCount * 0.08 + (isP1 ? 0 : 2.1)) * 1.8;
+      const bounceOffset = Math.abs(Math.sin(globalFrameCount * 0.14 + (isP1 ? 0 : 3.4))) * 1.5;
+      const headBobY = Math.sin(globalFrameCount * 0.16 + (isP1 ? 0 : 1.2)) * 1.0;
+      const chestSwellY = (Math.floor(globalFrameCount / 12) % 2 === 0) ? 0 : -1.0;
 
-      // Randomized Micro-Actions (Philly Shell Shoulder Slip / Southpaw Guard Check)
       const tauntCycle = Math.floor((globalFrameCount + (isP1 ? 0 : 50)) / 90) % 3;
       const tauntFrame = (globalFrameCount % 90);
       let microDodge = 0;
       let microFeint = 0;
       if (tauntFrame < 20) {
-        if (tauntCycle === 1) microDodge = (isP1 ? 2.5 : -2.5); // Philly Shell Shoulder Slip
-        if (tauntCycle === 2) microFeint = (isP1 ? 3.5 : -3.5); // Southpaw Guard Check Feint
+        if (tauntCycle === 1) microDodge = (isP1 ? 2.5 : -2.5);
+        if (tauntCycle === 2) microFeint = (isP1 ? 3.5 : -3.5);
       }
 
       fx += Math.floor(swayOffset + microDodge);
