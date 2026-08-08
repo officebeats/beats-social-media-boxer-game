@@ -1143,9 +1143,19 @@
             this.anim = 'IDLE';
           }
         }
+      }
 
+      getDropInterval() {
+        const elapsedSeconds = Math.max(0, 99 - roundTimer);
+        const speedLevel = Math.min(10, Math.floor(elapsedSeconds / 10) + 1);
+        // Level 1: 52 frames (0.87s/drop), Level 5: 36 frames (0.6s/drop), Level 10: 16 frames (0.27s/drop)
+        return Math.max(14, 52 - (speedLevel - 1) * 4);
+      }
+
+      update() {
         if (this.state === 'SPAWN') {
           this.spawnPair();
+          this.state = 'FALLING';
         } else if (this.state === 'CLEARING') {
           this.clearTimer--;
           if (this.clearTimer <= 0) {
@@ -1169,7 +1179,8 @@
         } else if (this.state === 'FALLING') {
           if (this.isAi && this.pair) {
             this.aiTimer++;
-            if (this.aiTimer >= 10) {
+            // AI decision pace: 16 frames (~0.27s) between actions for natural human-like rhythm
+            if (this.aiTimer >= 16) {
               this.aiTimer = 0;
 
               let moved = false;
@@ -1186,23 +1197,25 @@
               }
 
               if (!moved) {
-                if (Math.random() < 0.2) this.rotate(1);
-                this.dropHard();
+                if (Math.random() < 0.25) this.rotate(1);
+                // 30% soft drop chance for deliberate pacing instead of instant hard drop spam
+                if (Math.random() < 0.30) this.dropSoft();
               }
 
-              if (this.superMeter >= 100) this.triggerSuper();
+              if (this.superMeter >= 100 && Math.random() < 0.15) this.triggerSuper();
             }
           }
 
           if (this.pair) {
             this.dropTimer++;
-            if (this.dropTimer >= this.dropInterval) {
+            const targetInterval = this.getDropInterval();
+            if (this.dropTimer >= targetInterval) {
               this.dropTimer = 0;
               if (this.isValid(this.pair.x, this.pair.y + 1, this.pair.rot)) {
                 this.pair.y++;
               } else {
                 this.lockDelay++;
-                if (this.lockDelay >= 2) {
+                if (this.lockDelay >= 8) {
                   this.lockDelay = 0;
                   this.lockPair();
                 }
@@ -2014,6 +2027,12 @@
       ctx.fillText(p2.name || 'DEEN', 94, 13);
       ctx.fillText(roundTimer < 10 ? '0' + roundTimer : roundTimer, 58, 10);
 
+      const elapsedSec = Math.max(0, 99 - roundTimer);
+      const currentLvl = Math.min(10, Math.floor(elapsedSec / 10) + 1);
+      ctx.fillStyle = getPalColor(10);
+      ctx.font = '6px monospace';
+      ctx.fillText('LVL ' + currentLvl, 52, 22);
+
       drawPicoDitheredCrowd();
 
       // PICO-8 RING FLOOR (DARK RETRO RING FLOOR)
@@ -2133,9 +2152,23 @@
       }
 
       p1.hp = 100; p2.hp = 100;
+      p1.superMeter = 0; p2.superMeter = 0;
       p1.grid = Array(ROWS).fill(null).map(() => Array(COLS).fill(0));
       p2.grid = Array(ROWS).fill(null).map(() => Array(COLS).fill(0));
+      p1.powerGems = Array(ROWS).fill(null).map(() => Array(COLS).fill(false));
+      p2.powerGems = Array(ROWS).fill(null).map(() => Array(COLS).fill(false));
+      p1.counterTimers = Array(ROWS).fill(null).map(() => Array(COLS).fill(3));
+      p2.counterTimers = Array(ROWS).fill(null).map(() => Array(COLS).fill(3));
+      p1.squish = Array(ROWS).fill(null).map(() => Array(COLS).fill(0));
+      p2.squish = Array(ROWS).fill(null).map(() => Array(COLS).fill(0));
+
+      p1.state = 'SPAWN';
+      p2.state = 'SPAWN';
+      p1.pair = null;
+      p2.pair = null;
+
       roundTimer = 99;
+      timerFrameCounter = 0;
       gameState = 'PLAYING';
       appState = 'PLAYING';
     }
@@ -2150,15 +2183,11 @@
           lockCountdown = -1;
           startMatch();
         }
-        return;
       }
 
       if (appState !== 'PLAYING' && appState !== 'KO') return;
 
       if (!p1 || !p2) return;
-
-      idleP1.update();
-      idleP2.update();
 
       p1.update();
       p2.update();
@@ -2178,9 +2207,9 @@
           } else {
             gameState = 'KO';
             appState = 'KO';
-            if (p1.health > p2.health) {
+            if (p1.hp > p2.hp) {
               koMessage = 'TIME! ' + p1.name + ' WINS!';
-            } else if (p2.health > p1.health) {
+            } else if (p2.hp > p1.hp) {
               koMessage = 'TIME! ' + p2.name + ' WINS!';
             } else {
               koMessage = 'TIME! DRAW!';
