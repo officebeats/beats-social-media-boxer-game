@@ -1734,6 +1734,108 @@
       ctx.textAlign = 'left';
     }
 
+    const FIGHTER_DETAILS = {
+      broner: { skin: 4, hair: 0, trunks: 8, gloves: 10, chain: 10, feature: 'braids' },
+      deen: { skin: 4, hair: 0, trunks: 12, gloves: 12, feature: 'buzz' },
+      ryan: { skin: 15, hair: 0, trunks: 7, gloves: 8, feature: 'stylish' },
+      n3on: { skin: 15, hair: 0, trunks: 11, gloves: 11, feature: 'glasses' },
+      rayj: { skin: 4, hair: 0, trunks: 2, gloves: 2, feature: 'sunglasses' },
+      blueface: { skin: 4, hair: 0, trunks: 1, gloves: 12, feature: 'tattoos' },
+      chrisean: { skin: 4, hair: 0, trunks: 14, gloves: 10, feature: 'ponytail' },
+      rampage: { skin: 4, hair: 0, trunks: 8, gloves: 8, chain: 6, feature: 'mma' },
+      adin: { skin: 15, hair: 4, trunks: 2, gloves: 8, feature: 'curly' },
+      charleston: { skin: 4, hair: 0, trunks: 10, gloves: 8, feature: 'hat' },
+      walid: { skin: 15, hair: 0, trunks: 12, gloves: 14, feature: 'counter' },
+      abrown: { skin: 4, hair: 0, trunks: 10, gloves: 10, chain: 10, feature: 'dance' },
+      tank: { skin: 4, hair: 0, trunks: 8, gloves: 8, feature: 'southpaw' },
+      floyd: { skin: 4, hair: 0, trunks: 10, gloves: 10, feature: 'tmt' }
+    };
+
+    function drawBoxerAvatar(ctx, f, x, y, isBig = false) {
+      const details = FIGHTER_DETAILS[f.id] || { skin: 4, hair: 0, trunks: f.color, gloves: f.color };
+      const s = isBig ? 1.4 : 0.6;
+
+      ctx.save();
+      ctx.translate(x, y);
+
+      // Head & Face Base
+      ctx.fillStyle = getPalColor(details.skin);
+      ctx.fillRect(4 * s, 2 * s, 9 * s, 8 * s);
+      ctx.strokeStyle = getPalColor(0);
+      ctx.lineWidth = 1;
+      ctx.strokeRect(4 * s, 2 * s, 9 * s, 8 * s);
+
+      // Eyes & Accessories
+      ctx.fillStyle = getPalColor(0);
+      if (details.feature === 'glasses' || details.feature === 'sunglasses') {
+        ctx.fillRect(3 * s, 4 * s, 11 * s, 3 * s);
+        ctx.fillStyle = details.feature === 'glasses' ? getPalColor(7) : getPalColor(5);
+        ctx.fillRect(4 * s, 4.5 * s, 3.5 * s, 2 * s);
+        ctx.fillRect(9.5 * s, 4.5 * s, 3.5 * s, 2 * s);
+      } else {
+        ctx.fillRect(5.5 * s, 4.5 * s, 1.5 * s, 1.5 * s);
+        ctx.fillRect(9.5 * s, 4.5 * s, 1.5 * s, 1.5 * s);
+      }
+
+      // Tattoos / Face details
+      if (details.feature === 'tattoos') {
+        ctx.fillStyle = getPalColor(12);
+        ctx.fillRect(4 * s, 6.5 * s, 2 * s, 2 * s);
+      }
+
+      // Hair / Headwear
+      ctx.fillStyle = getPalColor(details.hair || 0);
+      if (details.feature === 'hat') {
+        ctx.fillStyle = getPalColor(4);
+        ctx.fillRect(1 * s, 0 * s, 15 * s, 2.5 * s);
+        ctx.fillRect(3.5 * s, -2.5 * s, 10 * s, 3 * s);
+        ctx.fillStyle = getPalColor(10);
+        ctx.fillRect(3.5 * s, 0 * s, 10 * s, 1 * s);
+      } else if (details.feature === 'tmt') {
+        ctx.fillStyle = getPalColor(10);
+        ctx.fillRect(3 * s, -1.5 * s, 11 * s, 3.5 * s);
+        ctx.fillStyle = getPalColor(0);
+        ctx.fillRect(1 * s, 1 * s, 7 * s, 1.5 * s);
+      } else if (details.feature === 'ponytail') {
+        ctx.fillRect(3 * s, 0 * s, 11 * s, 2.5 * s);
+        ctx.fillRect(13 * s, 1.5 * s, 3 * s, 6 * s);
+      } else if (details.feature === 'braids') {
+        ctx.fillRect(3 * s, 0 * s, 11 * s, 2.5 * s);
+        ctx.fillRect(3 * s, 2.5 * s, 1.5 * s, 5 * s);
+        ctx.fillRect(12.5 * s, 2.5 * s, 1.5 * s, 5 * s);
+      } else {
+        ctx.fillRect(3 * s, 0 * s, 11 * s, 2.5 * s);
+      }
+
+      // Beard & Chain
+      if (f.id === 'broner' || f.id === 'rampage' || f.id === 'floyd' || f.id === 'tank') {
+        ctx.fillStyle = getPalColor(0);
+        ctx.fillRect(4 * s, 7.5 * s, 9 * s, 2.5 * s);
+      }
+      if (details.chain) {
+        ctx.fillStyle = getPalColor(details.chain);
+        ctx.fillRect(4.5 * s, 10 * s, 8 * s, 1.5 * s);
+      }
+
+      // Torso & Musculature
+      ctx.fillStyle = getPalColor(details.skin);
+      ctx.fillRect(4.5 * s, 10 * s, 8 * s, 9 * s);
+      ctx.strokeRect(4.5 * s, 10 * s, 8 * s, 9 * s);
+
+      // Trunks & Waistband
+      ctx.fillStyle = getPalColor(details.trunks);
+      ctx.fillRect(4 * s, 17 * s, 9 * s, 6 * s);
+      ctx.fillStyle = getPalColor(7);
+      ctx.fillRect(4 * s, 17 * s, 9 * s, 1.5 * s);
+
+      // Gloves
+      ctx.fillStyle = getPalColor(details.gloves);
+      ctx.fillRect(1 * s, 11 * s, 3.5 * s, 4.5 * s);
+      ctx.fillRect(12.5 * s, 11 * s, 3.5 * s, 4.5 * s);
+
+      ctx.restore();
+    }
+
     // === CHARACTER SELECT RENDERER ===
     function drawCharSelectScreen() {
       ctx.fillStyle = getPalColor(0);
@@ -1762,17 +1864,22 @@
         const isP2 = (p2SelectIdx === idx);
 
         // Cell background
-        ctx.fillStyle = getPalColor(f.color);
+        ctx.fillStyle = getPalColor(1);
         ctx.fillRect(cx, cy, cellW, cellH);
 
-        // Name initial
+        // Draw Fighter Pixel Mini-Avatar
+        drawBoxerAvatar(ctx, f, cx - 1, cy - 2, false);
+
+        // Name Initial Badge at bottom of cell
+        ctx.fillStyle = getPalColor(0);
+        ctx.fillRect(cx, cy + 11, cellW, 6);
         ctx.fillStyle = getPalColor(7);
-        ctx.font = 'bold 6px monospace';
+        ctx.font = 'bold 5px monospace';
         ctx.textAlign = 'center';
-        ctx.fillText(f.name.substring(0, 3), cx + 8, cy + 11);
+        ctx.fillText(f.name.substring(0, 3), cx + 8, cy + 16);
 
         // Cell border
-        ctx.strokeStyle = getPalColor(0);
+        ctx.strokeStyle = getPalColor(f.color);
         ctx.strokeRect(cx, cy, cellW, cellH);
 
         // Dual Cursors
@@ -1809,8 +1916,7 @@
       } else if (selectedFighter.id === 'deen' && deenIdleCanvas) {
         ctx.drawImage(deenIdleCanvas, 0, 0, deenIdleCanvas.width, deenIdleCanvas.height, 10, 60, 26, 44);
       } else {
-        ctx.fillStyle = getPalColor(selectedFighter.color);
-        ctx.fillRect(17, 72, 12, 24);
+        drawBoxerAvatar(ctx, selectedFighter, 8, 60, true);
       }
 
       // Fighter Stats & Bio Text
