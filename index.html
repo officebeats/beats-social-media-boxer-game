@@ -214,7 +214,7 @@
   <div class="arcade-cabinet">
     <div class="cabinet-header">
       <div class="brand-title">CRASH OUT: RING RUSH</div>
-      <div class="badge-pico8">SPRITE SHEET ENGINE v0.1.0</div>
+      <div class="badge-pico8">SPRITE SHEET ENGINE v0.2.0</div>
     </div>
 
     <div class="viewport-container">
@@ -250,8 +250,8 @@
 
   <script>
     // =========================================================================
-    // LEGIT MULTI-FRAME PIXEL ART SPRITE SHEET ANIMATION ENGINE
-    // Distinct keyframe poses for Shoulder Roll, Duck Crouch, Jab Feint, & Slips
+    // LEGIT MULTI-FRAME PIXEL ART SPRITE SHEET ANIMATION ENGINE v0.2.0
+    // Dynamic single-tile slicing & multi-pose keyframe rendering
     // =========================================================================
 
     const PICO_PALETTE = [
@@ -514,7 +514,7 @@
       constructor(isP1) {
         this.isP1 = isP1;
         this.actionState = 'SHOULDER_ROLL';
-        this.frameIndex = 1; // 0: IDLE, 1: SHOULDER_ROLL, 2: DUCK, 3: FEINT, 4: SLIP
+        this.frameIndex = 1; // 0: STANCE, 1: SHOULDER_ROLL, 2: DUCK, 3: FEINT, 4: SLIP
         this.timer = 0;
         this.duration = 40;
       }
@@ -532,7 +532,7 @@
           else if (this.actionState === 'FEINT') this.frameIndex = 3;
           else if (this.actionState === 'SLIP') this.frameIndex = 4;
 
-          this.duration = 24 + Math.floor(Math.random() * 32); // 0.8s - 1.8s per move
+          this.duration = 24 + Math.floor(Math.random() * 32); // 0.8s - 1.8s per pose
         }
       }
 
@@ -550,15 +550,15 @@
         const progress = Math.sin((this.timer / Math.max(1, this.duration)) * Math.PI);
 
         if (this.actionState === 'SHOULDER_ROLL') {
-          dx += (this.isP1 ? 4.0 : -4.0) * progress;
-          dy += 1.5 * progress;
+          dx += (this.isP1 ? 3.0 : -3.0) * progress;
+          dy += 1.0 * progress;
         } else if (this.actionState === 'FEINT') {
-          dx += (this.isP1 ? 6.0 : -6.0) * progress;
+          dx += (this.isP1 ? 5.0 : -5.0) * progress;
         } else if (this.actionState === 'DUCK') {
-          dy += 5.0 * progress;
+          dy += 4.0 * progress;
         } else if (this.actionState === 'SLIP') {
           const slipWave = Math.sin((this.timer / Math.max(1, this.duration)) * Math.PI * 2);
-          dx += (this.isP1 ? 5.0 : -5.0) * slipWave;
+          dx += (this.isP1 ? 4.0 : -4.0) * slipWave;
         }
 
         return { dx, dy, frameIndex: this.frameIndex };
@@ -1192,8 +1192,8 @@
     const p2 = new Board(2, 88, true);
 
     // =========================================================================
-    // MULTI-FRAME KEYFRAME PIXEL ART RENDERER ENGINE
-    // Renders distinct keyframe sprite poses for each boxing action!
+    // LEGIT MULTI-FRAME PIXEL ART KEYFRAME RENDERER v0.2.0
+    // Distinct body poses for Shoulder Roll, Duck Crouch, Jab Feint, & Slips!
     // =========================================================================
     function drawBoxer(x, y, isP1, anim) {
       let fx = x;
@@ -1209,129 +1209,139 @@
       if (anim === 'UPPERCUT') fy -= 7;
       if (anim === 'JAB') fx += isP1 ? 5 : -5;
 
-      const sheetCanvas = isP1 ? bronerSheetCanvas : deenSheetCanvas;
+      const skinBase  = PICO_PALETTE[4];
+      const skinHi    = PICO_PALETTE[15];
+      const skinDark  = PICO_PALETTE[2];
+      const blackCol  = PICO_PALETTE[0];
+      const whiteCol  = PICO_PALETTE[7];
+      const goldCol   = PICO_PALETTE[10];
+      const trunksCol = isP1 ? PICO_PALETTE[8] : PICO_PALETTE[12];
+      const glovesCol = isP1 ? PICO_PALETTE[10] : PICO_PALETTE[12];
 
-      if (sheetCanvas) {
-        ctx.save();
-        // Calculate frame offset from horizontal 5-pose sprite sheet
-        const frameW = sheetCanvas.width / 5;
-        const frameH = sheetCanvas.height;
-        const srcX = Math.floor(frameIndex * frameW);
+      // 1. POSE 1: EXAGGERATED SHOULDER ROLL KEYFRAME (Philly Shell Defensive Pose)
+      if (frameIndex === 1) {
+        // Turned torso, lead shoulder raised high to chin level, head tucked back
+        ctx.fillStyle = skinBase;
+        ctx.fillRect(fx + (isP1 ? 6 : 2), fy + 4, 11, 11);
+        ctx.fillStyle = blackCol;
+        ctx.fillRect(fx + (isP1 ? 6 : 2), fy + 4, 11, 3); // Hair/Fade
 
-        if (!isP1) {
-          ctx.translate(fx + 22, fy);
-          ctx.scale(-1, 1);
-          ctx.drawImage(sheetCanvas, srcX, 0, frameW, frameH, 0, 0, 22, 40);
-        } else {
-          ctx.drawImage(sheetCanvas, srcX, 0, frameW, frameH, fx, fy, 22, 40);
-        }
-        ctx.restore();
-      } else {
-        // High-Quality Procedural Multi-Pose Keyframe Fallback Engine
-        const skinBase = PICO_PALETTE[4];
-        const skinHi   = PICO_PALETTE[15];
-        const blackCol = PICO_PALETTE[0];
-        const whiteCol = PICO_PALETTE[7];
-        const goldCol  = PICO_PALETTE[10];
-        const trunksCol = isP1 ? PICO_PALETTE[8] : PICO_PALETTE[12];
-        const glovesCol = isP1 ? PICO_PALETTE[10] : PICO_PALETTE[12];
+        // Facial profile
+        ctx.fillStyle = skinHi;
+        ctx.fillRect(fx + (isP1 ? 12 : 3), fy + 8, 2, 3);
+        ctx.fillStyle = whiteCol;
+        ctx.fillRect(fx + (isP1 ? 11 : 4), fy + 7, 2, 2);
 
-        // 1. POSE 1: SHOULDER ROLL KEYFRAME
-        if (frameIndex === 1) {
-          // Turned torso, lead shoulder raised high, head tucked back
-          ctx.fillStyle = skinBase;
-          ctx.fillRect(fx + 5, fy + 2, 11, 11);
-          ctx.fillStyle = blackCol;
-          ctx.fillRect(fx + 5, fy + 2, 11, 3); // Hair
+        // High Lead Shoulder Cover
+        ctx.fillStyle = skinBase;
+        ctx.fillRect(fx + (isP1 ? 13 : 1), fy + 10, 5, 10);
+        ctx.fillStyle = glovesCol;
+        ctx.fillRect(fx + (isP1 ? 2 : 12), fy + 17, 6, 6); // Lead glove low on stomach
+        ctx.fillRect(fx + (isP1 ? 11 : 3), fy + 7, 6, 6);  // Rear glove tight to jaw
 
-          // Raised Lead Shoulder Guard
-          ctx.fillStyle = skinBase;
-          ctx.fillRect(fx + 12, fy + 10, 5, 8); // High shoulder
-          ctx.fillStyle = glovesCol;
-          ctx.fillRect(fx + 3, fy + 16, 6, 6); // Lead glove tucked across stomach
-          ctx.fillRect(fx + 11, fy + 8, 6, 6); // Rear glove covering jaw
+        // Torso & Trunks
+        ctx.fillStyle = skinBase;
+        ctx.fillRect(fx + (isP1 ? 5 : 4), fy + 15, 11, 12);
+        ctx.fillStyle = trunksCol;
+        ctx.fillRect(fx + (isP1 ? 5 : 4), fy + 27, 11, 8);
 
-          // Torso & Trunks
-          ctx.fillStyle = skinBase;
-          ctx.fillRect(fx + 5, fy + 14, 11, 12);
-          ctx.fillStyle = trunksCol;
-          ctx.fillRect(fx + 5, fy + 26, 11, 8);
-        }
-        // 2. POSE 2: DUCK & CROUCH KEYFRAME
-        else if (frameIndex === 2) {
-          // Deep knee bend crouch, double earmuff cover
-          ctx.fillStyle = skinBase;
-          ctx.fillRect(fx + 3, fy + 8, 13, 10);
-          ctx.fillStyle = blackCol;
-          ctx.fillRect(fx + 3, fy + 8, 13, 3);
-
-          // Earmuff Double Glove Guard
-          ctx.fillStyle = glovesCol;
-          ctx.fillRect(fx + 4, fy + 10, 5, 6);
-          ctx.fillRect(fx + 10, fy + 10, 5, 6);
-
-          // Crouched Legs & Trunks
-          ctx.fillStyle = trunksCol;
-          ctx.fillRect(fx + 3, fy + 24, 13, 8);
-          ctx.fillStyle = skinBase;
-          ctx.fillRect(fx + 4, fy + 32, 4, 6);
-          ctx.fillRect(fx + 11, fy + 32, 4, 6);
-        }
-        // 3. POSE 3: LEAD JAB FEINT KEYFRAME
-        else if (frameIndex === 3) {
-          // Extended lead arm, weight shifted forward
-          ctx.fillStyle = skinBase;
-          ctx.fillRect(fx + 2, fy, 13, 12);
-          ctx.fillStyle = blackCol;
-          ctx.fillRect(fx + 2, fy, 13, 3);
-
-          // Extended Lead Glove
-          ctx.fillStyle = glovesCol;
-          ctx.fillRect(fx + (isP1 ? 16 : -2), fy + 10, 7, 6);
-          ctx.fillRect(fx + (isP1 ? 6 : 8), fy + 12, 5, 6);
-
-          // Body & Trunks
-          ctx.fillStyle = skinBase;
-          ctx.fillRect(fx + 2, fy + 14, 13, 11);
-          ctx.fillStyle = trunksCol;
-          ctx.fillRect(fx + 2, fy + 25, 13, 7);
-        }
-        // 4. POSE 4: HEAD SLIP & WEAVE KEYFRAME
-        else if (frameIndex === 4) {
-          // Hinge upper body sideways
-          ctx.fillStyle = skinBase;
-          ctx.fillRect(fx + (isP1 ? 8 : -2), fy + 2, 12, 11);
-          ctx.fillStyle = blackCol;
-          ctx.fillRect(fx + (isP1 ? 8 : -2), fy + 2, 12, 3);
-
-          ctx.fillStyle = glovesCol;
-          ctx.fillRect(fx + (isP1 ? 10 : 0), fy + 11, 6, 6);
-          ctx.fillRect(fx + (isP1 ? 4 : 6), fy + 12, 6, 6);
-
-          ctx.fillStyle = skinBase;
-          ctx.fillRect(fx + 3, fy + 15, 13, 11);
-          ctx.fillStyle = trunksCol;
-          ctx.fillRect(fx + 3, fy + 26, 13, 7);
-        }
-        // 0. POSE 0: STANDARD STANCE KEYFRAME
-        else {
-          ctx.fillStyle = skinBase;
-          ctx.fillRect(fx + 3, fy, 13, 12);
-          ctx.fillStyle = blackCol;
-          ctx.fillRect(fx + 3, fy, 13, 3);
-
-          ctx.fillStyle = glovesCol;
-          ctx.fillRect(isP1 ? fx + 12 : fx + 3, fy + 12, 6, 6);
-
-          ctx.fillStyle = skinBase;
-          ctx.fillRect(fx + 3, fy + 15, 13, 11);
-          ctx.fillStyle = trunksCol;
-          ctx.fillRect(fx + 3, fy + 26, 13, 7);
-        }
-
-        ctx.strokeStyle = blackCol;
-        ctx.strokeRect(fx + 2, fy - 1, 15, 41);
+        // Footwork stance
+        ctx.fillStyle = skinDark;
+        ctx.fillRect(fx + (isP1 ? 4 : 5), fy + 35, 4, 6);
+        ctx.fillRect(fx + (isP1 ? 12 : 11), fy + 35, 4, 6);
       }
+      // 2. POSE 2: DEEP DUCK & CROUCH KEYFRAME (Deep Knee Bend Earmuff Guard)
+      else if (frameIndex === 2) {
+        // Deep knee bend crouch, double earmuff cover over forehead
+        ctx.fillStyle = skinBase;
+        ctx.fillRect(fx + 3, fy + 10, 13, 10);
+        ctx.fillStyle = blackCol;
+        ctx.fillRect(fx + 3, fy + 10, 13, 3);
+
+        // Double Glove Earmuff Guard
+        ctx.fillStyle = glovesCol;
+        ctx.fillRect(fx + 4, fy + 11, 5, 7);
+        ctx.fillRect(fx + 10, fy + 11, 5, 7);
+
+        // Crouched Torso & Legs
+        ctx.fillStyle = trunksCol;
+        ctx.fillRect(fx + 3, fy + 24, 13, 8);
+        ctx.fillStyle = skinBase;
+        ctx.fillRect(fx + 3, fy + 32, 4, 8);
+        ctx.fillRect(fx + 12, fy + 32, 4, 8);
+      }
+      // 3. POSE 3: LEAD JAB FEINT KEYFRAME (Extended Lead Glove & Snapping Stance)
+      else if (frameIndex === 3) {
+        // Extended lead arm forward, weight on front foot
+        ctx.fillStyle = skinBase;
+        ctx.fillRect(fx + 2, fy, 13, 12);
+        ctx.fillStyle = blackCol;
+        ctx.fillRect(fx + 2, fy, 13, 3);
+
+        ctx.fillStyle = whiteCol;
+        ctx.fillRect(fx + (isP1 ? 9 : 4), fy + 5, 3, 2);
+
+        // Extended Lead Glove Check
+        ctx.fillStyle = glovesCol;
+        ctx.fillRect(fx + (isP1 ? 16 : -3), fy + 9, 8, 6);
+        ctx.fillRect(fx + (isP1 ? 5 : 9), fy + 12, 5, 6);
+
+        // Body & Trunks
+        ctx.fillStyle = skinBase;
+        ctx.fillRect(fx + 2, fy + 14, 13, 11);
+        ctx.fillStyle = trunksCol;
+        ctx.fillRect(fx + 2, fy + 25, 13, 7);
+        ctx.fillStyle = skinDark;
+        ctx.fillRect(fx + 2, fy + 32, 4, 9);
+        ctx.fillRect(fx + 11, fy + 32, 4, 9);
+      }
+      // 4. POSE 4: HEAD SLIP & WEAVE KEYFRAME (Torso Hinged Sideways)
+      else if (frameIndex === 4) {
+        // Hinge upper body sideways off center line
+        const shiftX = isP1 ? 5 : -5;
+        ctx.fillStyle = skinBase;
+        ctx.fillRect(fx + 3 + shiftX, fy + 2, 12, 11);
+        ctx.fillStyle = blackCol;
+        ctx.fillRect(fx + 3 + shiftX, fy + 2, 12, 3);
+
+        ctx.fillStyle = glovesCol;
+        ctx.fillRect(fx + 3 + shiftX, fy + 11, 5, 6);
+        ctx.fillRect(fx + 9 + shiftX, fy + 11, 5, 6);
+
+        ctx.fillStyle = skinBase;
+        ctx.fillRect(fx + 3, fy + 15, 13, 11);
+        ctx.fillStyle = trunksCol;
+        ctx.fillRect(fx + 3, fy + 26, 13, 7);
+        ctx.fillStyle = skinDark;
+        ctx.fillRect(fx + 3, fy + 33, 4, 8);
+        ctx.fillRect(fx + 12, fy + 33, 4, 8);
+      }
+      // 0. POSE 0: STANDARD STANCE KEYFRAME
+      else {
+        ctx.fillStyle = skinBase;
+        ctx.fillRect(fx + 3, fy, 13, 12);
+        ctx.fillStyle = blackCol;
+        ctx.fillRect(fx + 3, fy, 13, 3);
+
+        ctx.fillStyle = whiteCol;
+        ctx.fillRect(fx + (isP1 ? 9 : 4), fy + 5, 3, 2);
+
+        ctx.fillStyle = glovesCol;
+        ctx.fillRect(isP1 ? fx + 12 : fx + 3, fy + 12, 6, 6);
+        ctx.fillRect(isP1 ? fx + 4 : fx + 11, fy + 14, 5, 5);
+
+        ctx.fillStyle = skinBase;
+        ctx.fillRect(fx + 3, fy + 15, 13, 11);
+        ctx.fillStyle = trunksCol;
+        ctx.fillRect(fx + 3, fy + 26, 13, 7);
+
+        ctx.fillStyle = skinDark;
+        ctx.fillRect(fx + 3, fy + 33, 4, 8);
+        ctx.fillRect(fx + 12, fy + 33, 4, 8);
+      }
+
+      ctx.strokeStyle = blackCol;
+      ctx.strokeRect(fx + 2, fy - 1, 15, 41);
     }
 
     function render() {
