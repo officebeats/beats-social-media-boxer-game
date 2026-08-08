@@ -1600,6 +1600,35 @@
       ctx.restore();
     }
 
+    // =========================================================================
+    // 14 VERIFIED REAL-LIFE STREAM GUEST ROSTER (GDD SECTION 4)
+    // =========================================================================
+    const ROSTER = [
+      { id: 'broner', name: 'BRONER', fullName: 'ADRIEN BRONER', stance: 'PHILLY SHELL DEFENSE', move: 'PHILLY SHELL COUNTER', pwr: 90, spd: 75, def: 95, color: 8 },
+      { id: 'deen', name: 'DEEN', fullName: 'DEEN THE GREAT', stance: 'SOUTHPAW BRAWLER', move: 'LIGHTNING STRAIGHT', pwr: 85, spd: 95, def: 75, color: 12 },
+      { id: 'ryan', name: 'RYAN', fullName: 'RYAN GARCIA', stance: 'SPEED COUNTER', move: 'FLASH LEFT HOOK', pwr: 88, spd: 92, def: 70, color: 7 },
+      { id: 'n3on', name: 'N3ON', fullName: 'N3ON STREAMER', stance: 'HYPER PRESSER', move: 'CRASH OUT SPAM', pwr: 70, spd: 98, def: 60, color: 11 },
+      { id: 'rayj', name: 'RAY J', fullName: 'RAY J', stance: 'SLICK SLIPPER', move: 'GLASSES COUNTER', pwr: 75, spd: 80, def: 88, color: 2 },
+      { id: 'blueface', name: 'BLUEFACE', fullName: 'BLUEFACE', stance: 'WILD BRAWLER', move: 'FAMOUS HOOK', pwr: 92, spd: 70, def: 65, color: 1 },
+      { id: 'chrisean', name: 'CHRISEAN', fullName: 'CHRISEAN ROCK', stance: 'AGGRESSIVE PRESSER', move: 'BADDIE OVERHAND', pwr: 86, spd: 78, def: 68, color: 14 },
+      { id: 'rampage', name: 'RAMPAGE', fullName: 'RAMPAGE JACKSON', stance: 'POWER SLAMMER', move: 'RAMPAGE SLAM', pwr: 96, spd: 65, def: 85, color: 4 },
+      { id: 'adin', name: 'ADIN', fullName: 'ADIN ROSS', stance: 'BALANCED DEFENSE', move: 'STREAM RAID BOMB', pwr: 78, spd: 82, def: 80, color: 9 },
+      { id: 'charleston', name: 'C. WHITE', fullName: 'CHARLESTON WHITE', stance: 'ERRATIC COUNTER', move: 'MICROPHONE RANT', pwr: 72, spd: 88, def: 82, color: 10 },
+      { id: 'walid', name: 'WALID', fullName: 'WALID SHARKS', stance: 'FAST COUNTER', move: 'SHARK ATTACK COMBO', pwr: 84, spd: 90, def: 72, color: 12 },
+      { id: 'abrown', name: 'A. BROWN', fullName: 'ANTONIO BROWN', stance: 'SHOWBOAT STYLE', move: 'CT KO DANCE', pwr: 82, spd: 88, def: 74, color: 10 },
+      { id: 'tank', name: 'TANK', fullName: 'GERVONTA DAVIS', stance: 'SOUTHPAW POWER', move: 'TANK UPPERCUT KO', pwr: 98, spd: 90, def: 88, color: 8 },
+      { id: 'floyd', name: 'FLOYD', fullName: 'FLOYD MAYWEATHER', stance: '50-0 PHILLY SHELL', move: 'SHOULDER ROLL', pwr: 92, spd: 96, def: 100, color: 10 }
+    ];
+
+    // Navigation & State Management
+    let appState = 'TITLE'; // 'TITLE', 'MODE_SELECT', 'CHAR_SELECT', 'PLAYING', 'KO'
+    let selectedModeIdx = 0; // 0: 1P VS CPU, 1: 2P LOCAL, 2: CPU VS CPU
+    let p1SelectIdx = 0;
+    let p2SelectIdx = 1;
+    let p1Locked = false;
+    let p2Locked = false;
+    let lockCountdown = -1;
+
     function drawPicoDitheredCrowd() {
       ctx.fillStyle = getPalColor(1);
       ctx.fillRect(41, 15, 46, 30);
@@ -1614,30 +1643,224 @@
       }
     }
 
-    function render() {
-      const superBtn = document.getElementById('btnX');
-      if (p1 && p1.superMeter >= 100) {
-        superBtn.classList.add('super-ready');
+    // === TITLE SCREEN RENDERER ===
+    function drawTitleScreen() {
+      ctx.fillStyle = getPalColor(1);
+      ctx.fillRect(0, 0, 128, 128);
+
+      // Background boxing ring ropes
+      ctx.strokeStyle = getPalColor(6);
+      ctx.beginPath();
+      ctx.moveTo(0, 45); ctx.lineTo(128, 45);
+      ctx.moveTo(0, 65); ctx.lineTo(128, 65);
+      ctx.moveTo(0, 85); ctx.lineTo(128, 85);
+      ctx.stroke();
+
+      drawPicoDitheredCrowd();
+
+      // Title Logo Box
+      ctx.fillStyle = getPalColor(0);
+      ctx.fillRect(10, 12, 108, 44);
+      ctx.strokeStyle = getPalColor(10);
+      ctx.strokeRect(10, 12, 108, 44);
+      ctx.strokeStyle = getPalColor(8);
+      ctx.strokeRect(12, 14, 104, 40);
+
+      ctx.fillStyle = getPalColor(10);
+      ctx.font = 'bold 11px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('CRASH OUT', 64, 28);
+
+      ctx.fillStyle = getPalColor(8);
+      ctx.font = 'bold 10px monospace';
+      ctx.fillText('RING RUSH', 64, 43);
+
+      ctx.fillStyle = getPalColor(7);
+      ctx.font = '6px monospace';
+      ctx.fillText('PICO-8 PUZZLE BOXING v1.0-alpha', 64, 62);
+
+      // Flashing press prompt
+      if (Math.floor(globalFrameCount / 25) % 2 === 0) {
+        ctx.fillStyle = getPalColor(10);
+        ctx.font = 'bold 8px monospace';
+        ctx.fillText('PRESS START / TOUCH', 64, 88);
+      }
+
+      ctx.fillStyle = getPalColor(6);
+      ctx.font = '6px monospace';
+      ctx.fillText('ANTIGRAVITY STUDIOS (C) 2026', 64, 118);
+      ctx.textAlign = 'left';
+    }
+
+    // === MODE SELECT RENDERER ===
+    function drawModeSelectScreen() {
+      ctx.fillStyle = getPalColor(1);
+      ctx.fillRect(0, 0, 128, 128);
+
+      ctx.fillStyle = getPalColor(0);
+      ctx.fillRect(0, 0, 128, 18);
+      ctx.fillStyle = getPalColor(10);
+      ctx.font = 'bold 9px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('SELECT GAME MODE', 64, 13);
+
+      const modes = [
+        { label: '1P VS CPU (ARCADE)', desc: 'PLAYER 1 VS AI OPPONENT' },
+        { label: '2P VERSUS (LOCAL)', desc: 'HEAD TO HEAD LOCAL PLAY' },
+        { label: 'CPU VS CPU (WATCH)', desc: 'AI VS AI DEMO MATCH' }
+      ];
+
+      modes.forEach((m, idx) => {
+        const y = 30 + idx * 28;
+        const isSelected = (selectedModeIdx === idx);
+
+        ctx.fillStyle = isSelected ? getPalColor(10) : getPalColor(0);
+        ctx.fillRect(10, y, 108, 22);
+        ctx.strokeStyle = isSelected ? getPalColor(7) : getPalColor(5);
+        ctx.strokeRect(10, y, 108, 22);
+
+        ctx.fillStyle = isSelected ? getPalColor(0) : getPalColor(7);
+        ctx.font = 'bold 8px monospace';
+        ctx.fillText((isSelected ? '> ' : '  ') + m.label, 64, y + 10);
+
+        ctx.fillStyle = isSelected ? getPalColor(2) : getPalColor(6);
+        ctx.font = '6px monospace';
+        ctx.fillText(m.desc, 64, y + 18);
+      });
+
+      ctx.fillStyle = getPalColor(7);
+      ctx.font = '6px monospace';
+      ctx.fillText('UP/DOWN: NAVIGATE  X/TOUCH: SELECT', 64, 120);
+      ctx.textAlign = 'left';
+    }
+
+    // === CHARACTER SELECT RENDERER ===
+    function drawCharSelectScreen() {
+      ctx.fillStyle = getPalColor(0);
+      ctx.fillRect(0, 0, 128, 128);
+
+      // Header
+      ctx.fillStyle = getPalColor(10);
+      ctx.font = 'bold 8px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('SELECT YOUR FIGHTER', 64, 10);
+
+      // 14-Character Grid (2 rows x 7 cols)
+      const cols = 7;
+      const cellW = 16;
+      const cellH = 17;
+      const startX = 8;
+      const startY = 15;
+
+      ROSTER.forEach((f, idx) => {
+        const r = Math.floor(idx / cols);
+        const c = idx % cols;
+        const cx = startX + c * 17;
+        const cy = startY + r * 18;
+
+        const isP1 = (p1SelectIdx === idx);
+        const isP2 = (p2SelectIdx === idx);
+
+        // Cell background
+        ctx.fillStyle = getPalColor(f.color);
+        ctx.fillRect(cx, cy, cellW, cellH);
+
+        // Name initial
+        ctx.fillStyle = getPalColor(7);
+        ctx.font = 'bold 6px monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText(f.name.substring(0, 3), cx + 8, cy + 11);
+
+        // Cell border
+        ctx.strokeStyle = getPalColor(0);
+        ctx.strokeRect(cx, cy, cellW, cellH);
+
+        // Dual Cursors
+        if (isP1 && isP2) {
+          ctx.strokeStyle = getPalColor(10); // Yellow P1
+          ctx.strokeRect(cx - 1, cy - 1, cellW + 2, cellH + 2);
+          ctx.strokeStyle = getPalColor(12); // Cyan P2
+          ctx.strokeRect(cx - 2, cy - 2, cellW + 4, cellH + 4);
+        } else if (isP1) {
+          ctx.strokeStyle = getPalColor(10);
+          ctx.strokeRect(cx - 1, cy - 1, cellW + 2, cellH + 2);
+        } else if (isP2) {
+          ctx.strokeStyle = getPalColor(12);
+          ctx.strokeRect(cx - 1, cy - 1, cellW + 2, cellH + 2);
+        }
+      });
+
+      // Bio Card Panel (Bottom)
+      const selectedFighter = ROSTER[p1SelectIdx];
+      ctx.fillStyle = getPalColor(1);
+      ctx.fillRect(4, 54, 120, 58);
+      ctx.strokeStyle = getPalColor(5);
+      ctx.strokeRect(4, 54, 120, 58);
+
+      // Fighter Portrait Frame
+      ctx.fillStyle = getPalColor(0);
+      ctx.fillRect(8, 58, 30, 48);
+      ctx.strokeStyle = getPalColor(selectedFighter.color);
+      ctx.strokeRect(8, 58, 30, 48);
+
+      // Draw Sprite Preview
+      if (selectedFighter.id === 'broner' && bronerIdleCanvas) {
+        ctx.drawImage(bronerIdleCanvas, 0, 0, bronerIdleCanvas.width, bronerIdleCanvas.height, 10, 60, 26, 44);
+      } else if (selectedFighter.id === 'deen' && deenIdleCanvas) {
+        ctx.drawImage(deenIdleCanvas, 0, 0, deenIdleCanvas.width, deenIdleCanvas.height, 10, 60, 26, 44);
       } else {
-        superBtn.classList.remove('super-ready');
+        ctx.fillStyle = getPalColor(selectedFighter.color);
+        ctx.fillRect(17, 72, 12, 24);
       }
 
-      if (flashFrames > 0) {
-        flashFrames--;
-        pal(0, 7); pal(1, 7); pal(2, 7); pal(3, 7);
+      // Fighter Stats & Bio Text
+      ctx.textAlign = 'left';
+      ctx.fillStyle = getPalColor(10);
+      ctx.font = 'bold 7px monospace';
+      ctx.fillText(selectedFighter.fullName, 42, 66);
+
+      ctx.fillStyle = getPalColor(6);
+      ctx.font = '5px monospace';
+      ctx.fillText(selectedFighter.stance, 42, 74);
+
+      ctx.fillStyle = getPalColor(9);
+      ctx.fillText('SP: ' + selectedFighter.move, 42, 82);
+
+      // Stat Bars
+      const drawStatBar = (label, val, y, col) => {
+        ctx.fillStyle = getPalColor(7);
+        ctx.font = '5px monospace';
+        ctx.fillText(label, 42, y + 5);
+        ctx.fillStyle = getPalColor(0);
+        ctx.fillRect(60, y, 58, 6);
+        ctx.fillStyle = getPalColor(col);
+        ctx.fillRect(60, y, Math.floor(58 * (val / 100)), 6);
+      };
+
+      drawStatBar('PWR', selectedFighter.pwr, 87, 8);
+      drawStatBar('SPD', selectedFighter.spd, 95, 10);
+      drawStatBar('DEF', selectedFighter.def, 103, 12);
+
+      // Lock-In Status Footer
+      ctx.textAlign = 'center';
+      if (p1Locked && p2Locked) {
+        ctx.fillStyle = getPalColor(10);
+        ctx.font = 'bold 8px monospace';
+        ctx.fillText('MATCH STARTING...', 64, 122);
+      } else if (p1Locked) {
+        ctx.fillStyle = getPalColor(11);
+        ctx.font = '6px monospace';
+        ctx.fillText('P1 READY! PRESS START TO BATTLE', 64, 122);
       } else {
-        pal();
+        ctx.fillStyle = getPalColor(7);
+        ctx.font = '6px monospace';
+        ctx.fillText('ARROWS: NAVIGATE  X: SELECT FIGHTER', 64, 122);
       }
+      ctx.textAlign = 'left';
+    }
 
-      ctx.save();
-      if (cameraShake > 0) {
-        const rx = (Math.random() * cameraShake - cameraShake / 2);
-        const ry = (Math.random() * cameraShake - cameraShake / 2);
-        ctx.translate(rx, ry);
-        cameraShake *= 0.85;
-        if (cameraShake < 0.5) cameraShake = 0;
-      }
-
+    // === BATTLE SCREEN RENDERER ===
+    function drawBattleScreen() {
       ctx.fillStyle = getPalColor(1);
       ctx.fillRect(0, 0, 128, 128);
 
@@ -1656,8 +1879,8 @@
 
       ctx.fillStyle = getPalColor(7);
       ctx.font = '8px monospace';
-      ctx.fillText('BRONER', 4, 13);
-      ctx.fillText('DEEN', 98, 13);
+      ctx.fillText(p1.name || 'BRONER', 4, 13);
+      ctx.fillText(p2.name || 'DEEN', 94, 13);
       ctx.fillText(roundTimer < 10 ? '0' + roundTimer : roundTimer, 58, 10);
 
       drawPicoDitheredCrowd();
@@ -1715,13 +1938,93 @@
         ctx.font = 'bold 12px monospace';
         ctx.fillText(koMessage, 10, 68);
       }
+    }
+
+    function render() {
+      const superBtn = document.getElementById('btnX');
+      if (p1 && p1.superMeter >= 100) {
+        superBtn.classList.add('super-ready');
+      } else {
+        superBtn.classList.remove('super-ready');
+      }
+
+      if (flashFrames > 0) {
+        flashFrames--;
+        pal(0, 7); pal(1, 7); pal(2, 7); pal(3, 7);
+      } else {
+        pal();
+      }
+
+      ctx.save();
+      if (cameraShake > 0) {
+        const rx = (Math.random() * cameraShake - cameraShake / 2);
+        const ry = (Math.random() * cameraShake - cameraShake / 2);
+        ctx.translate(rx, ry);
+        cameraShake *= 0.85;
+        if (cameraShake < 0.5) cameraShake = 0;
+      }
+
+      if (appState === 'TITLE') {
+        drawTitleScreen();
+      } else if (appState === 'MODE_SELECT') {
+        drawModeSelectScreen();
+      } else if (appState === 'CHAR_SELECT') {
+        drawCharSelectScreen();
+      } else {
+        drawBattleScreen();
+      }
 
       ctx.restore();
     }
 
+    function startMatch() {
+      const f1 = ROSTER[p1SelectIdx];
+      const f2 = ROSTER[p2SelectIdx];
+
+      p1.name = f1.name;
+      p2.name = f2.name;
+
+      if (selectedModeIdx === 0) { // 1P vs CPU
+        p1.isAi = false;
+        p2.isAi = true;
+        gameMode = 'VS_AI';
+        document.getElementById('btnMode').innerText = 'MODE: VS AI';
+      } else if (selectedModeIdx === 1) { // 2P Local
+        p1.isAi = false;
+        p2.isAi = false;
+        gameMode = 'VS_LOCAL';
+        document.getElementById('btnMode').innerText = 'MODE: 2P LOCAL';
+      } else { // CPU vs CPU
+        p1.isAi = true;
+        p2.isAi = true;
+        gameMode = 'AI_VS_AI';
+        document.getElementById('btnMode').innerText = 'MODE: AI VS AI';
+      }
+
+      p1.hp = 100; p2.hp = 100;
+      p1.grid = Array(ROWS).fill(null).map(() => Array(COLS).fill(0));
+      p2.grid = Array(ROWS).fill(null).map(() => Array(COLS).fill(0));
+      roundTimer = 99;
+      gameState = 'PLAYING';
+      appState = 'PLAYING';
+    }
+
     function update() {
-      if (!p1 || !p2) return;
       globalFrameCount++;
+
+      if (appState === 'CHAR_SELECT' && p1Locked && p2Locked) {
+        if (lockCountdown < 0) lockCountdown = 30;
+        lockCountdown--;
+        if (lockCountdown <= 0) {
+          lockCountdown = -1;
+          startMatch();
+        }
+        return;
+      }
+
+      if (appState !== 'PLAYING' && appState !== 'KO') return;
+
+      if (!p1 || !p2) return;
 
       idleP1.update();
       idleP2.update();
@@ -1737,18 +2040,17 @@
 
       if (gameState === 'PLAYING') {
         timerFrameCounter++;
-        // BUG-005 FIX: 60 frames = 1 second at 60fps (was 30, running 2x fast)
         if (timerFrameCounter >= 60) {
           timerFrameCounter = 0;
           if (roundTimer > 0) {
             roundTimer--;
           } else {
-            // Timer expired: winner by HP
             gameState = 'KO';
+            appState = 'KO';
             if (p1.health > p2.health) {
-              koMessage = 'TIME! BRONER WINS!';
+              koMessage = 'TIME! ' + p1.name + ' WINS!';
             } else if (p2.health > p1.health) {
-              koMessage = 'TIME! DEEN WINS!';
+              koMessage = 'TIME! ' + p2.name + ' WINS!';
             } else {
               koMessage = 'TIME! DRAW!';
             }
@@ -1773,27 +2075,67 @@
       render();
     }
 
-    // BUG-001 FIX: Removed duplicate setInterval. Only use rAF for single game loop.
     function loop() {
       tick();
       requestAnimationFrame(loop);
     }
     requestAnimationFrame(loop);
 
+    // === UNIFIED KEYBOARD CONTROL MANAGER ===
     window.addEventListener('keydown', (e) => {
       initAudio();
-      if (e.key === 'ArrowLeft') p1.move(-1);
-      if (e.key === 'ArrowRight') p1.move(1);
-      if (e.key === 'ArrowDown') p1.dropSoft();
-      if (e.key === 'ArrowUp') p1.dropHard();
-      if (e.key === 'z' || e.key === 'Z') p1.rotate(-1);
-      if (e.key === 'x' || e.key === 'X') {
-        if (p1.superMeter >= 100) p1.triggerSuper();
-        else p1.rotate(1);
+
+      if (appState === 'TITLE') {
+        if (e.key === 'x' || e.key === 'X' || e.key === 'z' || e.key === 'Z' || e.key === 'Enter' || e.key === ' ') {
+          appState = 'MODE_SELECT';
+        }
+        return;
+      }
+
+      if (appState === 'MODE_SELECT') {
+        if (e.key === 'ArrowUp') selectedModeIdx = (selectedModeIdx + 2) % 3;
+        if (e.key === 'ArrowDown') selectedModeIdx = (selectedModeIdx + 1) % 3;
+        if (e.key === 'x' || e.key === 'X' || e.key === 'z' || e.key === 'Z' || e.key === 'Enter') {
+          appState = 'CHAR_SELECT';
+          p1Locked = false;
+          p2Locked = false;
+          p1SelectIdx = 0; // Broner
+          p2SelectIdx = 1; // Deen
+        }
+        return;
+      }
+
+      if (appState === 'CHAR_SELECT') {
+        if (!p1Locked) {
+          if (e.key === 'ArrowLeft') p1SelectIdx = (p1SelectIdx + 13) % 14;
+          if (e.key === 'ArrowRight') p1SelectIdx = (p1SelectIdx + 1) % 14;
+          if (e.key === 'ArrowUp') p1SelectIdx = (p1SelectIdx + 7) % 14;
+          if (e.key === 'ArrowDown') p1SelectIdx = (p1SelectIdx + 7) % 14;
+        }
+
+        if (e.key === 'x' || e.key === 'X' || e.key === 'z' || e.key === 'Z' || e.key === 'Enter') {
+          p1Locked = true;
+          // In 1P vs CPU or CPU vs CPU, auto lock P2
+          p2Locked = true;
+        }
+        return;
+      }
+
+      // IN BATTLE / KO
+      if (appState === 'PLAYING') {
+        if (e.key === 'ArrowLeft') p1.move(-1);
+        if (e.key === 'ArrowRight') p1.move(1);
+        if (e.key === 'ArrowDown') p1.dropSoft();
+        if (e.key === 'ArrowUp') p1.dropHard();
+        if (e.key === 'z' || e.key === 'Z') p1.rotate(-1);
+        if (e.key === 'x' || e.key === 'X') {
+          if (p1.superMeter >= 100) p1.triggerSuper();
+          else p1.rotate(1);
+        }
       }
     });
 
-    // BUG-007 FIX: Prevent double-fire on touch devices
+    // Touch & Button Handler
     const bindBtn = (id, action) => {
       const btn = document.getElementById(id);
       if (!btn) return;
@@ -1801,7 +2143,7 @@
       const handler = (e) => {
         e.preventDefault();
         const now = performance.now();
-        if (now - lastFired < 80) return; // debounce
+        if (now - lastFired < 80) return;
         lastFired = now;
         initAudio();
         action();
@@ -1810,35 +2152,91 @@
       btn.addEventListener('click', handler);
     };
 
-    bindBtn('btnLeft', () => p1.move(-1));
-    bindBtn('btnRight', () => p1.move(1));
-    bindBtn('btnDown', () => p1.dropSoft());
-    bindBtn('btnUp', () => p1.dropHard());
-    bindBtn('btnO', () => p1.rotate(-1));
-    bindBtn('btnX', () => {
-      if (p1.superMeter >= 100) p1.triggerSuper();
-      else p1.rotate(1);
+    bindBtn('btnLeft', () => {
+      if (appState === 'CHAR_SELECT') p1SelectIdx = (p1SelectIdx + 13) % 14;
+      else if (appState === 'PLAYING') p1.move(-1);
     });
 
-    bindBtn('btnMode', () => {
-      if (gameMode === 'AI_VS_AI') {
-        gameMode = 'VS_AI';
-        p1.isAi = false;
-        p2.isAi = true;
-        document.getElementById('btnMode').innerText = 'MODE: VS AI';
-      } else {
-        gameMode = 'AI_VS_AI';
-        p1.isAi = true;
-        p2.isAi = true;
-        document.getElementById('btnMode').innerText = 'MODE: AI VS AI';
+    bindBtn('btnRight', () => {
+      if (appState === 'CHAR_SELECT') p1SelectIdx = (p1SelectIdx + 1) % 14;
+      else if (appState === 'PLAYING') p1.move(1);
+    });
+
+    bindBtn('btnDown', () => {
+      if (appState === 'MODE_SELECT') selectedModeIdx = (selectedModeIdx + 1) % 3;
+      else if (appState === 'CHAR_SELECT') p1SelectIdx = (p1SelectIdx + 7) % 14;
+      else if (appState === 'PLAYING') p1.dropSoft();
+    });
+
+    bindBtn('btnUp', () => {
+      if (appState === 'MODE_SELECT') selectedModeIdx = (selectedModeIdx + 2) % 3;
+      else if (appState === 'CHAR_SELECT') p1SelectIdx = (p1SelectIdx + 7) % 14;
+      else if (appState === 'PLAYING') p1.dropHard();
+    });
+
+    bindBtn('btnO', () => {
+      if (appState === 'TITLE') appState = 'MODE_SELECT';
+      else if (appState === 'MODE_SELECT') { appState = 'CHAR_SELECT'; p1Locked = false; p2Locked = false; }
+      else if (appState === 'CHAR_SELECT') { p1Locked = true; p2Locked = true; }
+      else if (appState === 'PLAYING') p1.rotate(-1);
+    });
+
+    bindBtn('btnX', () => {
+      if (appState === 'TITLE') appState = 'MODE_SELECT';
+      else if (appState === 'MODE_SELECT') { appState = 'CHAR_SELECT'; p1Locked = false; p2Locked = false; }
+      else if (appState === 'CHAR_SELECT') { p1Locked = true; p2Locked = true; }
+      else if (appState === 'PLAYING') {
+        if (p1.superMeter >= 100) p1.triggerSuper();
+        else p1.rotate(1);
       }
     });
 
-    bindBtn('btnReset', () => location.reload());
+    bindBtn('btnMode', () => {
+      appState = 'CHAR_SELECT';
+      p1Locked = false; p2Locked = false;
+    });
+
+    bindBtn('btnReset', () => {
+      appState = 'TITLE';
+    });
+
     bindBtn('btnAudio', () => {
       audioEnabled = !audioEnabled;
       document.getElementById('btnAudio').innerText = audioEnabled ? 'AUDIO: CHIPTUNE ON' : 'AUDIO: OFF';
     });
+
+    // Direct Canvas Click Navigation for Desktop / Mobile
+    const canvasEl = document.getElementById('picoCanvas');
+    if (canvasEl) {
+      canvasEl.addEventListener('click', (e) => {
+      initAudio();
+      if (appState === 'TITLE') {
+        appState = 'MODE_SELECT';
+      } else if (appState === 'MODE_SELECT') {
+        appState = 'CHAR_SELECT';
+        p1Locked = false; p2Locked = false;
+      } else if (appState === 'CHAR_SELECT') {
+        const rect = canvasEl.getBoundingClientRect();
+        const clickX = ((e.clientX - rect.left) / rect.width) * 128;
+        const clickY = ((e.clientY - rect.top) / rect.height) * 128;
+
+        // Check grid click (X: 8..124, Y: 15..51)
+        if (clickY >= 15 && clickY <= 51 && clickX >= 8 && clickX <= 124) {
+          const col = Math.floor((clickX - 8) / 17);
+          const row = Math.floor((clickY - 15) / 18);
+          const idx = row * 7 + col;
+          if (idx >= 0 && idx < 14) {
+            p1SelectIdx = idx;
+            p1Locked = true;
+            p2Locked = true;
+          }
+        } else {
+          p1Locked = true;
+          p2Locked = true;
+        }
+      }
+    });
+    }
   </script>
 </body>
 </html>
