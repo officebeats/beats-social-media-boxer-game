@@ -214,7 +214,7 @@
   <div class="arcade-cabinet">
     <div class="cabinet-header">
       <div class="brand-title">CRASH OUT: RING RUSH</div>
-      <div class="badge-pico8">ZERO-BOX SPRITES v0.1.0</div>
+      <div class="badge-pico8">BOXING ACTION IDLE v0.1.0</div>
     </div>
 
     <div class="viewport-container">
@@ -250,26 +250,14 @@
 
   <script>
     // =========================================================================
-    // PERFECT ZERO-BOX TRANSPARENT SPRITE & MULTI-JOINT BODY IDLE ENGINE
+    // RANDOMIZED BOXING ACTION IDLE SYSTEM (SHOULDER ROLLS, FEINTS, DUCKS, SLIPS)
     // =========================================================================
 
     const PICO_PALETTE = [
-      '#000000', // 0: Black
-      '#1D2B53', // 1: Dark Blue
-      '#7E2553', // 2: Dark Purple
-      '#008751', // 3: Dark Green
-      '#AB5236', // 4: Brown (Skin Base)
-      '#5F574F', // 5: Dark Gray
-      '#C2C3C7', // 6: Light Gray
-      '#FFF1E8', // 7: White
-      '#FF004D', // 8: Red
-      '#FFA300', // 9: Orange
-      '#FFEC27', // 10: Yellow (Gold)
-      '#00E436', // 11: Green
-      '#29ADFF', // 12: Blue
-      '#83769C', // 13: Lavender
-      '#FF77A8', // 14: Pink
-      '#FFCCAA'  // 15: Peach (Skin Highlight)
+      '#000000', '#1D2B53', '#7E2553', '#008751',
+      '#AB5236', '#5F574F', '#C2C3C7', '#FFF1E8',
+      '#FF004D', '#FFA300', '#FFEC27', '#00E436',
+      '#29ADFF', '#83769C', '#FF77A8', '#FFCCAA'
     ];
 
     const canvas = document.getElementById('picoCanvas');
@@ -287,7 +275,6 @@
     let deenCanvas = null;
     imgDeen.onload = () => { deenCanvas = createCleanTransparentSprite(imgDeen); };
 
-    // FLAWLESS CHROMA-KEYING: Strips ALL background colors (white, gray, gridlines, shadows)
     function createCleanTransparentSprite(img) {
       const c = document.createElement('canvas');
       c.width = img.width;
@@ -301,14 +288,9 @@
         const r = d[i];
         const g = d[i+1];
         const b = d[i+2];
-
-        // Strip any non-fighter background pixel (white, light gray, off-white, gridlines, shadows)
         const isLight = (r > 130 && g > 130 && b > 130);
         const isGray = (Math.abs(r - g) < 20 && Math.abs(g - b) < 20 && r > 90);
-        
-        if (isLight || isGray) {
-          d[i+3] = 0; // Alpha = 0 (100% Transparent!)
-        }
+        if (isLight || isGray) d[i+3] = 0;
       }
       cCtx.putImageData(imgData, 0, 0);
       return c;
@@ -526,6 +508,65 @@
     let globalParticles = [];
     let globalFloatingTexts = [];
 
+    // --- RANDOMIZED BOXING ACTION IDLE CONTROLLER ---
+    class BoxerIdleController {
+      constructor(isP1) {
+        this.isP1 = isP1;
+        this.actionState = 'SHUFFLE'; // SHUFFLE, SHOULDER_ROLL, FEINT, DUCK, SLIP
+        this.timer = 0;
+        this.duration = 45;
+      }
+
+      update() {
+        this.timer++;
+        if (this.timer >= this.duration) {
+          this.timer = 0;
+          const actions = ['SHUFFLE', 'SHUFFLE', 'SHOULDER_ROLL', 'FEINT', 'DUCK', 'SLIP'];
+          this.actionState = actions[Math.floor(Math.random() * actions.length)];
+          this.duration = 24 + Math.floor(Math.random() * 40); // 0.8s to 2.2s per action
+        }
+      }
+
+      getOffsets() {
+        let dx = 0;
+        let dy = 0;
+        let rot = 0;
+
+        // Base footwork shuffle
+        const shuffleX = Math.sin(globalFrameCount * 0.1 + (this.isP1 ? 0 : 2.5)) * 1.5;
+        const shuffleY = Math.abs(Math.sin(globalFrameCount * 0.16 + (this.isP1 ? 0 : 3.1))) * 1.2;
+
+        dx += shuffleX;
+        dy -= shuffleY;
+
+        if (this.actionState === 'SHOULDER_ROLL') {
+          // Adrien Broner's signature Philly Shell Shoulder Roll / Slip
+          const rollProgress = Math.sin((this.timer / this.duration) * Math.PI);
+          dx += (this.isP1 ? 3.5 : -3.5) * rollProgress;
+          dy += 1.5 * rollProgress;
+          rot = (this.isP1 ? 0.08 : -0.08) * rollProgress;
+        } else if (this.actionState === 'FEINT') {
+          // Quick lead glove jab feint & head snap
+          const feintProgress = Math.sin((this.timer / this.duration) * Math.PI);
+          dx += (this.isP1 ? 4.5 : -4.5) * feintProgress;
+        } else if (this.actionState === 'DUCK') {
+          // Duck under hook crouch
+          const duckProgress = Math.sin((this.timer / this.duration) * Math.PI);
+          dy += 4.0 * duckProgress;
+        } else if (this.actionState === 'SLIP') {
+          // Head slip left & right
+          const slipProgress = Math.sin((this.timer / this.duration) * Math.PI * 2);
+          dx += (this.isP1 ? 3.0 : -3.0) * slipProgress;
+          dy += 1.0 * Math.abs(slipProgress);
+        }
+
+        return { dx, dy, rot };
+      }
+    }
+
+    const idleP1 = new BoxerIdleController(true);
+    const idleP2 = new BoxerIdleController(false);
+
     // --- PUZZLE BOARD ENGINE ---
     class Board {
       constructor(id, offsetX, isAi = false) {
@@ -550,7 +591,7 @@
         this.spawnPair();
 
         this.dropTimer = 0;
-        this.dropInterval = 48; // Slower pace
+        this.dropInterval = 48;
         this.lockDelay = 0;
 
         this.anim = 'IDLE';
@@ -1150,30 +1191,18 @@
     const p2 = new Board(2, 88, true);
 
     // =========================================================================
-    // PERFECT ZERO-BOX TRANSPARENT SPRITE & MULTI-JOINT BODY IDLE ENGINE
-    // Dynamic head bobs, chest breathing, hip sways, and guard feints
+    // RANDOMIZED BOXING ACTION IDLE RENDERER
+    // Renders active shoulder rolls, lead feints, ducking crouches, & head slips
     // =========================================================================
     function drawBoxer(x, y, isP1, anim) {
       let fx = x;
       let fy = y;
 
-      // MULTI-JOINT BODY MOVEMENT IDLE ANIMATION
-      const swayOffset = Math.sin(globalFrameCount * 0.08 + (isP1 ? 0 : 2.1)) * 1.8;
-      const bounceOffset = Math.abs(Math.sin(globalFrameCount * 0.14 + (isP1 ? 0 : 3.4))) * 1.5;
-      const headBobY = Math.sin(globalFrameCount * 0.16 + (isP1 ? 0 : 1.2)) * 1.0;
-      const chestSwellY = (Math.floor(globalFrameCount / 12) % 2 === 0) ? 0 : -1.0;
+      const idleController = isP1 ? idleP1 : idleP2;
+      const { dx, dy, rot } = idleController.getOffsets();
 
-      const tauntCycle = Math.floor((globalFrameCount + (isP1 ? 0 : 50)) / 90) % 3;
-      const tauntFrame = (globalFrameCount % 90);
-      let microDodge = 0;
-      let microFeint = 0;
-      if (tauntFrame < 20) {
-        if (tauntCycle === 1) microDodge = (isP1 ? 2.5 : -2.5);
-        if (tauntCycle === 2) microFeint = (isP1 ? 3.5 : -3.5);
-      }
-
-      fx += Math.floor(swayOffset + microDodge);
-      fy += Math.floor(-bounceOffset);
+      fx += Math.floor(dx);
+      fy += Math.floor(dy);
 
       if (anim === 'FLINCH') fx += isP1 ? -6 : 6;
       if (anim === 'UPPERCUT') fy -= 7;
@@ -1183,13 +1212,14 @@
 
       if (sprCanvas) {
         ctx.save();
+        ctx.translate(fx + 11, fy + 20);
+        if (rot !== 0) ctx.rotate(rot);
+
         if (!isP1) {
-          ctx.translate(fx + 22, fy);
           ctx.scale(-1, 1);
-          ctx.drawImage(sprCanvas, 0, 0, 22, 40);
-        } else {
-          ctx.drawImage(sprCanvas, fx, fy, 22, 40);
         }
+
+        ctx.drawImage(sprCanvas, -11, -20, 22, 40);
         ctx.restore();
       } else {
         // High-Quality Procedural 16-Bit Fallback Engine
@@ -1202,44 +1232,40 @@
         const trunksCol = isP1 ? PICO_PALETTE[8] : PICO_PALETTE[12];
         const glovesCol = isP1 ? PICO_PALETTE[10] : PICO_PALETTE[12];
 
-        // Head (Independent Head Bobbing)
-        const hy = fy + Math.floor(headBobY);
         ctx.fillStyle = skinBase;
-        ctx.fillRect(fx + 3, hy, 13, 12);
+        ctx.fillRect(fx + 3, fy, 13, 12);
         ctx.fillStyle = blackCol;
-        ctx.fillRect(fx + 3, hy, 13, 3);
+        ctx.fillRect(fx + 3, fy, 13, 3);
 
         ctx.fillStyle = blackCol;
-        ctx.fillRect(fx + 6, hy + 4, 3, 1);
-        ctx.fillRect(fx + 11, hy + 3, 3, 1);
+        ctx.fillRect(fx + 6, fy + 4, 3, 1);
+        ctx.fillRect(fx + 11, fy + 3, 3, 1);
         ctx.fillStyle = whiteCol;
-        ctx.fillRect(fx + 6, hy + 5, 3, 2);
-        ctx.fillRect(fx + 11, hy + 5, 3, 2);
+        ctx.fillRect(fx + 6, fy + 5, 3, 2);
+        ctx.fillRect(fx + 11, fy + 5, 3, 2);
         ctx.fillStyle = blackCol;
-        ctx.fillRect(fx + 7, hy + 5, 1, 2);
-        ctx.fillRect(fx + 12, hy + 5, 1, 2);
+        ctx.fillRect(fx + 7, fy + 5, 1, 2);
+        ctx.fillRect(fx + 12, fy + 5, 1, 2);
 
         ctx.fillStyle = skinHi;
-        ctx.fillRect(fx + 9, hy + 5, 2, 3);
+        ctx.fillRect(fx + 9, fy + 5, 2, 3);
 
         if (isP1) {
           ctx.fillStyle = blackCol;
-          ctx.fillRect(fx + 5, hy + 9, 9, 4);
+          ctx.fillRect(fx + 5, fy + 9, 9, 4);
           ctx.fillStyle = whiteCol;
-          ctx.fillRect(fx + 9, hy + 9, 3, 1);
+          ctx.fillRect(fx + 9, fy + 9, 3, 1);
           ctx.fillStyle = goldCol;
-          ctx.fillRect(fx + 5, hy + 13, 9, 2);
+          ctx.fillRect(fx + 5, fy + 13, 9, 2);
         }
 
-        // Torso & Breathing Expansion
         ctx.fillStyle = skinBase;
-        ctx.fillRect(fx + 3, fy + 15 + Math.floor(chestSwellY), 13, 11);
+        ctx.fillRect(fx + 3, fy + 15, 13, 11);
         ctx.fillStyle = trunksCol;
         ctx.fillRect(fx + 3, fy + 26, 13, 7);
 
-        // Gloves
         ctx.fillStyle = glovesCol;
-        ctx.fillRect(isP1 ? fx + 12 + Math.floor(microFeint) : fx + 3 + Math.floor(microFeint), fy + 12, 6, 6);
+        ctx.fillRect(isP1 ? fx + 12 : fx + 3, fy + 12, 6, 6);
 
         ctx.strokeStyle = blackCol;
         ctx.strokeRect(fx + 2, fy - 1, 15, 41);
@@ -1301,7 +1327,7 @@
       ctx.fillStyle = PICO_PALETTE[7];
       ctx.fillRect(41, 90, 46, 23);
 
-      // Draw Perfectly Chroma-Keyed Boxer Sprites & Multi-Joint Body Idle Animations!
+      // Draw Perfectly Chroma-Keyed Boxer Sprites & Active Action Idle Animations!
       drawBoxer(41, 50, true, p1.anim);  // Adrien Broner
       drawBoxer(65, 50, false, p2.anim); // Deen The Great
 
@@ -1335,6 +1361,9 @@
 
     function update() {
       globalFrameCount++;
+
+      idleP1.update();
+      idleP2.update();
 
       p1.update();
       p2.update();
