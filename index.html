@@ -680,6 +680,8 @@
               }
             }
           }
+          // Settle floating gems after clearing bottom rows
+          this.applyGravity();
 
           opponent.hp = Math.max(0, opponent.hp - 35);
           opponent.receiveGarbage(10);
@@ -807,6 +809,8 @@
         this.updateCounterGems();
         this.applyGravity();
         this.processRainbowDiamond();
+        // Gravity again — diamond blast may have cleared gems leaving floaters
+        this.applyGravity();
         this.detectPowerGems();
         
         const matchFound = this.evaluateMatches();
@@ -843,25 +847,32 @@
       }
 
       applyGravity() {
-        let moved = false;
-        for (let col = 0; col < COLS; col++) {
-          for (let row = ROWS - 2; row >= 0; row--) {
-            if (this.grid[row][col] !== 0 && this.grid[row + 1][col] === 0) {
-              let r = row;
-              while (r < ROWS - 1 && this.grid[r + 1][col] === 0) {
-                this.grid[r + 1][col] = this.grid[r][col];
-                this.powerGems[r + 1][col] = this.powerGems[r][col];
-                this.counterTimers[r + 1][col] = this.counterTimers[r][col];
-                this.grid[r][col] = 0;
-                this.powerGems[r][col] = false;
-                r++;
+        let anyMoved = false;
+        let pass = true;
+        // Loop until no gems move — guarantees full settle even with complex gap patterns
+        while (pass) {
+          pass = false;
+          for (let col = 0; col < COLS; col++) {
+            for (let row = ROWS - 2; row >= 0; row--) {
+              if (this.grid[row][col] !== 0 && this.grid[row + 1][col] === 0) {
+                let r = row;
+                while (r < ROWS - 1 && this.grid[r + 1][col] === 0) {
+                  this.grid[r + 1][col] = this.grid[r][col];
+                  this.powerGems[r + 1][col] = this.powerGems[r][col];
+                  this.counterTimers[r + 1][col] = this.counterTimers[r][col];
+                  this.grid[r][col] = 0;
+                  this.powerGems[r][col] = false;
+                  this.counterTimers[r][col] = 3;
+                  r++;
+                }
+                this.squish[r][col] = 0.5;
+                pass = true;
+                anyMoved = true;
               }
-              this.squish[r][col] = 0.8;
-              moved = true;
             }
           }
         }
-        return moved;
+        return anyMoved;
       }
 
       processRainbowDiamond() {
@@ -1093,17 +1104,20 @@
       }
 
       receiveGarbage(count) {
-        // BUG-006 FIX: Place garbage in bottom rows (not top) to prevent instant KO
-        let dropped = 0;
-        for (let r = ROWS - 1; r >= 4; r--) {
-          for (let c = 0; c < COLS; c++) {
-            if (dropped < count && this.grid[r][c] === 0) {
+        // Drop garbage rows from the top of the board, then let gravity settle them
+        let remaining = count;
+        // Fill from top rows downward so gravity can settle them
+        for (let r = 0; r < ROWS && remaining > 0; r++) {
+          for (let c = 0; c < COLS && remaining > 0; c++) {
+            if (this.grid[r][c] === 0) {
               this.grid[r][c] = 10;
               this.counterTimers[r][c] = 3;
-              dropped++;
+              remaining--;
             }
           }
         }
+        // Critical: run gravity so garbage blocks settle to the bottom
+        this.applyGravity();
         play808Sfx('garbage');
         globalFloatingTexts.push(new FloatingText(`GARBAGE +${count}!`, this.offsetX + 2, this.offsetY + 20, 8));
       }
@@ -1129,8 +1143,8 @@
         for (let r = 0; r < ROWS; r++) {
           for (let c = 0; c < COLS; c++) {
             if (this.squish[r][c] > 0) {
-              this.squish[r][c] -= 0.1;
-              if (this.squish[r][c] < 0) this.squish[r][c] = 0;
+              this.squish[r][c] -= 0.15;
+              if (this.squish[r][c] < 0.01) this.squish[r][c] = 0;
             }
           }
         }
