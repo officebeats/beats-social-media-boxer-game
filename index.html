@@ -1822,29 +1822,10 @@
       const fObj = isP1 ? ROSTER[p1SelectIdx] : ROSTER[p2SelectIdx];
       const fId = fObj ? fObj.id : (isP1 ? 'broner' : 'deen');
 
-      // Map of native orientations in the source image files
-      const NATIVE_FACE = {
-        broner:     { idle: 'L', punch: 'R' },
-        deen:       { idle: 'R', punch: 'L' },
-        ryan:       { idle: 'L', punch: 'L' },
-        n3on:       { idle: 'R', punch: 'R' },
-        rayj:       { idle: 'R', punch: 'R' },
-        blueface:   { idle: 'R', punch: 'R' },
-        chrisean:   { idle: 'R', punch: 'R' },
-        rampage:    { idle: 'L', punch: 'R' },
-        adin:       { idle: 'L', punch: 'R' },
-        charleston: { idle: 'R', punch: 'R' },
-        walid:      { idle: 'R', punch: 'R' },
-        abrown:     { idle: 'L', punch: 'R' },
-        tank:       { idle: 'R', punch: 'R' },
-        floyd:      { idle: 'L', punch: 'R' }
-      };
-
-      const nativeDir = usePunch ? (NATIVE_FACE[fId]?.punch || 'L') : (NATIVE_FACE[fId]?.idle || 'L');
-      // P1 (left side) must face RIGHT toward the center.
-      // P2 (right side) must face LEFT toward the center.
-      const targetDir = isP1 ? 'R' : 'L';
-      const needsFlip = (nativeDir !== targetDir);
+      // All sprites have been physically flipped on disk to natively face LEFT.
+      // P1 (left side) -> flip to face RIGHT toward center.
+      // P2 (right side) -> no flip, already faces LEFT toward center.
+      const needsFlip = isP1;
 
       ctx.translate(fx + 11, fy + 20);
       if (needsFlip) {
