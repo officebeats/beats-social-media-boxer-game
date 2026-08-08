@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body { background: #333; color: white; font-family: monospace; }
+    .row { display: flex; align-items: center; margin-bottom: 10px; border-bottom: 1px solid #555; }
+    img { width: 100px; height: auto; image-rendering: pixelated; margin-right: 10px; }
+    .label { width: 100px; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <script>
+    const ids = ['broner', 'deen', 'ryan', 'n3on', 'rayj', 'blueface', 'chrisean', 'rampage', 'adin', 'charleston', 'walid', 'abrown', 'tank', 'floyd'];
+    ids.forEach(id => {
+      document.write(`
+        <div class="row">
+          <div class="label">${id}</div>
+          <img src="assets/${id}_sprite.jpg" alt="${id} idle" />
+          <img src="assets/${id}_punches.jpg" alt="${id} punches" />
+        </div>
+      `);
+    });
+  </script>
+</body>
+</html>
