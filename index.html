@@ -214,7 +214,7 @@
   <div class="arcade-cabinet">
     <div class="cabinet-header">
       <div class="brand-title">CRASH OUT: RING RUSH</div>
-      <div class="badge-pico8">RELIABLE ENGINE v1.5.4</div>
+      <div class="badge-pico8">BOXING ART ENGINE v1.6.0</div>
     </div>
 
     <div class="viewport-container">
@@ -250,11 +250,13 @@
 
   <script>
     // =========================================================================
-    // SMOOTH KEYFRAMED BOXING PUNCH & HIT ENGINE v1.5.0
-    // - 60-Frame Smoothstep Interpolation: Zero abrupt pops, snapping, or glitches
-    // - 4-Phase Punch Sequence: Wind-up -> Step-in Lunge -> Glove Contact -> Recovery
-    // - Smooth Head Knockback & Body Hinge with Contact Starburst & Sweat Spray
-    // - Feet strictly grounded on ring floor canvas (0 mid-air floating)
+    // CAPCOM 16-BIT HEAVYWEIGHT BOXING ART ENGINE v1.6.0
+    // - 3 Distinct Heavyweight Punch Animations: JAB, HOOK, UPPERCUT
+    //   * JAB: Fast stiff lead extension with shoulder chin protection
+    //   * HOOK: Wide curving power arc with heavy 18° torso rotation torque
+    //   * UPPERCUT: Upward skyward scooping explosion rising from crouching knees
+    // - Grounded 72-Frame Pacing (~1.2s per punch): Weighty, clear, zero flicking
+    // - Distinct Hit Knockback Reactions for each punch type
     // =========================================================================
 
     const PICO_PALETTE = [
@@ -431,13 +433,25 @@
           gain.connect(audioCtx.destination);
           osc.start(t);
           osc.stop(t + 0.08);
+        } else if (type === 'hook') {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(220, t);
+          osc.frequency.exponentialRampToValueAtTime(60, t + 0.18);
+          gain.gain.setValueAtTime(0.45, t);
+          gain.gain.linearRampToValueAtTime(0.01, t + 0.18);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(t);
+          osc.stop(t + 0.18);
         } else if (type === 'uppercut') {
           const osc = audioCtx.createOscillator();
           const gain = audioCtx.createGain();
           osc.type = 'sawtooth';
           osc.frequency.setValueAtTime(180, t);
           osc.frequency.exponentialRampToValueAtTime(750, t + 0.25);
-          gain.gain.setValueAtTime(0.4, t);
+          gain.gain.setValueAtTime(0.5, t);
           gain.gain.linearRampToValueAtTime(0.01, t + 0.25);
           osc.connect(gain);
           gain.connect(audioCtx.destination);
@@ -672,8 +686,8 @@
 
           this.anim = 'UPPERCUT';
           opponent.anim = 'FLINCH';
-          this.animTimer = 60; // Smooth 60-Frame Sequence
-          opponent.animTimer = 60;
+          this.animTimer = 72; // Grounded 72-Frame (~1.2s) Punch Sequence
+          opponent.animTimer = 72;
 
           globalFloatingTexts.push(new FloatingText('SUPER FINISHER!', 50, 40, 10));
         } else {
@@ -1003,31 +1017,25 @@
 
         flashFrames = 3;
 
-        if (isSecondaryCluster) {
-          globalFloatingTexts.push(new FloatingText(`CLUSTER POP! +${clearCount}`, this.offsetX + 2, this.offsetY + 30, 11));
-          play808Sfx('cluster_pop');
-        } else if (this.comboCount >= 2) {
-          globalFloatingTexts.push(new FloatingText(`${this.comboCount}-CHAIN!`, this.offsetX + 4, this.offsetY + 30, 9));
-          play808Sfx('detonate');
-        } else {
-          globalFloatingTexts.push(new FloatingText(`CRASH! +${clearCount}`, this.offsetX + 4, this.offsetY + 30, 10));
-          play808Sfx('detonate');
-        }
-
-        // TRIGGER SMOOTH 60-FRAME KEYFRAMED PUNCH SEQUENCE
-        if (powerGemCleared || this.comboCount >= 2) {
+        // TRIGGER DISTINCT HEAVYWEIGHT PUNCH ANIMATION TYPES (JAB, HOOK, UPPERCUT)
+        if (powerGemCleared || this.comboCount >= 3) { // SKYWARD UPPERCUT EXPLOSION
           this.anim = 'UPPERCUT';
           opponent.anim = 'FLINCH';
-          cameraShake = 12;
+          cameraShake = 14;
           play808Sfx('uppercut');
-        } else {
+        } else if (isSecondaryCluster || this.comboCount >= 2 || clearCount >= 5) { // CURVING HOOK POWER ARC
+          this.anim = 'HOOK';
+          opponent.anim = 'FLINCH';
+          cameraShake = 10;
+          play808Sfx('hook');
+        } else { // QUICK TECHNICAL JAB STIFF LEAD
           this.anim = 'JAB';
           opponent.anim = 'FLINCH';
           cameraShake = 6;
           play808Sfx('jab');
         }
-        this.animTimer = 60; // 1.0 Full Second Smooth Keyframed Sequence
-        opponent.animTimer = 60;
+        this.animTimer = 72; // Grounded 72-Frame (~1.2s) Pacing for Heavyweight Boxing Visuals!
+        opponent.animTimer = 72;
 
         this.pendingClear = null;
       }
@@ -1308,29 +1316,29 @@
       }
     }
 
-    p1 = new Board(1, 4, true);  // AI P1
-    p2 = new Board(2, 88, true); // AI P2
-
     let impactFxTimer = 0;
+    let impactFxX = 58;
+    let impactFxY = 56;
     let impactTriggeredThisPunch = false;
 
-    function triggerImpactBurst() {
-      impactFxTimer = 8;
-      const hitX = 58;
-      const hitY = 56;
+    function triggerImpactBurst(hitX = 58, hitY = 56) {
+      impactFxTimer = 10;
+      impactFxX = hitX;
+      impactFxY = hitY;
 
-      for (let k = 0; k < 12; k++) {
-        const vx = (Math.random() - 0.5) * 3.5;
-        const vy = (Math.random() - 0.5) * 3.5;
+      for (let k = 0; k < 14; k++) {
+        const vx = (Math.random() - 0.5) * 4;
+        const vy = (Math.random() - 0.5) * 4;
         const pColor = (k % 3 === 0) ? 10 : (k % 3 === 1 ? 8 : 7);
-        globalParticles.push(new Particle(hitX, hitY, vx, vy, pColor, 20, 2));
+        globalParticles.push(new Particle(hitX, hitY, vx, vy, pColor, 24, 2));
       }
     }
 
     // =========================================================================
-    // SMOOTH KEYFRAMED BOXER ANIMATION & PUNCH RENDERER v1.5.0
-    // - 60-Frame Smoothstep Interpolation for Wind-up -> Step-in -> Contact -> Recovery
-    // - Smooth Head Knockback & Body Hinge with ZERO abrupt pops or glitches
+    // CAPCOM 16-BIT DISTINCT PUNCH RENDERER v1.6.0
+    // - JAB: Straight stiff lead extension ($14px$ lunge across floor)
+    // - HOOK: Wide curving power arc ($18px$ lunge, $dy = -3px$, $18^\circ$ torque)
+    // - UPPERCUT: Skyward scooping explosion ($fy+4 \rightarrow fy-6$, $-0.18$ rad scoop)
     // =========================================================================
     function drawBoxer(x, y, isP1, anim, animTimer) {
       let fx = x;
@@ -1343,52 +1351,96 @@
       let currentPose = frameIndex;
       let punchTilt = 0;
       let flinchTilt = 0;
+      let dyOffset = 0;
       let isHitFlash = false;
 
       const timerVal = animTimer || 0;
-      const progress = 1.0 - (timerVal / 60.0); // 0.0 to 1.0 over 60 frames
+      const progress = 1.0 - (timerVal / 72.0); // 0.0 to 1.0 over 72 frames (~1.2s)
 
-      // --- SMOOTH KEYFRAMED PUNCH LUNGE SEQUENCE ---
-      if (anim === 'JAB' || anim === 'UPPERCUT') {
+      // --- DISTINCT PUNCH ANIMATION TYPES ---
+      if (anim === 'JAB') {
         currentPose = 3;
-
-        // Phase 1 (0.0 - 0.35): Wind-up & Step-in
-        // Phase 2 (0.35 - 0.50): Full Extension & Contact (X=58)
-        // Phase 3 (0.50 - 0.70): Contact Hold (Linger at impact point)
-        // Phase 4 (0.70 - 1.00): Smooth Step-Back Recovery
         let lungeProgress = 0;
         if (progress < 0.35) {
-          lungeProgress = smoothstep(0.0, 0.35, progress) * 0.75; // Step in 12px
+          lungeProgress = smoothstep(0.0, 0.35, progress) * 0.70;
         } else if (progress < 0.50) {
-          lungeProgress = 0.75 + smoothstep(0.35, 0.50, progress) * 0.25; // Extend 16px to X=58 contact!
+          lungeProgress = 0.70 + smoothstep(0.35, 0.50, progress) * 0.30;
         } else if (progress < 0.70) {
-          lungeProgress = 1.0; // Hold glove at contact point for 12 frames
+          lungeProgress = 1.0;
         } else {
-          lungeProgress = 1.0 - smoothstep(0.70, 1.00, progress); // Smooth return to guard
+          lungeProgress = 1.0 - smoothstep(0.70, 1.00, progress);
         }
 
-        const lungeDist = lungeProgress * 16.0;
+        const lungeDist = lungeProgress * 14.0;
         fx += isP1 ? lungeDist : -lungeDist;
+        punchTilt = isP1 ? 0.05 : -0.05;
 
-        // Smooth torso lean into punch
-        const tiltAmt = Math.sin(lungeProgress * Math.PI) * (anim === 'UPPERCUT' ? 0.12 : 0.07);
-        punchTilt = isP1 ? tiltAmt : -tiltAmt;
-
-        // Trigger Impact Starburst exactly at impact point (progress ≈ 0.45)
         if (progress >= 0.45 && progress < 0.55 && !impactTriggeredThisPunch) {
           impactTriggeredThisPunch = true;
-          triggerImpactBurst();
+          triggerImpactBurst(55, 56);
         } else if (progress >= 0.95) {
           impactTriggeredThisPunch = false;
         }
 
-      // --- SMOOTH KEYFRAMED DEFENDER HIT REACTION ---
+      } else if (anim === 'HOOK') { // WIDE CURVING POWER ARC
+        currentPose = 3;
+        let lungeProgress = 0;
+        if (progress < 0.35) {
+          lungeProgress = smoothstep(0.0, 0.35, progress) * 0.65;
+        } else if (progress < 0.50) {
+          lungeProgress = 0.65 + smoothstep(0.35, 0.50, progress) * 0.35;
+        } else if (progress < 0.70) {
+          lungeProgress = 1.0;
+        } else {
+          lungeProgress = 1.0 - smoothstep(0.70, 1.00, progress);
+        }
+
+        const lungeDist = lungeProgress * 18.0;
+        fx += isP1 ? lungeDist : -lungeDist;
+
+        // Curving Arc & Torque Rotation (18 degrees / 0.30 rad)
+        dyOffset = -Math.sin(lungeProgress * Math.PI) * 3.5;
+        const torqueAmt = Math.sin(lungeProgress * Math.PI) * 0.30;
+        punchTilt = isP1 ? torqueAmt : -torqueAmt;
+
+        if (progress >= 0.45 && progress < 0.55 && !impactTriggeredThisPunch) {
+          impactTriggeredThisPunch = true;
+          triggerImpactBurst(59, 53);
+        } else if (progress >= 0.95) {
+          impactTriggeredThisPunch = false;
+        }
+
+      } else if (anim === 'UPPERCUT') { // SKYWARD SCOOPING EXPLOSION
+        currentPose = 3;
+        let lungeProgress = 0;
+        if (progress < 0.35) {
+          lungeProgress = smoothstep(0.0, 0.35, progress) * 0.70;
+          dyOffset = smoothstep(0.0, 0.35, progress) * 4.0; // Knee Dip Crouch
+        } else if (progress < 0.50) {
+          lungeProgress = 0.70 + smoothstep(0.35, 0.50, progress) * 0.30;
+          dyOffset = 4.0 - smoothstep(0.35, 0.50, progress) * 10.0; // Skyward Lift (-6px)
+        } else if (progress < 0.70) {
+          lungeProgress = 1.0;
+          dyOffset = -6.0;
+        } else {
+          lungeProgress = 1.0 - smoothstep(0.70, 1.00, progress);
+          dyOffset = -6.0 + smoothstep(0.70, 1.00, progress) * 6.0;
+        }
+
+        const lungeDist = lungeProgress * 16.0;
+        fx += isP1 ? lungeDist : -lungeDist;
+        punchTilt = isP1 ? -0.18 : 0.18; // Backward leverage
+
+        if (progress >= 0.45 && progress < 0.55 && !impactTriggeredThisPunch) {
+          impactTriggeredThisPunch = true;
+          triggerImpactBurst(57, 48);
+        } else if (progress >= 0.95) {
+          impactTriggeredThisPunch = false;
+        }
+
+      // --- DISTINCT DEFENDER HIT KNOCKBACK REACTIONS ---
       } else if (anim === 'FLINCH') {
         currentPose = 4;
-
-        // Phase 1 (0.0 - 0.45): High Guard anticipating hit
-        // Phase 2 (0.45 - 0.70): Smooth Head Knockback & Body Hinge (12px back)
-        // Phase 3 (0.70 - 1.00): Smooth Recovery Step-Back to Stance
         let flinchProgress = 0;
         if (progress < 0.45) {
           flinchProgress = 0;
@@ -1398,11 +1450,11 @@
           flinchProgress = 1.0 - smoothstep(0.70, 1.00, progress);
         }
 
-        const flinchDist = flinchProgress * 12.0;
+        const flinchDist = flinchProgress * 14.0;
         fx += isP1 ? -flinchDist : flinchDist;
 
-        // Smooth Head Tilt Back (15 degrees / 0.25 rad)
-        const tiltAmt = flinchProgress * 0.25;
+        // Head Knockback Tilt (20 degrees / 0.35 rad)
+        const tiltAmt = flinchProgress * 0.35;
         flinchTilt = isP1 ? -tiltAmt : tiltAmt;
 
         if (progress >= 0.45 && progress < 0.55) isHitFlash = true;
@@ -1421,21 +1473,23 @@
 
         // HORIZONTAL FLIP FOR DEEN (P2) SO BOTH BOXERS FACE EACH OTHER!
         if (!isP1) {
-          ctx.translate(fx + 22, fy);
+          ctx.translate(fx + 22, fy + dyOffset);
           ctx.scale(-1, 1);
           fx = 0;
           fy = 0;
+        } else {
+          fy += dyOffset;
         }
 
         if (isHitFlash) {
           ctx.filter = 'brightness(2.2)';
         }
 
-        if (anim === 'JAB' || anim === 'UPPERCUT') { // SMOOTH PUNCH EXTENSION
+        if (anim === 'JAB' || anim === 'HOOK' || anim === 'UPPERCUT') { // DISTINCT PUNCH RENDERING
           ctx.translate(fx + 11, fy + 38);
           ctx.rotate(punchTilt);
           ctx.drawImage(singleCanvas, -11, -38, 22, 40);
-        } else if (anim === 'FLINCH') { // SMOOTH HEAD KNOCKBACK TILT
+        } else if (anim === 'FLINCH') { // HEAD KNOCKBACK TILT
           ctx.translate(fx + 11, fy + 38);
           ctx.rotate(flinchTilt);
           ctx.drawImage(singleCanvas, -11, -38, 22, 40);
@@ -1455,7 +1509,7 @@
         ctx.restore();
       } else {
         ctx.fillStyle = isP1 ? '#AB5236' : '#29ADFF';
-        ctx.fillRect(fx + 3, fy, 14, 38);
+        ctx.fillRect(fx + 3, fy + dyOffset, 14, 38);
       }
     }
 
@@ -1521,13 +1575,10 @@
       // 8-BIT CONTACT STARBURST IMPACT FLARE (★) AT CONTACT POINT
       if (impactFxTimer > 0) {
         impactFxTimer--;
-        const starX = 58;
-        const starY = 56;
-
         ctx.fillStyle = PICO_PALETTE[10]; // Gold star flare
-        ctx.fillRect(starX - 3, starY - 3, 7, 7);
+        ctx.fillRect(impactFxX - 3, impactFxY - 3, 7, 7);
         ctx.fillStyle = PICO_PALETTE[7]; // Specular white core
-        ctx.fillRect(starX - 1, starY - 1, 3, 3);
+        ctx.fillRect(impactFxX - 1, impactFxY - 1, 3, 3);
       }
 
       p1.draw();
@@ -1652,8 +1703,6 @@
       audioEnabled = !audioEnabled;
       document.getElementById('btnAudio').innerText = audioEnabled ? 'AUDIO: 808 ON' : 'AUDIO: OFF';
     };
-
-    requestAnimationFrame(loop);
   </script>
 </body>
 </html>
