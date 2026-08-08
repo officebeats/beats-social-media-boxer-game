@@ -8,6 +8,20 @@
 
 ---
 
+## 🎮 Play Vertical Slice (v0.1.0)
+
+1. **Browser Playable Engine**: Open [`index.html`](index.html) in any web browser to play the PICO-8 engine vertical slice immediately (WebAudio chiptune synth, 128×128 pixel scaling, touch & keyboard controls).
+2. **Native PICO-8 Cartridge**: Load [`crash_out.p8`](crash_out.p8) directly inside PICO-8 or Picotron using `pico8 -run crash_out.p8`.
+
+### Controls
+- **Arrow Left / Right**: Move falling gem pair
+- **Arrow Down**: Soft drop
+- **Arrow Up**: Hard drop (Instant lock)
+- **Z**: Rotate Counter-Clockwise
+- **X**: Rotate Clockwise / Trigger SUPER
+
+---
+
 ## 🥊 Visual Targets & Screen Gallery
 
 ### Title Screen

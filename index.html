@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>CRASH OUT: RING RUSH — PICO-8 Puzzle Boxing</title>
+  <style>
+    :root {
+      --pico-black: #000000;
+      --pico-dark-blue: #1D2B53;
+      --pico-dark-purple: #7E2553;
+      --pico-dark-green: #008751;
+      --pico-brown: #AB5236;
+      --pico-dark-gray: #5F574F;
+      --pico-light-gray: #C2C3C7;
+      --pico-white: #FFF1E8;
+      --pico-red: #FF004D;
+      --pico-orange: #FFA300;
+      --pico-yellow: #FFEC27;
+      --pico-green: #00E436;
+      --pico-blue: #29ADFF;
+      --pico-lavender: #83769C;
+      --pico-pink: #FF77A8;
+      --pico-peach: #FFCCAA;
+    }
+
+    * {
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: manipulation;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #080810;
+      color: var(--pico-white);
+      font-family: 'Courier New', Courier, monospace;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    .arcade-cabinet {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: linear-gradient(180deg, #181428 0%, #0d0a18 100%);
+      border: 4px solid #2a2244;
+      border-radius: 16px;
+      box-shadow: 0 0 40px rgba(0, 0, 0, 0.8), 0 0 15px rgba(41, 173, 255, 0.2);
+      padding: 16px;
+      max-width: 100vw;
+    }
+
+    .cabinet-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      margin-bottom: 12px;
+    }
+
+    .brand-title {
+      font-size: 16px;
+      font-weight: bold;
+      color: var(--pico-yellow);
+      text-shadow: 2px 2px 0px var(--pico-red);
+      letter-spacing: 1px;
+    }
+
+    .badge-pico8 {
+      background-color: var(--pico-dark-blue);
+      color: var(--pico-pink);
+      border: 1px solid var(--pico-blue);
+      border-radius: 4px;
+      padding: 2px 6px;
+      font-size: 10px;
+      font-weight: bold;
+    }
+
+    .viewport-container {
+      position: relative;
+      background-color: #000;
+      border: 4px solid var(--pico-dark-gray);
+      border-radius: 8px;
+      box-shadow: inset 0 0 10px rgba(0,0,0,0.9);
+      overflow: hidden;
+    }
+
+    /* Crisp PICO-8 128x128 Pixel Canvas */
+    canvas#picoCanvas {
+      width: 512px;
+      height: 512px;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+      display: block;
+    }
+
+    @media (max-width: 560px) {
+      canvas#picoCanvas {
+        width: 320px;
+        height: 320px;
+      }
+    }
+
+    /* Controls Panel */
+    .control-panel {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      margin-top: 12px;
+      gap: 12px;
+    }
+
+    .dpad-container {
+      display: grid;
+      grid-template-columns: repeat(3, 40px);
+      grid-template-rows: repeat(3, 40px);
+      gap: 4px;
+    }
+
+    .btn-ctrl {
+      background-color: #241e38;
+      border: 2px solid #4a3e6b;
+      color: var(--pico-white);
+      border-radius: 6px;
+      font-weight: bold;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 4px 0 #120e1f;
+    }
+
+    .btn-ctrl:active, .btn-ctrl.active {
+      transform: translateY(2px);
+      box-shadow: 0 2px 0 #120e1f;
+      background-color: var(--pico-blue);
+      color: var(--pico-black);
+    }
+
+    .dpad-up { grid-column: 2; grid-row: 1; }
+    .dpad-left { grid-column: 1; grid-row: 2; }
+    .dpad-down { grid-column: 2; grid-row: 2; }
+    .dpad-right { grid-column: 3; grid-row: 2; }
+
+    .action-buttons {
+      display: flex;
+      gap: 12px;
+    }
+
+    .btn-action {
+      width: 54px;
+      height: 54px;
+      border-radius: 50%;
+      font-size: 16px;
+      font-weight: bold;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 0 #120e1f;
+      border: 2px solid #fff;
+    }
+
+    .btn-o {
+      background-color: var(--pico-orange);
+      color: var(--pico-black);
+    }
+
+    .btn-x {
+      background-color: var(--pico-pink);
+      color: var(--pico-black);
+    }
+
+    .btn-action span {
+      font-size: 8px;
+      margin-top: 2px;
+    }
+
+    .options-bar {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .btn-opt {
+      background: var(--pico-dark-blue);
+      border: 1px solid var(--pico-blue);
+      color: var(--pico-white);
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 11px;
+      cursor: pointer;
+    }
+
+    .instructions {
+      font-size: 10px;
+      color: var(--pico-light-gray);
+      margin-top: 8px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="arcade-cabinet">
+    <div class="cabinet-header">
+      <div class="brand-title">CRASH OUT: RING RUSH</div>
+      <div class="badge-pico8">PICO-8 v0.1.0</div>
+    </div>
+
+    <div class="viewport-container">
+      <canvas id="picoCanvas" width="128" height="128"></canvas>
+    </div>
+
+    <div class="control-panel">
+      <!-- D-PAD -->
+      <div class="dpad-container">
+        <button class="btn-ctrl dpad-up" id="btnUp">▲</button>
+        <button class="btn-ctrl dpad-left" id="btnLeft">◄</button>
+        <button class="btn-ctrl dpad-down" id="btnDown">▼</button>
+        <button class="btn-ctrl dpad-right" id="btnRight">►</button>
+      </div>
+
+      <!-- ACTION BUTTONS -->
+      <div class="action-buttons">
+        <button class="btn-action btn-o" id="btnO">🅾️<span>ROTATE</span></button>
+        <button class="btn-action btn-x" id="btnX">❎<span>SUPER</span></button>
+      </div>
+    </div>
+
+    <div class="options-bar">
+      <button class="btn-opt" id="btnMode">MODE: VS AI</button>
+      <button class="btn-opt" id="btnReset">RESET MATCH</button>
+      <button class="btn-opt" id="btnAudio">AUDIO: ON</button>
+    </div>
+
+    <div class="instructions">
+      Keyboard: Arrows = Move/Drop | Z = Rotate CCW | X = Rotate CW / SUPER
+    </div>
+  </div>
+
+  <script>
+    // =========================================================================
+    // PICO-8 ENGINE & GAME SYSTEM ENGINE (128x128 RES)
+    // =========================================================================
+
+    const PICO_PALETTE = [
+      '#000000', // 0: Black
+      '#1D2B53', // 1: Dark Blue
+      '#7E2553', // 2: Dark Purple
+      '#008751', // 3: Dark Green
+      '#AB5236', // 4: Brown (Skin)
+      '#5F574F', // 5: Dark Gray
+      '#C2C3C7', // 6: Light Gray
+      '#FFF1E8', // 7: White
+      '#FF004D', // 8: Red
+      '#FFA300', // 9: Orange
+      '#FFEC27', // 10: Yellow
+      '#00E436', // 11: Green
+      '#29ADFF', // 12: Blue
+      '#83769C', // 13: Lavender
+      '#FF77A8', // 14: Pink
+      '#FFCCAA'  // 15: Peach
+    ];
+
+    const canvas = document.getElementById('picoCanvas');
+    const ctx = canvas.getContext('2d');
+    ctx.imageSmoothingEnabled = false;
+
+    // --- WebAudio Synthesizer for Chiptune SFX ---
+    let audioEnabled = true;
+    let audioCtx = null;
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+
+    function playSfx(type) {
+      if (!audioEnabled || !audioCtx) return;
+      try {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        const t = audioCtx.currentTime;
+
+        if (type === 'step') {
+          osc.type = 'square';
+          osc.frequency.setValueAtTime(300, t);
+          osc.frequency.exponentialRampToValueAtTime(450, t + 0.04);
+          gain.gain.setValueAtTime(0.1, t);
+          gain.gain.linearRampToValueAtTime(0.01, t + 0.04);
+          osc.start(t);
+          osc.stop(t + 0.04);
+        } else if (type === 'rotate') {
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(400, t);
+          osc.frequency.exponentialRampToValueAtTime(650, t + 0.05);
+          gain.gain.setValueAtTime(0.15, t);
+          gain.gain.linearRampToValueAtTime(0.01, t + 0.05);
+          osc.start(t);
+          osc.stop(t + 0.05);
+        } else if (type === 'land') {
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(160, t);
+          osc.frequency.linearRampToValueAtTime(60, t + 0.06);
+          gain.gain.setValueAtTime(0.2, t);
+          gain.gain.linearRampToValueAtTime(0.01, t + 0.06);
+          osc.start(t);
+          osc.stop(t + 0.06);
+        } else if (type === 'detonate') {
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(220, t);
+          osc.frequency.exponentialRampToValueAtTime(40, t + 0.25);
+          gain.gain.setValueAtTime(0.3, t);
+          gain.gain.linearRampToValueAtTime(0.01, t + 0.25);
+          osc.start(t);
+          osc.stop(t + 0.25);
+        } else if (type === 'jab') {
+          osc.type = 'square';
+          osc.frequency.setValueAtTime(500, t);
+          osc.frequency.exponentialRampToValueAtTime(150, t + 0.08);
+          gain.gain.setValueAtTime(0.2, t);
+          gain.gain.linearRampToValueAtTime(0.01, t + 0.08);
+          osc.start(t);
+          osc.stop(t + 0.08);
+        } else if (type === 'uppercut') {
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(150, t);
+          osc.frequency.exponentialRampToValueAtTime(700, t + 0.2);
+          gain.gain.setValueAtTime(0.3, t);
+          gain.gain.linearRampToValueAtTime(0.01, t + 0.2);
+          osc.start(t);
+          osc.stop(t + 0.2);
+        } else if (type === 'ko') {
+          osc.type = 'square';
+          osc.frequency.setValueAtTime(800, t);
+          osc.frequency.setValueAtTime(600, t + 0.1);
+          osc.frequency.setValueAtTime(1000, t + 0.2);
+          gain.gain.setValueAtTime(0.3, t);
+          gain.gain.linearRampToValueAtTime(0.01, t + 0.4);
+          osc.start(t);
+          osc.stop(t + 0.4);
+        }
+      } catch (e) {}
+    }
+
+    // --- GAME DATA STRUCTURES ---
+    const COLS = 6;
+    const ROWS = 12;
+    const CELL_W = 6;
+    const CELL_H = 8;
+
+    // Gem Types: 1:Red, 2:Blue, 3:Green, 4:Yellow, 5:Red Crash, 6:Blue Crash, 7:Green Crash, 8:Yellow Crash, 9:Counter Shield
+    const GEM_COLORS = [8, 12, 11, 10]; // Red, Blue, Green, Yellow
+
+    let vsAiMode = true;
+    let cameraShake = 0;
+    let roundTimer = 99;
+    let timerFrameCounter = 0;
+    let gameState = 'PLAYING'; // PLAYING, KO
+
+    // Player State Class
+    class Board {
+      constructor(id, offsetX, isAi = false) {
+        this.id = id;
+        this.offsetX = offsetX;
+        this.offsetY = 16;
+        this.isAi = isAi;
+        this.grid = Array(ROWS).fill(null).map(() => Array(COLS).fill(0));
+        this.powerGems = Array(ROWS).fill(null).map(() => Array(COLS).fill(false));
+        this.hp = 100;
+        this.superMeter = 0;
+        this.score = 0;
+        this.comboCount = 0;
+
+        this.pair = null;
+        this.spawnPair();
+
+        this.dropTimer = 0;
+        this.dropInterval = 30; // frames
+        this.lockDelay = 0;
+
+        // DAS (Delayed Auto Shift)
+        this.dasDir = 0;
+        this.dasTimer = 0;
+
+        // Fighter state
+        this.anim = 'IDLE'; // IDLE, JAB, UPPERCUT, FLINCH, KO
+        this.animTimer = 0;
+      }
+
+      spawnPair() {
+        const g1 = Math.floor(Math.random() * 4) + 1; // 1..4
+        // 25% chance for Crash Orb
+        const isCrash = Math.random() < 0.25;
+        const g2 = isCrash ? (Math.floor(Math.random() * 4) + 5) : (Math.floor(Math.random() * 4) + 1);
+
+        this.pair = {
+          x: 2,
+          y: 0,
+          rot: 0, // 0:Sub top, 1:Sub right, 2:Sub bottom, 3:Sub left
+          g1: g1, // Main gem
+          g2: g2  // Sub gem
+        };
+
+        if (this.grid[0][2] !== 0 || this.grid[1][2] !== 0) {
+          this.hp = 0;
+          gameState = 'KO';
+          playSfx('ko');
+        }
+      }
+
+      getSubX() {
+        if (this.pair.rot === 1) return this.pair.x + 1;
+        if (this.pair.rot === 3) return this.pair.x - 1;
+        return this.pair.x;
+      }
+
+      getSubY() {
+        if (this.pair.rot === 0) return this.pair.y - 1;
+        if (this.pair.rot === 2) return this.pair.y + 1;
+        return this.pair.y;
+      }
+
+      isValid(x, y, rot) {
+        let subX = x;
+        let subY = y;
+        if (rot === 0) subY = y - 1;
+        if (rot === 1) subX = x + 1;
+        if (rot === 2) subY = y + 1;
+        if (rot === 3) subX = x - 1;
+
+        if (x < 0 || x >= COLS || y < 0 || y >= ROWS) return false;
+        if (subX < 0 || subX >= COLS || subY < 0 || subY >= ROWS) return false;
+
+        if (this.grid[y][x] !== 0) return false;
+        if (subY >= 0 && this.grid[subY][subX] !== 0) return false;
+
+        return true;
+      }
+
+      move(dir) {
+        if (!this.pair) return;
+        if (this.isValid(this.pair.x + dir, this.pair.y, this.pair.rot)) {
+          this.pair.x += dir;
+          playSfx('step');
+        }
+      }
+
+      rotate(dir) { // 1: CW, -1: CCW
+        if (!this.pair) return;
+        let newRot = (this.pair.rot + dir + 4) % 4;
+        let newX = this.pair.x;
+        let newY = this.pair.y;
+
+        // Wall kick
+        if (!this.isValid(newX, newY, newRot)) {
+          if (this.isValid(newX - 1, newY, newRot)) newX -= 1;
+          else if (this.isValid(newX + 1, newY, newRot)) newX += 1;
+          else if (this.isValid(newX, newY - 1, newRot)) newY -= 1;
+        }
+
+        if (this.isValid(newX, newY, newRot)) {
+          this.pair.x = newX;
+          this.pair.y = newY;
+          this.pair.rot = newRot;
+          playSfx('rotate');
+        }
+      }
+
+      dropSoft() {
+        if (!this.pair) return;
+        if (this.isValid(this.pair.x, this.pair.y + 1, this.pair.rot)) {
+          this.pair.y += 1;
+          this.score += 1;
+        } else {
+          this.lockPair();
+        }
+      }
+
+      dropHard() {
+        if (!this.pair) return;
+        while (this.isValid(this.pair.x, this.pair.y + 1, this.pair.rot)) {
+          this.pair.y += 1;
+          this.score += 2;
+        }
+        this.lockPair();
+      }
+
+      lockPair() {
+        if (!this.pair) return;
+        const subX = this.getSubX();
+        const subY = this.getSubY();
+
+        if (this.pair.y >= 0) this.grid[this.pair.y][this.pair.x] = this.pair.g1;
+        if (subY >= 0) this.grid[subY][subX] = this.pair.g2;
+
+        playSfx('land');
+        this.pair = null;
+
+        // Process physics: Gravity -> Fusion -> Detonation
+        this.applyGravity();
+        this.detectPowerGems();
+        this.processDetonations();
+      }
+
+      applyGravity() {
+        for (let col = 0; col < COLS; col++) {
+          for (let row = ROWS - 2; row >= 0; row--) {
+            if (this.grid[row][col] !== 0 && this.grid[row + 1][col] === 0) {
+              let r = row;
+              while (r < ROWS - 1 && this.grid[r + 1][col] === 0) {
+                this.grid[r + 1][col] = this.grid[r][col];
+                this.powerGems[r + 1][col] = this.powerGems[r][col];
+                this.grid[r][col] = 0;
+                this.powerGems[r][col] = false;
+                r++;
+              }
+            }
+          }
+        }
+      }
+
+      detectPowerGems() {
+        // Reset power gems
+        for (let r = 0; r < ROWS; r++) {
+          for (let c = 0; c < COLS; c++) this.powerGems[r][c] = false;
+        }
+
+        // Scan 2x2 blocks of normal gems (1..4)
+        for (let r = 0; r < ROWS - 1; r++) {
+          for (let c = 0; c < COLS - 1; c++) {
+            const g = this.grid[r][c];
+            if (g >= 1 && g <= 4) {
+              if (this.grid[r][c + 1] === g && this.grid[r + 1][c] === g && this.grid[r + 1][c + 1] === g) {
+                this.powerGems[r][c] = true;
+                this.powerGems[r][c + 1] = true;
+                this.powerGems[r + 1][c] = true;
+                this.powerGems[r + 1][c + 1] = true;
+              }
+            }
+          }
+        }
+      }
+
+      processDetonations() {
+        let matched = false;
+        let toClear = Array(ROWS).fill(null).map(() => Array(COLS).fill(false));
+
+        // Find Crash Orbs (5..8)
+        for (let r = 0; r < ROWS; r++) {
+          for (let c = 0; c < COLS; c++) {
+            const orb = this.grid[r][c];
+            if (orb >= 5 && orb <= 8) {
+              const targetColor = orb - 4; // 1..4
+              // Check 4 adjacents
+              const adj = [[r-1,c], [r+1,c], [r,c-1], [r,c+1]];
+              let triggered = false;
+
+              adj.forEach(([ar, ac]) => {
+                if (ar >= 0 && ar < ROWS && ac >= 0 && ac < COLS) {
+                  if (this.grid[ar][ac] === targetColor) {
+                    triggered = true;
+                  }
+                }
+              });
+
+              if (triggered) {
+                matched = true;
+                toClear[r][c] = true;
+                // Flood fill connected target color gems
+                this.floodFillClear(r, c, targetColor, toClear);
+              }
+            }
+          }
+        }
+
+        if (matched) {
+          let clearCount = 0;
+          let powerGemCleared = false;
+
+          for (let r = 0; r < ROWS; r++) {
+            for (let c = 0; c < COLS; c++) {
+              if (toClear[r][c]) {
+                clearCount++;
+                if (this.powerGems[r][c]) powerGemCleared = true;
+                this.grid[r][c] = 0;
+                this.powerGems[r][c] = false;
+              }
+            }
+          }
+
+          this.comboCount++;
+          const dmg = clearCount * 4 * (powerGemCleared ? 1.5 : 1.0) * this.comboCount;
+          
+          // Trigger Opponent Damage & Counter Gem Drop
+          const opponent = (this.id === 1) ? p2 : p1;
+          opponent.hp = Math.max(0, opponent.hp - Math.floor(dmg));
+          this.superMeter = Math.min(100, this.superMeter + clearCount * 5);
+          this.score += Math.floor(dmg * 10);
+
+          // Triggers Fighter Punch Reaction
+          if (powerGemCleared || this.comboCount >= 2) {
+            this.anim = 'UPPERCUT';
+            opponent.anim = 'FLINCH';
+            cameraShake = 8;
+            playSfx('uppercut');
+          } else {
+            this.anim = 'JAB';
+            opponent.anim = 'FLINCH';
+            cameraShake = 3;
+            playSfx('jab');
+          }
+          this.animTimer = 20;
+          opponent.animTimer = 20;
+
+          playSfx('detonate');
+
+          // Cascade: Apply gravity and check for secondary combo!
+          setTimeout(() => {
+            this.applyGravity();
+            this.detectPowerGems();
+            this.processDetonations();
+          }, 250);
+
+        } else {
+          this.comboCount = 0;
+          this.spawnPair();
+        }
+      }
+
+      floodFillClear(r, c, targetColor, toClear) {
+        const stack = [[r-1,c], [r+1,c], [r,c-1], [r,c+1]];
+        while (stack.length > 0) {
+          const [cr, cc] = stack.pop();
+          if (cr >= 0 && cr < ROWS && cc >= 0 && cc < COLS) {
+            if (!toClear[cr][cc] && this.grid[cr][cc] === targetColor) {
+              toClear[cr][cc] = true;
+              stack.push([cr-1, cc], [cr+1, cc], [cr, cc-1], [cr, cc+1]);
+            }
+          }
+        }
+      }
+
+      update() {
+        if (gameState !== 'PLAYING') return;
+
+        // Fighter anim reset
+        if (this.animTimer > 0) {
+          this.animTimer--;
+          if (this.animTimer === 0) this.anim = 'IDLE';
+        }
+
+        // AI Logic
+        if (this.isAi && this.pair) {
+          if (Math.random() < 0.1) {
+            const targetX = Math.floor(Math.random() * COLS);
+            if (this.pair.x < targetX) this.move(1);
+            else if (this.pair.x > targetX) this.move(-1);
+          }
+          if (Math.random() < 0.05) this.rotate(1);
+        }
+
+        // Gravity drop for active pair
+        if (this.pair) {
+          this.dropTimer++;
+          if (this.dropTimer >= this.dropInterval) {
+            this.dropTimer = 0;
+            if (this.isValid(this.pair.x, this.pair.y + 1, this.pair.rot)) {
+              this.pair.y++;
+            } else {
+              this.lockDelay++;
+              if (this.lockDelay >= 4) {
+                this.lockDelay = 0;
+                this.lockPair();
+              }
+            }
+          }
+        }
+      }
+
+      draw() {
+        // Outer Board Frame
+        ctx.strokeStyle = PICO_PALETTE[5];
+        ctx.lineWidth = 1;
+        ctx.strokeRect(this.offsetX - 1, this.offsetY - 1, COLS * CELL_W + 2, ROWS * CELL_H + 2);
+
+        // Grid Background
+        ctx.fillStyle = PICO_PALETTE[0];
+        ctx.fillRect(this.offsetX, this.offsetY, COLS * CELL_W, ROWS * CELL_H);
+
+        // Draw Locked Grid Gems
+        for (let r = 0; r < ROWS; r++) {
+          for (let c = 0; c < COLS; c++) {
+            const g = this.grid[r][c];
+            if (g !== 0) {
+              this.drawGem(this.offsetX + c * CELL_W, this.offsetY + r * CELL_H, g, this.powerGems[r][c]);
+            }
+          }
+        }
+
+        // Draw Active Pair
+        if (this.pair) {
+          const mainX = this.offsetX + this.pair.x * CELL_W;
+          const mainY = this.offsetY + this.pair.y * CELL_H;
+          const subX = this.offsetX + this.getSubX() * CELL_W;
+          const subY = this.offsetY + this.getSubY() * CELL_H;
+
+          if (this.pair.y >= 0) this.drawGem(mainX, mainY, this.pair.g1, false);
+          if (this.getSubY() >= 0) this.drawGem(subX, subY, this.pair.g2, false);
+        }
+      }
+
+      drawGem(x, y, type, isPower) {
+        let colorIdx = 8;
+        let isCrash = false;
+
+        if (type >= 1 && type <= 4) colorIdx = GEM_COLORS[type - 1];
+        else if (type >= 5 && type <= 8) {
+          colorIdx = GEM_COLORS[type - 5];
+          isCrash = true;
+        } else if (type === 9) colorIdx = 5;
+
+        // Gem fill
+        ctx.fillStyle = PICO_PALETTE[colorIdx];
+        ctx.fillRect(x + 1, y + 1, CELL_W - 2, CELL_H - 2);
+
+        // Gem border
+        ctx.strokeStyle = PICO_PALETTE[0];
+        ctx.strokeRect(x, y, CELL_W, CELL_H);
+
+        // Power Gem Gold Border
+        if (isPower) {
+          ctx.strokeStyle = PICO_PALETTE[10]; // Gold
+          ctx.strokeRect(x + 0.5, y + 0.5, CELL_W - 1, CELL_H - 1);
+        }
+
+        // Crash Orb Icon (+)
+        if (isCrash) {
+          ctx.fillStyle = PICO_PALETTE[7]; // White center
+          ctx.fillRect(x + 2, y + 3, 2, 2);
+        }
+      }
+    }
+
+    // Initialize Players
+    const p1 = new Board(1, 4, false);
+    const p2 = new Board(2, 88, true);
+
+    // --- FIGHTER RENDERING SYSTEM (16x16 CHIBI SPRITES) ---
+    function drawFighter(x, y, isP1, anim) {
+      // P1: Adrien Broner (Red trunks, Gold gloves)
+      // P2: Deen The Great (Blue trunks, Cyan gloves)
+      const skinColor = PICO_PALETTE[4]; // Brown
+      const trunksColor = isP1 ? PICO_PALETTE[8] : PICO_PALETTE[12]; // Red / Blue
+      const glovesColor = isP1 ? PICO_PALETTE[10] : PICO_PALETTE[9]; // Gold / Cyan
+
+      // Flinch offset
+      let fx = x;
+      let fy = y;
+      if (anim === 'FLINCH') fx += isP1 ? -3 : 3;
+      if (anim === 'UPPERCUT') fy -= 4;
+
+      // Head (8x8)
+      ctx.fillStyle = skinColor;
+      ctx.fillRect(fx + 4, fy, 8, 7);
+
+      // Hair
+      ctx.fillStyle = PICO_PALETTE[0];
+      ctx.fillRect(fx + 4, fy, 8, 2);
+
+      // Eyes
+      ctx.fillStyle = PICO_PALETTE[7];
+      ctx.fillRect(isP1 ? fx + 9 : fx + 5, fy + 3, 2, 2);
+      ctx.fillStyle = PICO_PALETTE[0];
+      ctx.fillRect(isP1 ? fx + 10 : fx + 5, fy + 3, 1, 2);
+
+      // Body (8x5)
+      ctx.fillStyle = skinColor;
+      ctx.fillRect(fx + 4, fy + 7, 8, 5);
+
+      // Trunks (8x4)
+      ctx.fillStyle = trunksColor;
+      ctx.fillRect(fx + 4, fy + 12, 8, 4);
+
+      // Gloves (4x4)
+      ctx.fillStyle = glovesColor;
+      if (anim === 'JAB') {
+        ctx.fillRect(isP1 ? fx + 13 : fx - 1, fy + 6, 5, 4); // Extend punch
+      } else if (anim === 'UPPERCUT') {
+        ctx.fillRect(isP1 ? fx + 10 : fx + 2, fy + 2, 4, 5); // Rise punch
+      } else {
+        ctx.fillRect(isP1 ? fx + 10 : fx + 2, fy + 7, 4, 4); // Guard
+      }
+
+      // Black Outline
+      ctx.strokeStyle = PICO_PALETTE[0];
+      ctx.strokeRect(fx + 3, fy - 1, 10, 18);
+    }
+
+    // --- MAIN RENDER LOOP ---
+    function render() {
+      // Screen Shake
+      ctx.save();
+      if (cameraShake > 0) {
+        const rx = (Math.random() * cameraShake - cameraShake / 2);
+        const ry = (Math.random() * cameraShake - cameraShake / 2);
+        ctx.translate(rx, ry);
+        cameraShake *= 0.85;
+        if (cameraShake < 0.5) cameraShake = 0;
+      }
+
+      // 1. Background (Black / Dark Blue Arena)
+      ctx.fillStyle = PICO_PALETTE[1];
+      ctx.fillRect(0, 0, 128, 128);
+
+      // 2. Top HUD Bar
+      ctx.fillStyle = PICO_PALETTE[0];
+      ctx.fillRect(0, 0, 128, 15);
+
+      // P1 HP Bar
+      ctx.fillStyle = PICO_PALETTE[8];
+      ctx.fillRect(4, 3, 42, 5);
+      ctx.fillStyle = PICO_PALETTE[11];
+      ctx.fillRect(4, 3, 42 * (p1.hp / 100), 5);
+
+      // P2 HP Bar
+      ctx.fillStyle = PICO_PALETTE[8];
+      ctx.fillRect(82, 3, 42, 5);
+      ctx.fillStyle = PICO_PALETTE[11];
+      ctx.fillRect(82, 3, 42 * (p2.hp / 100), 5);
+
+      // Names & Timer
+      ctx.fillStyle = PICO_PALETTE[7];
+      ctx.font = '8px monospace';
+      ctx.fillText('BRONER', 4, 13);
+      ctx.fillText('DEEN', 98, 13);
+      ctx.fillText(roundTimer < 10 ? '0' + roundTimer : roundTimer, 58, 10);
+
+      // 3. Center Ring Arena (X: 41..86)
+      ctx.fillStyle = PICO_PALETTE[0];
+      ctx.fillRect(41, 15, 46, 98);
+
+      // Ring Ropes
+      ctx.strokeStyle = PICO_PALETTE[6];
+      ctx.beginPath();
+      ctx.moveTo(41, 45); ctx.lineTo(86, 45);
+      ctx.moveTo(41, 65); ctx.lineTo(86, 65);
+      ctx.moveTo(41, 85); ctx.lineTo(86, 85);
+      ctx.stroke();
+
+      // Ring Floor Mat
+      ctx.fillStyle = PICO_PALETTE[7];
+      ctx.fillRect(41, 92, 46, 21);
+
+      // Draw Center Fighters
+      drawFighter(44, 74, true, p1.anim);
+      drawFighter(68, 74, false, p2.anim);
+
+      // 4. Draw Boards
+      p1.draw();
+      p2.draw();
+
+      // 5. Bottom SUPER Gauge
+      ctx.fillStyle = PICO_PALETTE[0];
+      ctx.fillRect(0, 114, 128, 14);
+
+      ctx.fillStyle = PICO_PALETTE[10];
+      ctx.fillRect(4, 118, 40 * (p1.superMeter / 100), 4);
+      ctx.fillRect(84, 118, 40 * (p2.superMeter / 100), 4);
+
+      ctx.fillStyle = PICO_PALETTE[7];
+      ctx.fillText('SP', 46, 123);
+      ctx.fillText('SP', 74, 123);
+
+      // KO Overlay
+      if (gameState === 'KO') {
+        ctx.fillStyle = 'rgba(0,0,0,0.7)';
+        ctx.fillRect(0, 45, 128, 38);
+        ctx.fillStyle = PICO_PALETTE[10];
+        ctx.font = 'bold 16px monospace';
+        ctx.fillText('K.O.!', 44, 68);
+      }
+
+      ctx.restore();
+    }
+
+    // --- GAME UPDATE LOOP ---
+    function update() {
+      p1.update();
+      p2.update();
+
+      // Timer countdown
+      if (gameState === 'PLAYING') {
+        timerFrameCounter++;
+        if (timerFrameCounter >= 30) {
+          timerFrameCounter = 0;
+          if (roundTimer > 0) roundTimer--;
+        }
+      }
+    }
+
+    function loop() {
+      update();
+      render();
+      requestAnimationFrame(loop);
+    }
+
+    // --- KEYBOARD & TOUCH INPUT HANDLERS ---
+    window.addEventListener('keydown', (e) => {
+      initAudio();
+      if (e.key === 'ArrowLeft') p1.move(-1);
+      if (e.key === 'ArrowRight') p1.move(1);
+      if (e.key === 'ArrowDown') p1.dropSoft();
+      if (e.key === 'ArrowUp') p1.dropHard();
+      if (e.key === 'z' || e.key === 'Z') p1.rotate(-1);
+      if (e.key === 'x' || e.key === 'X') p1.rotate(1);
+    });
+
+    // Touch Controls
+    document.getElementById('btnLeft').onclick = () => { initAudio(); p1.move(-1); };
+    document.getElementById('btnRight').onclick = () => { initAudio(); p1.move(1); };
+    document.getElementById('btnDown').onclick = () => { initAudio(); p1.dropSoft(); };
+    document.getElementById('btnUp').onclick = () => { initAudio(); p1.dropHard(); };
+    document.getElementById('btnO').onclick = () => { initAudio(); p1.rotate(-1); };
+    document.getElementById('btnX').onclick = () => { initAudio(); p1.rotate(1); };
+
+    // Option Buttons
+    document.getElementById('btnMode').onclick = () => {
+      vsAiMode = !vsAiMode;
+      p2.isAi = vsAiMode;
+      document.getElementById('btnMode').innerText = vsAiMode ? 'MODE: VS AI' : 'MODE: VS P2';
+    };
+
+    document.getElementById('btnReset').onclick = () => {
+      location.reload();
+    };
+
+    document.getElementById('btnAudio').onclick = () => {
+      audioEnabled = !audioEnabled;
+      document.getElementById('btnAudio').innerText = audioEnabled ? 'AUDIO: ON' : 'AUDIO: OFF';
+    };
+
+    // Start Engine Loop
+    requestAnimationFrame(loop);
+  </script>
+</body>
+</html>
