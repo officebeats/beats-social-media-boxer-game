@@ -214,7 +214,7 @@
   <div class="arcade-cabinet">
     <div class="cabinet-header">
       <div class="brand-title">CRASH OUT: RING RUSH</div>
-      <div class="badge-pico8">PERFECTED ENGINE v1.2.0</div>
+      <div class="badge-pico8">GROUNDED PACING v1.3.0</div>
     </div>
 
     <div class="viewport-container">
@@ -250,10 +250,10 @@
 
   <script>
     // =========================================================================
-    // PERFECTED CAPCOM ARCADE PUZZLE ENGINE v1.2.0
-    // - 50% Slower Arcade Pacing: Clear, readable piece drops & block clear flashes
-    // - Face-to-Face Boxer Positioning: Deen flipped horizontally to face Broner directly
-    // - Full-size 16-bit Capcom boxer figures with 100% clean transparent chroma keying
+    // GROUNDED PACING CAPCOM ARCADE PUZZLE ENGINE v1.3.0
+    // - 60% Slower Brick & Animation Pacing: Smooth, readable, relaxing arcade speed
+    // - Grounded Feet Physics: Feet 100% locked to ring floor canvas (NO MID-AIR FLOATING!)
+    // - Deen flipped horizontally to face Broner face-to-face eye-to-eye
     // =========================================================================
 
     const PICO_PALETTE = [
@@ -495,10 +495,10 @@
         this.x = x;
         this.y = y;
         this.color = color;
-        this.life = 40;
+        this.life = 50;
       }
       update() {
-        this.y -= 0.4;
+        this.y -= 0.3;
         this.life--;
       }
       draw() {
@@ -514,14 +514,14 @@
     let globalParticles = [];
     let globalFloatingTexts = [];
 
-    // --- DEFENSIVE ONLY IDLE CONTROLLER ---
+    // --- DEFENSIVE ONLY IDLE CONTROLLER (60% SLOWER SMOOTH ANIMATIONS) ---
     class BoxerIdleController {
       constructor(isP1) {
         this.isP1 = isP1;
         this.actionState = 'SHOULDER_ROLL';
         this.frameIndex = 1;
         this.timer = 0;
-        this.duration = 40;
+        this.duration = 80;
       }
 
       update() {
@@ -537,42 +537,34 @@
           else if (this.actionState === 'HIGH_BLOCK') this.frameIndex = 3;
           else if (this.actionState === 'SLIP') this.frameIndex = 4;
 
-          this.duration = 30 + Math.floor(Math.random() * 40);
+          this.duration = 80 + Math.floor(Math.random() * 90);
         }
       }
 
       getOffsets() {
         let dx = 0;
-        let dy = 0;
 
-        const shuffleX = Math.sin(globalFrameCount * 0.10 + (this.isP1 ? 0 : 2.5)) * 1.5;
-        const shuffleY = Math.abs(Math.sin(globalFrameCount * 0.15 + (this.isP1 ? 0 : 3.1))) * 1.2;
-
+        // 60% Slower Stance Sway (Horizontal Feet Movement ONLY - dy is ZERO so feet stay on floor!)
+        const shuffleX = Math.sin(globalFrameCount * 0.04 + (this.isP1 ? 0 : 2.5)) * 1.2;
         dx += shuffleX;
-        dy -= shuffleY;
 
         const progress = Math.sin((this.timer / Math.max(1, this.duration)) * Math.PI);
 
         if (this.actionState === 'SHOULDER_ROLL') {
-          dx += (this.isP1 ? 3.0 : -3.0) * progress;
-          dy += 1.0 * progress;
-        } else if (this.actionState === 'HIGH_BLOCK') {
-          dy -= 1.0 * progress;
-        } else if (this.actionState === 'DUCK') {
-          dy += 4.0 * progress;
+          dx += (this.isP1 ? 2.5 : -2.5) * progress;
         } else if (this.actionState === 'SLIP') {
           const slipWave = Math.sin((this.timer / Math.max(1, this.duration)) * Math.PI * 2);
-          dx += (this.isP1 ? 3.5 : -3.5) * slipWave;
+          dx += (this.isP1 ? 3.0 : -3.0) * slipWave;
         }
 
-        return { dx, dy, frameIndex: this.frameIndex };
+        return { dx, dy: 0, frameIndex: this.frameIndex };
       }
     }
 
     const idleP1 = new BoxerIdleController(true);
     const idleP2 = new BoxerIdleController(false);
 
-    // --- DETERMINISTIC BOARD STATE MACHINE ENGINE ---
+    // --- DETERMINISTIC BOARD STATE MACHINE ENGINE (60% SLOWER BRICK SPEED) ---
     class Board {
       constructor(id, offsetX, isAi = true) {
         this.id = id;
@@ -594,7 +586,7 @@
 
         this.pair = null;
         this.dropTimer = 0;
-        this.dropInterval = 35; // 50% Slower Soft Drop Speed
+        this.dropInterval = 90; // 60% Slower Soft Falling Speed
         this.lockDelay = 0;
 
         this.anim = 'IDLE';
@@ -674,8 +666,8 @@
 
           this.anim = 'UPPERCUT';
           opponent.anim = 'FLINCH';
-          this.animTimer = 35;
-          opponent.animTimer = 35;
+          this.animTimer = 40;
+          opponent.animTimer = 40;
 
           globalFloatingTexts.push(new FloatingText('SUPER FINISHER!', this.offsetX + 2, this.offsetY + 30, 10));
         } else {
@@ -791,7 +783,7 @@
         const matchFound = this.evaluateMatches();
         if (matchFound) {
           this.state = 'CLEARING';
-          this.clearTimer = 24; // 50% Slower Clear Animation Flash
+          this.clearTimer = 36; // 60% Slower Clear Animation Flash
         } else {
           this.comboCount = 0;
           this.state = 'SPAWN';
@@ -1027,8 +1019,8 @@
           cameraShake = 4;
           play808Sfx('jab');
         }
-        this.animTimer = 28;
-        opponent.animTimer = 28;
+        this.animTimer = 32;
+        opponent.animTimer = 32;
 
         this.pendingClear = null;
       }
@@ -1110,17 +1102,17 @@
             const matchFound = this.evaluateMatches();
             if (matchFound) {
               this.state = 'CLEARING';
-              this.clearTimer = 20;
+              this.clearTimer = 28;
             } else {
               this.comboCount = 0;
               this.state = 'SPAWN';
             }
           }
         } else if (this.state === 'FALLING') {
-          // 50% SLOWER ARCADE AI TICK (Every 8 frames ~0.13s per move)
+          // 60% SLOWER ARCADE AI TICK (Every 20 frames ~0.33s per move)
           if (this.isAi && this.pair) {
             this.aiTimer++;
-            if (this.aiTimer >= 8) {
+            if (this.aiTimer >= 20) {
               this.aiTimer = 0;
 
               if (this.pair.x < this.aiTargetCol) {
@@ -1304,20 +1296,19 @@
     const p2 = new Board(2, 88, true); // AI P2
 
     // =========================================================================
-    // PERFECTED CAPCOM ARCADE SPRITE RENDERER v1.2.0
-    // - P1 (Broner) faces Right towards Deen
-    // - P2 (Deen) flipped horizontally so Deen faces Left towards Broner!
-    // - Full-size 16-bit Capcom boxer figures face-to-face in ring center
+    // GROUNDED CAPCOM ARCADE SPRITE RENDERER v1.3.0
+    // - Feet Y-position STRICTLY LOCKED to Ring Canvas Floor (Y = 50, Feet = 90)
+    // - NO MID-AIR FLOATING! Ambient drop shadow ellipse directly under feet.
     // =========================================================================
     function drawBoxer(x, y, isP1, anim) {
       let fx = x;
-      let fy = y;
+      let fy = 50; // STRICTLY GROUNDED ON RING FLOOR CANVAS (Feet at 50 + 40 = 90)
 
       const idleController = isP1 ? idleP1 : idleP2;
       const { dx, dy, frameIndex } = idleController.getOffsets();
 
       fx += Math.floor(dx);
-      fy += Math.floor(dy);
+      // dy is strictly 0 for feet grounding!
 
       let currentPose = frameIndex;
 
@@ -1326,14 +1317,15 @@
         fx += isP1 ? 7 : -7;
       } else if (anim === 'UPPERCUT') {
         currentPose = 3;
-        fy -= 7;
+        // Step forward on floor during uppercut
+        fx += isP1 ? 4 : -4;
       } else if (anim === 'FLINCH') {
         currentPose = 4;
-        fx += isP1 ? -6 : 6;
+        fx += isP1 ? -5 : 5;
       }
 
-      // Dynamic Ambient Ring Drop Shadow
-      ctx.fillStyle = 'rgba(0,0,0,0.5)';
+      // Dynamic Ambient Ring Drop Shadow ON THE FLOOR CANVAS
+      ctx.fillStyle = 'rgba(0,0,0,0.55)';
       ctx.beginPath();
       ctx.ellipse(fx + 11, 89, 10, 3, 0, 0, Math.PI * 2);
       ctx.fill();
@@ -1351,18 +1343,18 @@
           fy = 0;
         }
 
-        if (currentPose === 1) { // SHOULDER ROLL (Philly Shell tilt)
-          ctx.translate(fx + 11, fy + 20);
-          ctx.rotate(isP1 ? -0.08 : -0.08);
-          ctx.drawImage(singleCanvas, -11, -20, 22, 40);
-        } else if (currentPose === 2) { // DUCK CROUCH
-          ctx.drawImage(singleCanvas, fx, fy + 4, 22, 36);
+        if (currentPose === 1) { // SHOULDER ROLL (Philly Shell torso tilt around feet center)
+          ctx.translate(fx + 11, fy + 38); // Pivot near feet
+          ctx.rotate(isP1 ? -0.06 : -0.06);
+          ctx.drawImage(singleCanvas, -11, -38, 22, 40);
+        } else if (currentPose === 2) { // DUCK CROUCH (Body crouches down, feet stay grounded!)
+          ctx.drawImage(singleCanvas, fx, fy + 3, 22, 37);
         } else if (currentPose === 3) { // JAB / FEINT EXTENSION
           ctx.drawImage(singleCanvas, fx + 3, fy, 22, 40);
-        } else if (currentPose === 4) { // HEAD SLIP & WEAVE
-          ctx.translate(fx + 11, fy + 20);
-          ctx.rotate(isP1 ? 0.12 : 0.12);
-          ctx.drawImage(singleCanvas, -11, -20, 22, 40);
+        } else if (currentPose === 4) { // HEAD SLIP & WEAVE (Pivot near feet)
+          ctx.translate(fx + 11, fy + 38);
+          ctx.rotate(isP1 ? 0.08 : 0.08);
+          ctx.drawImage(singleCanvas, -11, -38, 22, 40);
         } else { // STANCE GUARD
           ctx.drawImage(singleCanvas, fx, fy, 22, 40);
         }
@@ -1424,13 +1416,13 @@
       ctx.moveTo(41, 85); ctx.lineTo(86, 85);
       ctx.stroke();
 
-      // Ring Floor Canvas
+      // Ring Floor Canvas (Y: 90)
       ctx.fillStyle = PICO_PALETTE[7];
       ctx.fillRect(41, 90, 46, 23);
 
-      // Draw Clean Transparent Full-Size Face-to-Face Capcom Boxer Sprites!
-      drawBoxer(41, 50, true, p1.anim);  // Adrien Broner (Faces Right)
-      drawBoxer(65, 50, false, p2.anim); // Deen The Great (Flipped to Face Left)
+      // Draw Clean Transparent Full-Size Face-to-Face Capcom Boxer Sprites GROUNDED ON FLOOR!
+      drawBoxer(41, 50, true, p1.anim);  // Adrien Broner (Ground Y=50, Feet=90)
+      drawBoxer(65, 50, false, p2.anim); // Deen The Great (Ground Y=50, Feet=90)
 
       p1.draw();
       p2.draw();
