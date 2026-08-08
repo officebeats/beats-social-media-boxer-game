@@ -630,6 +630,7 @@
         this.dropTimer = 0;
         this.lockDelay = 0;
 
+        // AI target column logic
         const colHeights = Array(COLS).fill(0);
         for (let c = 0; c < COLS; c++) {
           for (let r = 0; r < ROWS; r++) {
@@ -649,13 +650,17 @@
         }
         this.aiTargetCol = Math.random() < 0.2 ? Math.floor(Math.random() * COLS) : bestC;
 
-        if (this.dropCount % 12 === 0) {
+        // === PUZZLE FIGHTER GEM GENERATION ===
+        // Diamond every 25 drops (original PF spec)
+        if (this.dropCount % 25 === 0) {
           this.pair = { x: 2, y: 0, rot: 0, g1: 9, g2: Math.floor(Math.random() * 4) + 1, vy: 0 };
         } else {
-          const g1 = Math.floor(Math.random() * 4) + 1;
-          const isCrash = Math.random() < 0.35;
-          const g2 = isCrash ? (Math.floor(Math.random() * 4) + 5) : (Math.floor(Math.random() * 4) + 1);
-          this.pair = { x: 2, y: 0, rot: 0, g1: g1, g2: g2, vy: 0 };
+          // Each gem has independent chance of being a crash gem (~18%)
+          const makeGem = () => {
+            const color = Math.floor(Math.random() * 4) + 1;
+            return Math.random() < 0.18 ? (color + 4) : color; // crash = color+4
+          };
+          this.pair = { x: 2, y: 0, rot: 0, g1: makeGem(), g2: makeGem(), vy: 0 };
         }
 
         if (this.grid[0][2] !== 0 || this.grid[1][2] !== 0) {
@@ -824,6 +829,8 @@
       }
 
       updateCounterGems() {
+        // Puzzle Fighter: counter gems tick down by 1 each time a pair lands.
+        // When timer hits 0, they convert to a random normal gem.
         for (let r = 0; r < ROWS; r++) {
           for (let c = 0; c < COLS; c++) {
             if (this.grid[r][c] === 10) {
@@ -909,35 +916,72 @@
       }
 
       detectPowerGems() {
+        // === PUZZLE FIGHTER POWER GEM DETECTION ===
+        // Finds ALL maximal rectangles of same-color normal gems (≥2×2).
+        // Marks every cell in a qualifying rectangle as a power gem.
+        const prev = Array(ROWS).fill(null).map((_, r) =>
+          Array(COLS).fill(null).map((_, c) => this.powerGems[r][c])
+        );
+
         for (let r = 0; r < ROWS; r++) {
           for (let c = 0; c < COLS; c++) this.powerGems[r][c] = false;
         }
 
-        let newFusion = false;
+        // For each possible top-left corner and color, find the largest rectangle
         for (let r = 0; r < ROWS - 1; r++) {
           for (let c = 0; c < COLS - 1; c++) {
             const g = this.grid[r][c];
-            if (g >= 1 && g <= 4) {
-              if (this.grid[r][c + 1] === g && this.grid[r + 1][c] === g && this.grid[r + 1][c + 1] === g) {
-                this.powerGems[r][c] = true;
-                this.powerGems[r][c + 1] = true;
-                this.powerGems[r + 1][c] = true;
-                this.powerGems[r + 1][c + 1] = true;
-                newFusion = true;
+            if (g < 1 || g > 4) continue;
+
+            // Expand rectangle right and down as far as possible
+            let maxW = 0;
+            for (let cc = c; cc < COLS; cc++) {
+              if (this.grid[r][cc] === g) maxW++;
+              else break;
+            }
+
+            // Try all widths from maxW down to 2
+            for (let w = maxW; w >= 2; w--) {
+              let h = 1;
+              for (let rr = r + 1; rr < ROWS; rr++) {
+                let rowOk = true;
+                for (let cc = c; cc < c + w; cc++) {
+                  if (this.grid[rr][cc] !== g) { rowOk = false; break; }
+                }
+                if (rowOk) h++;
+                else break;
+              }
+              if (h >= 2) {
+                // Mark all cells in this rectangle as power gems
+                for (let rr = r; rr < r + h; rr++) {
+                  for (let cc = c; cc < c + w; cc++) {
+                    this.powerGems[rr][cc] = true;
+                  }
+                }
               }
             }
           }
         }
 
+        // Check if any new power gems were formed
+        let newFusion = false;
+        for (let r = 0; r < ROWS && !newFusion; r++) {
+          for (let c = 0; c < COLS && !newFusion; c++) {
+            if (this.powerGems[r][c] && !prev[r][c]) newFusion = true;
+          }
+        }
         if (newFusion) {
           play808Sfx('fuse');
-          globalFloatingTexts.push(new FloatingText('POWER FUSION!', this.offsetX + 2, this.offsetY + 40, 10));
+          globalFloatingTexts.push(new FloatingText('POWER GEM!', this.offsetX + 2, this.offsetY + 40, 10));
         }
       }
 
       evaluateMatches() {
+        // === PUZZLE FIGHTER: ONLY CRASH GEMS TRIGGER CLEARS ===
+        // A crash gem (type 5-8) clears when adjacent to a same-color normal gem.
+        // It flood-fills and removes all connected gems of that color.
+        // No Puyo-style cluster matching.
         let matched = false;
-        let isSecondaryCluster = false;
         let toClear = Array(ROWS).fill(null).map(() => Array(COLS).fill(false));
 
         for (let r = 0; r < ROWS; r++) {
@@ -963,48 +1007,38 @@
           }
         }
 
-        if (!matched) {
-          const visited = Array(ROWS).fill(null).map(() => Array(COLS).fill(false));
-          for (let r = 0; r < ROWS; r++) {
-            for (let c = 0; c < COLS; c++) {
-              const g = this.grid[r][c];
-              if (g >= 1 && g <= 4 && !visited[r][c]) {
-                const group = [];
-                this.getClusterGroup(r, c, g, visited, group);
-                if (group.length >= 4) {
-                  matched = true;
-                  isSecondaryCluster = true;
-                  group.forEach(([gr, gc]) => toClear[gr][gc] = true);
-                }
-              }
-            }
-          }
-        }
-
         if (matched) {
-          this.pendingClear = { toClear, isSecondaryCluster };
+          this.pendingClear = { toClear };
         }
         return matched;
       }
 
       clearPendingMatches() {
         if (!this.pendingClear) return;
-        const { toClear, isSecondaryCluster } = this.pendingClear;
+        const { toClear } = this.pendingClear;
         let clearCount = 0;
-        let powerGemCleared = false;
+        let powerGemCount = 0;
 
+        // First pass: also mark adjacent counter gems for clearing
         for (let r = 0; r < ROWS; r++) {
           for (let c = 0; c < COLS; c++) {
             if (toClear[r][c]) {
-              clearCount++;
-              if (this.powerGems[r][c]) powerGemCleared = true;
-
               const adj = [[r-1,c], [r+1,c], [r,c-1], [r,c+1]];
               adj.forEach(([ar, ac]) => {
                 if (ar >= 0 && ar < ROWS && ac >= 0 && ac < COLS) {
                   if (this.grid[ar][ac] === 10) toClear[ar][ac] = true;
                 }
               });
+            }
+          }
+        }
+
+        // Second pass: clear gems and spawn particles
+        for (let r = 0; r < ROWS; r++) {
+          for (let c = 0; c < COLS; c++) {
+            if (toClear[r][c]) {
+              clearCount++;
+              if (this.powerGems[r][c]) powerGemCount++;
 
               const px = this.offsetX + c * CELL_W + CELL_W / 2;
               const py = this.offsetY + r * CELL_H + CELL_H / 2;
@@ -1022,14 +1056,17 @@
           }
         }
 
+        // === PUZZLE FIGHTER DAMAGE & GARBAGE ===
         this.comboCount++;
         if (this.comboCount > maxComboTrack) {
           maxComboTrack = this.comboCount;
           dset(1, maxComboTrack);
         }
 
-        const powerMult = isSecondaryCluster ? 0.5 : (powerGemCleared ? 1.6 : 1.0);
-        const dmg = Math.floor(clearCount * 3 * powerMult * this.comboCount);
+        // Damage: base from gem count, power gem bonus, chain multiplier
+        const powerBonus = powerGemCount > 0 ? 1.5 : 1.0;
+        const chainMult = this.comboCount;
+        const dmg = Math.floor(clearCount * 3 * powerBonus * chainMult);
         const opponent = (this.id === 1) ? p2 : p1;
 
         opponent.hp = Math.max(0, opponent.hp - dmg);
@@ -1041,15 +1078,15 @@
           dset(0, highScore);
         }
 
-        const baseGarbage = isSecondaryCluster ? Math.floor(clearCount / 2) : Math.max(2, Math.floor((clearCount - 2) * 1.4));
-        const garbageToSend = Math.max(1, baseGarbage + (this.comboCount - 1) * 2);
+        // Garbage: Puzzle Fighter style — half of cleared gems + chain bonus
+        const garbageToSend = Math.max(1, Math.ceil(clearCount / 2) + (this.comboCount - 1) * 2);
         opponent.receiveGarbage(garbageToSend);
 
         flashFrames = 3;
-
         globalFloatingTexts.push(new FloatingText(`-${dmg} HP!`, 58, 32, 8));
 
-        if (powerGemCleared || this.comboCount >= 3) {
+        // Punch animation intensity scales with damage
+        if (powerGemCount > 0 || this.comboCount >= 3) {
           this.anim = 'UPPERCUT';
           cameraShake = 14;
           play808Sfx('uppercut');
@@ -1057,7 +1094,7 @@
           this.anim = 'HOOK';
           cameraShake = 10;
           play808Sfx('hook');
-        } else if (clearCount === 4) {
+        } else if (clearCount >= 4) {
           this.anim = 'STRAIGHT';
           cameraShake = 8;
           play808Sfx('straight');
@@ -1068,24 +1105,20 @@
         }
         this.animTimer = 72;
 
-        // BUG-003 FIX: Opponent randomly blocks/dodges instead of always flinching
+        // Opponent reaction
         const defenseRoll = Math.random();
         if (defenseRoll < 0.15) {
           opponent.anim = 'BLOCK';
-          opponent.animTimer = 72;
         } else if (defenseRoll < 0.25) {
           opponent.anim = 'DODGE';
-          opponent.animTimer = 72;
         } else if (defenseRoll < 0.32) {
           opponent.anim = 'LEAN';
-          opponent.animTimer = 72;
         } else if (defenseRoll < 0.38) {
           opponent.anim = 'SHOULDER_ROLL';
-          opponent.animTimer = 72;
         } else {
           opponent.anim = 'FLINCH';
-          opponent.animTimer = 72;
         }
+        opponent.animTimer = 72;
 
         this.pendingClear = null;
       }
@@ -1104,19 +1137,17 @@
       }
 
       receiveGarbage(count) {
-        // Drop garbage rows from the top of the board, then let gravity settle them
+        // Puzzle Fighter: counter gems start with timer=5, placed from top, gravity settles
         let remaining = count;
-        // Fill from top rows downward so gravity can settle them
         for (let r = 0; r < ROWS && remaining > 0; r++) {
           for (let c = 0; c < COLS && remaining > 0; c++) {
             if (this.grid[r][c] === 0) {
               this.grid[r][c] = 10;
-              this.counterTimers[r][c] = 3;
+              this.counterTimers[r][c] = 5;
               remaining--;
             }
           }
         }
-        // Critical: run gravity so garbage blocks settle to the bottom
         this.applyGravity();
         play808Sfx('garbage');
         globalFloatingTexts.push(new FloatingText(`GARBAGE +${count}!`, this.offsetX + 2, this.offsetY + 20, 8));
@@ -1297,8 +1328,6 @@
 
         if (isCrash) {
           // ── CRASH ORB: full-cell with rounded inner shape ──
-          const flash = Math.floor(this.pulseAngle * 8) % 2;
-
           // Dark fill for corners (creates rounded look)
           ctx.fillStyle = dark;
           ctx.fillRect(dx, dy, w, h);
@@ -1317,18 +1346,6 @@
           ctx.fillStyle = dark;
           ctx.fillRect(dx + 1, dy + h - 2, w - 2, 1);
 
-          // Flashing center cross-star
-          ctx.fillStyle = flash ? white : getPalColor(10);
-          ctx.fillRect(dx + 2, dy + 3, 2, 2);
-          ctx.fillRect(dx + 1, dy + 4, 1, 1);
-          ctx.fillRect(dx + 4, dy + 4, 1, 1);
-          ctx.fillRect(dx + 2, dy + 2, 2, 1);
-          ctx.fillRect(dx + 2, dy + 5, 2, 1);
-
-          // Corner sparkle
-          ctx.fillStyle = white;
-          ctx.fillRect(dx + 1, dy + 1, 1, 1);
-
         } else if (isDiamond) {
           // ── RAINBOW DIAMOND ──
           const phase = Math.floor(this.pulseAngle * 6) % 4;
@@ -1343,18 +1360,10 @@
           ctx.fillRect(dx, dy, w, 1);
           ctx.fillRect(dx, dy, 1, h);
 
-          // Inner facet
-          ctx.fillStyle = getPalColor(dCols[(phase + 2) % 4]);
-          ctx.fillRect(dx + 2, dy + 3, 2, 2);
-
           // Bottom-right shadow bevel
           ctx.fillStyle = getPalColor(dCols[(phase + 1) % 4]);
           ctx.fillRect(dx, dy + h - 1, w, 1);
           ctx.fillRect(dx + w - 1, dy, 1, h);
-
-          // Sparkle
-          ctx.fillStyle = white;
-          ctx.fillRect(dx + 2, dy + 2, 1, 1);
 
         } else if (isCounter) {
           // ── COUNTER BLOCK: stone slab ──
@@ -1410,8 +1419,6 @@
             ctx.fillRect(dx, dy + h - 1, w, 1);
             ctx.fillRect(dx, dy, 1, h);
             ctx.fillRect(dx + w - 1, dy, 1, h);
-            // Gold center pip
-            ctx.fillRect(dx + 2, dy + 3, 2, 2);
           }
         }
       }
