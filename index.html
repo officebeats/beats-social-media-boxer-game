@@ -214,7 +214,7 @@
   <div class="arcade-cabinet">
     <div class="cabinet-header">
       <div class="brand-title">CRASH OUT: RING RUSH</div>
-      <div class="badge-pico8">ACCURATE HITBOX v2.6.0</div>
+      <div class="badge-pico8">ANATOMICAL SHOULDER v2.7.0</div>
     </div>
 
     <div class="viewport-container">
@@ -250,13 +250,11 @@
 
   <script>
     // =========================================================================
-    // CAPCOM ACCURATE FIGHTING GAME HITBOX & IMPACT ENGINE v2.6.0
-    // - Grounded, natural lunge distance (8px) - less dramatic, 100% authentic!
-    // - ANATOMICAL GLOVE-TO-HEAD AABB HITBOX OVERLAP DETECTION:
-    //   * Attacker glove hitbox intersects Defender head target rect!
-    //   * Precise contact starburst (★) flare at exact impact point!
-    //   * Defender white hit-freeze flash, head snap flinch, & damage text!
-    // - Exact RGB skin color matching (#8C4A27 for Broner, #C58C5D for Deen)!
+    // CAPCOM ANATOMICAL SHOULDER-JOINT ENGINE v2.7.0
+    // - EXACT SHOULDER JOINT COORDINATE AT LOCAL Y = -24 (4px below neck, 10px above waist)!
+    // - ZERO HEAD LINES! ZERO STOMACH LINES!
+    // - 100% physically connected to the top deltoid muscle joint!
+    // - Exact RGB skin color matching (#8C4A27 for Broner, #C58C5D for Deen)
     // =========================================================================
 
     const PICO_PALETTE = [
@@ -1359,9 +1357,9 @@
     }
 
     // =========================================================================
-    // CAPCOM ACCURATE FIGHTING GAME HITBOX & IMPACT ENGINE v2.6.0
-    // - GROUNDED NATURAL LUNGE DISTANCE (8px) - LESS DRAMATIC, 100% AUTHENTIC!
-    // - ANATOMICAL GLOVE-TO-HEAD AABB HITBOX OVERLAP DETECTION!
+    // CAPCOM ANATOMICAL SHOULDER-JOINT ENGINE v2.7.0
+    // - EXACT SHOULDER JOINT COORDINATE AT LOCAL Y = -24 (4px below neck, 10px above waist)!
+    // - ZERO HEAD LINES! ZERO STOMACH LINES!
     // =========================================================================
     function drawPunchOverlay(ctx, isP1, punchType, extProgress) {
       const skinColor = isP1 ? '#8C4A27' : '#C58C5D';     // Broner warm brown vs Deen golden tan
@@ -1371,16 +1369,16 @@
       const gloveColor = isP1 ? PICO_PALETTE[8] : PICO_PALETTE[12]; // Red glove vs Blue glove
       const shineColor = PICO_PALETTE[7];
 
-      // Exact Top Shoulder Socket Joint on HD Sprite Image: (3, -34) RIGHT AT CHIN LEVEL!
+      // Exact Shoulder Joint on HD Sprite Image: (3, -24) (4px below neck -28, 10px above waist -14)!
 
       if (punchType === 'JAB') {
         const extX = extProgress * 12.0; // Grounded 12px Extension
         const sockX = 3;
-        const sockY = -34; // Exact Top Shoulder Joint Beside Chin!
+        const sockY = -24; // EXACT SHOULDER JOINT!
 
         // Speed trail behind jab glove
         ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
-        ctx.fillRect(sockX + 4, sockY, extX, 2);
+        ctx.fillRect(sockX + 4, sockY - 2, extX, 2);
 
         // Rounded Deltoid Muscle Shoulder Cap (5x5) Fused to Body
         ctx.fillStyle = skinHighlight;
@@ -1388,7 +1386,7 @@
         ctx.fillStyle = skinColor;
         ctx.fillRect(sockX - 2, sockY, 5, 3);
 
-        // Sleek Tapered Muscular Lead Arm extending from top shoulder socket
+        // Sleek Tapered Muscular Lead Arm extending from shoulder joint
         ctx.fillStyle = skinHighlight;
         ctx.fillRect(sockX, sockY - 1, extX, 1);
         ctx.fillStyle = skinColor;
@@ -1398,19 +1396,19 @@
 
         // Consistent 6x6 Boxing Glove Target at Chin Height!
         ctx.fillStyle = gloveColor;
-        ctx.fillRect(sockX + extX, sockY - 2, 6, 6);
+        ctx.fillRect(sockX + extX, sockY - 3, 6, 6);
         ctx.fillStyle = shineColor;
-        ctx.fillRect(sockX + extX + 2, sockY - 1, 2, 2);
+        ctx.fillRect(sockX + extX + 2, sockY - 2, 2, 2);
 
       } else if (punchType === 'STRAIGHT') {
         const extX = extProgress * 14.0; // Grounded 14px Extension
         const sockX = -4;  // Rear shoulder socket
-        const sockY = -33; // Exact Top Rear Shoulder Joint!
+        const sockY = -23; // EXACT REAR SHOULDER JOINT!
 
         // Double white shockwave line
         ctx.fillStyle = PICO_PALETTE[10];
-        ctx.fillRect(sockX + 2, sockY - 2, extX, 1);
-        ctx.fillRect(sockX + 4, sockY + 4, extX, 1);
+        ctx.fillRect(sockX + 2, sockY - 3, extX, 1);
+        ctx.fillRect(sockX + 4, sockY + 3, extX, 1);
 
         // Rear Deltoid Muscle Cap
         ctx.fillStyle = skinHighlight;
@@ -1428,20 +1426,20 @@
 
         // Consistent 6x6 Power Glove
         ctx.fillStyle = gloveColor;
-        ctx.fillRect(sockX + extX + 6, sockY - 2, 6, 6);
+        ctx.fillRect(sockX + extX + 6, sockY - 3, 6, 6);
         ctx.fillStyle = PICO_PALETTE[10]; // Gold wristband
-        ctx.fillRect(sockX + extX + 5, sockY - 2, 1, 6);
+        ctx.fillRect(sockX + extX + 5, sockY - 3, 1, 6);
         ctx.fillStyle = shineColor;
-        ctx.fillRect(sockX + extX + 8, sockY - 1, 2, 2);
+        ctx.fillRect(sockX + extX + 8, sockY - 2, 2, 2);
 
       } else if (punchType === 'HOOK') {
         const arc = extProgress * Math.PI;
         const sockX = 3;
-        const sockY = -34; // Exact Top Shoulder Joint Beside Chin!
+        const sockY = -24; // EXACT SHOULDER JOINT!
         const armX = Math.sin(arc) * 12.0;
         const armY = -Math.cos(arc) * 3.0;
 
-        // Yellow curving power arc trail anchored at shoulder height (-34)
+        // Yellow curving power arc trail anchored at shoulder height (-24)
         ctx.strokeStyle = PICO_PALETTE[10];
         ctx.lineWidth = 1;
         ctx.beginPath();
@@ -1454,7 +1452,7 @@
         ctx.fillStyle = skinColor;
         ctx.fillRect(sockX - 2, sockY, 5, 3);
 
-        // Sleek Bent Elbow Arc Arm from Top Shoulder Joint (3, -34)
+        // Sleek Bent Elbow Arc Arm from Shoulder Joint (3, -24)
         ctx.fillStyle = skinHighlight;
         ctx.fillRect(sockX, sockY - 1, Math.max(2, armX), 1);
         ctx.fillStyle = skinColor;
@@ -1463,18 +1461,18 @@
 
         // Consistent 6x6 Sweeping Horizontal Hook Glove at Jaw Level
         ctx.fillStyle = gloveColor;
-        ctx.fillRect(sockX + armX + 2, sockY - 2 + armY, 6, 6);
+        ctx.fillRect(sockX + armX + 2, sockY - 3 + armY, 6, 6);
         ctx.fillStyle = shineColor;
-        ctx.fillRect(sockX + armX + 4, sockY - 1 + armY, 2, 2);
+        ctx.fillRect(sockX + armX + 4, sockY - 2 + armY, 2, 2);
 
       } else if (punchType === 'UPPERCUT') {
         const liftY = extProgress * 14.0;
         const sockX = 3;
-        const sockY = -34; // Exact Top Shoulder Joint Beside Chin!
+        const sockY = -24; // EXACT SHOULDER JOINT!
 
         // Skyward Speed Trail
         ctx.fillStyle = PICO_PALETTE[10];
-        ctx.fillRect(sockX + 1, sockY - liftY + 4, 2, liftY);
+        ctx.fillRect(sockX + 1, sockY - liftY + 2, 2, liftY);
 
         // Rounded Deltoid Muscle Cap
         ctx.fillStyle = skinHighlight;
@@ -1482,17 +1480,17 @@
         ctx.fillStyle = skinColor;
         ctx.fillRect(sockX - 2, sockY, 5, 3);
 
-        // Vertical Arm Scooping Upward from waist (-24) up to (-34 - liftY)
+        // Vertical Arm Scooping Upward from waist (-14) up to (-24 - liftY)
         ctx.fillStyle = skinColor;
-        ctx.fillRect(sockX, sockY - liftY, 3, Math.max(4, liftY + 8));
+        ctx.fillRect(sockX, sockY - liftY, 3, Math.max(4, liftY + 6));
         ctx.fillStyle = skinHighlight;
-        ctx.fillRect(sockX + 3, sockY - liftY, 1, Math.max(4, liftY + 8));
+        ctx.fillRect(sockX + 3, sockY - liftY, 1, Math.max(4, liftY + 6));
 
         // Consistent 6x6 Skyward Inverted Glove
         ctx.fillStyle = gloveColor;
-        ctx.fillRect(sockX - 1, sockY - 5 - liftY, 6, 6);
+        ctx.fillRect(sockX - 1, sockY - 6 - liftY, 6, 6);
         ctx.fillStyle = shineColor;
-        ctx.fillRect(sockX + 1, sockY - 4 - liftY, 2, 2);
+        ctx.fillRect(sockX + 1, sockY - 5 - liftY, 2, 2);
       }
     }
 
@@ -1603,7 +1601,7 @@
           ctx.rotate(punchTilt);
           ctx.drawImage(singleCanvas, -11, -38, 22, 40);
 
-          // RENDER EXACT TOP SHOULDER-LEVEL HD SPRITE PUNCH ARM OVERLAY (-34 local Y)!
+          // RENDER EXACT SHOULDER-JOINT HD SPRITE PUNCH ARM OVERLAY (-24 local Y)!
           drawPunchOverlay(ctx, isP1, anim, extProgress);
 
         } else if (anim === 'FLINCH') { // HEAD KNOCKBACK TILT
