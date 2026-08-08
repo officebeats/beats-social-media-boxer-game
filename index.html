@@ -592,7 +592,7 @@
 
         this.pair = null;
         this.dropTimer = 0;
-        this.dropInterval = 90; // 60% Slower Soft Falling Speed
+        this.dropInterval = 45; // Smooth Steady Soft Falling Speed
         this.lockDelay = 0;
 
         this.anim = 'IDLE';
@@ -1116,21 +1116,30 @@
             }
           }
         } else if (this.state === 'FALLING') {
-          // 60% SLOWER ARCADE AI TICK (Every 20 frames ~0.33s per move)
+          // FAIL-SAFE AI TICK ENGINE (Every 10 frames ~0.16s per decision)
           if (this.isAi && this.pair) {
             this.aiTimer++;
-            if (this.aiTimer >= 20) {
+            if (this.aiTimer >= 10) {
               this.aiTimer = 0;
 
+              let moved = false;
               if (this.pair.x < this.aiTargetCol) {
-                this.move(1);
+                if (this.isValid(this.pair.x + 1, this.pair.y, this.pair.rot)) {
+                  this.move(1);
+                  moved = true;
+                }
               } else if (this.pair.x > this.aiTargetCol) {
-                this.move(-1);
-              } else {
+                if (this.isValid(this.pair.x - 1, this.pair.y, this.pair.rot)) {
+                  this.move(-1);
+                  moved = true;
+                }
+              }
+
+              if (!moved) {
+                if (Math.random() < 0.2) this.rotate(1);
                 this.dropHard();
               }
 
-              if (Math.random() < 0.3) this.rotate(1);
               if (this.superMeter >= 100) this.triggerSuper();
             }
           }
