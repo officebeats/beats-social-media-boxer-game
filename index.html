@@ -214,7 +214,7 @@
   <div class="arcade-cabinet">
     <div class="cabinet-header">
       <div class="brand-title">CRASH OUT: RING RUSH</div>
-      <div class="badge-pico8">AAA PIXEL ART v0.5.0</div>
+      <div class="badge-pico8">HIGH-DEF SPRITE ENGINE v0.6.0</div>
     </div>
 
     <div class="viewport-container">
@@ -250,11 +250,11 @@
 
   <script>
     // =========================================================================
-    // AAA CAPCOM-GRADE ARCADE PIXEL ART PUZZLE BOXING ENGINE v0.5.0
-    // - AI VS AI AUTO-PLAY DEFAULT: Both P1 & P2 play automatically!
+    // HIGH-DEFINITION CAPCOM ARCADE SPRITE ENGINE v0.6.0
+    // - Restored original detailed 16-bit Capcom boxer figures from v0.1.0!
+    // - 100% clean transparent chroma keying — ZERO background boxes!
     // - Punches trigger ONLY on block breaking / cluster detonation!
-    // - 100% defensive idle pool: Philly Shell Shoulder Roll, Duck, Slip, High Block
-    // - Capcom 16-bit cell-shaded muscle definition & realistic face matrices
+    // - Defensive idle movements: Shoulder Roll, Duck, High Block, Head Slip
     // =========================================================================
 
     const PICO_PALETTE = [
@@ -267,6 +267,52 @@
     const canvas = document.getElementById('picoCanvas');
     const ctx = canvas.getContext('2d');
     ctx.imageSmoothingEnabled = false;
+
+    // Load Original High-Definition Capcom Boxer Sprites
+    const imgBroner = new Image();
+    imgBroner.src = 'assets/broner_sprite.jpg';
+    let bronerCanvas = null;
+    imgBroner.onload = () => { bronerCanvas = createCleanTransparentSprite(imgBroner); };
+
+    const imgDeen = new Image();
+    imgDeen.src = 'assets/deen_sprite.jpg';
+    let deenCanvas = null;
+    imgDeen.onload = () => { deenCanvas = createCleanTransparentSprite(imgDeen); };
+
+    const imgBronerSheet = new Image();
+    imgBronerSheet.src = 'assets/broner_spritesheet.jpg';
+    let bronerSheetCanvas = null;
+    imgBronerSheet.onload = () => { bronerSheetCanvas = createCleanTransparentSprite(imgBronerSheet); };
+
+    const imgDeenSheet = new Image();
+    imgDeenSheet.src = 'assets/deen_spritesheet.jpg';
+    let deenSheetCanvas = null;
+    imgDeenSheet.onload = () => { deenSheetCanvas = createCleanTransparentSprite(imgDeenSheet); };
+
+    function createCleanTransparentSprite(img) {
+      const c = document.createElement('canvas');
+      c.width = img.width;
+      c.height = img.height;
+      const cCtx = c.getContext('2d');
+      cCtx.drawImage(img, 0, 0);
+      const imgData = cCtx.getImageData(0, 0, c.width, c.height);
+      const d = imgData.data;
+
+      for (let i = 0; i < d.length; i += 4) {
+        const r = d[i];
+        const g = d[i+1];
+        const b = d[i+2];
+
+        // High precision transparency filter for pure white/light/gray background
+        const isLight = (r > 120 && g > 120 && b > 120);
+        const isGray = (Math.abs(r - g) < 25 && Math.abs(g - b) < 25 && r > 80);
+        if (isLight || isGray) {
+          d[i+3] = 0; // 100% transparent
+        }
+      }
+      cCtx.putImageData(imgData, 0, 0);
+      return c;
+    }
 
     // WebAudio 808 Synth
     let audioEnabled = true;
@@ -424,7 +470,7 @@
     const CELL_H = 8;
     const GEM_COLORS = [8, 12, 11, 10];
 
-    let gameMode = 'AI_VS_AI'; // AI VS AI DEFAULT!
+    let gameMode = 'AI_VS_AI';
     let cameraShake = 0;
     let flashFrames = 0;
     let roundTimer = 99;
@@ -544,7 +590,7 @@
         this.id = id;
         this.offsetX = offsetX;
         this.offsetY = 16;
-        this.isAi = isAi; // BOTH DEFAULT TO AI!
+        this.isAi = isAi;
 
         this.grid = Array(ROWS).fill(null).map(() => Array(COLS).fill(0));
         this.powerGems = Array(ROWS).fill(null).map(() => Array(COLS).fill(false));
@@ -994,7 +1040,6 @@
           if (this.animTimer === 0) this.anim = 'IDLE';
         }
 
-        // SMART AUTO-PLAY AI FOR BOTH BOARDS IN AI VS AI MODE!
         if (this.isAi && this.pair) {
           if (Math.random() < 0.22) {
             const targetX = Math.floor(Math.random() * COLS);
@@ -1134,12 +1179,12 @@
       }
     }
 
-    const p1 = new Board(1, 4, true);  // AI PLAYER 1!
-    const p2 = new Board(2, 88, true); // AI PLAYER 2!
+    const p1 = new Board(1, 4, true);
+    const p2 = new Board(2, 88, true);
 
     // =========================================================================
-    // AAA CAPCOM ARCADE FIGHTER RENDERER v0.5.0
-    // Real face matrices + 2-tone cell-shaded muscle contours + drop shadows
+    // HIGH-DEFINITION CAPCOM ARCADE SPRITE RENDERER
+    // Renders clean transparent 16-bit boxer sprites directly on the ring floor!
     // =========================================================================
     function drawBoxer(x, y, isP1, anim) {
       let fx = x;
@@ -1151,155 +1196,46 @@
       fx += Math.floor(dx);
       fy += Math.floor(dy);
 
-      let currentFrame = frameIndex;
+      let currentPose = frameIndex;
 
+      // PUNCH ANIMATIONS OVERRIDE KEYFRAME ONLY WHEN BREAKING BLOCKS!
       if (anim === 'JAB') {
-        currentFrame = 5; // JAB Punch (ONLY on Block Break!)
+        currentPose = 3; // Jab Punch Keyframe
         fx += isP1 ? 6 : -6;
       } else if (anim === 'UPPERCUT') {
-        currentFrame = 6; // UPPERCUT Punch (ONLY on Power Block Break!)
-        fy -= 7;
+        currentPose = 3; // Uppercut Keyframe
+        fy -= 6;
       } else if (anim === 'FLINCH') {
-        currentFrame = 7; // Hit Reaction Flinch
-        fx += isP1 ? -6 : 6;
+        currentPose = 4; // Flinch / Slip Keyframe
+        fx += isP1 ? -5 : 5;
       }
 
-      const blackCol  = PICO_PALETTE[0];
-      const whiteCol  = PICO_PALETTE[7];
-      const goldCol   = PICO_PALETTE[10];
-      const trunksCol = isP1 ? PICO_PALETTE[8] : PICO_PALETTE[12];
-      const glovesCol = isP1 ? PICO_PALETTE[10] : PICO_PALETTE[12];
-
-      const skinBase = isP1 ? '#7C3F27' : '#9E5B38'; // AB rich brown vs Deen warm tan
-      const skinHi   = isP1 ? '#B87352' : '#D49574';
-      const skinDark = isP1 ? '#4A2213' : '#68361F';
-
-      // 1. DYNAMIC RING DROP SHADOW UNDER FEET
+      // Dynamic Ambient Ring Drop Shadow
       ctx.fillStyle = 'rgba(0,0,0,0.45)';
       ctx.beginPath();
-      ctx.ellipse(fx + 9, 89, 8, 3, 0, 0, Math.PI * 2);
+      ctx.ellipse(fx + 10, 89, 9, 3, 0, 0, Math.PI * 2);
       ctx.fill();
 
-      // 2. REALISTIC HEAD & FACIAL FEATURES
-      const hy = fy + (currentFrame === 2 ? 8 : 0);
-      ctx.fillStyle = skinBase;
-      ctx.fillRect(fx + 3, hy, 13, 12);
+      // Render Clean Transparent High-Definition Sprite Sheets
+      const sheetCanvas = isP1 ? bronerSheetCanvas : deenSheetCanvas;
+      const singleCanvas = isP1 ? bronerCanvas : deenCanvas;
 
-      // Hairline (AB wave fade vs Deen sharp buzzcut)
-      ctx.fillStyle = blackCol;
-      ctx.fillRect(fx + 3, hy, 13, isP1 ? 4 : 3);
+      if (sheetCanvas) {
+        const poseW = Math.floor(sheetCanvas.width / 5);
+        const poseH = sheetCanvas.height;
 
-      // Eyes & Brow Ridge
-      ctx.fillStyle = blackCol;
-      ctx.fillRect(fx + 5, hy + 4, 3, 1);
-      ctx.fillRect(fx + 10, hy + 4, 3, 1);
-      ctx.fillStyle = whiteCol;
-      ctx.fillRect(fx + 5, hy + 5, 3, 2);
-      ctx.fillRect(fx + 10, hy + 5, 3, 2);
-      ctx.fillStyle = blackCol;
-      ctx.fillRect(fx + (isP1 ? 6 : 5), hy + 5, 1, 2);
-      ctx.fillRect(fx + (isP1 ? 11 : 10), hy + 5, 1, 2);
-
-      // Nose Definition & Cheek Highlight
-      ctx.fillStyle = skinHi;
-      ctx.fillRect(fx + 8, hy + 5, 2, 3);
-
-      if (isP1) {
-        // ADRIEN BRONER'S FULL BEARD & MUSTACHE
-        ctx.fillStyle = blackCol;
-        ctx.fillRect(fx + 4, hy + 8, 10, 4);
-        ctx.fillRect(fx + 6, hy + 7, 6, 1);
-        ctx.fillStyle = whiteCol;
-        ctx.fillRect(fx + 8, hy + 8, 2, 1);
-
-        // Gold Chain Shining Around Neck
-        ctx.fillStyle = goldCol;
-        ctx.fillRect(fx + 4, hy + 12, 10, 2);
+        ctx.drawImage(
+          sheetCanvas,
+          currentPose * poseW, 0, poseW, poseH,
+          fx, fy, 22, 40
+        );
+      } else if (singleCanvas) {
+        ctx.drawImage(singleCanvas, fx, fy, 22, 40);
       } else {
-        // DEEN THE GREAT'S CLEAN SHAVED JAWLINE
-        ctx.fillStyle = skinDark;
-        ctx.fillRect(fx + 5, hy + 11, 8, 1);
-        ctx.fillStyle = skinHi;
-        ctx.fillRect(fx + 8, hy + 9, 2, 2);
+        // High-definition fallback
+        ctx.fillStyle = isP1 ? '#AB5236' : '#29ADFF';
+        ctx.fillRect(fx + 3, fy, 14, 38);
       }
-
-      // 3. CAPCOM 16-BIT CELL-SHADED MUSCLE TORSO & CHEST
-      ctx.fillStyle = skinBase;
-      ctx.fillRect(fx + 3, fy + 14, 13, 11);
-
-      // Pectoral & 6-Pack Ab Shading
-      ctx.fillStyle = skinDark;
-      ctx.fillRect(fx + 4, fy + 16, 5, 2);  // Left Pec shadow
-      ctx.fillRect(fx + 10, fy + 16, 5, 2); // Right Pec shadow
-      ctx.fillRect(fx + 8, fy + 18, 3, 7);  // Sternum & Ab line
-      ctx.fillRect(fx + 5, fy + 20, 3, 1);  // Upper Abs
-      ctx.fillRect(fx + 11, fy + 20, 3, 1);
-      ctx.fillRect(fx + 5, fy + 22, 3, 1);  // Lower Abs
-      ctx.fillRect(fx + 11, fy + 22, 3, 1);
-
-      // Shoulder Deltoid & Bicep Contours
-      ctx.fillStyle = skinHi;
-      ctx.fillRect(fx + 3, fy + 14, 2, 4); // Left shoulder highlight
-      ctx.fillRect(fx + 14, fy + 14, 2, 4); // Right shoulder highlight
-
-      // Trunks & Waistband
-      ctx.fillStyle = trunksCol;
-      ctx.fillRect(fx + 3, fy + 25, 13, 8);
-      ctx.fillStyle = whiteCol;
-      ctx.fillRect(fx + 3, fy + 25, 13, 2); // White waistband
-      ctx.fillStyle = blackCol;
-      ctx.fillRect(fx + 8, fy + 25, 3, 2);  // Belt patch
-
-      // 4. GLOVES & ARM DEFENSIVE/PUNCH KEYFRAMES
-      if (currentFrame === 5) { // JAB PUNCH (ONLY ON BLOCK BREAK!)
-        ctx.fillStyle = glovesCol;
-        ctx.fillRect(fx + (isP1 ? 16 : -4), fy + 9, 8, 6);
-        ctx.fillRect(fx + (isP1 ? 4 : 8), fy + 12, 5, 5);
-        ctx.fillStyle = whiteCol;
-        ctx.fillRect(fx + (isP1 ? 16 : 0), fy + 9, 2, 6); // Wrist tape
-      } else if (currentFrame === 6) { // UPPERCUT PUNCH (ONLY ON POWER BLOCK BREAK!)
-        ctx.fillStyle = glovesCol;
-        ctx.fillRect(fx + (isP1 ? 10 : 3), fy - 4, 6, 8);
-        ctx.fillRect(fx + (isP1 ? 3 : 10), fy + 12, 5, 5);
-        ctx.fillStyle = whiteCol;
-        ctx.fillRect(fx + (isP1 ? 10 : 3), fy + 2, 6, 2); // Wrist tape
-      } else if (currentFrame === 1) { // SHOULDER ROLL (Philly Shell)
-        ctx.fillStyle = glovesCol;
-        ctx.fillRect(fx + (isP1 ? 2 : 12), fy + 16, 6, 6);
-        ctx.fillRect(fx + (isP1 ? 11 : 3), hy + 5, 6, 6);
-      } else if (currentFrame === 2) { // DEEP DUCK CROUCH
-        ctx.fillStyle = glovesCol;
-        ctx.fillRect(fx + 3, hy + 7, 5, 6);
-        ctx.fillRect(fx + 10, hy + 7, 5, 6);
-      } else if (currentFrame === 3) { // HIGH EARMUFF BLOCK
-        ctx.fillStyle = glovesCol;
-        ctx.fillRect(fx + 4, hy + 5, 5, 7);
-        ctx.fillRect(fx + 9, hy + 5, 5, 7);
-      } else if (currentFrame === 4) { // HEAD SLIP
-        ctx.fillStyle = glovesCol;
-        ctx.fillRect(fx + 3, hy + 11, 5, 6);
-        ctx.fillRect(fx + 10, hy + 11, 5, 6);
-      } else { // STANCE GUARD
-        ctx.fillStyle = glovesCol;
-        ctx.fillRect(isP1 ? fx + 12 : fx + 3, fy + 12, 6, 6);
-        ctx.fillRect(isP1 ? fx + 4 : fx + 11, fy + 14, 5, 5);
-      }
-
-      // 5. LEG DEFINITION & BOXING SHOES
-      ctx.fillStyle = skinDark;
-      ctx.fillRect(fx + 3, fy + 33, 4, 5);
-      ctx.fillRect(fx + 12, fy + 33, 4, 5);
-
-      // White Ankle Support Tape & High-Top Boxing Boots
-      ctx.fillStyle = whiteCol;
-      ctx.fillRect(fx + 3, fy + 37, 4, 2);
-      ctx.fillRect(fx + 12, fy + 37, 4, 2);
-      ctx.fillStyle = blackCol;
-      ctx.fillRect(fx + 2, fy + 39, 5, 2);
-      ctx.fillRect(fx + 12, fy + 39, 5, 2);
-
-      ctx.strokeStyle = blackCol;
-      ctx.strokeRect(fx + 2, fy - 1, 15, 41);
     }
 
     function render() {
@@ -1357,7 +1293,7 @@
       ctx.fillStyle = PICO_PALETTE[7];
       ctx.fillRect(41, 90, 46, 23);
 
-      // Draw AAA Capcom-Grade Boxer Sprites!
+      // Draw Clean Transparent Capcom Boxer Sprites!
       drawBoxer(41, 50, true, p1.anim);  // Adrien Broner
       drawBoxer(65, 50, false, p2.anim); // Deen The Great
 
