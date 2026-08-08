@@ -52,7 +52,7 @@
       background: linear-gradient(180deg, #181428 0%, #0d0a18 100%);
       border: 4px solid #2a2244;
       border-radius: 16px;
-      box-shadow: 0 0 40px rgba(0, 0, 0, 0.8), 0 0 15px rgba(41, 173, 255, 0.2);
+      box-shadow: 0 0 40px rgba(0, 0, 0, 0.8), 0 0 15px rgba(41, 173, 255, 0.3);
       padding: 16px;
       max-width: 100vw;
     }
@@ -214,7 +214,7 @@
   <div class="arcade-cabinet">
     <div class="cabinet-header">
       <div class="brand-title">CRASH OUT: RING RUSH</div>
-      <div class="badge-pico8">PICO-8 v0.1.0</div>
+      <div class="badge-pico8">JUICY PICO-8 v0.1.0</div>
     </div>
 
     <div class="viewport-container">
@@ -250,7 +250,7 @@
 
   <script>
     // =========================================================================
-    // PICO-8 ENGINE & GAME SYSTEM ENGINE (128x128 RES)
+    // HIGHLY POLISHED & JUICY PICO-8 PUZZLE BOXING ENGINE
     // =========================================================================
 
     const PICO_PALETTE = [
@@ -297,89 +297,161 @@
 
         if (type === 'step') {
           osc.type = 'square';
-          osc.frequency.setValueAtTime(300, t);
-          osc.frequency.exponentialRampToValueAtTime(450, t + 0.04);
-          gain.gain.setValueAtTime(0.1, t);
+          osc.frequency.setValueAtTime(320, t);
+          osc.frequency.exponentialRampToValueAtTime(480, t + 0.04);
+          gain.gain.setValueAtTime(0.12, t);
           gain.gain.linearRampToValueAtTime(0.01, t + 0.04);
           osc.start(t);
           osc.stop(t + 0.04);
         } else if (type === 'rotate') {
           osc.type = 'triangle';
-          osc.frequency.setValueAtTime(400, t);
-          osc.frequency.exponentialRampToValueAtTime(650, t + 0.05);
+          osc.frequency.setValueAtTime(420, t);
+          osc.frequency.exponentialRampToValueAtTime(700, t + 0.05);
           gain.gain.setValueAtTime(0.15, t);
           gain.gain.linearRampToValueAtTime(0.01, t + 0.05);
           osc.start(t);
           osc.stop(t + 0.05);
         } else if (type === 'land') {
-          osc.type = 'sawtooth';
-          osc.frequency.setValueAtTime(160, t);
-          osc.frequency.linearRampToValueAtTime(60, t + 0.06);
-          gain.gain.setValueAtTime(0.2, t);
-          gain.gain.linearRampToValueAtTime(0.01, t + 0.06);
-          osc.start(t);
-          osc.stop(t + 0.06);
-        } else if (type === 'detonate') {
+          // Exaggerated Squish Thud
           osc.type = 'sawtooth';
           osc.frequency.setValueAtTime(220, t);
-          osc.frequency.exponentialRampToValueAtTime(40, t + 0.25);
-          gain.gain.setValueAtTime(0.3, t);
-          gain.gain.linearRampToValueAtTime(0.01, t + 0.25);
-          osc.start(t);
-          osc.stop(t + 0.25);
-        } else if (type === 'jab') {
-          osc.type = 'square';
-          osc.frequency.setValueAtTime(500, t);
-          osc.frequency.exponentialRampToValueAtTime(150, t + 0.08);
-          gain.gain.setValueAtTime(0.2, t);
+          osc.frequency.exponentialRampToValueAtTime(50, t + 0.08);
+          gain.gain.setValueAtTime(0.25, t);
           gain.gain.linearRampToValueAtTime(0.01, t + 0.08);
           osc.start(t);
           osc.stop(t + 0.08);
-        } else if (type === 'uppercut') {
+        } else if (type === 'fuse') {
+          // Gold Power Gem Fusion Chime
           osc.type = 'triangle';
-          osc.frequency.setValueAtTime(150, t);
-          osc.frequency.exponentialRampToValueAtTime(700, t + 0.2);
-          gain.gain.setValueAtTime(0.3, t);
+          osc.frequency.setValueAtTime(523, t); // C5
+          osc.frequency.setValueAtTime(659, t + 0.06); // E5
+          osc.frequency.setValueAtTime(783, t + 0.12); // G5
+          gain.gain.setValueAtTime(0.2, t);
           gain.gain.linearRampToValueAtTime(0.01, t + 0.2);
           osc.start(t);
           osc.stop(t + 0.2);
+        } else if (type === 'detonate') {
+          // Explosive Pop Blast
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(350, t);
+          osc.frequency.exponentialRampToValueAtTime(30, t + 0.3);
+          gain.gain.setValueAtTime(0.35, t);
+          gain.gain.linearRampToValueAtTime(0.01, t + 0.3);
+          osc.start(t);
+          osc.stop(t + 0.3);
+        } else if (type === 'jab') {
+          osc.type = 'square';
+          osc.frequency.setValueAtTime(550, t);
+          osc.frequency.exponentialRampToValueAtTime(120, t + 0.09);
+          gain.gain.setValueAtTime(0.25, t);
+          gain.gain.linearRampToValueAtTime(0.01, t + 0.09);
+          osc.start(t);
+          osc.stop(t + 0.09);
+        } else if (type === 'uppercut') {
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(140, t);
+          osc.frequency.exponentialRampToValueAtTime(850, t + 0.22);
+          gain.gain.setValueAtTime(0.35, t);
+          gain.gain.linearRampToValueAtTime(0.01, t + 0.22);
+          osc.start(t);
+          osc.stop(t + 0.22);
         } else if (type === 'ko') {
           osc.type = 'square';
-          osc.frequency.setValueAtTime(800, t);
-          osc.frequency.setValueAtTime(600, t + 0.1);
-          osc.frequency.setValueAtTime(1000, t + 0.2);
-          gain.gain.setValueAtTime(0.3, t);
-          gain.gain.linearRampToValueAtTime(0.01, t + 0.4);
+          osc.frequency.setValueAtTime(880, t);
+          osc.frequency.setValueAtTime(659, t + 0.12);
+          osc.frequency.setValueAtTime(1046, t + 0.24);
+          gain.gain.setValueAtTime(0.4, t);
+          gain.gain.linearRampToValueAtTime(0.01, t + 0.5);
           osc.start(t);
-          osc.stop(t + 0.4);
+          osc.stop(t + 0.5);
         }
       } catch (e) {}
     }
 
-    // --- GAME DATA STRUCTURES ---
+    // --- GAME CONSTANTS & PARTICLE SYSTEMS ---
     const COLS = 6;
     const ROWS = 12;
     const CELL_W = 6;
     const CELL_H = 8;
-
-    // Gem Types: 1:Red, 2:Blue, 3:Green, 4:Yellow, 5:Red Crash, 6:Blue Crash, 7:Green Crash, 8:Yellow Crash, 9:Counter Shield
     const GEM_COLORS = [8, 12, 11, 10]; // Red, Blue, Green, Yellow
 
     let vsAiMode = true;
     let cameraShake = 0;
+    let flashFrames = 0;
     let roundTimer = 99;
     let timerFrameCounter = 0;
     let gameState = 'PLAYING'; // PLAYING, KO
 
-    // Player State Class
+    // Particle Class for Dust, Explosion Shards, and Connecting Glow
+    class Particle {
+      constructor(x, y, vx, vy, color, life, size = 1) {
+        this.x = x;
+        this.y = y;
+        this.vx = vx;
+        this.vy = vy;
+        this.color = color;
+        this.life = life;
+        this.maxLife = life;
+        this.size = size;
+      }
+
+      update() {
+        this.x += this.vx;
+        this.y += this.vy;
+        this.vy += 0.15; // Gravity
+        this.life--;
+      }
+
+      draw() {
+        if (this.life <= 0) return;
+        ctx.fillStyle = PICO_PALETTE[this.color];
+        ctx.fillRect(Math.floor(this.x), Math.floor(this.y), this.size, this.size);
+      }
+    }
+
+    // Floating Text Class (Popups like "BOOM!", "2-CHAIN!", "POWER!")
+    class FloatingText {
+      constructor(text, x, y, color) {
+        this.text = text;
+        this.x = x;
+        this.y = y;
+        this.color = color;
+        this.life = 35;
+        this.scale = 1.4;
+      }
+
+      update() {
+        this.y -= 0.5;
+        this.life--;
+        if (this.scale > 1.0) this.scale -= 0.04;
+      }
+
+      draw() {
+        if (this.life <= 0) return;
+        ctx.fillStyle = PICO_PALETTE[0]; // Shadow
+        ctx.font = 'bold 9px monospace';
+        ctx.fillText(this.text, Math.floor(this.x) + 1, Math.floor(this.y) + 1);
+        ctx.fillStyle = PICO_PALETTE[this.color];
+        ctx.fillText(this.text, Math.floor(this.x), Math.floor(this.y));
+      }
+    }
+
+    let globalParticles = [];
+    let globalFloatingTexts = [];
+
+    // --- BOARD CLASS WITH JUICY SQUISH, BOUNCE & FUSION ---
     class Board {
       constructor(id, offsetX, isAi = false) {
         this.id = id;
         this.offsetX = offsetX;
         this.offsetY = 16;
         this.isAi = isAi;
+
         this.grid = Array(ROWS).fill(null).map(() => Array(COLS).fill(0));
         this.powerGems = Array(ROWS).fill(null).map(() => Array(COLS).fill(false));
+        this.squish = Array(ROWS).fill(null).map(() => Array(COLS).fill(0)); // 0..1 squish factor
+        this.pulseAngle = 0;
+
         this.hp = 100;
         this.superMeter = 0;
         this.score = 0;
@@ -389,30 +461,25 @@
         this.spawnPair();
 
         this.dropTimer = 0;
-        this.dropInterval = 30; // frames
+        this.dropInterval = 28; // frames
         this.lockDelay = 0;
 
-        // DAS (Delayed Auto Shift)
-        this.dasDir = 0;
-        this.dasTimer = 0;
-
-        // Fighter state
-        this.anim = 'IDLE'; // IDLE, JAB, UPPERCUT, FLINCH, KO
+        this.anim = 'IDLE';
         this.animTimer = 0;
       }
 
       spawnPair() {
         const g1 = Math.floor(Math.random() * 4) + 1; // 1..4
-        // 25% chance for Crash Orb
-        const isCrash = Math.random() < 0.25;
+        const isCrash = Math.random() < 0.26; // 26% crash orb
         const g2 = isCrash ? (Math.floor(Math.random() * 4) + 5) : (Math.floor(Math.random() * 4) + 1);
 
         this.pair = {
           x: 2,
           y: 0,
-          rot: 0, // 0:Sub top, 1:Sub right, 2:Sub bottom, 3:Sub left
-          g1: g1, // Main gem
-          g2: g2  // Sub gem
+          rot: 0,
+          g1: g1,
+          g2: g2,
+          vy: 0 // speed line velocity
         };
 
         if (this.grid[0][2] !== 0 || this.grid[1][2] !== 0) {
@@ -459,7 +526,7 @@
         }
       }
 
-      rotate(dir) { // 1: CW, -1: CCW
+      rotate(dir) {
         if (!this.pair) return;
         let newRot = (this.pair.rot + dir + 4) % 4;
         let newX = this.pair.x;
@@ -484,6 +551,7 @@
         if (!this.pair) return;
         if (this.isValid(this.pair.x, this.pair.y + 1, this.pair.rot)) {
           this.pair.y += 1;
+          this.pair.vy += 1;
           this.score += 1;
         } else {
           this.lockPair();
@@ -504,16 +572,36 @@
         const subX = this.getSubX();
         const subY = this.getSubY();
 
-        if (this.pair.y >= 0) this.grid[this.pair.y][this.pair.x] = this.pair.g1;
-        if (subY >= 0) this.grid[subY][subX] = this.pair.g2;
+        if (this.pair.y >= 0) {
+          this.grid[this.pair.y][this.pair.x] = this.pair.g1;
+          this.squish[this.pair.y][this.pair.x] = 1.0; // Trigger Impact Squish
+          this.spawnImpactParticles(this.pair.x, this.pair.y);
+        }
+        if (subY >= 0) {
+          this.grid[subY][subX] = this.pair.g2;
+          this.squish[subY][subX] = 1.0; // Trigger Impact Squish
+          this.spawnImpactParticles(subX, subY);
+        }
 
         playSfx('land');
+        cameraShake = Math.max(cameraShake, 2);
         this.pair = null;
 
         // Process physics: Gravity -> Fusion -> Detonation
         this.applyGravity();
         this.detectPowerGems();
         this.processDetonations();
+      }
+
+      spawnImpactParticles(col, row) {
+        const px = this.offsetX + col * CELL_W + CELL_W / 2;
+        const py = this.offsetY + row * CELL_H + CELL_H;
+        // Dust Cloud Shards
+        for (let i = 0; i < 4; i++) {
+          const vx = (Math.random() - 0.5) * 1.5;
+          const vy = -Math.random() * 0.8;
+          globalParticles.push(new Particle(px, py, vx, vy, 6, 12, 1));
+        }
       }
 
       applyGravity() {
@@ -528,18 +616,18 @@
                 this.powerGems[r][col] = false;
                 r++;
               }
+              this.squish[r][col] = 0.8; // Falling Squish
             }
           }
         }
       }
 
       detectPowerGems() {
-        // Reset power gems
+        let newFusion = false;
         for (let r = 0; r < ROWS; r++) {
           for (let c = 0; c < COLS; c++) this.powerGems[r][c] = false;
         }
 
-        // Scan 2x2 blocks of normal gems (1..4)
         for (let r = 0; r < ROWS - 1; r++) {
           for (let c = 0; c < COLS - 1; c++) {
             const g = this.grid[r][c];
@@ -549,9 +637,15 @@
                 this.powerGems[r][c + 1] = true;
                 this.powerGems[r + 1][c] = true;
                 this.powerGems[r + 1][c + 1] = true;
+                newFusion = true;
               }
             }
           }
+        }
+
+        if (newFusion) {
+          playSfx('fuse');
+          globalFloatingTexts.push(new FloatingText('POWER FUSION!', this.offsetX + 2, this.offsetY + 40, 10));
         }
       }
 
@@ -559,28 +653,23 @@
         let matched = false;
         let toClear = Array(ROWS).fill(null).map(() => Array(COLS).fill(false));
 
-        // Find Crash Orbs (5..8)
         for (let r = 0; r < ROWS; r++) {
           for (let c = 0; c < COLS; c++) {
             const orb = this.grid[r][c];
             if (orb >= 5 && orb <= 8) {
-              const targetColor = orb - 4; // 1..4
-              // Check 4 adjacents
+              const targetColor = orb - 4;
               const adj = [[r-1,c], [r+1,c], [r,c-1], [r,c+1]];
               let triggered = false;
 
               adj.forEach(([ar, ac]) => {
                 if (ar >= 0 && ar < ROWS && ac >= 0 && ac < COLS) {
-                  if (this.grid[ar][ac] === targetColor) {
-                    triggered = true;
-                  }
+                  if (this.grid[ar][ac] === targetColor) triggered = true;
                 }
               });
 
               if (triggered) {
                 matched = true;
                 toClear[r][c] = true;
-                // Flood fill connected target color gems
                 this.floodFillClear(r, c, targetColor, toClear);
               }
             }
@@ -596,6 +685,18 @@
               if (toClear[r][c]) {
                 clearCount++;
                 if (this.powerGems[r][c]) powerGemCleared = true;
+
+                // Spawn Explosion Shard Particles
+                const px = this.offsetX + c * CELL_W + CELL_W / 2;
+                const py = this.offsetY + r * CELL_H + CELL_H / 2;
+                const gColor = GEM_COLORS[(this.grid[r][c] - 1) % 4] || 8;
+
+                for (let k = 0; k < 6; k++) {
+                  const vx = (Math.random() - 0.5) * 3;
+                  const vy = (Math.random() - 0.5) * 3 - 1;
+                  globalParticles.push(new Particle(px, py, vx, vy, gColor, 20, 2));
+                }
+
                 this.grid[r][c] = 0;
                 this.powerGems[r][c] = false;
               }
@@ -603,37 +704,44 @@
           }
 
           this.comboCount++;
-          const dmg = clearCount * 4 * (powerGemCleared ? 1.5 : 1.0) * this.comboCount;
-          
-          // Trigger Opponent Damage & Counter Gem Drop
+          const dmg = clearCount * 4 * (powerGemCleared ? 1.6 : 1.0) * this.comboCount;
           const opponent = (this.id === 1) ? p2 : p1;
           opponent.hp = Math.max(0, opponent.hp - Math.floor(dmg));
           this.superMeter = Math.min(100, this.superMeter + clearCount * 5);
           this.score += Math.floor(dmg * 10);
 
-          // Triggers Fighter Punch Reaction
+          flashFrames = 3; // Screen Flash
+
+          // Exaggerated Text Popups
+          if (this.comboCount >= 2) {
+            globalFloatingTexts.push(new FloatingText(`${this.comboCount}-CHAIN!`, this.offsetX + 4, this.offsetY + 30, 9));
+          } else {
+            globalFloatingTexts.push(new FloatingText(`BOOM! +${clearCount}`, this.offsetX + 4, this.offsetY + 30, 10));
+          }
+
+          // Fighter Punch Reaction
           if (powerGemCleared || this.comboCount >= 2) {
             this.anim = 'UPPERCUT';
             opponent.anim = 'FLINCH';
-            cameraShake = 8;
+            cameraShake = 9;
             playSfx('uppercut');
           } else {
             this.anim = 'JAB';
             opponent.anim = 'FLINCH';
-            cameraShake = 3;
+            cameraShake = 4;
             playSfx('jab');
           }
-          this.animTimer = 20;
-          opponent.animTimer = 20;
+          this.animTimer = 22;
+          opponent.animTimer = 22;
 
           playSfx('detonate');
 
-          // Cascade: Apply gravity and check for secondary combo!
+          // Cascade Loop
           setTimeout(() => {
             this.applyGravity();
             this.detectPowerGems();
             this.processDetonations();
-          }, 250);
+          }, 240);
 
         } else {
           this.comboCount = 0;
@@ -657,23 +765,35 @@
       update() {
         if (gameState !== 'PLAYING') return;
 
-        // Fighter anim reset
+        this.pulseAngle += 0.1;
+
+        // Decaying Squish Physics
+        for (let r = 0; r < ROWS; r++) {
+          for (let c = 0; c < COLS; c++) {
+            if (this.squish[r][c] > 0) {
+              this.squish[r][c] -= 0.1;
+              if (this.squish[r][c] < 0) this.squish[r][c] = 0;
+            }
+          }
+        }
+
+        // Fighter anim timer
         if (this.animTimer > 0) {
           this.animTimer--;
           if (this.animTimer === 0) this.anim = 'IDLE';
         }
 
-        // AI Logic
+        // AI Controls
         if (this.isAi && this.pair) {
-          if (Math.random() < 0.1) {
+          if (Math.random() < 0.12) {
             const targetX = Math.floor(Math.random() * COLS);
             if (this.pair.x < targetX) this.move(1);
             else if (this.pair.x > targetX) this.move(-1);
           }
-          if (Math.random() < 0.05) this.rotate(1);
+          if (Math.random() < 0.06) this.rotate(1);
         }
 
-        // Gravity drop for active pair
+        // Gravity drop for pair
         if (this.pair) {
           this.dropTimer++;
           if (this.dropTimer >= this.dropInterval) {
@@ -701,29 +821,36 @@
         ctx.fillStyle = PICO_PALETTE[0];
         ctx.fillRect(this.offsetX, this.offsetY, COLS * CELL_W, ROWS * CELL_H);
 
-        // Draw Locked Grid Gems
+        // Draw Locked Grid Gems with Squish Physics
         for (let r = 0; r < ROWS; r++) {
           for (let c = 0; c < COLS; c++) {
             const g = this.grid[r][c];
             if (g !== 0) {
-              this.drawGem(this.offsetX + c * CELL_W, this.offsetY + r * CELL_H, g, this.powerGems[r][c]);
+              this.drawGem(this.offsetX + c * CELL_W, this.offsetY + r * CELL_H, g, this.powerGems[r][c], this.squish[r][c]);
             }
           }
         }
 
-        // Draw Active Pair
+        // Draw Active Falling Pair with Speed Trails
         if (this.pair) {
           const mainX = this.offsetX + this.pair.x * CELL_W;
           const mainY = this.offsetY + this.pair.y * CELL_H;
           const subX = this.offsetX + this.getSubX() * CELL_W;
           const subY = this.offsetY + this.getSubY() * CELL_H;
 
-          if (this.pair.y >= 0) this.drawGem(mainX, mainY, this.pair.g1, false);
-          if (this.getSubY() >= 0) this.drawGem(subX, subY, this.pair.g2, false);
+          // Speed Trail Lines
+          if (this.pair.vy > 0) {
+            ctx.fillStyle = PICO_PALETTE[6];
+            ctx.fillRect(mainX + 2, mainY - 3, 2, 3);
+            ctx.fillRect(subX + 2, subY - 3, 2, 3);
+          }
+
+          if (this.pair.y >= 0) this.drawGem(mainX, mainY, this.pair.g1, false, 0);
+          if (this.getSubY() >= 0) this.drawGem(subX, subY, this.pair.g2, false, 0);
         }
       }
 
-      drawGem(x, y, type, isPower) {
+      drawGem(x, y, type, isPower, squishFactor) {
         let colorIdx = 8;
         let isCrash = false;
 
@@ -733,47 +860,57 @@
           isCrash = true;
         } else if (type === 9) colorIdx = 5;
 
-        // Gem fill
+        // Squish Deformation (Scale X up, Scale Y down on impact)
+        const squishY = Math.floor(squishFactor * 2);
+        const squishX = Math.floor(squishFactor * 1);
+        const drawX = x - squishX / 2;
+        const drawY = y + squishY;
+        const drawW = CELL_W + squishX;
+        const drawH = CELL_H - squishY;
+
+        // Fill & Outer Outline
         ctx.fillStyle = PICO_PALETTE[colorIdx];
-        ctx.fillRect(x + 1, y + 1, CELL_W - 2, CELL_H - 2);
+        ctx.fillRect(drawX + 1, drawY + 1, drawW - 2, drawH - 2);
 
-        // Gem border
         ctx.strokeStyle = PICO_PALETTE[0];
-        ctx.strokeRect(x, y, CELL_W, CELL_H);
+        ctx.strokeRect(drawX, drawY, drawW, drawH);
 
-        // Power Gem Gold Border
+        // Top-Left Beveled Inner Highlight
+        ctx.fillStyle = PICO_PALETTE[7];
+        ctx.fillRect(drawX + 1, drawY + 1, drawW - 3, 1);
+        ctx.fillRect(drawX + 1, drawY + 1, 1, drawH - 3);
+
+        // Gold Power Gem Border
         if (isPower) {
-          ctx.strokeStyle = PICO_PALETTE[10]; // Gold
-          ctx.strokeRect(x + 0.5, y + 0.5, CELL_W - 1, CELL_H - 1);
+          ctx.strokeStyle = PICO_PALETTE[10];
+          ctx.strokeRect(drawX + 0.5, drawY + 0.5, drawW - 1, drawH - 1);
         }
 
-        // Crash Orb Icon (+)
+        // Pulsing Crash Orb Icon (+)
         if (isCrash) {
+          const pulse = Math.floor(Math.sin(this.pulseAngle * 2) * 1);
           ctx.fillStyle = PICO_PALETTE[7]; // White center
-          ctx.fillRect(x + 2, y + 3, 2, 2);
+          ctx.fillRect(drawX + 2 - pulse, drawY + 3 - pulse, 2 + pulse * 2, 2 + pulse * 2);
         }
       }
     }
 
-    // Initialize Players
+    // Initialize Boards
     const p1 = new Board(1, 4, false);
     const p2 = new Board(2, 88, true);
 
-    // --- FIGHTER RENDERING SYSTEM (16x16 CHIBI SPRITES) ---
+    // --- FIGHTER ANIMATIONS SYSTEM ---
     function drawFighter(x, y, isP1, anim) {
-      // P1: Adrien Broner (Red trunks, Gold gloves)
-      // P2: Deen The Great (Blue trunks, Cyan gloves)
-      const skinColor = PICO_PALETTE[4]; // Brown
-      const trunksColor = isP1 ? PICO_PALETTE[8] : PICO_PALETTE[12]; // Red / Blue
-      const glovesColor = isP1 ? PICO_PALETTE[10] : PICO_PALETTE[9]; // Gold / Cyan
+      const skinColor = PICO_PALETTE[4];
+      const trunksColor = isP1 ? PICO_PALETTE[8] : PICO_PALETTE[12];
+      const glovesColor = isP1 ? PICO_PALETTE[10] : PICO_PALETTE[9];
 
-      // Flinch offset
       let fx = x;
       let fy = y;
       if (anim === 'FLINCH') fx += isP1 ? -3 : 3;
       if (anim === 'UPPERCUT') fy -= 4;
 
-      // Head (8x8)
+      // Head
       ctx.fillStyle = skinColor;
       ctx.fillRect(fx + 4, fy, 8, 7);
 
@@ -787,22 +924,21 @@
       ctx.fillStyle = PICO_PALETTE[0];
       ctx.fillRect(isP1 ? fx + 10 : fx + 5, fy + 3, 1, 2);
 
-      // Body (8x5)
+      // Body & Trunks
       ctx.fillStyle = skinColor;
       ctx.fillRect(fx + 4, fy + 7, 8, 5);
 
-      // Trunks (8x4)
       ctx.fillStyle = trunksColor;
       ctx.fillRect(fx + 4, fy + 12, 8, 4);
 
-      // Gloves (4x4)
+      // Gloves & Punch Micro-Animations
       ctx.fillStyle = glovesColor;
       if (anim === 'JAB') {
-        ctx.fillRect(isP1 ? fx + 13 : fx - 1, fy + 6, 5, 4); // Extend punch
+        ctx.fillRect(isP1 ? fx + 13 : fx - 1, fy + 6, 5, 4);
       } else if (anim === 'UPPERCUT') {
-        ctx.fillRect(isP1 ? fx + 10 : fx + 2, fy + 2, 4, 5); // Rise punch
+        ctx.fillRect(isP1 ? fx + 10 : fx + 2, fy + 2, 4, 5);
       } else {
-        ctx.fillRect(isP1 ? fx + 10 : fx + 2, fy + 7, 4, 4); // Guard
+        ctx.fillRect(isP1 ? fx + 10 : fx + 2, fy + 7, 4, 4);
       }
 
       // Black Outline
@@ -812,7 +948,15 @@
 
     // --- MAIN RENDER LOOP ---
     function render() {
-      // Screen Shake
+      // Screen Flash Effect
+      if (flashFrames > 0) {
+        flashFrames--;
+        ctx.fillStyle = PICO_PALETTE[7];
+        ctx.fillRect(0, 0, 128, 128);
+        return;
+      }
+
+      // Camera Shake
       ctx.save();
       if (cameraShake > 0) {
         const rx = (Math.random() * cameraShake - cameraShake / 2);
@@ -822,7 +966,7 @@
         if (cameraShake < 0.5) cameraShake = 0;
       }
 
-      // 1. Background (Black / Dark Blue Arena)
+      // 1. Arena Background
       ctx.fillStyle = PICO_PALETTE[1];
       ctx.fillRect(0, 0, 128, 128);
 
@@ -830,26 +974,25 @@
       ctx.fillStyle = PICO_PALETTE[0];
       ctx.fillRect(0, 0, 128, 15);
 
-      // P1 HP Bar
+      // P1 & P2 HP Bars
       ctx.fillStyle = PICO_PALETTE[8];
       ctx.fillRect(4, 3, 42, 5);
       ctx.fillStyle = PICO_PALETTE[11];
       ctx.fillRect(4, 3, 42 * (p1.hp / 100), 5);
 
-      // P2 HP Bar
       ctx.fillStyle = PICO_PALETTE[8];
       ctx.fillRect(82, 3, 42, 5);
       ctx.fillStyle = PICO_PALETTE[11];
       ctx.fillRect(82, 3, 42 * (p2.hp / 100), 5);
 
-      // Names & Timer
+      // Header Text & Timer
       ctx.fillStyle = PICO_PALETTE[7];
       ctx.font = '8px monospace';
       ctx.fillText('BRONER', 4, 13);
       ctx.fillText('DEEN', 98, 13);
       ctx.fillText(roundTimer < 10 ? '0' + roundTimer : roundTimer, 58, 10);
 
-      // 3. Center Ring Arena (X: 41..86)
+      // 3. Center Boxing Ring Arena
       ctx.fillStyle = PICO_PALETTE[0];
       ctx.fillRect(41, 15, 46, 98);
 
@@ -861,7 +1004,7 @@
       ctx.moveTo(41, 85); ctx.lineTo(86, 85);
       ctx.stroke();
 
-      // Ring Floor Mat
+      // Ring Floor Canvas
       ctx.fillStyle = PICO_PALETTE[7];
       ctx.fillRect(41, 92, 46, 21);
 
@@ -869,11 +1012,17 @@
       drawFighter(44, 74, true, p1.anim);
       drawFighter(68, 74, false, p2.anim);
 
-      // 4. Draw Boards
+      // 4. Draw Boards & Active Gems
       p1.draw();
       p2.draw();
 
-      // 5. Bottom SUPER Gauge
+      // 5. Draw Explosion Particles
+      globalParticles.forEach(p => p.draw());
+
+      // 6. Draw Floating Text Pops
+      globalFloatingTexts.forEach(t => t.draw());
+
+      // 7. Bottom SUPER Meter Bar
       ctx.fillStyle = PICO_PALETTE[0];
       ctx.fillRect(0, 114, 128, 14);
 
@@ -885,9 +1034,9 @@
       ctx.fillText('SP', 46, 123);
       ctx.fillText('SP', 74, 123);
 
-      // KO Overlay
+      // KO Screen Overlay
       if (gameState === 'KO') {
-        ctx.fillStyle = 'rgba(0,0,0,0.7)';
+        ctx.fillStyle = 'rgba(0,0,0,0.75)';
         ctx.fillRect(0, 45, 128, 38);
         ctx.fillStyle = PICO_PALETTE[10];
         ctx.font = 'bold 16px monospace';
@@ -901,6 +1050,14 @@
     function update() {
       p1.update();
       p2.update();
+
+      // Update Particles
+      globalParticles.forEach(p => p.update());
+      globalParticles = globalParticles.filter(p => p.life > 0);
+
+      // Update Floating Texts
+      globalFloatingTexts.forEach(t => t.update());
+      globalFloatingTexts = globalFloatingTexts.filter(t => t.life > 0);
 
       // Timer countdown
       if (gameState === 'PLAYING') {
@@ -918,7 +1075,7 @@
       requestAnimationFrame(loop);
     }
 
-    // --- KEYBOARD & TOUCH INPUT HANDLERS ---
+    // --- INPUT HANDLERS ---
     window.addEventListener('keydown', (e) => {
       initAudio();
       if (e.key === 'ArrowLeft') p1.move(-1);
