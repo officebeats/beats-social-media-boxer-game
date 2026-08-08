@@ -1316,6 +1316,9 @@
       }
     }
 
+    p1 = new Board(1, 4, true);  // AI P1
+    p2 = new Board(2, 88, true); // AI P2
+
     let impactFxTimer = 0;
     let impactFxX = 58;
     let impactFxY = 56;
@@ -1610,6 +1613,7 @@
     }
 
     function update() {
+      if (!p1 || !p2) return;
       globalFrameCount++;
 
       idleP1.update();
