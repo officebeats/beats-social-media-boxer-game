@@ -35,47 +35,47 @@
     html, body {
       margin: 0;
       padding: 0;
-      width: 100%;
-      height: 100%;
+      width: 100vw;
+      height: 100vh;
+      height: 100dvh;
       background-color: var(--pico-black);
       color: var(--pico-white);
       font-family: 'Courier New', Courier, monospace;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: space-between;
+      justify-content: center;
       overflow: hidden;
       image-rendering: pixelated;
     }
 
+    /* FULL SCREEN ZERO-MARGIN ARCADE CABINET CONTAINER */
     .arcade-cabinet {
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: space-between;
-      width: 100%;
-      max-width: 600px;
+      width: 100vw;
       height: 100vh;
       height: 100dvh;
       background-color: var(--pico-dark-blue);
       border: 4px solid var(--pico-dark-purple);
-      padding: 8px 12px env(safe-area-inset-bottom) 12px;
-      box-shadow: 0 0 40px var(--pico-black);
+      padding: 4px 6px env(safe-area-inset-bottom) 6px;
     }
 
-    /* HEADER MARQUEE */
+    /* COMPACT HEADER MARQUEE */
     .cabinet-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       width: 100%;
-      padding: 4px 4px;
-      margin-bottom: 4px;
+      height: 24px;
+      padding: 0 4px;
       flex-shrink: 0;
     }
 
     .brand-title {
-      font-size: 15px;
+      font-size: 14px;
       font-weight: 900;
       color: var(--pico-yellow);
       text-shadow: 2px 2px 0px var(--pico-red);
@@ -87,13 +87,13 @@
       color: var(--pico-pink);
       border: 2px solid var(--pico-blue);
       border-radius: 0px;
-      padding: 3px 8px;
-      font-size: 10px;
+      padding: 2px 6px;
+      font-size: 9px;
       font-weight: 800;
       box-shadow: 2px 2px 0px var(--pico-black);
     }
 
-    /* MAXIMIZED GAME VIEWPORT CANVAS */
+    /* MAXIMIZED 100% REAL ESTATE VIEWPORT CONTAINER */
     .viewport-container {
       position: relative;
       width: 100%;
@@ -102,18 +102,16 @@
       align-items: center;
       justify-content: center;
       background-color: var(--pico-black);
-      border: 4px solid var(--pico-dark-gray);
-      box-shadow: inset 0 0 15px var(--pico-black), 0 4px 0px var(--pico-black);
+      border: 4px solid var(--pico-dark-purple);
+      box-shadow: inset 0 0 10px var(--pico-black);
       overflow: hidden;
       margin: 2px 0;
     }
 
-    /* Responsive PICO-8 128x128 Pixel Canvas */
+    /* ABSOLUTE MAXIMUM REAL ESTATE PICO-8 CANVAS */
     canvas#picoCanvas {
-      width: 100%;
-      height: 100%;
-      max-width: calc(100vh - 220px);
-      max-height: calc(100vh - 220px);
+      width: min(calc(100vw - 12px), calc(100vh - 145px));
+      height: min(calc(100vw - 12px), calc(100vh - 145px));
       aspect-ratio: 1 / 1;
       object-fit: contain;
       image-rendering: pixelated;
@@ -121,22 +119,22 @@
       display: block;
     }
 
-    /* 100% PICO-8 PIXEL ART TOUCH CONTROLS */
+    /* COMPACT 16-BIT PIXEL ART TOUCH CONTROLS */
     .control-panel {
       display: flex;
       justify-content: space-between;
       align-items: center;
       width: 100%;
-      padding: 6px 4px 2px 4px;
+      padding: 4px 4px 2px 4px;
       flex-shrink: 0;
-      gap: 8px;
+      gap: 6px;
     }
 
     /* AUTHENTIC PICO-8 PIXEL D-PAD */
     .dpad-container {
       display: grid;
-      grid-template-columns: repeat(3, 46px);
-      grid-template-rows: repeat(3, 46px);
+      grid-template-columns: repeat(3, min(44px, 12vw));
+      grid-template-rows: repeat(3, min(44px, 12vw));
       gap: 3px;
     }
 
@@ -147,12 +145,12 @@
       border-radius: 0px;
       font-family: 'Courier New', monospace;
       font-weight: 900;
-      font-size: 18px;
+      font-size: 16px;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      box-shadow: inset -2px -2px 0px var(--pico-black), inset 2px 2px 0px var(--pico-pink), 3px 3px 0px var(--pico-black);
+      box-shadow: inset -2px -2px 0px var(--pico-black), inset 2px 2px 0px var(--pico-pink), 2px 2px 0px var(--pico-black);
       text-shadow: 1px 1px 0px var(--pico-black);
     }
 
@@ -174,21 +172,21 @@
     .action-buttons {
       display: flex;
       align-items: center;
-      gap: 14px;
+      gap: 10px;
     }
 
     .btn-action {
-      width: 62px;
-      height: 62px;
+      width: min(58px, 16vw);
+      height: min(58px, 16vw);
       border-radius: 0px;
       font-family: 'Courier New', monospace;
-      font-size: 16px;
+      font-size: 15px;
       font-weight: 900;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      box-shadow: 3px 3px 0px var(--pico-black);
+      box-shadow: 2px 2px 0px var(--pico-black);
       border: 3px solid var(--pico-white);
       cursor: pointer;
       text-shadow: 1px 1px 0px var(--pico-black);
@@ -203,7 +201,7 @@
       background-color: var(--pico-orange);
       border-color: var(--pico-yellow);
       color: var(--pico-black);
-      box-shadow: inset -3px -3px 0px var(--pico-brown), inset 3px 3px 0px var(--pico-yellow), 3px 3px 0px var(--pico-black);
+      box-shadow: inset -3px -3px 0px var(--pico-brown), inset 3px 3px 0px var(--pico-yellow), 2px 2px 0px var(--pico-black);
       text-shadow: none;
     }
 
@@ -211,7 +209,7 @@
       background-color: var(--pico-pink);
       border-color: var(--pico-white);
       color: var(--pico-black);
-      box-shadow: inset -3px -3px 0px var(--pico-dark-purple), inset 3px 3px 0px var(--pico-white), 3px 3px 0px var(--pico-black);
+      box-shadow: inset -3px -3px 0px var(--pico-dark-purple), inset 3px 3px 0px var(--pico-white), 2px 2px 0px var(--pico-black);
       text-shadow: none;
     }
 
@@ -227,19 +225,20 @@
     }
 
     .btn-action span {
-      font-size: 8px;
+      font-size: 7px;
       font-weight: 900;
-      margin-top: 2px;
+      margin-top: 1px;
       letter-spacing: 0.5px;
     }
 
-    /* AUTHENTIC PICO-8 PIXEL OPTIONS BAR */
+    /* COMPACT OPTIONS BAR */
     .options-bar {
       display: flex;
       justify-content: space-between;
       width: 100%;
-      gap: 6px;
-      margin-top: 4px;
+      height: 26px;
+      gap: 4px;
+      margin-top: 2px;
       flex-shrink: 0;
     }
 
@@ -248,10 +247,10 @@
       background-color: var(--pico-dark-blue);
       border: 2px solid var(--pico-blue);
       color: var(--pico-white);
-      padding: 6px 4px;
+      padding: 3px 2px;
       border-radius: 0px;
       font-family: 'Courier New', monospace;
-      font-size: 10px;
+      font-size: 9px;
       font-weight: 800;
       cursor: pointer;
       text-align: center;
@@ -264,21 +263,6 @@
       background-color: var(--pico-blue);
       color: var(--pico-black);
     }
-
-    @media (min-width: 601px) {
-      .arcade-cabinet {
-        height: auto;
-        min-height: 95vh;
-        border: 4px solid var(--pico-dark-purple);
-        margin: 20px 0;
-      }
-      canvas#picoCanvas {
-        width: 480px;
-        height: 480px;
-        max-width: 480px;
-        max-height: 480px;
-      }
-    }
   </style>
 </head>
 <body>
@@ -287,15 +271,15 @@
     <!-- HEADER MARQUEE -->
     <div class="cabinet-header">
       <div class="brand-title">CRASH OUT: RING RUSH</div>
-      <div class="badge-pico8">100% PICO-8 ART v4.0.0</div>
+      <div class="badge-pico8">MAX REAL ESTATE v4.1.0</div>
     </div>
 
-    <!-- MAXIMIZED GAME VIEWPORT CANVAS -->
+    <!-- ABSOLUTE MAXIMUM REAL ESTATE GAME VIEWPORT CANVAS -->
     <div class="viewport-container">
       <canvas id="picoCanvas" width="128" height="128"></canvas>
     </div>
 
-    <!-- 100% PICO-8 PIXEL ART TOUCH CONTROLS -->
+    <!-- COMPACT 100% PICO-8 PIXEL ART TOUCH CONTROLS -->
     <div class="control-panel">
       <!-- LEFT THUMB D-PAD -->
       <div class="dpad-container">
@@ -322,11 +306,11 @@
 
   <script>
     // =========================================================================
-    // 100% PURE PICO-8 UNIFIED ART ENGINE v4.0.0
-    // - 100% Authentic PICO-8 Pixel Art Fighters (Broner & Deen) drawn natively in 16-color palette!
-    // - ZERO external images! ZERO color mismatch!
+    // 100% FULL-SCREEN MAXIMUM REAL ESTATE PICO-8 ENGINE v4.1.0
+    // - Canvas calculates width/height: min(100vw - 12px, 100vh - 145px)!
+    // - ZERO black empty gaps! Maximum responsive real estate usage on any device!
+    // - 100% Pure PICO-8 16-Color Palette Pixel Art Boxers & UI Controls!
     // - Anatomical shoulder joint origin at local Y = -24 (4px below neck, 10px above waist)!
-    // - 100% PICO-8 UI controls, D-Pad, buttons, & arcade frame!
     // =========================================================================
 
     const PICO_PALETTE = [
@@ -1386,7 +1370,7 @@
     }
 
     // =========================================================================
-    // 100% PURE PICO-8 PIXEL ART BOXER RENDERER (NO EXTERNAL IMAGES!)
+    // 100% PURE PICO-8 PIXEL ART BOXER RENDERER
     // - Broner (P1): Dark Brown Skin (#AB5236 Palette 4), Red Trunks (#FF004D Palette 8)
     // - Deen (P2): Golden Peach Skin (#FFCCAA Palette 15), Blue Trunks (#29ADFF Palette 12)
     // - Anatomical Shoulder Joint at local Y = -24!
@@ -1405,10 +1389,10 @@
       }
 
       // --- 1. LEGS & BOXING BOOTS ---
-      ctx.fillStyle = isHitFlash ? PICO_PALETTE[7] : PICO_PALETTE[0]; // Black boots
+      ctx.fillStyle = isHitFlash ? PICO_PALETTE[7] : PICO_PALETTE[0];
       ctx.fillRect(-6, 34, 4, 6);
       ctx.fillRect(2, 34, 4, 6);
-      ctx.fillStyle = isHitFlash ? PICO_PALETTE[7] : skinColor; // Lower legs
+      ctx.fillStyle = isHitFlash ? PICO_PALETTE[7] : skinColor;
       ctx.fillRect(-5, 26, 3, 8);
       ctx.fillRect(2, 26, 3, 8);
 
@@ -1418,32 +1402,32 @@
       ctx.fillStyle = isHitFlash ? PICO_PALETTE[7] : trunksColor;
       ctx.fillRect(-7, 17, 14, 9);
       ctx.fillStyle = isHitFlash ? PICO_PALETTE[7] : PICO_PALETTE[0];
-      ctx.fillRect(-1, 17, 2, 9); // Trunks slit divider
+      ctx.fillRect(-1, 17, 2, 9);
 
       // --- 3. MUSCULAR TORSO & CHEST ---
       ctx.fillStyle = isHitFlash ? PICO_PALETTE[7] : skinColor;
       ctx.fillRect(-6, -18, 12, 32);
       ctx.fillStyle = isHitFlash ? PICO_PALETTE[7] : skinDark;
-      ctx.fillRect(-1, -14, 2, 28); // Abdominal muscle line
+      ctx.fillRect(-1, -14, 2, 28);
 
       // --- 4. HEAD & FACE ---
       ctx.fillStyle = isHitFlash ? PICO_PALETTE[7] : hairColor;
-      ctx.fillRect(-5, -36, 10, 8); // Hair / Head top
+      ctx.fillRect(-5, -36, 10, 8);
       ctx.fillStyle = isHitFlash ? PICO_PALETTE[7] : skinColor;
-      ctx.fillRect(-4, -28, 8, 8);  // Face
+      ctx.fillRect(-4, -28, 8, 8);
       ctx.fillStyle = isHitFlash ? PICO_PALETTE[7] : PICO_PALETTE[7];
-      ctx.fillRect(isP1 ? 0 : -2, -26, 2, 2); // Eye pixel
-      if (isP1) { // Broner Beard
+      ctx.fillRect(isP1 ? 0 : -2, -26, 2, 2);
+      if (isP1) {
         ctx.fillStyle = isHitFlash ? PICO_PALETTE[7] : hairColor;
         ctx.fillRect(-4, -22, 8, 3);
       }
 
-      // --- 5. REAR GUARD ARM (Always covering chin when not punching) ---
+      // --- 5. REAR GUARD ARM ---
       if (pose === 'IDLE' || pose === 'FLINCH') {
         ctx.fillStyle = isHitFlash ? PICO_PALETTE[7] : skinColor;
         ctx.fillRect(-8, -24, 4, 10);
         ctx.fillStyle = isHitFlash ? PICO_PALETTE[7] : gloveColor;
-        ctx.fillRect(-9, -26, 5, 5); // Guard glove at chin level
+        ctx.fillRect(-9, -26, 5, 5);
       }
 
       // --- 6. DYNAMIC PUNCH EXTENSION FROM SHOULDER JOINT (-24 Y) ---
@@ -1466,7 +1450,7 @@
           ctx.fillRect(sockX - 4, sockY - 1, extX + 4, 3);
           ctx.fillStyle = isHitFlash ? PICO_PALETTE[7] : gloveColor;
           ctx.fillRect(sockX + extX, sockY - 3, 6, 6);
-          ctx.fillStyle = PICO_PALETTE[10]; // Gold wristband
+          ctx.fillStyle = PICO_PALETTE[10];
           ctx.fillRect(sockX + extX - 1, sockY - 3, 1, 6);
           ctx.fillStyle = PICO_PALETTE[7];
           ctx.fillRect(sockX + extX + 2, sockY - 2, 2, 2);
@@ -1496,7 +1480,6 @@
           ctx.fillRect(sockX + 1, sockY - 5 - liftY, 2, 2);
         }
       } else {
-        // LEAD STANCE GLOVE
         ctx.fillStyle = isHitFlash ? PICO_PALETTE[7] : skinColor;
         ctx.fillRect(4, -24, 4, 10);
         ctx.fillStyle = isHitFlash ? PICO_PALETTE[7] : gloveColor;
