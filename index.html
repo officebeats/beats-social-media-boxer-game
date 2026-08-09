@@ -832,9 +832,16 @@
         }
 
         if (this.grid[0][2] !== 0 || this.grid[1][2] !== 0) {
+          // Board topped out — this fighter loses by knockout.
           this.hp = 0;
+          this.pair = null;
+          this.state = 'GAMEOVER';
           gameState = 'KO';
+          appState = 'KO';
+          const winner = (this.id === 1) ? p2 : p1;
+          koMessage = 'K.O.! ' + (winner.name || 'WINNER') + ' WINS!';
           play808Sfx('ko');
+          cameraShake = Math.max(cameraShake, 12);
         } else {
           this.state = 'FALLING';
         }
@@ -1051,6 +1058,8 @@
       }
 
       processRainbowDiamond() {
+        let totalCleared = 0;
+
         for (let r = 0; r < ROWS; r++) {
           for (let c = 0; c < COLS; c++) {
             if (this.grid[r][c] === 9) {
@@ -1066,11 +1075,22 @@
 
               if (targetColor > 0 || r === ROWS - 1) {
                 this.grid[r][c] = 0;
+                totalCleared++;
+
                 if (targetColor > 0) {
                   for (let tr = 0; tr < ROWS; tr++) {
                     for (let tc = 0; tc < COLS; tc++) {
                       if (this.grid[tr][tc] === targetColor || this.grid[tr][tc] === targetColor + 4) {
+                        const px = this.offsetX + tc * CELL_W + CELL_W / 2;
+                        const py = this.offsetY + tr * CELL_H + CELL_H / 2;
+                        for (let k = 0; k < 5; k++) {
+                          const vx = (Math.random() - 0.5) * 3.5;
+                          const vy = (Math.random() - 0.5) * 3.5 - 1;
+                          globalParticles.push(new Particle(px, py, vx, vy, GEM_COLORS[(targetColor - 1) % 4], 22, 2));
+                        }
                         this.grid[tr][tc] = 0;
+                        this.powerGems[tr][tc] = false;
+                        totalCleared++;
                       }
                     }
                   }
@@ -1080,6 +1100,26 @@
               }
             }
           }
+        }
+
+        // GDD §4.5: rainbow diamond detonations deal full attack power with the
+        // 1.6× power-gem multiplier and send a 100% garbage payload to the rival.
+        if (totalCleared > 0) {
+          const opponent = (this.id === 1) ? p2 : p1;
+          const dmg = Math.floor(totalCleared * 3 * 1.6);
+          opponent.hp = Math.max(0, opponent.hp - dmg);
+          this.superMeter = Math.min(100, this.superMeter + totalCleared * 6);
+          this.score += Math.floor(dmg * 10);
+          if (this.score > highScore) { highScore = this.score; dset(0, highScore); }
+          opponent.receiveGarbage(Math.max(1, Math.ceil(totalCleared / 2)));
+
+          cameraShake = Math.max(cameraShake, 14);
+          flashFrames = Math.max(flashFrames, 4);
+          this.anim = 'UPPERCUT';
+          this.animTimer = 72;
+          opponent.anim = 'FLINCH';
+          opponent.animTimer = 72;
+          globalFloatingTexts.push(new FloatingText(`-${dmg} DIAMOND!`, 58, 42, 10));
         }
       }
 
@@ -1145,13 +1185,17 @@
       }
 
       evaluateMatches() {
-        // === PUZZLE FIGHTER: ONLY CRASH GEMS TRIGGER CLEARS ===
-        // A crash gem (type 5-8) clears when adjacent to a same-color normal gem.
-        // It flood-fills and removes all connected gems of that color.
-        // No Puyo-style cluster matching.
-        let matched = false;
+        // === DUAL DETONATION SYSTEM (GDD §4.5) ===
+        // Primary:   Crash gems (5-8) flood-fill & clear all connected same-color gems.
+        // Secondary: 4+ contiguous same-color NORMAL gems auto-pop without a crash orb.
+        //
+        // This prevents boards from stalling while players wait for rare crash orbs,
+        // while keeping crash orbs the higher-damage strategic option.
         let toClear = Array(ROWS).fill(null).map(() => Array(COLS).fill(false));
 
+        // --- PRIMARY: crash orb detonation ---
+        // A crash gem (5-8) adjacent to a same-color normal gem flood-fills and
+        // clears every connected gem of that color.
         for (let r = 0; r < ROWS; r++) {
           for (let c = 0; c < COLS; c++) {
             const orb = this.grid[r][c];
@@ -1167,7 +1211,6 @@
               });
 
               if (triggered) {
-                matched = true;
                 toClear[r][c] = true;
                 this.floodFillClear(r, c, targetColor, toClear);
               }
@@ -1175,15 +1218,46 @@
           }
         }
 
+        // Count how many cells the primary detonation claimed.
+        let primaryCount = 0;
+        for (let r = 0; r < ROWS; r++) {
+          for (let c = 0; c < COLS; c++) {
+            if (toClear[r][c]) primaryCount++;
+          }
+        }
+
+        // --- SECONDARY: 4+ contiguous normal-gem cluster auto-pop ---
+        // Only auto-pops clusters that are NOT already being cleared by a crash orb.
+        let secondaryCount = 0;
+        if (primaryCount === 0) {
+          const visited = Array(ROWS).fill(null).map(() => Array(COLS).fill(false));
+          for (let r = 0; r < ROWS; r++) {
+            for (let c = 0; c < COLS; c++) {
+              const g = this.grid[r][c];
+              if (g >= 1 && g <= 4 && !visited[r][c] && !toClear[r][c]) {
+                const group = [];
+                this.getClusterGroup(r, c, g, visited, group);
+                if (group.length >= 4) {
+                  group.forEach(([gr, gc]) => {
+                    toClear[gr][gc] = true;
+                    secondaryCount++;
+                  });
+                }
+              }
+            }
+          }
+        }
+
+        const matched = primaryCount > 0 || secondaryCount > 0;
         if (matched) {
-          this.pendingClear = { toClear };
+          this.pendingClear = { toClear, primaryCount, secondaryCount };
         }
         return matched;
       }
 
       clearPendingMatches() {
         if (!this.pendingClear) return;
-        const { toClear } = this.pendingClear;
+        const { toClear, primaryCount, secondaryCount } = this.pendingClear;
         let clearCount = 0;
         let powerGemCount = 0;
 
@@ -1231,10 +1305,13 @@
           dset(1, maxComboTrack);
         }
 
-        // Damage: base from gem count, power gem bonus, chain multiplier
-        const powerBonus = powerGemCount > 0 ? 1.5 : 1.0;
+        // Damage: primary clears deal full power; secondary auto-pops deal 50%
+        // (GDD §4.5 balancing). Power gems and chains amplify the result.
+        const isPrimary = primaryCount > 0;
+        const powerBonus = powerGemCount > 0 ? 1.6 : 1.0;
         const chainMult = this.comboCount;
-        const dmg = Math.floor(clearCount * 3 * powerBonus * chainMult);
+        const dmgMult = isPrimary ? 1.0 : 0.5;
+        const dmg = Math.floor(clearCount * 3 * powerBonus * chainMult * dmgMult);
         const opponent = (this.id === 1) ? p2 : p1;
 
         opponent.hp = Math.max(0, opponent.hp - dmg);
@@ -1246,8 +1323,10 @@
           dset(0, highScore);
         }
 
-        // Garbage: Puzzle Fighter style — half of cleared gems + chain bonus
-        const garbageToSend = Math.max(1, Math.ceil(clearCount / 2) + (this.comboCount - 1) * 2);
+        // Garbage: full payload for primary detonations, 50% for secondary auto-pops.
+        const garbageToSend = isPrimary
+          ? Math.max(1, Math.ceil(clearCount / 2) + (this.comboCount - 1) * 2)
+          : Math.max(1, Math.floor(clearCount / 2));
         opponent.receiveGarbage(garbageToSend);
 
         flashFrames = 3;
@@ -1334,9 +1413,9 @@
         }
       }
 
-      update() {
-        if (gameState !== 'PLAYING') return;
-
+      // Visual timers must tick every frame so punch/flinch retract animations
+      // resolve even while the round outcome (KO) is being shown.
+      tickVisuals() {
         this.pulseAngle += 0.12;
 
         for (let r = 0; r < ROWS; r++) {
@@ -1350,7 +1429,6 @@
 
         if (this.animTimer > 0) {
           this.animTimer--;
-          // BUG-004 FIX: Allow retract phase to complete before snapping to IDLE
           if (this.animTimer <= 0) {
             this.animTimer = 0;
             this.anim = 'IDLE';
@@ -1366,9 +1444,17 @@
       }
 
       update() {
+        // Always advance cosmetic timers (animTimer decay resets boxers to IDLE,
+        // pulseAngle drives the rainbow diamond shimmer, squish settles gem landings).
+        this.tickVisuals();
+
+        // Freeze the puzzle state machine once a round has been decided.
+        if (gameState !== 'PLAYING') return;
+
         if (this.state === 'SPAWN') {
+          // spawnPair() transitions to 'FALLING' on success or triggers a KO
+          // on board overflow, so we must not force the state back to FALLING here.
           this.spawnPair();
-          this.state = 'FALLING';
         } else if (this.state === 'CLEARING') {
           this.clearTimer--;
           if (this.clearTimer <= 0) {
@@ -2364,11 +2450,22 @@
 
     function startMatch() {
       switchMusicTrack();
+
+      // In 1P vs CPU the AI opponent picks a random fighter different from P1
+      // so arcade runs vary across the 14-fighter roster instead of always Deen.
+      if (selectedModeIdx === 0) {
+        do { p2SelectIdx = Math.floor(Math.random() * ROSTER.length); }
+        while (p2SelectIdx === p1SelectIdx);
+      }
+
       const f1 = ROSTER[p1SelectIdx];
       const f2 = ROSTER[p2SelectIdx];
 
       p1.name = f1.name;
       p2.name = f2.name;
+      p1.score = 0; p2.score = 0;
+      p1.comboCount = 0; p2.comboCount = 0;
+      p1.dropCount = 0; p2.dropCount = 0;
 
       if (selectedModeIdx === 0) { // 1P vs CPU
         p1.isAi = false;
@@ -2403,6 +2500,26 @@
       p1.pair = null;
       p2.pair = null;
 
+      // Clear any leftover animation / chain state from the previous round so
+      // rematches start from a neutral idle pose with no pending clears.
+      for (const p of [p1, p2]) {
+        p.anim = 'IDLE';
+        p.animTimer = 0;
+        p.dropTimer = 0;
+        p.lockDelay = 0;
+        p.aiTimer = 0;
+        p.clearTimer = 0;
+        p.pendingClear = null;
+        p.comboCount = 0;
+      }
+      impactTriggeredP1 = false;
+      impactTriggeredP2 = false;
+      impactFxTimer = 0;
+      cameraShake = 0;
+      flashFrames = 0;
+      globalParticles = [];
+      globalFloatingTexts = [];
+
       roundTimer = 99;
       timerFrameCounter = 0;
       gameState = 'PLAYING';
@@ -2435,20 +2552,39 @@
       globalFloatingTexts = globalFloatingTexts.filter(t => t.life > 0);
 
       if (gameState === 'PLAYING') {
-        timerFrameCounter++;
-        if (timerFrameCounter >= 60) {
-          timerFrameCounter = 0;
-          if (roundTimer > 0) {
-            roundTimer--;
+        // HP-based knockout: a fighter reduced to 0 HP loses immediately.
+        // Without this check the match could only end via timer expiry or board
+        // overflow, leaving damage dealt by gem detonations meaningless.
+        if (p1.hp <= 0 || p2.hp <= 0) {
+          gameState = 'KO';
+          appState = 'KO';
+          play808Sfx('ko');
+          cameraShake = Math.max(cameraShake, 14);
+          flashFrames = Math.max(flashFrames, 5);
+          if (p1.hp <= 0 && p2.hp <= 0) {
+            koMessage = 'DOUBLE K.O.!';
+          } else if (p1.hp <= 0) {
+            koMessage = 'K.O.! ' + (p2.name || 'P2') + ' WINS!';
           } else {
-            gameState = 'KO';
-            appState = 'KO';
-            if (p1.hp > p2.hp) {
-              koMessage = 'TIME! ' + p1.name + ' WINS!';
-            } else if (p2.hp > p1.hp) {
-              koMessage = 'TIME! ' + p2.name + ' WINS!';
+            koMessage = 'K.O.! ' + (p1.name || 'P1') + ' WINS!';
+          }
+        } else {
+          timerFrameCounter++;
+          if (timerFrameCounter >= 60) {
+            timerFrameCounter = 0;
+            if (roundTimer > 0) {
+              roundTimer--;
             } else {
-              koMessage = 'TIME! DRAW!';
+              gameState = 'KO';
+              appState = 'KO';
+              play808Sfx('ko');
+              if (p1.hp > p2.hp) {
+                koMessage = 'TIME! ' + p1.name + ' WINS!';
+              } else if (p2.hp > p1.hp) {
+                koMessage = 'TIME! ' + p2.name + ' WINS!';
+              } else {
+                koMessage = 'TIME! DRAW!';
+              }
             }
           }
         }
@@ -2478,11 +2614,22 @@
     requestAnimationFrame(loop);
 
     // === UNIFIED KEYBOARD CONTROL MANAGER ===
+    const isStartKey = (k) => k === 'x' || k === 'X' || k === 'z' || k === 'Z' || k === 'Enter' || k === ' ';
+
+    // Returns to the character select screen for an immediate rematch.
+    function rematchToCharSelect() {
+      appState = 'CHAR_SELECT';
+      gameState = 'PLAYING';
+      p1Locked = false;
+      p2Locked = false;
+      lockCountdown = -1;
+    }
+
     window.addEventListener('keydown', (e) => {
       initAudio();
 
       if (appState === 'TITLE') {
-        if (e.key === 'x' || e.key === 'X' || e.key === 'z' || e.key === 'Z' || e.key === 'Enter' || e.key === ' ') {
+        if (isStartKey(e.key)) {
           appState = 'MODE_SELECT';
         }
         return;
@@ -2491,7 +2638,7 @@
       if (appState === 'MODE_SELECT') {
         if (e.key === 'ArrowUp') selectedModeIdx = (selectedModeIdx + 2) % 3;
         if (e.key === 'ArrowDown') selectedModeIdx = (selectedModeIdx + 1) % 3;
-        if (e.key === 'x' || e.key === 'X' || e.key === 'z' || e.key === 'Z' || e.key === 'Enter') {
+        if (isStartKey(e.key)) {
           appState = 'CHAR_SELECT';
           p1Locked = false;
           p2Locked = false;
@@ -2509,7 +2656,7 @@
           if (e.key === 'ArrowDown') p1SelectIdx = (p1SelectIdx + 7) % 14;
         }
 
-        if (e.key === 'x' || e.key === 'X' || e.key === 'z' || e.key === 'Z' || e.key === 'Enter') {
+        if (isStartKey(e.key)) {
           p1Locked = true;
           // In 1P vs CPU or CPU vs CPU, auto lock P2
           p2Locked = true;
@@ -2517,16 +2664,38 @@
         return;
       }
 
-      // IN BATTLE / KO
+      // KO: allow an immediate rematch instead of softlocking on the finisher.
+      if (appState === 'KO') {
+        if (isStartKey(e.key) || e.key === 'r' || e.key === 'R') {
+          rematchToCharSelect();
+        }
+        return;
+      }
+
+      // IN BATTLE
       if (appState === 'PLAYING') {
-        if (e.key === 'ArrowLeft') p1.move(-1);
-        if (e.key === 'ArrowRight') p1.move(1);
-        if (e.key === 'ArrowDown') p1.dropSoft();
-        if (e.key === 'ArrowUp') p1.dropHard();
+        // Player 1 (arrow keys + Z/X)
+        if (e.key === 'ArrowLeft') { e.preventDefault(); p1.move(-1); }
+        if (e.key === 'ArrowRight') { e.preventDefault(); p1.move(1); }
+        if (e.key === 'ArrowDown') { e.preventDefault(); p1.dropSoft(); }
+        if (e.key === 'ArrowUp') { e.preventDefault(); p1.dropHard(); }
         if (e.key === 'z' || e.key === 'Z') p1.rotate(-1);
         if (e.key === 'x' || e.key === 'X') {
           if (p1.superMeter >= 100) p1.triggerSuper();
           else p1.rotate(1);
+        }
+
+        // Player 2 local controls (WASD + Q/E) — only active in 2P VERSUS mode.
+        if (gameMode === 'VS_LOCAL') {
+          if (e.key === 'a' || e.key === 'A') p2.move(-1);
+          if (e.key === 'd' || e.key === 'D') p2.move(1);
+          if (e.key === 's' || e.key === 'S') p2.dropSoft();
+          if (e.key === 'w' || e.key === 'W') p2.dropHard();
+          if (e.key === 'q' || e.key === 'Q') p2.rotate(-1);
+          if (e.key === 'e' || e.key === 'E') {
+            if (p2.superMeter >= 100) p2.triggerSuper();
+            else p2.rotate(1);
+          }
         }
       }
     });
@@ -2574,6 +2743,7 @@
       if (appState === 'TITLE') appState = 'MODE_SELECT';
       else if (appState === 'MODE_SELECT') { appState = 'CHAR_SELECT'; p1Locked = false; p2Locked = false; }
       else if (appState === 'CHAR_SELECT') { p1Locked = true; p2Locked = true; }
+      else if (appState === 'KO') rematchToCharSelect();
       else if (appState === 'PLAYING') p1.rotate(-1);
     });
 
@@ -2581,6 +2751,7 @@
       if (appState === 'TITLE') appState = 'MODE_SELECT';
       else if (appState === 'MODE_SELECT') { appState = 'CHAR_SELECT'; p1Locked = false; p2Locked = false; }
       else if (appState === 'CHAR_SELECT') { p1Locked = true; p2Locked = true; }
+      else if (appState === 'KO') rematchToCharSelect();
       else if (appState === 'PLAYING') {
         if (p1.superMeter >= 100) p1.triggerSuper();
         else p1.rotate(1);
@@ -2589,11 +2760,15 @@
 
     bindBtn('btnMode', () => {
       appState = 'CHAR_SELECT';
+      gameState = 'PLAYING';
       p1Locked = false; p2Locked = false;
+      lockCountdown = -1;
     });
 
     bindBtn('btnReset', () => {
       appState = 'TITLE';
+      gameState = 'PLAYING';
+      lockCountdown = -1;
     });
 
     bindBtn('btnAudio', () => {
@@ -2611,6 +2786,8 @@
       } else if (appState === 'MODE_SELECT') {
         appState = 'CHAR_SELECT';
         p1Locked = false; p2Locked = false;
+      } else if (appState === 'KO') {
+        rematchToCharSelect();
       } else if (appState === 'CHAR_SELECT') {
         const rect = canvasEl.getBoundingClientRect();
         const clickX = ((e.clientX - rect.left) / rect.width) * 128;
