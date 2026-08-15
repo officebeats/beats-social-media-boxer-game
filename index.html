@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>CRASH OUT: RING RUSH (v1.2-alpha) — PICO-8 Native Transparent Boxing</title>
+  <title>CRASH OUT: RING RUSH (v1.3.0) — PICO-8 Native Transparent Boxing</title>
   <style>
     :root {
       --pico-black: #000000;
@@ -48,7 +48,7 @@
       image-rendering: pixelated;
     }
 
-    /* 100% NATIVE EDGE-TO-EDGE PICO-8 GAME CONTAINER */
+    /* AUTHENTIC RETRO ARCADE CABINET BEZEL VIEWPORT */
     .pico8-viewport {
       position: relative;
       width: 100vw;
@@ -57,30 +57,30 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      background-color: var(--pico-black);
+      background: radial-gradient(circle at center, #1D2B53 0%, #000000 100%);
       overflow: hidden;
     }
 
-    /* EDGE-TO-EDGE PICO-8 CANVAS (FILLS VIEWPORT DIRECTLY) */
+    /* EDGE-TO-EDGE PICO-8 CANVAS (WITH CRT CABINET CASING) */
     canvas#picoCanvas {
-      width: 100vw;
-      height: 100vh;
-      height: 100dvh;
-      max-width: 100vw;
-      max-height: 100vh;
+      width: min(100vw, 100vh);
+      height: min(100vw, 100vh);
+      aspect-ratio: 1 / 1;
       object-fit: contain;
       image-rendering: pixelated;
       image-rendering: crisp-edges;
       display: block;
-      background-color: var(--pico-dark-blue);
+      background-color: var(--pico-black);
+      box-shadow: 0px 0px 24px rgba(0, 0, 0, 0.9), inset 0px 0px 6px rgba(0, 0, 0, 0.8);
+      border: 2px solid var(--pico-dark-purple);
     }
 
-    /* PICO-8 NATIVE OVERLAY CONTROLS (SEAMLESS EDGE-TO-EDGE) */
+    /* PICO-8 NATIVE ARCADE TOUCH CONTROLS OVERLAY */
     .pico8-touch-controls {
       position: absolute;
-      bottom: max(10px, env(safe-area-inset-bottom));
-      left: 10px;
-      right: 10px;
+      bottom: max(8px, env(safe-area-inset-bottom));
+      left: 12px;
+      right: 12px;
       display: flex;
       justify-content: space-between;
       align-items: flex-end;
@@ -88,39 +88,37 @@
       pointer-events: none;
     }
 
-    /* AUTHENTIC PICO-8 PIXEL D-PAD OVERLAY */
+    /* AUTHENTIC JAPANESE ARCADE D-PAD (MICROSWITCH BEZELS) */
     .dpad-container {
       display: grid;
-      grid-template-columns: repeat(3, min(48px, 13vw));
-      grid-template-rows: repeat(3, min(48px, 13vw));
-      gap: 4px;
+      grid-template-columns: repeat(3, min(44px, 12vw));
+      grid-template-rows: repeat(3, min(44px, 12vw));
+      gap: 3px;
       pointer-events: auto;
     }
 
     .btn-ctrl {
-      background-color: rgba(126, 37, 83, 0.85);
-      border: 3px solid var(--pico-lavender);
-      color: var(--pico-white);
-      border-radius: 0px;
-      font-family: 'Courier New', monospace;
+      background: linear-gradient(180deg, #5F574F 0%, #1D2B53 100%);
+      border: 2px solid var(--pico-light-gray);
+      color: var(--pico-yellow);
+      border-radius: 4px;
+      font-family: monospace;
       font-weight: 900;
-      font-size: 18px;
+      font-size: 16px;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      box-shadow: inset -2px -2px 0px var(--pico-black), inset 2px 2px 0px var(--pico-pink), 3px 3px 0px var(--pico-black);
-      text-shadow: 1px 1px 0px var(--pico-black);
-      backdrop-filter: blur(2px);
+      box-shadow: inset 1px 1px 0px rgba(255,255,255,0.4), 2px 2px 0px #000000;
+      text-shadow: 1px 1px 0px #000000;
+      user-select: none;
     }
 
     .btn-ctrl:active, .btn-ctrl.active {
-      transform: translate(2px, 2px);
-      box-shadow: inset 2px 2px 0px var(--pico-black), 1px 1px 0px var(--pico-black);
-      background-color: var(--pico-blue);
+      transform: translate(1px, 1px);
+      box-shadow: inset 1px 1px 0px #000000, 1px 1px 0px #000000;
+      background: var(--pico-orange);
       color: var(--pico-black);
-      border-color: var(--pico-white);
-      text-shadow: none;
     }
 
     .dpad-up { grid-column: 2; grid-row: 1; }
@@ -128,76 +126,72 @@
     .dpad-down { grid-column: 2; grid-row: 2; }
     .dpad-right { grid-column: 3; grid-row: 2; }
 
-    /* AUTHENTIC PICO-8 PIXEL ACTION BUTTONS OVERLAY */
+    /* ARCADE SANWA-STYLE PUSH BUTTONS */
     .action-buttons {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
       pointer-events: auto;
     }
 
     .btn-action {
-      width: min(62px, 16vw);
-      height: min(62px, 16vw);
-      border-radius: 0px;
-      font-family: 'Courier New', monospace;
-      font-size: 16px;
+      width: min(54px, 15vw);
+      height: min(54px, 15vw);
+      border-radius: 50%;
+      font-family: monospace;
+      font-size: 14px;
       font-weight: 900;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      box-shadow: 3px 3px 0px var(--pico-black);
-      border: 3px solid var(--pico-white);
+      box-shadow: 0px 4px 0px #000000, inset 0px 2px 0px rgba(255,255,255,0.5);
+      border: 3px solid var(--pico-black);
       cursor: pointer;
-      text-shadow: 1px 1px 0px var(--pico-black);
+      user-select: none;
     }
 
     .btn-action:active, .btn-action.active {
-      transform: translate(2px, 2px);
-      box-shadow: 1px 1px 0px var(--pico-black);
+      transform: translateY(3px);
+      box-shadow: 0px 1px 0px #000000, inset 0px 1px 0px rgba(0,0,0,0.5);
     }
 
     .btn-o {
-      background-color: rgba(255, 163, 0, 0.9);
-      border-color: var(--pico-yellow);
+      background: radial-gradient(circle at 35% 35%, #FFEC27 0%, #FFA300 70%, #AB5236 100%);
       color: var(--pico-black);
-      box-shadow: inset -3px -3px 0px var(--pico-brown), inset 3px 3px 0px var(--pico-yellow), 3px 3px 0px var(--pico-black);
-      text-shadow: none;
     }
 
     .btn-x {
-      background-color: rgba(255, 119, 168, 0.9);
-      border-color: var(--pico-white);
-      color: var(--pico-black);
-      box-shadow: inset -3px -3px 0px var(--pico-dark-purple), inset 3px 3px 0px var(--pico-white), 3px 3px 0px var(--pico-black);
-      text-shadow: none;
+      background: radial-gradient(circle at 35% 35%, #FF77A8 0%, #FF004D 70%, #7E2553 100%);
+      color: var(--pico-white);
+      text-shadow: 1px 1px 0px var(--pico-black);
     }
 
     .btn-x.super-ready {
-      animation: pixelPulseSuper 0.4s steps(2, end) infinite;
-      border-color: var(--pico-yellow);
+      animation: arcadeSuperFlash 0.3s steps(2, end) infinite;
+      box-shadow: 0px 0px 12px var(--pico-yellow), 0px 4px 0px #000000;
     }
 
-    @keyframes pixelPulseSuper {
-      0% { background-color: var(--pico-pink); }
-      50% { background-color: var(--pico-yellow); }
-      100% { background-color: var(--pico-pink); }
+    @keyframes arcadeSuperFlash {
+      0% { background: radial-gradient(circle at 35% 35%, #FFF1E8 0%, #FFEC27 70%, #FFA300 100%); }
+      50% { background: radial-gradient(circle at 35% 35%, #FF77A8 0%, #FF004D 70%, #7E2553 100%); }
+      100% { background: radial-gradient(circle at 35% 35%, #FFF1E8 0%, #FFEC27 70%, #FFA300 100%); }
     }
 
     .btn-action span {
-      font-size: 8px;
+      font-size: 7px;
       font-weight: 900;
       margin-top: 1px;
       letter-spacing: 0.5px;
+      text-transform: uppercase;
     }
 
-    /* TOP OPTIONS BAR OVERLAY */
+    /* TOP ARCADE MARQUEE OPTIONS BAR */
     .pico8-top-bar {
       position: absolute;
       top: max(6px, env(safe-area-inset-top));
-      left: 10px;
-      right: 10px;
+      left: 12px;
+      right: 12px;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -207,23 +201,23 @@
 
     .btn-opt {
       pointer-events: auto;
-      background-color: rgba(29, 43, 83, 0.85);
-      border: 2px solid var(--pico-blue);
-      color: var(--pico-white);
+      background: linear-gradient(180deg, #1D2B53 0%, #000000 100%);
+      border: 1px solid var(--pico-blue);
+      color: var(--pico-yellow);
       padding: 4px 8px;
-      border-radius: 0px;
-      font-family: 'Courier New', monospace;
-      font-size: 10px;
-      font-weight: 800;
+      border-radius: 3px;
+      font-family: monospace;
+      font-size: 9px;
+      font-weight: 900;
       cursor: pointer;
       text-align: center;
-      box-shadow: inset -2px -2px 0px var(--pico-black), inset 2px 2px 0px var(--pico-lavender), 2px 2px 0px var(--pico-black);
+      box-shadow: 1px 1px 0px #000000;
+      letter-spacing: 0.5px;
     }
 
     .btn-opt:active {
       transform: translate(1px, 1px);
-      box-shadow: inset 2px 2px 0px var(--pico-black), 1px 1px 0px var(--pico-black);
-      background-color: var(--pico-blue);
+      background: var(--pico-blue);
       color: var(--pico-black);
     }
   </style>
@@ -239,7 +233,7 @@
     </div>
 
     <!-- 100% EDGE-TO-EDGE PICO-8 ENGINE CANVAS -->
-    <canvas id="picoCanvas" width="128" height="128"></canvas>
+    <canvas id="picoCanvas" width="256" height="256"></canvas>
 
     <!-- NATIVE PICO-8 TOUCH CONTROLS OVERLAY -->
     <div class="pico8-touch-controls">
@@ -650,6 +644,46 @@
           gain.connect(audioCtx.destination);
           osc.start(t);
           osc.stop(t + 0.8);
+        } else if (type === 'nav') {
+          // Cursor move blip (menus)
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'square';
+          osc.frequency.setValueAtTime(700, t);
+          osc.frequency.exponentialRampToValueAtTime(500, t + 0.04);
+          gain.gain.setValueAtTime(0.08, t);
+          gain.gain.linearRampToValueAtTime(0.01, t + 0.04);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(t);
+          osc.stop(t + 0.04);
+        } else if (type === 'confirm') {
+          // Lock-in / confirm beep (menus)
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'square';
+          osc.frequency.setValueAtTime(330, t);
+          osc.frequency.exponentialRampToValueAtTime(660, t + 0.07);
+          gain.gain.setValueAtTime(0.12, t);
+          gain.gain.linearRampToValueAtTime(0.01, t + 0.07);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(t);
+          osc.stop(t + 0.07);
+        } else if (type === 'bell') {
+          // Boxing round bell with dual resonant overtones
+          const osc1 = audioCtx.createOscillator();
+          const osc2 = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc1.type = 'sine'; osc2.type = 'sine';
+          osc1.frequency.setValueAtTime(1180, t);
+          osc2.frequency.setValueAtTime(2360, t);
+          gain.gain.setValueAtTime(0.4, t);
+          gain.gain.exponentialRampToValueAtTime(0.001, t + 0.95);
+          osc1.connect(gain); osc2.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc1.start(t); osc2.start(t);
+          osc1.stop(t + 0.95); osc2.stop(t + 0.95);
         }
       } catch (e) {}
     }
@@ -658,8 +692,116 @@
     const ROWS = 12;
     const CELL_W = 6;
     const CELL_H = 8;
-    const GEM_COLORS = [8, 12, 11, 10];
+    const GEM_COLORS = [8, 12, 11, 10]; // Red(8), Blue(12), Green(11), Yellow(10)
 
+    // =========================================================================
+    // 🥊 ALL 14 FIGHTERS: SIGNATURE GARBAGE DROP TABLES (SPF2T FORMAT)
+    // 1=Red, 2=Blue, 3=Green, 4=Yellow
+    // =========================================================================
+    const FIGHTER_GARBAGE_PATTERNS = {
+      broner: [ // Vertical Columns (The Problem - solid defensive pillars)
+        [1, 1, 4, 4, 2, 2],
+        [1, 1, 4, 4, 2, 2],
+        [2, 2, 1, 1, 4, 4],
+        [2, 2, 1, 1, 4, 4]
+      ],
+      deen: [ // Diagonal Stairs (Southpaw Lightning - natural cascade chain reaction)
+        [1, 2, 3, 4, 1, 2],
+        [2, 3, 4, 1, 2, 3],
+        [3, 4, 1, 2, 3, 4],
+        [4, 1, 2, 3, 4, 1]
+      ],
+      ryan: [ // Solid Horizontal Stripes (Flash Left Hook - cuts across board)
+        [1, 1, 1, 1, 1, 1],
+        [2, 2, 2, 2, 2, 2],
+        [4, 4, 4, 4, 4, 4],
+        [3, 3, 3, 3, 3, 3]
+      ],
+      n3on: [ // Chaotic Alternating Pairs (Crash Out Spam - high variance)
+        [3, 4, 3, 4, 3, 4],
+        [4, 3, 4, 3, 4, 3],
+        [1, 2, 1, 2, 1, 2],
+        [2, 1, 2, 1, 2, 1]
+      ],
+      rayj: [ // Center Shield Pyramid (Glasses Flash Counter)
+        [2, 1, 4, 4, 1, 2],
+        [1, 4, 2, 2, 4, 1],
+        [4, 2, 1, 1, 2, 4],
+        [2, 1, 3, 3, 1, 2]
+      ],
+      blueface: [ // Outer Edge Piles (Wild Brawler - traps corners)
+        [2, 2, 1, 4, 2, 2],
+        [2, 2, 4, 1, 2, 2],
+        [1, 1, 2, 2, 1, 1],
+        [4, 4, 2, 2, 4, 4]
+      ],
+      chrisean: [ // Heavy Red/Yellow Blitz (Baddie Overhand - aggro flood)
+        [1, 1, 1, 4, 4, 4],
+        [4, 4, 4, 1, 1, 1],
+        [1, 4, 1, 4, 1, 4],
+        [4, 1, 4, 1, 4, 1]
+      ],
+      rampage: [ // Heavy Symmetrical 3x2 Blocks (Rampage Slam)
+        [1, 1, 1, 2, 2, 2],
+        [1, 1, 1, 2, 2, 2],
+        [4, 4, 4, 3, 3, 3],
+        [4, 4, 4, 3, 3, 3]
+      ],
+      adin: [ // Kick Raid Cascade (Stream Raid Bomb - alternating 2-step columns)
+        [2, 2, 1, 1, 2, 2],
+        [4, 4, 3, 3, 4, 4],
+        [1, 1, 2, 2, 1, 1],
+        [3, 3, 4, 4, 3, 3]
+      ],
+      charleston: [ // Anti-Pattern Stagger (Microphone Rant - erratic breaks)
+        [4, 1, 2, 3, 4, 1],
+        [3, 2, 1, 4, 3, 2],
+        [1, 4, 3, 2, 1, 4],
+        [2, 3, 4, 1, 2, 3]
+      ],
+      walid: [ // Reverse Diagonal Steps (Shark Attack Combo - mirrors Deen)
+        [4, 3, 2, 1, 4, 3],
+        [3, 2, 1, 4, 3, 2],
+        [2, 1, 4, 3, 2, 1],
+        [1, 4, 3, 2, 1, 4]
+      ],
+      abrown: [ // CT Checkerboard Dance (CT KO Dance - flashy alternating grids)
+        [4, 1, 4, 1, 4, 1],
+        [1, 4, 1, 4, 1, 4],
+        [2, 3, 2, 3, 2, 3],
+        [3, 2, 3, 2, 3, 2]
+      ],
+      tank: [ // Heavy Red Power Slabs (Tank Uppercut - boss tier)
+        [1, 1, 1, 1, 1, 1],
+        [1, 1, 1, 1, 1, 1],
+        [4, 4, 2, 2, 3, 3],
+        [4, 4, 2, 2, 3, 3]
+      ],
+      floyd: [ // The 50-0 Perfect Checkerboard (Final Boss Tier)
+        [1, 2, 3, 4, 1, 2],
+        [2, 1, 4, 3, 2, 1],
+        [3, 4, 1, 2, 3, 4],
+        [4, 3, 2, 1, 4, 3]
+      ]
+    };
+
+    // Viral Kick warehouse stream live ticker comments
+    const KICK_STREAM_CHAT = [
+      'W IN THE CHAT',
+      'BRONER: "YOU CAN SEE IT COMING!"',
+      'DEEN: "LIGHTNING SOUTHPAW OUT THE GATES!"',
+      'CLIP THAT RIGHT NOW!',
+      'BAND CANNOT LOSE!',
+      '50-0 MONEY TEAM FOREVER',
+      'HE CAUGHT HIM SLIPPING!',
+      'KICK WAREHOUSE IS LIVE!',
+      'CT KO DANCE TIME!',
+      'SHARK COMBO ON DECK!',
+      'LOCK IN OR GET KNOCKED OUT!',
+      'W STREAM CHAT SPAM 777'
+    ];
+    let streamChatIdx = 0;
+    let streamChatTimer = 0;
     let gameMode = 'AI_VS_AI';
     let cameraShake = 0;
     let flashFrames = 0;
@@ -764,10 +906,12 @@
         this.offsetX = offsetX;
         this.offsetY = 16;
         this.isAi = isAi;
+        this.fighterId = (id === 1 ? 'broner' : 'deen');
 
         this.grid = Array(ROWS).fill(null).map(() => Array(COLS).fill(0));
         this.powerGems = Array(ROWS).fill(null).map(() => Array(COLS).fill(false));
         this.counterTimers = Array(ROWS).fill(null).map(() => Array(COLS).fill(3));
+        this.counterColors = Array(ROWS).fill(null).map(() => Array(COLS).fill(0));
         this.squish = Array(ROWS).fill(null).map(() => Array(COLS).fill(0));
 
         this.hp = 100;
@@ -775,6 +919,8 @@
         this.score = 0;
         this.comboCount = 0;
         this.dropCount = 0;
+        this.pityBreakerCount = 0;
+        this.pendingGarbage = 0; // Incoming garbage waiting in Warning Tray
         this.pulseAngle = 0;
 
         this.pair = null;
@@ -795,6 +941,7 @@
 
       spawnPair() {
         this.dropCount++;
+        this.pityBreakerCount++;
         this.dropTimer = 0;
         this.lockDelay = 0;
 
@@ -818,17 +965,28 @@
         }
         this.aiTargetCol = Math.random() < 0.2 ? Math.floor(Math.random() * COLS) : bestC;
 
-        // === PUZZLE FIGHTER GEM GENERATION ===
+        // === AUTHENTIC PUZZLE FIGHTER GEM GENERATION ===
         // Diamond every 25 drops (original PF spec)
         if (this.dropCount % 25 === 0) {
           this.pair = { x: 2, y: 0, rot: 0, g1: 9, g2: Math.floor(Math.random() * 4) + 1, vy: 0 };
+          this.pityBreakerCount = 0;
         } else {
-          // Each gem has independent chance of being a crash gem (~18%)
-          const makeGem = () => {
-            const color = Math.floor(Math.random() * 4) + 1;
-            return Math.random() < 0.18 ? (color + 4) : color; // crash = color+4
+          // High breaker frequency (~32%) + Guaranteed breaker every 3 drops
+          const forceBreaker = (this.pityBreakerCount >= 3);
+          const color1 = Math.floor(Math.random() * 4) + 1;
+          const color2 = Math.floor(Math.random() * 4) + 1;
+
+          let isCrash1 = forceBreaker || (Math.random() < 0.32);
+          let isCrash2 = !isCrash1 && (Math.random() < 0.22);
+
+          if (isCrash1 || isCrash2) this.pityBreakerCount = 0;
+
+          this.pair = {
+            x: 2, y: 0, rot: 0,
+            g1: isCrash1 ? (color1 + 4) : color1,
+            g2: isCrash2 ? (color2 + 4) : color2,
+            vy: 0
           };
-          this.pair = { x: 2, y: 0, rot: 0, g1: makeGem(), g2: makeGem(), vy: 0 };
         }
 
         if (this.grid[0][2] !== 0 || this.grid[1][2] !== 0) {
@@ -841,45 +999,207 @@
           const winner = (this.id === 1) ? p2 : p1;
           koMessage = 'K.O.! ' + (winner.name || 'WINNER') + ' WINS!';
           play808Sfx('ko');
-          cameraShake = Math.max(cameraShake, 12);
+          play808Sfx('bell');
+          cameraShake = Math.max(cameraShake, 14);
         } else {
           this.state = 'FALLING';
         }
       }
 
       triggerSuper() {
-        if (this.superMeter >= 100) {
-          this.superMeter = 0;
-          const opponent = (this.id === 1) ? p2 : p1;
+        if (this.superMeter < 100) {
+          this.rotate(1);
+          return;
+        }
+        this.superMeter = 0;
+        const opponent = (this.id === 1) ? p2 : p1;
+        const fId = this.fighterId || (this.id === 1 ? 'broner' : 'deen');
 
-          for (let r = ROWS - 3; r < ROWS; r++) {
-            for (let c = 0; c < COLS; c++) {
-              if (this.grid[r][c] !== 0) {
+        cameraShake = 20;
+        flashFrames = 8;
+        play808Sfx('super');
+        triggerHaptic(50);
+        this.anim = 'UPPERCUT';
+        opponent.anim = 'FLINCH';
+        this.animTimer = 72;
+        opponent.animTimer = 72;
+
+        switch (fId) {
+          case 'broner': {
+            // ABOUT BILLIONS / PHILLY SHELL: Converts own counter blocks to power gems & reflects 14 garbage
+            let converted = 0;
+            for (let r = 0; r < ROWS; r++) {
+              for (let c = 0; c < COLS; c++) {
+                if (this.grid[r][c] === 10) {
+                  this.grid[r][c] = 4; // Gold
+                  this.powerGems[r][c] = true;
+                  converted++;
+                }
+              }
+            }
+            this.detectPowerGems();
+            opponent.hp = Math.max(0, opponent.hp - 30);
+            opponent.receiveGarbage(14);
+            globalFloatingTexts.push(new FloatingText('ABOUT BILLIONS!', 48, 30, 10));
+            globalFloatingTexts.push(new FloatingText('-30 HP!', 58, 42, 8));
+            break;
+          }
+          case 'deen': {
+            // SOUTHPAW ROCKET FLURRY: Turns columns 2 & 3 into crash gems & deals 35 damage
+            for (let r = 0; r < ROWS; r++) {
+              if (this.grid[r][2] >= 1 && this.grid[r][2] <= 4) this.grid[r][2] += 4;
+              if (this.grid[r][3] >= 1 && this.grid[r][3] <= 4) this.grid[r][3] += 4;
+            }
+            opponent.hp = Math.max(0, opponent.hp - 35);
+            opponent.receiveGarbage(12);
+            globalFloatingTexts.push(new FloatingText('SOUTHPAW ROCKET!', 44, 30, 12));
+            globalFloatingTexts.push(new FloatingText('-35 HP!', 58, 42, 8));
+            break;
+          }
+          case 'ryan': {
+            // FLASH LEFT HOOK: Slices bottom 4 rows and sends 15 garbage
+            for (let r = ROWS - 4; r < ROWS; r++) {
+              for (let c = 0; c < COLS; c++) {
                 this.grid[r][c] = 0;
                 this.powerGems[r][c] = false;
               }
             }
+            this.applyGravity();
+            opponent.hp = Math.max(0, opponent.hp - 32);
+            opponent.receiveGarbage(15);
+            globalFloatingTexts.push(new FloatingText('FLASH LEFT HOOK!', 46, 30, 8));
+            break;
           }
-          // Settle floating gems after clearing bottom rows
-          this.applyGravity();
-
-          opponent.hp = Math.max(0, opponent.hp - 35);
-          opponent.receiveGarbage(10);
-
-          cameraShake = 16;
-          flashFrames = 6;
-          play808Sfx('super');
-          triggerHaptic(50);
-
-          this.anim = 'UPPERCUT';
-          opponent.anim = 'FLINCH';
-          this.animTimer = 72;
-          opponent.animTimer = 72;
-
-          globalFloatingTexts.push(new FloatingText('-35 HP!', 58, 30, 8));
-          globalFloatingTexts.push(new FloatingText('SUPER FINISHER!', 50, 40, 10));
-        } else {
-          this.rotate(1);
+          case 'n3on': {
+            // CRASH OUT SPAM: Randomly converts 8 gems into crash gems
+            let count = 0;
+            for (let r = ROWS - 1; r >= 0 && count < 8; r--) {
+              for (let c = 0; c < COLS && count < 8; c++) {
+                if (this.grid[r][c] >= 1 && this.grid[r][c] <= 4) {
+                  this.grid[r][c] += 4;
+                  count++;
+                }
+              }
+            }
+            opponent.hp = Math.max(0, opponent.hp - 25);
+            opponent.receiveGarbage(10);
+            globalFloatingTexts.push(new FloatingText('CRASH OUT SPAM!', 46, 30, 11));
+            break;
+          }
+          case 'rayj': {
+            // GLASSES FLASH COUNTER: Instantly converts all counter gems to normal gems
+            for (let r = 0; r < ROWS; r++) {
+              for (let c = 0; c < COLS; c++) {
+                if (this.grid[r][c] === 10) {
+                  this.grid[r][c] = Math.floor(Math.random() * 4) + 1;
+                  this.counterTimers[r][c] = 0;
+                }
+              }
+            }
+            opponent.hp = Math.max(0, opponent.hp - 28);
+            opponent.receiveGarbage(12);
+            globalFloatingTexts.push(new FloatingText('GLASSES FLASH!', 48, 30, 14));
+            break;
+          }
+          case 'blueface': {
+            // FAMOUS HOOK COMBO: Clears outer columns 0 and 5, deals 30 damage
+            for (let r = 0; r < ROWS; r++) {
+              this.grid[r][0] = 0; this.powerGems[r][0] = false;
+              this.grid[r][5] = 0; this.powerGems[r][5] = false;
+            }
+            this.applyGravity();
+            opponent.hp = Math.max(0, opponent.hp - 30);
+            opponent.receiveGarbage(14);
+            globalFloatingTexts.push(new FloatingText('FAMOUS HOOK!', 50, 30, 12));
+            break;
+          }
+          case 'chrisean': {
+            // BADDIE OVERHAND: Converts green and yellow gems to red power gems
+            for (let r = 0; r < ROWS; r++) {
+              for (let c = 0; c < COLS; c++) {
+                if (this.grid[r][c] === 3 || this.grid[r][c] === 4) this.grid[r][c] = 1;
+                if (this.grid[r][c] === 7 || this.grid[r][c] === 8) this.grid[r][c] = 5;
+              }
+            }
+            this.detectPowerGems();
+            opponent.hp = Math.max(0, opponent.hp - 32);
+            opponent.receiveGarbage(12);
+            globalFloatingTexts.push(new FloatingText('BADDIE OVERHAND!', 44, 30, 14));
+            break;
+          }
+          case 'rampage': {
+            // RAMPAGE SLAM: Heavy slam dealing 42 damage + 24px camera shake
+            cameraShake = 24;
+            opponent.hp = Math.max(0, opponent.hp - 42);
+            opponent.receiveGarbage(16);
+            globalFloatingTexts.push(new FloatingText('RAMPAGE SLAM!', 48, 30, 8));
+            globalFloatingTexts.push(new FloatingText('-42 HP!', 58, 42, 8));
+            break;
+          }
+          case 'adin': {
+            // STREAM RAID BOMB: Spawns double Rainbow Diamond
+            this.pair = { x: 2, y: 0, rot: 0, g1: 9, g2: 9, vy: 0 };
+            this.state = 'FALLING';
+            opponent.hp = Math.max(0, opponent.hp - 20);
+            globalFloatingTexts.push(new FloatingText('STREAM RAID BOMB!', 42, 30, 10));
+            break;
+          }
+          case 'charleston': {
+            // MICROPHONE RANT: Dumps 14 counter blocks with timer 7
+            opponent.hp = Math.max(0, opponent.hp - 26);
+            opponent.receiveGarbage(14);
+            globalFloatingTexts.push(new FloatingText('MICROPHONE RANT!', 44, 30, 10));
+            break;
+          }
+          case 'walid': {
+            // SHARK ATTACK COMBO: Clears blue and yellow gems and deals 34 damage
+            for (let r = 0; r < ROWS; r++) {
+              for (let c = 0; c < COLS; c++) {
+                if (this.grid[r][c] === 2 || this.grid[r][c] === 4 || this.grid[r][c] === 6 || this.grid[r][c] === 8) {
+                  this.grid[r][c] = 0;
+                  this.powerGems[r][c] = false;
+                }
+              }
+            }
+            this.applyGravity();
+            opponent.hp = Math.max(0, opponent.hp - 34);
+            opponent.receiveGarbage(12);
+            globalFloatingTexts.push(new FloatingText('SHARK ATTACK!', 48, 30, 12));
+            break;
+          }
+          case 'abrown': {
+            // CT KO DANCE: Flashy dance dumps 15 garbage blocks
+            opponent.hp = Math.max(0, opponent.hp - 30);
+            opponent.receiveGarbage(15);
+            globalFloatingTexts.push(new FloatingText('CT KO DANCE!', 50, 30, 10));
+            break;
+          }
+          case 'tank': {
+            // TANK UPPERCUT KO: Devastating 48 damage bomb + 18 garbage
+            cameraShake = 22;
+            opponent.hp = Math.max(0, opponent.hp - 48);
+            opponent.receiveGarbage(18);
+            globalFloatingTexts.push(new FloatingText('TANK UPPERCUT KO!', 42, 30, 8));
+            globalFloatingTexts.push(new FloatingText('-48 HP!', 58, 42, 8));
+            break;
+          }
+          case 'floyd': {
+            // 50-0 SHOULDER ROLL: Absorbs all incoming pending garbage and heals HP
+            const absorbed = this.pendingGarbage;
+            this.pendingGarbage = 0;
+            this.hp = Math.min(100, this.hp + 25 + Math.floor(absorbed * 1.5));
+            opponent.hp = Math.max(0, opponent.hp - 20);
+            opponent.receiveGarbage(12);
+            globalFloatingTexts.push(new FloatingText('50-0 SHOULDER ROLL!', 40, 30, 10));
+            globalFloatingTexts.push(new FloatingText('+25 HP HEAL!', 50, 42, 11));
+            break;
+          }
+          default: {
+            opponent.hp = Math.max(0, opponent.hp - 35);
+            opponent.receiveGarbage(12);
+            globalFloatingTexts.push(new FloatingText('SUPER FINISHER!', 48, 30, 10));
+            break;
+          }
         }
       }
 
@@ -989,29 +1309,35 @@
         this.updateCounterGems();
         this.applyGravity();
         this.processRainbowDiamond();
-        // Gravity again — diamond blast may have cleared gems leaving floaters
         this.applyGravity();
         this.detectPowerGems();
         
         const matchFound = this.evaluateMatches();
         if (matchFound) {
           this.state = 'CLEARING';
-          this.clearTimer = 36;
+          this.clearTimer = 34;
         } else {
           this.comboCount = 0;
-          this.state = 'SPAWN';
+          // After settling without clears, check if incoming garbage should drop
+          if (this.pendingGarbage > 0) {
+            this.dropPendingGarbage();
+            this.applyGravity();
+            this.state = 'GRAVITY';
+          } else {
+            this.state = 'SPAWN';
+          }
         }
       }
 
       updateCounterGems() {
-        // Puzzle Fighter: counter gems tick down by 1 each time a pair lands.
-        // When timer hits 0, they convert to a random normal gem.
+        // Puzzle Fighter: counter gems tick down by 1 each time a piece locks.
+        // When timer hits 0, they convert to their predetermined signature pattern color.
         for (let r = 0; r < ROWS; r++) {
           for (let c = 0; c < COLS; c++) {
             if (this.grid[r][c] === 10) {
               this.counterTimers[r][c]--;
               if (this.counterTimers[r][c] <= 0) {
-                this.grid[r][c] = Math.floor(Math.random() * 4) + 1;
+                this.grid[r][c] = this.counterColors[r][c] || (Math.floor(Math.random() * 4) + 1);
               }
             }
           }
@@ -1031,7 +1357,6 @@
       applyGravity() {
         let anyMoved = false;
         let pass = true;
-        // Loop until no gems move — guarantees full settle even with complex gap patterns
         while (pass) {
           pass = false;
           for (let col = 0; col < COLS; col++) {
@@ -1042,9 +1367,11 @@
                   this.grid[r + 1][col] = this.grid[r][col];
                   this.powerGems[r + 1][col] = this.powerGems[r][col];
                   this.counterTimers[r + 1][col] = this.counterTimers[r][col];
+                  this.counterColors[r + 1][col] = this.counterColors[r][col];
                   this.grid[r][col] = 0;
                   this.powerGems[r][col] = false;
                   this.counterTimers[r][col] = 3;
+                  this.counterColors[r][col] = 0;
                   r++;
                 }
                 this.squish[r][col] = 0.5;
@@ -1102,8 +1429,6 @@
           }
         }
 
-        // GDD §4.5: rainbow diamond detonations deal full attack power with the
-        // 1.6× power-gem multiplier and send a 100% garbage payload to the rival.
         if (totalCleared > 0) {
           const opponent = (this.id === 1) ? p2 : p1;
           const dmg = Math.floor(totalCleared * 3 * 1.6);
@@ -1111,7 +1436,9 @@
           this.superMeter = Math.min(100, this.superMeter + totalCleared * 6);
           this.score += Math.floor(dmg * 10);
           if (this.score > highScore) { highScore = this.score; dset(0, highScore); }
-          opponent.receiveGarbage(Math.max(1, Math.ceil(totalCleared / 2)));
+          
+          const garbageToSend = Math.max(1, Math.ceil(totalCleared / 1.8));
+          this.sendGarbageWithOffset(garbageToSend, opponent);
 
           cameraShake = Math.max(cameraShake, 14);
           flashFrames = Math.max(flashFrames, 4);
@@ -1126,7 +1453,6 @@
       detectPowerGems() {
         // === PUZZLE FIGHTER POWER GEM DETECTION ===
         // Finds ALL maximal rectangles of same-color normal gems (≥2×2).
-        // Marks every cell in a qualifying rectangle as a power gem.
         const prev = Array(ROWS).fill(null).map((_, r) =>
           Array(COLS).fill(null).map((_, c) => this.powerGems[r][c])
         );
@@ -1135,20 +1461,17 @@
           for (let c = 0; c < COLS; c++) this.powerGems[r][c] = false;
         }
 
-        // For each possible top-left corner and color, find the largest rectangle
         for (let r = 0; r < ROWS - 1; r++) {
           for (let c = 0; c < COLS - 1; c++) {
             const g = this.grid[r][c];
             if (g < 1 || g > 4) continue;
 
-            // Expand rectangle right and down as far as possible
             let maxW = 0;
             for (let cc = c; cc < COLS; cc++) {
               if (this.grid[r][cc] === g) maxW++;
               else break;
             }
 
-            // Try all widths from maxW down to 2
             for (let w = maxW; w >= 2; w--) {
               let h = 1;
               for (let rr = r + 1; rr < ROWS; rr++) {
@@ -1160,7 +1483,6 @@
                 else break;
               }
               if (h >= 2) {
-                // Mark all cells in this rectangle as power gems
                 for (let rr = r; rr < r + h; rr++) {
                   for (let cc = c; cc < c + w; cc++) {
                     this.powerGems[rr][cc] = true;
@@ -1171,7 +1493,6 @@
           }
         }
 
-        // Check if any new power gems were formed
         let newFusion = false;
         for (let r = 0; r < ROWS && !newFusion; r++) {
           for (let c = 0; c < COLS && !newFusion; c++) {
@@ -1185,17 +1506,12 @@
       }
 
       evaluateMatches() {
-        // === DUAL DETONATION SYSTEM (GDD §4.5) ===
-        // Primary:   Crash gems (5-8) flood-fill & clear all connected same-color gems.
-        // Secondary: 4+ contiguous same-color NORMAL gems auto-pop without a crash orb.
-        //
-        // This prevents boards from stalling while players wait for rare crash orbs,
-        // while keeping crash orbs the higher-damage strategic option.
+        // === PURE PUZZLE FIGHTER DETONATION SYSTEM ===
+        // Normal gems NEVER auto-pop on their own. They only detonate when a Crash Gem (5-8)
+        // or Rainbow Diamond touches a matching color group.
         let toClear = Array(ROWS).fill(null).map(() => Array(COLS).fill(false));
+        let primaryCount = 0;
 
-        // --- PRIMARY: crash orb detonation ---
-        // A crash gem (5-8) adjacent to a same-color normal gem flood-fills and
-        // clears every connected gem of that color.
         for (let r = 0; r < ROWS; r++) {
           for (let c = 0; c < COLS; c++) {
             const orb = this.grid[r][c];
@@ -1206,7 +1522,7 @@
 
               adj.forEach(([ar, ac]) => {
                 if (ar >= 0 && ar < ROWS && ac >= 0 && ac < COLS) {
-                  if (this.grid[ar][ac] === targetColor) triggered = true;
+                  if (this.grid[ar][ac] === targetColor || this.grid[ar][ac] === orb) triggered = true;
                 }
               });
 
@@ -1218,46 +1534,22 @@
           }
         }
 
-        // Count how many cells the primary detonation claimed.
-        let primaryCount = 0;
         for (let r = 0; r < ROWS; r++) {
           for (let c = 0; c < COLS; c++) {
             if (toClear[r][c]) primaryCount++;
           }
         }
 
-        // --- SECONDARY: 4+ contiguous normal-gem cluster auto-pop ---
-        // Only auto-pops clusters that are NOT already being cleared by a crash orb.
-        let secondaryCount = 0;
-        if (primaryCount === 0) {
-          const visited = Array(ROWS).fill(null).map(() => Array(COLS).fill(false));
-          for (let r = 0; r < ROWS; r++) {
-            for (let c = 0; c < COLS; c++) {
-              const g = this.grid[r][c];
-              if (g >= 1 && g <= 4 && !visited[r][c] && !toClear[r][c]) {
-                const group = [];
-                this.getClusterGroup(r, c, g, visited, group);
-                if (group.length >= 4) {
-                  group.forEach(([gr, gc]) => {
-                    toClear[gr][gc] = true;
-                    secondaryCount++;
-                  });
-                }
-              }
-            }
-          }
+        if (primaryCount > 0) {
+          this.pendingClear = { toClear, primaryCount };
+          return true;
         }
-
-        const matched = primaryCount > 0 || secondaryCount > 0;
-        if (matched) {
-          this.pendingClear = { toClear, primaryCount, secondaryCount };
-        }
-        return matched;
+        return false;
       }
 
       clearPendingMatches() {
         if (!this.pendingClear) return;
-        const { toClear, primaryCount, secondaryCount } = this.pendingClear;
+        const { toClear, primaryCount } = this.pendingClear;
         let clearCount = 0;
         let powerGemCount = 0;
 
@@ -1298,24 +1590,20 @@
           }
         }
 
-        // === PUZZLE FIGHTER DAMAGE & GARBAGE ===
+        // === PUZZLE FIGHTER DAMAGE & COUNTER OFFSETTING ===
         this.comboCount++;
         if (this.comboCount > maxComboTrack) {
           maxComboTrack = this.comboCount;
           dset(1, maxComboTrack);
         }
 
-        // Damage: primary clears deal full power; secondary auto-pops deal 50%
-        // (GDD §4.5 balancing). Power gems and chains amplify the result.
-        const isPrimary = primaryCount > 0;
-        const powerBonus = powerGemCount > 0 ? 1.6 : 1.0;
+        const powerBonus = powerGemCount > 0 ? 1.75 : 1.0;
         const chainMult = this.comboCount;
-        const dmgMult = isPrimary ? 1.0 : 0.5;
-        const dmg = Math.floor(clearCount * 3 * powerBonus * chainMult * dmgMult);
+        const dmg = Math.floor(clearCount * 3.5 * powerBonus * chainMult);
         const opponent = (this.id === 1) ? p2 : p1;
 
         opponent.hp = Math.max(0, opponent.hp - dmg);
-        this.superMeter = Math.min(100, this.superMeter + clearCount * 6);
+        this.superMeter = Math.min(100, this.superMeter + clearCount * 7);
         this.score += Math.floor(dmg * 10);
 
         if (this.score > highScore) {
@@ -1323,16 +1611,14 @@
           dset(0, highScore);
         }
 
-        // Garbage: full payload for primary detonations, 50% for secondary auto-pops.
-        const garbageToSend = isPrimary
-          ? Math.max(1, Math.ceil(clearCount / 2) + (this.comboCount - 1) * 2)
-          : Math.max(1, Math.floor(clearCount / 2));
-        opponent.receiveGarbage(garbageToSend);
+        // Calculate garbage to send: scales with clear count, power gems, and chains
+        const garbageToSend = Math.max(1, Math.ceil(clearCount / 1.8) + (this.comboCount - 1) * 3 + (powerGemCount > 0 ? 4 : 0));
+        this.sendGarbageWithOffset(garbageToSend, opponent);
 
         flashFrames = 3;
         globalFloatingTexts.push(new FloatingText(`-${dmg} HP!`, 58, 32, 8));
 
-        // Punch animation intensity scales with damage
+        // Punch animation intensity scales with combo and power
         if (powerGemCount > 0 || this.comboCount >= 3) {
           this.anim = 'UPPERCUT';
           cameraShake = 14;
@@ -1370,34 +1656,52 @@
         this.pendingClear = null;
       }
 
-      getClusterGroup(r, c, targetColor, visited, group) {
-        visited[r][c] = true;
-        group.push([r, c]);
-        const adj = [[r-1,c], [r+1,c], [r,c-1], [r,c+1]];
-        adj.forEach(([ar, ac]) => {
-          if (ar >= 0 && ar < ROWS && ac >= 0 && ac < COLS) {
-            if (!visited[ar][ac] && this.grid[ar][ac] === targetColor) {
-              this.getClusterGroup(ar, ac, targetColor, visited, group);
-            }
+      sendGarbageWithOffset(count, opponent) {
+        // === INCOMING GARBAGE WARNING & OFFSETTING ===
+        // If the player has incoming pending garbage in their Warning Tray,
+        // their attack first counters and cancels their own pending garbage!
+        if (this.pendingGarbage > 0) {
+          const offset = Math.min(this.pendingGarbage, count);
+          this.pendingGarbage -= offset;
+          const leftover = count - offset;
+          globalFloatingTexts.push(new FloatingText(`COUNTER -${offset}!`, this.offsetX + 2, this.offsetY + 12, 10));
+          if (leftover > 0) {
+            opponent.receiveGarbage(leftover);
           }
-        });
+        } else {
+          opponent.receiveGarbage(count);
+        }
       }
 
       receiveGarbage(count) {
-        // Puzzle Fighter: counter gems start with timer=5, placed from top, gravity settles
-        let remaining = count;
-        for (let r = 0; r < ROWS && remaining > 0; r++) {
-          for (let c = 0; c < COLS && remaining > 0; c++) {
+        // Queues into Warning Tray waiting above the board
+        this.pendingGarbage += count;
+        play808Sfx('garbage');
+        globalFloatingTexts.push(new FloatingText(`+${count} WARN!`, this.offsetX + 2, this.offsetY + 22, 8));
+      }
+
+      dropPendingGarbage() {
+        if (this.pendingGarbage <= 0) return;
+        const dropAmount = Math.min(this.pendingGarbage, 12);
+        this.pendingGarbage -= dropAmount;
+
+        const attacker = (this.id === 1) ? p2 : p1;
+        const attackerPattern = FIGHTER_GARBAGE_PATTERNS[attacker.fighterId] || FIGHTER_GARBAGE_PATTERNS.broner;
+
+        let placed = 0;
+        for (let r = 0; r < ROWS && placed < dropAmount; r++) {
+          for (let c = 0; c < COLS && placed < dropAmount; c++) {
             if (this.grid[r][c] === 0) {
-              this.grid[r][c] = 10;
-              this.counterTimers[r][c] = 5;
-              remaining--;
+              this.grid[r][c] = 10; // Counter gem
+              this.counterTimers[r][c] = 5; // Standard 5-turn counter
+              const patRow = attackerPattern[r % attackerPattern.length];
+              this.counterColors[r][c] = patRow[c % 6];
+              placed++;
             }
           }
         }
-        this.applyGravity();
-        play808Sfx('garbage');
-        globalFloatingTexts.push(new FloatingText(`GARBAGE +${count}!`, this.offsetX + 2, this.offsetY + 20, 8));
+        play808Sfx('land');
+        globalFloatingTexts.push(new FloatingText(`DROP +${placed}!`, this.offsetX + 2, this.offsetY + 20, 8));
       }
 
       floodFillClear(r, c, targetColor, toClear) {
@@ -1405,7 +1709,7 @@
         while (stack.length > 0) {
           const [cr, cc] = stack.pop();
           if (cr >= 0 && cr < ROWS && cc >= 0 && cc < COLS) {
-            if (!toClear[cr][cc] && this.grid[cr][cc] === targetColor) {
+            if (!toClear[cr][cc] && (this.grid[cr][cc] === targetColor || this.grid[cr][cc] === targetColor + 4)) {
               toClear[cr][cc] = true;
               stack.push([cr-1, cc], [cr+1, cc], [cr, cc-1], [cr, cc+1]);
             }
@@ -1439,21 +1743,15 @@
       getDropInterval() {
         const elapsedSeconds = Math.max(0, 99 - roundTimer);
         const speedLevel = Math.min(10, Math.floor(elapsedSeconds / 10) + 1);
-        // Level 1: 52 frames (0.87s/drop), Level 5: 36 frames (0.6s/drop), Level 10: 16 frames (0.27s/drop)
         return Math.max(14, 52 - (speedLevel - 1) * 4);
       }
 
       update() {
-        // Always advance cosmetic timers (animTimer decay resets boxers to IDLE,
-        // pulseAngle drives the rainbow diamond shimmer, squish settles gem landings).
         this.tickVisuals();
 
-        // Freeze the puzzle state machine once a round has been decided.
         if (gameState !== 'PLAYING') return;
 
         if (this.state === 'SPAWN') {
-          // spawnPair() transitions to 'FALLING' on success or triggers a KO
-          // on board overflow, so we must not force the state back to FALLING here.
           this.spawnPair();
         } else if (this.state === 'CLEARING') {
           this.clearTimer--;
@@ -1472,13 +1770,18 @@
               this.clearTimer = 28;
             } else {
               this.comboCount = 0;
-              this.state = 'SPAWN';
+              if (this.pendingGarbage > 0) {
+                this.dropPendingGarbage();
+                this.applyGravity();
+                this.state = 'GRAVITY';
+              } else {
+                this.state = 'SPAWN';
+              }
             }
           }
         } else if (this.state === 'FALLING') {
           if (this.isAi && this.pair) {
             this.aiTimer++;
-            // AI decision pace: 16 frames (~0.27s) between actions for natural human-like rhythm
             if (this.aiTimer >= 16) {
               this.aiTimer = 0;
 
@@ -1497,7 +1800,6 @@
 
               if (!moved) {
                 if (Math.random() < 0.25) this.rotate(1);
-                // 30% soft drop chance for deliberate pacing instead of instant hard drop spam
                 if (Math.random() < 0.30) this.dropSoft();
               }
 
@@ -1525,41 +1827,98 @@
       }
 
       draw() {
+        // Playfield outer border
         ctx.strokeStyle = getPalColor(5);
         ctx.lineWidth = 1;
         ctx.strokeRect(this.offsetX - 1, this.offsetY - 1, COLS * CELL_W + 2, ROWS * CELL_H + 2);
 
+        // Dark playfield background
         ctx.fillStyle = getPalColor(0);
         ctx.fillRect(this.offsetX, this.offsetY, COLS * CELL_W, ROWS * CELL_H);
 
+        // Subtle playfield grid
+        ctx.strokeStyle = 'rgba(29, 43, 83, 0.45)';
+        for (let r = 1; r < ROWS; r++) {
+          ctx.beginPath();
+          ctx.moveTo(this.offsetX, this.offsetY + r * CELL_H);
+          ctx.lineTo(this.offsetX + COLS * CELL_W, this.offsetY + r * CELL_H);
+          ctx.stroke();
+        }
+        for (let c = 1; c < COLS; c++) {
+          ctx.beginPath();
+          ctx.moveTo(this.offsetX + c * CELL_W, this.offsetY);
+          ctx.lineTo(this.offsetX + c * CELL_W, this.offsetY + ROWS * CELL_H);
+          ctx.stroke();
+        }
+
+        // Top danger alert warning line (Rows 0-2)
+        let topRowFilled = false;
+        for (let c = 0; c < COLS; c++) {
+          if (this.grid[2][c] !== 0) topRowFilled = true;
+        }
+        if (topRowFilled && Math.floor(globalFrameCount / 10) % 2 === 0) {
+          ctx.strokeStyle = getPalColor(8);
+          ctx.strokeRect(this.offsetX, this.offsetY, COLS * CELL_W, 3 * CELL_H);
+        }
+
+        // === INCOMING GARBAGE WARNING TRAY ===
+        if (this.pendingGarbage > 0) {
+          const warnBlocks = Math.min(COLS, Math.ceil(this.pendingGarbage / 2));
+          const flash = Math.floor(globalFrameCount / 8) % 2 === 0;
+          for (let i = 0; i < warnBlocks; i++) {
+            const wx = this.offsetX + i * CELL_W;
+            const wy = this.offsetY - 6;
+            ctx.fillStyle = flash ? getPalColor(8) : getPalColor(10);
+            ctx.fillRect(wx + 1, wy, CELL_W - 2, 4);
+            ctx.fillStyle = getPalColor(7);
+            ctx.fillRect(wx + 2, wy + 1, CELL_W - 4, 2);
+          }
+          printPico('!' + this.pendingGarbage, this.offsetX + COLS * CELL_W - 10, this.offsetY - 6, flash ? 8 : 10, 1);
+        }
+
+        // Ghost drop placement indicator
+        if (this.pair && this.state === 'FALLING') {
+          let ghostY = this.pair.y;
+          while (this.isValid(this.pair.x, ghostY + 1, this.pair.rot)) {
+            ghostY++;
+          }
+          if (ghostY > this.pair.y) {
+            const gMainX = this.offsetX + this.pair.x * CELL_W;
+            const gMainY = this.offsetY + ghostY * CELL_H;
+            const gSubX = this.offsetX + this.getSubX() * CELL_W;
+            const gSubY = this.offsetY + (this.pair.rot === 0 ? ghostY - 1 : (this.pair.rot === 2 ? ghostY + 1 : ghostY)) * CELL_H;
+
+            ctx.strokeStyle = 'rgba(255, 241, 232, 0.35)';
+            if (ghostY >= 0) ctx.strokeRect(gMainX + 0.5, gMainY + 0.5, CELL_W - 1, CELL_H - 1);
+            if (gSubY >= this.offsetY) ctx.strokeRect(gSubX + 0.5, gSubY + 0.5, CELL_W - 1, CELL_H - 1);
+          }
+        }
+
+        // Placed Gems
         for (let r = 0; r < ROWS; r++) {
           for (let c = 0; c < COLS; c++) {
             const g = this.grid[r][c];
             if (g !== 0) {
-              this.drawGem(this.offsetX + c * CELL_W, this.offsetY + r * CELL_H, g, this.powerGems[r][c], this.squish[r][c], this.counterTimers[r][c]);
+              this.drawGem(this.offsetX + c * CELL_W, this.offsetY + r * CELL_H, g, this.powerGems[r][c], r, c, this.counterTimers[r][c]);
             }
           }
         }
 
+        // Falling Gem Pair
         if (this.pair && this.state === 'FALLING') {
           const mainX = this.offsetX + this.pair.x * CELL_W;
           const mainY = this.offsetY + this.pair.y * CELL_H;
           const subX = this.offsetX + this.getSubX() * CELL_W;
           const subY = this.offsetY + this.getSubY() * CELL_H;
 
-
-
-          if (this.pair.y >= 0) this.drawGem(mainX, mainY, this.pair.g1, false, 0, 3);
-          if (this.getSubY() >= 0) this.drawGem(subX, subY, this.pair.g2, false, 0, 3);
+          if (this.pair.y >= 0) this.drawGem(mainX, mainY, this.pair.g1, false, -1, -1, 3);
+          if (this.getSubY() >= 0) this.drawGem(subX, subY, this.pair.g2, false, -1, -1, 3);
         }
       }
 
-      drawGem(x, y, type, isPower, squishFactor, timerVal) {
-        // === FULL-CELL GEM RENDERER — NO BORDER GAPS ===
-        // Gems fill their entire cell. Bevels provide 3D separation.
-        // No squish animation — consistent sizing at all times.
-        const dx = x;
-        const dy = y;
+      drawGem(x, y, type, isPower, gridR, gridC, timerVal) {
+        const dx = Math.floor(x);
+        const dy = Math.floor(y);
         const w = CELL_W;   // 6
         const h = CELL_H;   // 8
 
@@ -1569,8 +1928,8 @@
         const cIdx = isCrash ? (type - 4) : type;
 
         const PAL = {
-          1: [8,  14, 2],  // Red:    red / pink / maroon
-          2: [12, 13, 1],  // Blue:   blue / lavender / navy
+          1: [8,  14, 2],  // Red:    red / pink / dark maroon
+          2: [12, 13, 1],  // Blue:   blue / lavender / dark navy
           3: [11, 10, 3],  // Green:  green / yellow / dark-green
           4: [10, 7,  9],  // Yellow: yellow / white / orange
         };
@@ -1581,103 +1940,117 @@
         const white = getPalColor(7);
 
         if (isCrash) {
-          // ── CRASH ORB: full-cell with rounded inner shape ──
-          // Dark fill for corners (creates rounded look)
-          ctx.fillStyle = dark;
+          // ── CRASH ORB (Pulsing Circular Gem) ──
+          const pulse = (Math.floor(globalFrameCount / 6) % 2 === 0);
+
+          // Outer dark corner cuts for circular silhouette
+          ctx.fillStyle = getPalColor(0);
           ctx.fillRect(dx, dy, w, h);
 
-          // Rounded body
+          // Orb body
           ctx.fillStyle = base;
           ctx.fillRect(dx + 1, dy, w - 2, h);
           ctx.fillRect(dx, dy + 1, w, h - 2);
 
-          // Top specular arc
+          // Inner glowing core
           ctx.fillStyle = lite;
-          ctx.fillRect(dx + 1, dy + 1, w - 2, 1);
-          ctx.fillRect(dx + 2, dy + 2, w - 4, 1);
+          ctx.fillRect(dx + 1, dy + 1, w - 2, 2);
+          ctx.fillRect(dx + 2, dy + 2, 2, 2);
 
-          // Bottom shadow arc
+          // Bright center glint
+          if (pulse) {
+            ctx.fillStyle = white;
+            ctx.fillRect(dx + 2, dy + 2, 2, 2);
+          } else {
+            ctx.fillStyle = white;
+            ctx.fillRect(dx + 2, dy + 1, 1, 1);
+          }
+
+          // Bottom bevel shadow
           ctx.fillStyle = dark;
           ctx.fillRect(dx + 1, dy + h - 2, w - 2, 1);
+          ctx.fillRect(dx + w - 2, dy + 2, 1, h - 3);
 
         } else if (isDiamond) {
           // ── RAINBOW DIAMOND ──
           const phase = Math.floor(this.pulseAngle * 6) % 4;
           const dCols = [8, 12, 11, 10];
 
-          // Full cell base
           ctx.fillStyle = getPalColor(dCols[phase]);
           ctx.fillRect(dx, dy, w, h);
 
-          // Top-left highlight bevel
+          // White facet bevel
           ctx.fillStyle = white;
           ctx.fillRect(dx, dy, w, 1);
           ctx.fillRect(dx, dy, 1, h);
+          ctx.fillRect(dx + 2, dy + 2, 2, 4);
 
-          // Bottom-right shadow bevel
           ctx.fillStyle = getPalColor(dCols[(phase + 1) % 4]);
           ctx.fillRect(dx, dy + h - 1, w, 1);
           ctx.fillRect(dx + w - 1, dy, 1, h);
 
         } else if (isCounter) {
-          // ── COUNTER BLOCK: stone slab ──
-          // Full cell stone fill
+          // ── COUNTER BLOCK (Stone Timer Slab) ──
           ctx.fillStyle = getPalColor(5);
           ctx.fillRect(dx, dy, w, h);
 
-          // Top-left highlight bevel
+          // Stone highlight & shadow
           ctx.fillStyle = getPalColor(6);
           ctx.fillRect(dx, dy, w, 1);
           ctx.fillRect(dx, dy, 1, h);
 
-          // Bottom-right shadow bevel
           ctx.fillStyle = getPalColor(1);
           ctx.fillRect(dx, dy + h - 1, w, 1);
           ctx.fillRect(dx + w - 1, dy, 1, h);
 
-          // Countdown number (centered)
-          ctx.fillStyle = white;
-          ctx.font = 'bold 6px monospace';
-          ctx.textAlign = 'center';
-          ctx.fillText(timerVal, dx + 3, dy + 6);
-          ctx.textAlign = 'left';
+          // Inner dark inset for timer number
+          ctx.fillStyle = getPalColor(0);
+          ctx.fillRect(dx + 1, dy + 1, w - 2, h - 2);
+
+          // Direct Pixel Countdown Number
+          printPico(String(timerVal || 3), dx + 2, dy + 2, 7, 1);
 
         } else {
-          // ── NORMAL GEM: full-cell beveled crystal ──
-          // Base color fills entire cell
+          // ── NORMAL GEM / FUSED POWER GEM ──
           ctx.fillStyle = base;
           ctx.fillRect(dx, dy, w, h);
 
-          // Top highlight (1px)
-          ctx.fillStyle = lite;
-          ctx.fillRect(dx, dy, w, 1);
-
-          // Left highlight (1px)
-          ctx.fillRect(dx, dy + 1, 1, h - 1);
-
-          // Bottom shadow (1px)
-          ctx.fillStyle = dark;
-          ctx.fillRect(dx, dy + h - 1, w, 1);
-
-          // Right shadow (1px)
-          ctx.fillRect(dx + w - 1, dy + 1, 1, h - 2);
-
-          // Corner glint
-          ctx.fillStyle = white;
-          ctx.fillRect(dx + 1, dy + 1, 1, 1);
+          // Determine neighbor connections for fused Power Gem borders
+          const topSame    = (gridR > 0 && isPower && this.powerGems[gridR - 1][gridC] && this.grid[gridR - 1][gridC] === type);
+          const bottomSame = (gridR < ROWS - 1 && isPower && this.powerGems[gridR + 1][gridC] && this.grid[gridR + 1][gridC] === type);
+          const leftSame   = (gridC > 0 && isPower && this.powerGems[gridR][gridC - 1] && this.grid[gridR][gridC - 1] === type);
+          const rightSame  = (gridC < COLS - 1 && isPower && this.powerGems[gridR][gridC + 1] && this.grid[gridR][gridC + 1] === type);
 
           if (isPower) {
-            // Power gem: gold border frame
+            // Glowing gold power gem border
             ctx.fillStyle = getPalColor(10);
+            if (!topSame)    ctx.fillRect(dx, dy, w, 1);
+            if (!bottomSame) ctx.fillRect(dx, dy + h - 1, w, 1);
+            if (!leftSame)   ctx.fillRect(dx, dy, 1, h);
+            if (!rightSame)  ctx.fillRect(dx + w - 1, dy, 1, h);
+
+            // Internal subtle power shine
+            if (!topSame && !leftSame) {
+              ctx.fillStyle = white;
+              ctx.fillRect(dx + 1, dy + 1, 2, 2);
+            }
+          } else {
+            // Standard Crystal Jewel Bevel Facets
+            ctx.fillStyle = lite;
             ctx.fillRect(dx, dy, w, 1);
+            ctx.fillRect(dx, dy + 1, 1, h - 2);
+
+            ctx.fillStyle = dark;
             ctx.fillRect(dx, dy + h - 1, w, 1);
-            ctx.fillRect(dx, dy, 1, h);
-            ctx.fillRect(dx + w - 1, dy, 1, h);
+            ctx.fillRect(dx + w - 1, dy + 1, 1, h - 2);
+
+            // Specular diamond glint on top-left
+            ctx.fillStyle = white;
+            ctx.fillRect(dx + 1, dy + 1, 1, 1);
           }
         }
       }
     }
-
     p1 = new Board(1, 4, true);  // AI P1
     p2 = new Board(2, 88, true); // AI P2
 
@@ -1711,22 +2084,20 @@
       const imgData = offCtx.getImageData(0, 0, w, h);
       const data = imgData.data;
 
-      // Sample background color from the top-left corner
+      // Sample top-left corner color
       const bgR = data[0], bgG = data[1], bgB = data[2];
 
       for (let i = 0; i < data.length; i += 4) {
         const r = data[i], g = data[i+1], b = data[i+2];
         
-        // Euclidean distance from background color
+        // Background color distance
         const dist = Math.sqrt(Math.pow(r - bgR, 2) + Math.pow(g - bgG, 2) + Math.pow(b - bgB, 2));
+        // Pure black background or white corner flash
+        const isBlack = (r < 18 && g < 18 && b < 18);
+        const isWhite = (r > 240 && g > 240 && b > 240);
 
-        // Original strict thresholds for true black/white just in case
-        const isWhite = (r > 230 && g > 230 && b > 230);
-        const isBlack = (r < 15 && g < 15 && b < 15);
-
-        // If it's within a tolerance of the corner color, or it's extreme black/white, make it transparent
-        if (dist < 35 || isWhite || isBlack) {
-          data[i+3] = 0; // Alpha = 0
+        if (dist < 28 || isBlack || isWhite) {
+          data[i+3] = 0; // Alpha = 0 (100% transparent)
         }
       }
       offCtx.putImageData(imgData, 0, 0);
@@ -1737,22 +2108,22 @@
     // Idle: single full-body stance (1024x1024)
     // Punches: 2x2 grid — TL=jab, TR=straight, BL=hook, BR=uppercut (1024x1024)
     const bronerIdleRaw = new Image();
-    bronerIdleRaw.src = 'assets/broner_sprite.jpg?v=5';
+    bronerIdleRaw.src = 'assets/broner_sprite.jpg?v=700';
     let bronerIdleCanvas = null;
     bronerIdleRaw.onload = () => { bronerIdleCanvas = createTransparentCanvas(bronerIdleRaw); };
 
     const deenIdleRaw = new Image();
-    deenIdleRaw.src = 'assets/deen_sprite.jpg?v=5';
+    deenIdleRaw.src = 'assets/deen_sprite.jpg?v=700';
     let deenIdleCanvas = null;
     deenIdleRaw.onload = () => { deenIdleCanvas = createTransparentCanvas(deenIdleRaw); };
 
     const bronerPunchRaw = new Image();
-    bronerPunchRaw.src = 'assets/broner_punches.jpg?v=5';
+    bronerPunchRaw.src = 'assets/broner_punches.jpg?v=700';
     let bronerPunchCanvas = null;
     bronerPunchRaw.onload = () => { bronerPunchCanvas = createTransparentCanvas(bronerPunchRaw); };
 
     const deenPunchRaw = new Image();
-    deenPunchRaw.src = 'assets/deen_punches.jpg?v=5';
+    deenPunchRaw.src = 'assets/deen_punches.jpg?v=700';
     let deenPunchCanvas = null;
     deenPunchRaw.onload = () => { deenPunchCanvas = createTransparentCanvas(deenPunchRaw); };
 
@@ -1762,13 +2133,13 @@
     const rosterIds = ['broner', 'deen', 'ryan', 'n3on', 'rayj', 'blueface', 'chrisean', 'rampage', 'adin', 'charleston', 'walid', 'abrown', 'tank', 'floyd'];
     rosterIds.forEach(id => {
       const imgIdle = new Image();
-      imgIdle.src = 'assets/' + id + '_sprite.jpg?v=12';
+      imgIdle.src = 'assets/' + id + '_sprite.jpg?v=700';
       imgIdle.onload = () => {
         ROSTER_IDLE_CANVASES[id] = createTransparentCanvas(imgIdle);
       };
 
       const imgPunch = new Image();
-      imgPunch.src = 'assets/' + id + '_punches.jpg?v=12';
+      imgPunch.src = 'assets/' + id + '_punches.jpg?v=700';
       imgPunch.onload = () => {
         ROSTER_PUNCH_CANVASES[id] = createTransparentCanvas(imgPunch);
       };
@@ -1799,9 +2170,13 @@
 
     const PUNCH_QUAD = { 'JAB': 0, 'STRAIGHT': 1, 'HOOK': 2, 'UPPERCUT': 3 };
 
+    // All 14 Capcom-style sprites natively face RIGHT.
+    // Player 1 (left side of ring) -> NO flip (faces RIGHT towards center/opponent).
+    // Player 2 (right side of ring) -> ALWAYS flip horizontal (faces LEFT towards center/opponent).
+
     function drawBoxer(x, y, isP1, anim, animTimer) {
       let fx = x;
-      let fy = 50 + (isP1 ? 0 : 3); // P2 (Deen) source image padding adjustment to align boots on floor level
+      const groundY = 90; // Ground plane on the ring canvas floor (Y=88..113)
 
       const idleController = isP1 ? idleP1 : idleP2;
       const { dx } = idleController.getOffsets();
@@ -1824,33 +2199,27 @@
       if (anim === 'JAB' || anim === 'STRAIGHT' || anim === 'HOOK' || anim === 'UPPERCUT') {
         punchQuad = PUNCH_QUAD[anim] || 0;
 
-        // Animation phases: windup → extend → hold → retract
         if (progress < 0.15) {
-          // Windup: lean back slightly, use idle sprite
           extProgress = smoothstep(0.0, 0.15, progress) * 0.3;
           bodyTilt = (isP1 ? -1 : 1) * extProgress * 0.08;
         } else if (progress < 0.35) {
-          // Extend: switch to punch sprite, lunge forward
           usePunch = true;
           extProgress = 0.3 + smoothstep(0.15, 0.35, progress) * 0.7;
         } else if (progress < 0.65) {
-          // Hold: full extension punch sprite
           usePunch = true;
           extProgress = 1.0;
         } else {
-          // Retract: back to idle
           extProgress = 1.0 - smoothstep(0.65, 1.00, progress);
           if (progress < 0.80) usePunch = true;
         }
 
-        const lungeDist = extProgress * 8.0;
+        const lungeDist = extProgress * 7.0;
         horzShift = isP1 ? lungeDist : -lungeDist;
 
-        // BUG-002 FIX: Per-player impact flags
         const impactFlag = isP1 ? impactTriggeredP1 : impactTriggeredP2;
         if (progress >= 0.42 && progress < 0.58 && !impactFlag) {
           if (isP1) impactTriggeredP1 = true; else impactTriggeredP2 = true;
-          triggerImpactBurst(isP1 ? 57 : 55, anim === 'UPPERCUT' ? 48 : anim === 'HOOK' ? 50 : 54);
+          triggerImpactBurst(isP1 ? 62 : 66, anim === 'UPPERCUT' ? 56 : anim === 'HOOK' ? 58 : 62);
           triggerHaptic(30);
         } else if (progress >= 0.90) {
           if (isP1) impactTriggeredP1 = false; else impactTriggeredP2 = false;
@@ -1861,46 +2230,42 @@
         if (progress < 0.40) fp = 0;
         else if (progress < 0.65) fp = smoothstep(0.40, 0.65, progress);
         else fp = 1.0 - smoothstep(0.65, 1.00, progress);
-        horzShift = (isP1 ? -1 : 1) * fp * 8.0;
-        bodyTilt = (isP1 ? -1 : 1) * fp * 0.15;
+        horzShift = (isP1 ? -1 : 1) * fp * 6.0;
+        bodyTilt = (isP1 ? -1 : 1) * fp * 0.12;
         if (progress >= 0.42 && progress < 0.58) isHitFlash = true;
 
       } else if (anim === 'DODGE' || anim === 'DUCK') {
-        // Duck: squash vertically, shift down
         let dp = 0;
         if (progress < 0.25) dp = smoothstep(0.0, 0.25, progress);
         else if (progress < 0.65) dp = 1.0;
         else dp = 1.0 - smoothstep(0.65, 1.0, progress);
-        vertSquash = 1.0 - dp * 0.35;  // squash to 65% height
-        vertShift = dp * 14;            // shift down
+        vertSquash = 1.0 - dp * 0.35;
+        vertShift = dp * 12;
 
       } else if (anim === 'LEAN') {
-        // Lean back: tilt torso backward
         let lp = 0;
         if (progress < 0.25) lp = smoothstep(0.0, 0.25, progress);
         else if (progress < 0.65) lp = 1.0;
-        else lp = 1.0 - smoothstep(0.65, 1.0, progress);
-        bodyTilt = (isP1 ? -1 : 1) * lp * 0.2;
-        horzShift = (isP1 ? -1 : 1) * lp * -4;
+        else dp = 1.0 - smoothstep(0.65, 1.0, progress);
+        bodyTilt = (isP1 ? -1 : 1) * lp * 0.15;
+        horzShift = (isP1 ? -1 : 1) * lp * -3;
 
       } else if (anim === 'BLOCK' || anim === 'SHOULDER_ROLL') {
-        // Shoulder roll: slight crouch + tilt
         let bp = 0;
         if (progress < 0.20) bp = smoothstep(0.0, 0.20, progress);
         else if (progress < 0.70) bp = 1.0;
         else bp = 1.0 - smoothstep(0.70, 1.0, progress);
-        vertSquash = 1.0 - bp * 0.12;
-        bodyTilt = (isP1 ? -1 : 1) * bp * 0.1;
-        vertShift = bp * 5;
+        vertSquash = 1.0 - bp * 0.10;
+        bodyTilt = (isP1 ? -1 : 1) * bp * 0.08;
+        vertShift = bp * 4;
       }
-      // else: IDLE — no transforms, just the base idle sprite with bounce from idleController
 
       fx += horzShift;
 
-      // Draw shadow
-      ctx.fillStyle = 'rgba(0,0,0,0.55)';
+      // Ground shadow placed directly on the floor below the boots
+      ctx.fillStyle = 'rgba(0,0,0,0.65)';
       ctx.beginPath();
-      ctx.ellipse(fx + 11, 89, 10, 3, 0, 0, Math.PI * 2);
+      ctx.ellipse(fx, groundY + 1, 9, 2.5, 0, 0, Math.PI * 2);
       ctx.fill();
 
       ctx.save();
@@ -1908,17 +2273,14 @@
       const fObj = isP1 ? ROSTER[p1SelectIdx] : ROSTER[p2SelectIdx];
       const fId = fObj ? fObj.id : (isP1 ? 'broner' : 'deen');
 
-      // All sprites have been physically flipped on disk to natively face LEFT.
-      // P1 (left side) -> flip to face RIGHT toward center.
-      // P2 (right side) -> no flip, already faces LEFT toward center.
-      const needsFlip = isP1;
-
-      ctx.translate(fx + 11, fy + 20);
+      // P1 on left side always faces RIGHT (scale 1); P2 on right side always faces LEFT (scale -1)
+      const needsFlip = !isP1;
+      ctx.translate(fx, groundY);
       if (needsFlip) {
         ctx.scale(-1, 1);
       }
 
-      // Apply body tilt (negate when flipped to preserve visual direction)
+      // Apply body tilt
       if (bodyTilt !== 0) {
         ctx.rotate(needsFlip ? -bodyTilt : bodyTilt);
       }
@@ -1927,34 +2289,30 @@
         ctx.filter = 'brightness(2.5) contrast(1.5)';
       }
 
-      // === DRAW THE SPRITE ===
+      // === DRAW SPRITE ANCHORED ON FEET AT GROUND PLANE ===
       const idleCanvas = ROSTER_IDLE_CANVASES[fId] || (isP1 ? bronerIdleCanvas : deenIdleCanvas);
       const punchCanvas = ROSTER_PUNCH_CANVASES[fId] || (fId === 'deen' ? deenPunchCanvas : bronerPunchCanvas);
-
-      const dw = 44;
-      const dh = 44 * vertSquash;
-      const ddx = -22;                    // center horizontally
-      const ddy = -44 + 8 + vertShift;    // anchor at feet, shift down for duck
+      const dw = 40;
+      const dh = 40 * vertSquash;
+      const ddx = -20;
+      const ddy = -40 + vertShift; // Boots at Y=0 (groundY), head at Y=-40
 
       if (usePunch && punchCanvas) {
-        // Draw from 2x2 punch grid
         const pw = punchCanvas.width / 2;
         const ph = punchCanvas.height / 2;
         const col = punchQuad % 2;
         const row = Math.floor(punchQuad / 2);
         ctx.drawImage(punchCanvas, col * pw, row * ph, pw, ph, ddx, ddy, dw, dh);
       } else if (idleCanvas) {
-        // Draw idle sprite (same image for ALL non-punch states)
         ctx.drawImage(idleCanvas, 0, 0, idleCanvas.width, idleCanvas.height, ddx, ddy, dw, dh);
       } else {
         ctx.fillStyle = isP1 ? '#8C4A27' : '#C58C5D';
-        ctx.fillRect(-6, -20, 12, 38);
+        ctx.fillRect(-6, -34, 12, 34);
       }
 
       ctx.filter = 'none';
       ctx.restore();
     }
-
     // =========================================================================
     // 14 VERIFIED REAL-LIFE STREAM GUEST ROSTER (GDD SECTION 4)
     // =========================================================================
@@ -1983,12 +2341,14 @@
     let p1Locked = false;
     let p2Locked = false;
     let lockCountdown = -1;
+    let selectedArenaIdx = 0; // 0: KICK WAREHOUSE, 1: MAYWEATHER GYM, 2: BRONER GYM, 3: VEGAS ARENA
+    let bioFighterIdx = 0;    // fighter being viewed on the bio screen
 
-    function drawPicoDitheredCrowd() {
-      ctx.fillStyle = getPalColor(1);
+    function drawPicoDitheredCrowd(crowdBg = 1, crowdDit = 2) {
+      ctx.fillStyle = getPalColor(crowdBg);
       ctx.fillRect(41, 15, 46, 30);
 
-      ctx.fillStyle = getPalColor(2);
+      ctx.fillStyle = getPalColor(crowdDit);
       for (let y = 15; y < 45; y += 2) {
         for (let x = 41; x < 87; x += 2) {
           if ((x + y) % 4 === 0) {
@@ -1996,6 +2356,139 @@
           }
         }
       }
+    }
+
+    // =========================================================================
+    // 🔤 100% NATIVE PICO-8 4x5 RETRO ARCADE BITMAP PIXEL FONT ENGINE
+    // =========================================================================
+    const BITMAP_4X5 = {
+      'A': ['0110','1001','1111','1001','1001'],
+      'B': ['1110','1001','1110','1001','1110'],
+      'C': ['0111','1000','1000','1000','0111'],
+      'D': ['1110','1001','1001','1001','1110'],
+      'E': ['1111','1000','1110','1000','1111'],
+      'F': ['1111','1000','1110','1000','1000'],
+      'G': ['0111','1000','1011','1001','0111'],
+      'H': ['1001','1001','1111','1001','1001'],
+      'I': ['1110','0100','0100','0100','1110'],
+      'J': ['0011','0001','0001','1001','0110'],
+      'K': ['1001','1010','1100','1010','1001'],
+      'L': ['1000','1000','1000','1000','1111'],
+      'M': ['1001','1111','1111','1001','1001'],
+      'N': ['1001','1101','1011','1001','1001'],
+      'O': ['0110','1001','1001','1001','0110'],
+      'P': ['1110','1001','1110','1000','1000'],
+      'Q': ['0110','1001','1001','1110','0001'],
+      'R': ['1110','1001','1110','1010','1001'],
+      'S': ['0111','1000','0110','0001','1110'],
+      'T': ['1111','0100','0100','0100','0100'],
+      'U': ['1001','1001','1001','1001','0110'],
+      'V': ['1001','1001','1001','0110','0110'],
+      'W': ['1001','1001','1001','1111','1001'],
+      'X': ['1001','1001','0110','1001','1001'],
+      'Y': ['1001','1001','0110','0100','0100'],
+      'Z': ['1111','0001','0110','1000','1111'],
+      '0': ['0110','1001','1001','1001','0110'],
+      '1': ['0100','1100','0100','0100','1110'],
+      '2': ['1110','0001','0110','1000','1111'],
+      '3': ['1110','0001','0110','0001','1110'],
+      '4': ['1001','1001','1111','0001','0001'],
+      '5': ['1111','1000','1110','0001','1110'],
+      '6': ['0111','1000','1110','1001','0110'],
+      '7': ['1111','0001','0010','0100','0100'],
+      '8': ['0110','1001','0110','1001','0110'],
+      '9': ['0110','1001','0111','0001','1110'],
+      ' ': ['0000','0000','0000','0000','0000'],
+      'W': ['1001','1001','1001','1101','0110'],
+      '.': ['0000','0000','0000','0000','0110'],
+      ',': ['0000','0000','0000','0110','0100'],
+      '-': ['0000','0000','1111','0000','0000'],
+      '+': ['0000','0100','1110','0100','0000'],
+      '/': ['0001','0010','0100','1000','0000'],
+      '>': ['1000','0100','0010','0100','1000'],
+      '<': ['0010','0100','1000','0100','0010'],
+      '(': ['0010','0100','0100','0100','0010'],
+      ')': ['0100','0010','0010','0010','0100'],
+      '!': ['0100','0100','0100','0000','0100'],
+      '?': ['1110','0001','0110','0000','0100'],
+      '$': ['0100','1111','0100','1111','0100'],
+      '%': ['1001','0010','0100','1000','1001'],
+      '@': ['0110','1001','1011','1000','0111'],
+      '*': ['0000','1001','0110','1001','0000'],
+      '\'': ['0100','0100','0000','0000','0000'],
+      '"': ['1010','1010','0000','0000','0000'],
+      '#': ['1010','1111','1010','1111','1010'],
+      '_': ['0000','0000','0000','0000','1111']
+    };
+
+    function printPico(text, x, y, col = 7, scale = 1, shadow = false) {
+      const str = String(text).toUpperCase();
+      const color = getPalColor(col);
+      const shadowColor = getPalColor(0);
+      const startX = Math.floor(x);
+      const startY = Math.floor(y);
+      const charAdvance = 5 * scale;
+
+      for (let i = 0; i < str.length; i++) {
+        const ch = str[i];
+        if (ch === '\n') continue;
+        const glyph = BITMAP_4X5[ch] || BITMAP_4X5[' '];
+        const gx = startX + i * charAdvance;
+
+        if (shadow) {
+          ctx.fillStyle = shadowColor;
+          for (let r = 0; r < 5; r++) {
+            const row = glyph[r];
+            for (let c = 0; c < 4; c++) {
+              if (row[c] === '1') {
+                ctx.fillRect(gx + c * scale + scale, startY + r * scale + scale, scale, scale);
+              }
+            }
+          }
+        }
+
+        ctx.fillStyle = color;
+        for (let r = 0; r < 5; r++) {
+          const row = glyph[r];
+          for (let c = 0; c < 4; c++) {
+            if (row[c] === '1') {
+              ctx.fillRect(gx + c * scale, startY + r * scale, scale, scale);
+            }
+          }
+        }
+      }
+    }
+
+    function printPicoCenter(text, cy, col = 7, scale = 1, shadow = false) {
+      const str = String(text).toUpperCase();
+      const totalW = str.length * 5 * scale - scale;
+      const startX = Math.floor((128 - totalW) / 2);
+      printPico(str, startX, cy, col, scale, shadow);
+    }
+
+    function printPicoWrap(text, x, y, maxW, col = 7, scale = 1, shadow = false) {
+      const words = String(text).toUpperCase().split(' ');
+      let line = '';
+      let curY = Math.floor(y);
+      const lineH = 7 * scale;
+      const charAdvance = 5 * scale;
+
+      for (let i = 0; i < words.length; i++) {
+        const word = words[i];
+        const testLine = line ? line + ' ' + word : word;
+        const testW = testLine.length * charAdvance - scale;
+        if (testW > maxW && line) {
+          printPico(line, x, curY, col, scale, shadow);
+          line = word;
+          curY += lineH;
+        } else {
+          line = testLine;
+        }
+      }
+      if (line) {
+        printPico(line, x, curY, col, scale, shadow);
+      }
+      return curY + lineH;
     }
 
     // === TITLE SCREEN RENDERER ===
@@ -2015,36 +2508,22 @@
 
       // Title Logo Box
       ctx.fillStyle = getPalColor(0);
-      ctx.fillRect(10, 12, 108, 44);
+      ctx.fillRect(10, 10, 108, 46);
       ctx.strokeStyle = getPalColor(10);
-      ctx.strokeRect(10, 12, 108, 44);
+      ctx.strokeRect(10, 10, 108, 46);
       ctx.strokeStyle = getPalColor(8);
-      ctx.strokeRect(12, 14, 104, 40);
+      ctx.strokeRect(12, 12, 104, 42);
 
-      ctx.fillStyle = getPalColor(10);
-      ctx.font = 'bold 11px monospace';
-      ctx.textAlign = 'center';
-      ctx.fillText('CRASH OUT', 64, 28);
-
-      ctx.fillStyle = getPalColor(8);
-      ctx.font = 'bold 10px monospace';
-      ctx.fillText('RING RUSH', 64, 43);
-
-      ctx.fillStyle = getPalColor(7);
-      ctx.font = '6px monospace';
-      ctx.fillText('PICO-8 PUZZLE BOXING v1.2-alpha', 64, 62);
+      printPicoCenter('CRASH OUT', 16, 10, 2, true);
+      printPicoCenter('RING RUSH', 30, 8, 2, true);
+      printPicoCenter('PICO-8 PUZZLE BOXING', 62, 7, 1);
 
       // Flashing press prompt
       if (Math.floor(globalFrameCount / 25) % 2 === 0) {
-        ctx.fillStyle = getPalColor(10);
-        ctx.font = 'bold 8px monospace';
-        ctx.fillText('PRESS START / TOUCH', 64, 88);
+        printPicoCenter('PRESS START / TOUCH', 86, 10, 1, true);
       }
 
-      ctx.fillStyle = getPalColor(6);
-      ctx.font = '6px monospace';
-      ctx.fillText('ANTIGRAVITY STUDIOS (C) 2026', 64, 118);
-      ctx.textAlign = 'left';
+      printPicoCenter('ANTIGRAVITY STUDIOS 2026', 118, 6, 1);
     }
 
     // === MODE SELECT RENDERER ===
@@ -2054,10 +2533,7 @@
 
       ctx.fillStyle = getPalColor(0);
       ctx.fillRect(0, 0, 128, 18);
-      ctx.fillStyle = getPalColor(10);
-      ctx.font = 'bold 9px monospace';
-      ctx.textAlign = 'center';
-      ctx.fillText('SELECT GAME MODE', 64, 13);
+      printPicoCenter('SELECT GAME MODE', 6, 10, 1, true);
 
       const modes = [
         { label: '1P VS CPU (ARCADE)', desc: 'PLAYER 1 VS AI OPPONENT' },
@@ -2066,7 +2542,7 @@
       ];
 
       modes.forEach((m, idx) => {
-        const y = 30 + idx * 28;
+        const y = 28 + idx * 28;
         const isSelected = (selectedModeIdx === idx);
 
         ctx.fillStyle = isSelected ? getPalColor(10) : getPalColor(0);
@@ -2074,19 +2550,11 @@
         ctx.strokeStyle = isSelected ? getPalColor(7) : getPalColor(5);
         ctx.strokeRect(10, y, 108, 22);
 
-        ctx.fillStyle = isSelected ? getPalColor(0) : getPalColor(7);
-        ctx.font = 'bold 8px monospace';
-        ctx.fillText((isSelected ? '> ' : '  ') + m.label, 64, y + 10);
-
-        ctx.fillStyle = isSelected ? getPalColor(2) : getPalColor(6);
-        ctx.font = '6px monospace';
-        ctx.fillText(m.desc, 64, y + 18);
+        printPico((isSelected ? '> ' : '  ') + m.label, 14, y + 4, isSelected ? 0 : 7, 1);
+        printPico(m.desc, 18, y + 13, isSelected ? 2 : 6, 1);
       });
 
-      ctx.fillStyle = getPalColor(7);
-      ctx.font = '6px monospace';
-      ctx.fillText('UP/DOWN: NAVIGATE  X/TOUCH: SELECT', 64, 120);
-      ctx.textAlign = 'left';
+      printPicoCenter('UP/DOWN: NAVIGATE  X: SELECT', 120, 7, 1);
     }
 
     const FIGHTER_DETAILS = {
@@ -2105,6 +2573,36 @@
       tank: { skin: 4, hair: 0, trunks: 8, gloves: 8, feature: 'southpaw' },
       floyd: { skin: 4, hair: 0, trunks: 10, gloves: 10, feature: 'tmt' }
     };
+
+    // Fighter bios for the FIGHTER_BIO screen (nickname, bio, quote, record).
+    // Content follows the GDD section 4 roster table & README guest list.
+    const FIGHTER_BIOS = {
+      broner: { nickname: 'THE PROBLEM', bio: 'WAREHOUSE CO-HOST. PHILLY SHELL MASTER WHO CALLS HIS SHOTS.', quote: 'YOU CAN SEE IT COMING.', record: '38-4-1 (29 KO)' },
+      deen: { nickname: 'THE GREAT', bio: 'SOUTHPAW SPARK PLUG. THE LIGHTNING STRAIGHT FREEZES GUESTS.', quote: 'HANDS OUT OF THE GATES.', record: '24-1 (18 KO)' },
+      ryan: { nickname: 'KING RYAN', bio: 'FLASHY COUNTER-PUNCHER. THE HOOK HEADS TO THE HEADLINES.', quote: 'STILL ME, STILL FAST.', record: '25-1 (20 KO)' },
+      n3on: { nickname: 'NEON', bio: 'HYPER STREAMER WHO NEVER STOPS. CRASH OUT SPAM KEEPS THE BOARD LIVE.', quote: 'LOCK IN OR LOSE OUT.', record: '11-2 (9 KO)' },
+      rayj: { nickname: 'RAY J', bio: 'SLICK CELEBRITY DEFENDER. THE GLASSES FLASH CANNOT BE TIMED.', quote: 'STILL FAMOUS, STILL FLASHY.', record: '6-0 (4 KO)' },
+      blueface: { nickname: 'BLUEFACE', bio: 'RAPPER WITH A WILD BRAWLING STYLE. TATTOOS TELL THE STORY.', quote: "THATS ON ME, THASS IT.", record: '7-3 (6 KO)' },
+      chrisean: { nickname: 'THE BADDIE', bio: 'AGGRESSIVE PRESSER WHO SWARMS THE RING WITH THE SMOKE.', quote: 'IM NOT BACKING DOWN.', record: '9-2 (7 KO)' },
+      rampage: { nickname: 'RAMPAGE', bio: 'MMA LEGEND CRASHING THE BOXING RING. THE SLAM HITS LIKE A TRUCK.', quote: 'DONT START NOTHIN.', record: 'MMA 22-10' },
+      adin: { nickname: 'ADIN ROSS', bio: 'KICK COLLABORATOR WHO RAIDED THE WAREHOUSE. THE BOMB DROPS HARD.', quote: 'WE GO LIVE, WE GO BIG.', record: '3-1 (2 KO)' },
+      charleston: { nickname: 'C. WHITE', bio: 'ERRATIC TAUNT COUNTER. RANTS AT THE ROPES, THEN LANDS THE RIGHT.', quote: 'WHO ELSE WOULD I BE?', record: '5-2 (3 KO)' },
+      walid: { nickname: 'SHARKS', bio: 'FAST COUNTER-PUNCHER AND DEENS RIVAL. THE SHARK COMBO BITES.', quote: 'IM AFTER THAT SPOT.', record: '15-4 (11 KO)' },
+      abrown: { nickname: 'A.B.', bio: 'NFL STAR WHO SHOWBOATS AND STRIKES. THE CT KO DANCE FOLLOWS.', quote: 'CTE? NAH, CT KO.', record: '12-1 (10 KO)' },
+      tank: { nickname: 'TANK', bio: 'SOUTHPAW POWERHOUSE. THE UPPERCUT ENDS ROUNDS AND DREAMS.', quote: 'IM HERE TO PUT YALL DOWN.', record: '30-0 (28 KO)' },
+      floyd: { nickname: 'MONEY', bio: '50-0 PHILLY SHELL LEGEND. THE SHOULDER ROLL MAKES PUNCHES MISS.', quote: 'NOTHING EASY, ALL MONEY.', record: '50-0 (27 KO)' }
+    };
+
+    // Arena stage select data. Palette indices theme crowd, backdrop, ropes,
+    // and ring floor in drawBattleScreen via ARENAS[selectedArenaIdx].colors.
+    const ARENAS = [
+      { id: 'warehouse', name: 'WHOUSE', tag: 'STREAM', location: 'AUSTIN, TX', colors: { crowdBg: 0, crowdDit: 3, backdrop: 1, ropes: 11, floor: 5, accent: 11, turnbuckle: 11 } },
+      { id: 'vegas', name: 'VEGAS', tag: 'CASINO', location: 'LAS VEGAS, NV', colors: { crowdBg: 0, crowdDit: 10, backdrop: 1, ropes: 10, floor: 2, accent: 10, turnbuckle: 10 } },
+      { id: 'misfits', name: 'MISFIT', tag: 'LONDON', location: 'LONDON, UK', colors: { crowdBg: 0, crowdDit: 12, backdrop: 1, ropes: 12, floor: 1, accent: 12, turnbuckle: 12 } },
+      { id: 'miamiHouse', name: 'MIAMI', tag: 'POOL', location: 'MIAMI, FL', colors: { crowdBg: 2, crowdDit: 14, backdrop: 2, ropes: 14, floor: 3, accent: 14, turnbuckle: 14 } },
+      { id: 'gymTmt', name: 'TMT GYM', tag: 'MONEY', location: 'LAS VEGAS, NV', colors: { crowdBg: 0, crowdDit: 10, backdrop: 0, ropes: 10, floor: 4, accent: 10, turnbuckle: 10 } },
+      { id: 'gymBroner', name: 'BRONER', tag: 'DETROIT', location: 'CINCINNATI, OH', colors: { crowdBg: 0, crowdDit: 8, backdrop: 2, ropes: 8, floor: 4, accent: 8, turnbuckle: 8 } }
+    ];
 
     function drawBoxerAvatar(ctx, f, x, y, isBig = false) {
       const details = FIGHTER_DETAILS[f.id] || { skin: 4, hair: 0, trunks: f.color, gloves: f.color };
@@ -2191,188 +2689,477 @@
       ctx.restore();
     }
 
+    // Condensed name banner for the 16px grid cells. Renders at 5px and
+    // horizontally squashes only when the name would overflow the cell width.
     // === CHARACTER SELECT RENDERER ===
     function drawCharSelectScreen() {
-      ctx.fillStyle = getPalColor(0);
+      ctx.fillStyle = getPalColor(1);
       ctx.fillRect(0, 0, 128, 128);
 
       // Header
-      ctx.fillStyle = getPalColor(10);
-      ctx.font = 'bold 8px monospace';
-      ctx.textAlign = 'center';
-      ctx.fillText('SELECT YOUR FIGHTER', 64, 10);
+      ctx.fillStyle = getPalColor(0);
+      ctx.fillRect(0, 0, 128, 15);
+      printPicoCenter('SELECT YOUR FIGHTER', 5, 10, 1, true);
 
-      // 14-Character Grid (2 rows x 7 cols)
-      const cols = 7;
+      // 2x7 Character Grid (X: 6..122, Y: 18..52)
+      const startX = 6;
+      const startY = 17;
       const cellW = 16;
       const cellH = 17;
-      const startX = 8;
-      const startY = 15;
 
       ROSTER.forEach((f, idx) => {
-        const r = Math.floor(idx / cols);
-        const c = idx % cols;
-        const cx = startX + c * 17;
-        const cy = startY + r * 18;
+        const col = idx % 7;
+        const row = Math.floor(idx / 7);
+        const cx = startX + col * cellW;
+        const cy = startY + row * cellH;
 
         const isP1 = (p1SelectIdx === idx);
         const isP2 = (p2SelectIdx === idx);
 
-        // Cell background
-        ctx.fillStyle = getPalColor(1);
+        // Base cell
+        ctx.fillStyle = getPalColor(0);
         ctx.fillRect(cx, cy, cellW, cellH);
+        ctx.strokeStyle = getPalColor(f.color);
+        ctx.strokeRect(cx, cy, cellW, cellH);
 
-        // Draw Fighter 16-bit Arcade Sprite Mini-Avatar
-        const cellCanvas = ROSTER_IDLE_CANVASES[f.id];
-        if (cellCanvas) {
-          ctx.drawImage(cellCanvas, 0, 0, cellCanvas.width, cellCanvas.height, cx, cy - 2, cellW, cellH + 2);
+        // Mini avatar
+        const thumbCanvas = ROSTER_IDLE_CANVASES[f.id] || (idx === 0 ? bronerIdleCanvas : deenIdleCanvas);
+        if (thumbCanvas) {
+          ctx.drawImage(thumbCanvas, 0, 0, thumbCanvas.width, thumbCanvas.height, cx + 1, cy + 1, cellW - 2, cellH - 6);
         } else {
           drawBoxerAvatar(ctx, f, cx - 1, cy - 2, false);
         }
 
-        // Name Initial Badge at bottom of cell
-        ctx.fillStyle = 'rgba(0,0,0,0.85)';
-        ctx.fillRect(cx, cy + 11, cellW, 6);
-        ctx.fillStyle = getPalColor(7);
-        ctx.font = 'bold 5px monospace';
-        ctx.textAlign = 'center';
-        ctx.fillText(f.name.substring(0, 3), cx + 8, cy + 16);
+        // Name banner at cell bottom
+        ctx.fillStyle = getPalColor(0);
+        ctx.fillRect(cx + 1, cy + cellH - 5, cellW - 2, 5);
+        const shortName = f.name.length > 3 ? f.name.slice(0, 3) : f.name;
+        const nameW = shortName.length * 5 - 1;
+        const nameX = cx + Math.floor((cellW - nameW) / 2);
+        printPico(shortName, nameX, cy + cellH - 6, (isP1 || isP2) ? 10 : 7, 1);
 
-        // Cell border
-        ctx.strokeStyle = getPalColor(f.color);
-        ctx.strokeRect(cx, cy, cellW, cellH);
-
-        // Dual Cursors
-        if (isP1 && isP2) {
-          ctx.strokeStyle = getPalColor(10); // Yellow P1
-          ctx.strokeRect(cx - 1, cy - 1, cellW + 2, cellH + 2);
-          ctx.strokeStyle = getPalColor(12); // Cyan P2
-          ctx.strokeRect(cx - 2, cy - 2, cellW + 4, cellH + 4);
-        } else if (isP1) {
+        // P1 & P2 Selection Cursors
+        if (isP1) {
           ctx.strokeStyle = getPalColor(10);
+          ctx.lineWidth = 1;
           ctx.strokeRect(cx - 1, cy - 1, cellW + 2, cellH + 2);
-        } else if (isP2) {
+          ctx.fillStyle = getPalColor(10);
+          ctx.fillRect(cx, cy, 5, 5);
+          printPico('1', cx + 1, cy, 0, 1);
+        }
+        if (isP2) {
           ctx.strokeStyle = getPalColor(12);
-          ctx.strokeRect(cx - 1, cy - 1, cellW + 2, cellH + 2);
+          ctx.lineWidth = 1;
+          ctx.strokeRect(cx, cy, cellW, cellH);
+          ctx.fillStyle = getPalColor(12);
+          ctx.fillRect(cx + cellW - 5, cy, 5, 5);
+          printPico('2', cx + cellW - 4, cy, 0, 1);
         }
       });
 
-      // Bio Card Panel (Bottom)
+      // Selected Fighter Card (bottom half: Y = 54..114)
       const selectedFighter = ROSTER[p1SelectIdx];
-      ctx.fillStyle = getPalColor(1);
-      ctx.fillRect(4, 54, 120, 58);
-      ctx.strokeStyle = getPalColor(5);
-      ctx.strokeRect(4, 54, 120, 58);
-
-      // Fighter Portrait Frame
       ctx.fillStyle = getPalColor(0);
-      ctx.fillRect(8, 58, 30, 48);
+      ctx.fillRect(4, 53, 120, 62);
       ctx.strokeStyle = getPalColor(selectedFighter.color);
-      ctx.strokeRect(8, 58, 30, 48);
+      ctx.strokeRect(4, 53, 120, 62);
 
-      // Draw 16-bit Capcom Arcade Sprite Preview
-      const previewCanvas = ROSTER_IDLE_CANVASES[selectedFighter.id];
-      if (previewCanvas) {
-        ctx.drawImage(previewCanvas, 0, 0, previewCanvas.width, previewCanvas.height, 10, 60, 26, 44);
+      // Large Portrait Panel
+      ctx.fillStyle = getPalColor(1);
+      ctx.fillRect(7, 56, 32, 56);
+      ctx.strokeStyle = getPalColor(selectedFighter.color);
+      ctx.strokeRect(7, 56, 32, 56);
+
+      const bigCanvas = ROSTER_IDLE_CANVASES[selectedFighter.id] || bronerIdleCanvas;
+      if (bigCanvas) {
+        ctx.drawImage(bigCanvas, 0, 0, bigCanvas.width, bigCanvas.height, 9, 58, 28, 52);
       } else {
         drawBoxerAvatar(ctx, selectedFighter, 8, 60, true);
       }
-
       // Fighter Stats & Bio Text
-      ctx.textAlign = 'left';
-      ctx.fillStyle = getPalColor(10);
-      ctx.font = 'bold 7px monospace';
-      ctx.fillText(selectedFighter.fullName, 42, 66);
+      printPico(selectedFighter.fullName, 42, 58, 10, 1, true);
+      const stanceStr = selectedFighter.stance.length > 15 ? selectedFighter.stance.slice(0, 15) : selectedFighter.stance;
+      printPico(stanceStr, 42, 66, 6, 1);
+      const moveStr = 'SP ' + (selectedFighter.move.length > 13 ? selectedFighter.move.slice(0, 13) : selectedFighter.move);
+      printPico(moveStr, 42, 74, 9, 1);
+      drawStatBar('PWR', selectedFighter.pwr, 42, 82, 56, 8);
+      drawStatBar('SPD', selectedFighter.spd, 42, 91, 56, 10);
+      drawStatBar('DEF', selectedFighter.def, 42, 100, 56, 12);
 
-      ctx.fillStyle = getPalColor(6);
-      ctx.font = '5px monospace';
-      ctx.fillText(selectedFighter.stance, 42, 74);
-
-      ctx.fillStyle = getPalColor(9);
-      ctx.fillText('SP: ' + selectedFighter.move, 42, 82);
-
-      // Stat Bars
-      const drawStatBar = (label, val, y, col) => {
-        ctx.fillStyle = getPalColor(7);
-        ctx.font = '5px monospace';
-        ctx.fillText(label, 42, y + 5);
-        ctx.fillStyle = getPalColor(0);
-        ctx.fillRect(60, y, 58, 6);
-        ctx.fillStyle = getPalColor(col);
-        ctx.fillRect(60, y, Math.floor(58 * (val / 100)), 6);
-      };
-
-      drawStatBar('PWR', selectedFighter.pwr, 87, 8);
-      drawStatBar('SPD', selectedFighter.spd, 95, 10);
-      drawStatBar('DEF', selectedFighter.def, 103, 12);
-
-      // Lock-In Status Footer
-      ctx.textAlign = 'center';
+      // Selection instructions
       if (p1Locked && p2Locked) {
-        ctx.fillStyle = getPalColor(10);
-        ctx.font = 'bold 8px monospace';
-        ctx.fillText('MATCH STARTING...', 64, 122);
-      } else if (p1Locked) {
-        ctx.fillStyle = getPalColor(11);
-        ctx.font = '6px monospace';
-        ctx.fillText('P1 READY! PRESS START TO BATTLE', 64, 122);
+        printPicoCenter('MATCH STARTING...', 122, 10, 1, true);
+      } else if (p1Locked && !p2Locked) {
+        printPicoCenter('P1 READY! P2 PRESS S TO LOCK', 122, 11, 1);
       } else {
-        ctx.fillStyle = getPalColor(7);
-        ctx.font = '6px monospace';
-        ctx.fillText('ARROWS: NAVIGATE  X: SELECT FIGHTER', 64, 122);
+        printPicoCenter('ARROWS: MOVE   X: SELECT', 121, 7, 1);
       }
-      ctx.textAlign = 'left';
     }
 
-    // === BATTLE SCREEN RENDERER ===
-    function drawBattleScreen() {
-      ctx.fillStyle = getPalColor(1);
+    function drawStatBar(label, val, x, y, w, col) {
+      printPico(label, x, y, 7, 1);
+      ctx.fillStyle = getPalColor(0);
+      ctx.fillRect(x + 18, y - 1, w, 6);
+      ctx.fillStyle = getPalColor(col);
+      ctx.fillRect(x + 18, y, Math.floor((w - 2) * (val / 100)), 4);
+      ctx.strokeStyle = getPalColor(5);
+      ctx.strokeRect(x + 18, y - 1, w, 6);
+    }
+
+    function wrapText(c, text, x, y, maxW, lineH) {
+      let line = '';
+      let yy = y;
+      for (const word of text.split(' ')) {
+        const test = line ? line + ' ' + word : word;
+        if (c.measureText(test).width > maxW && line) {
+          c.fillText(line, x, yy);
+          line = word;
+          yy += lineH;
+        } else {
+          line = test;
+        }
+      }
+      if (line) c.fillText(line, x, yy);
+      return yy;
+    }
+    // === FIGHTER BIO SCREEN RENDERER ===
+    function drawFighterBioScreen() {
+      ctx.fillStyle = getPalColor(0);
       ctx.fillRect(0, 0, 128, 128);
 
-      ctx.fillStyle = getPalColor(0);
-      ctx.fillRect(0, 0, 128, 15);
+      const f = ROSTER[bioFighterIdx];
+      const bio = FIGHTER_BIOS[f.id] || { nickname: f.name, bio: '', quote: '', record: '' };
 
-      ctx.fillStyle = getPalColor(8);
-      ctx.fillRect(4, 3, 42, 5);
-      ctx.fillStyle = getPalColor(11);
-      ctx.fillRect(4, 3, 42 * (p1.hp / 100), 5);
-
-      ctx.fillStyle = getPalColor(8);
-      ctx.fillRect(82, 3, 42, 5);
-      ctx.fillStyle = getPalColor(11);
-      ctx.fillRect(82, 3, 42 * (p2.hp / 100), 5);
-
-      ctx.fillStyle = getPalColor(7);
-      ctx.font = '8px monospace';
-      ctx.fillText(p1.name || 'BRONER', 4, 13);
-      ctx.fillText(p2.name || 'DEEN', 94, 13);
-      ctx.fillText(roundTimer < 10 ? '0' + roundTimer : roundTimer, 58, 10);
-
-      const elapsedSec = Math.max(0, 99 - roundTimer);
-      const currentLvl = Math.min(10, Math.floor(elapsedSec / 10) + 1);
-      ctx.fillStyle = getPalColor(10);
-      ctx.font = '6px monospace';
-      ctx.fillText('LVL ' + currentLvl, 52, 22);
-
-      drawPicoDitheredCrowd();
-
-      // PICO-8 RING FLOOR (DARK RETRO RING FLOOR)
+      // Header banner
       ctx.fillStyle = getPalColor(1);
-      ctx.fillRect(41, 45, 46, 68);
+      ctx.fillRect(0, 0, 128, 15);
+      printPicoCenter(f.fullName, 5, 10, 1, true);
 
-      ctx.strokeStyle = getPalColor(6);
+      // Portrait Box (top-left)
+      ctx.fillStyle = getPalColor(1);
+      ctx.fillRect(6, 19, 36, 56);
+      ctx.strokeStyle = getPalColor(f.color);
+      ctx.strokeRect(6, 19, 36, 56);
+
+      const portraitCanvas = ROSTER_IDLE_CANVASES[f.id] || bronerIdleCanvas;
+      if (portraitCanvas) {
+        ctx.drawImage(portraitCanvas, 0, 0, portraitCanvas.width, portraitCanvas.height, 8, 21, 32, 52);
+      } else {
+        drawBoxerAvatar(ctx, f, 6, 20, true);
+      }
+      // Right column: nickname, stance, special, stat bars
+      printPico(bio.nickname, 46, 20, 10, 1, true);
+      printPico(f.stance, 46, 28, 6, 1);
+      const bioMoveStr = 'SP ' + (f.move.length > 13 ? f.move.slice(0, 13) : f.move);
+      printPico(bioMoveStr, 46, 36, 9, 1);
+      drawStatBar('PWR', f.pwr, 46, 44, 50, 8);
+      drawStatBar('SPD', f.spd, 46, 52, 50, 10);
+      drawStatBar('DEF', f.def, 46, 60, 50, 12);
+
+      // Lower section: bio description, quote, record (Dynamic non-overlapping layout)
+      const bioEndY = printPicoWrap(bio.bio, 8, 78, 112, 7, 1);
+      const quoteEndY = printPicoWrap('"' + bio.quote + '"', 8, bioEndY + 2, 112, 14, 1);
+      printPico('RECORD ' + bio.record, 8, quoteEndY + 2, 10, 1, true);
+      printPicoCenter('ARROWS: BROWSE   X: BACK', 121, 6, 1);
+    }
+    // === ARENA STAGE SELECT RENDERER (6 DYNAMIC VENUES) ===
+    function drawArenaSelectScreen() {
+      ctx.fillStyle = getPalColor(0);
+      ctx.fillRect(0, 0, 128, 128);
+
+      // Header
+      ctx.fillStyle = getPalColor(1);
+      ctx.fillRect(0, 0, 128, 15);
+      printPicoCenter('SELECT ARENA (6 VENUES)', 5, 10, 1, true);
+
+      // 2x3 Grid of 6 Arena Cards (3 Cols x 2 Rows)
+      const cardW = 36;
+      const cardH = 46;
+      const startX = 6;
+      const startY = 18;
+      const gapX = 4;
+      const gapY = 4;
+
+      ARENAS.forEach((a, idx) => {
+        const r = Math.floor(idx / 3);
+        const c = idx % 3;
+        const cx = startX + c * (cardW + gapX);
+        const cy = startY + r * (cardH + gapY);
+        const isSelected = (selectedArenaIdx === idx);
+
+        // Card background + border
+        ctx.fillStyle = getPalColor(0);
+        ctx.fillRect(cx, cy, cardW, cardH);
+        ctx.strokeStyle = getPalColor(isSelected ? 10 : 5);
+        ctx.strokeRect(cx, cy, cardW, cardH);
+
+        // ── Custom Pixel-Art Arena Preview Thumbnail (32x22) ──
+        const px = cx + 2;
+        const py = cy + 2;
+        const pw = cardW - 4;
+        const ph = 22;
+
+        if (a.id === 'warehouse') {
+          // Kick Warehouse: dark wall, pulsing green neon sign, crates
+          ctx.fillStyle = getPalColor(1);
+          ctx.fillRect(px, py, pw, ph);
+          const pulse = Math.floor(globalFrameCount / 10) % 2 === 0;
+          ctx.fillStyle = pulse ? getPalColor(11) : getPalColor(3);
+          ctx.fillRect(px + 4, py + 3, 10, 4);
+          ctx.fillStyle = getPalColor(7);
+          ctx.fillRect(px + 5, py + 4, 8, 2);
+          // Wooden crates
+          ctx.fillStyle = getPalColor(4);
+          ctx.fillRect(px + pw - 11, py + 12, 9, 10);
+          ctx.fillStyle = getPalColor(5);
+          ctx.strokeRect(px + pw - 11, py + 12, 9, 10);
+
+        } else if (a.id === 'vegas') {
+          // Vegas Strip: skyline towers, moving gold searchlight beam
+          ctx.fillStyle = getPalColor(1);
+          ctx.fillRect(px, py, pw, ph);
+          ctx.fillStyle = getPalColor(0); // Skyline buildings
+          ctx.fillRect(px + 2, py + 8, 6, 14);
+          ctx.fillRect(px + 10, py + 4, 8, 18);
+          ctx.fillRect(px + 20, py + 6, 8, 16);
+          // Moving searchlight beam
+          const beamX = px + 14 + Math.round(Math.sin(globalFrameCount * 0.08) * 8);
+          ctx.fillStyle = 'rgba(255, 236, 39, 0.45)';
+          ctx.beginPath();
+          ctx.moveTo(px + 14, py + ph);
+          ctx.lineTo(beamX - 4, py);
+          ctx.lineTo(beamX + 4, py);
+          ctx.fill();
+          ctx.fillStyle = getPalColor(10);
+          ctx.fillRect(px + pw - 7, py + 3, 5, 8);
+          printPico('$', px + pw - 6, py + 4, 7, 1);
+
+        } else if (a.id === 'misfits') {
+          // London Misfits 00X: massive overhead stadium floodlights, electric blue ropes
+          ctx.fillStyle = getPalColor(0);
+          ctx.fillRect(px, py, pw, ph);
+          // Stadium lights
+          ctx.fillStyle = getPalColor(7);
+          ctx.fillRect(px + 3, py + 2, 6, 3);
+          ctx.fillRect(px + pw - 9, py + 2, 6, 3);
+          ctx.fillStyle = 'rgba(41, 173, 255, 0.35)';
+          ctx.fillRect(px, py + 5, pw, 8);
+          // Flashing crowd camera lights
+          if (Math.floor(globalFrameCount / 6) % 2 === 0) {
+            ctx.fillStyle = getPalColor(7);
+            ctx.fillRect(px + 8, py + 14, 2, 2);
+            ctx.fillRect(px + 20, py + 16, 2, 2);
+          }
+
+        } else if (a.id === 'miamiHouse') {
+          // Miami Stream Mansion: pink/purple sunset, black palm tree silhouette, turquoise pool
+          ctx.fillStyle = getPalColor(2); // Purple dusk
+          ctx.fillRect(px, py, pw, ph);
+          ctx.fillStyle = getPalColor(14); // Pink sunset band
+          ctx.fillRect(px, py + 8, pw, 5);
+          // Turquoise pool water
+          ctx.fillStyle = getPalColor(12);
+          ctx.fillRect(px, py + 15, pw, 7);
+          // Palm tree
+          ctx.fillStyle = getPalColor(0);
+          ctx.fillRect(px + 4, py + 6, 2, 10);
+          ctx.fillRect(px + 2, py + 5, 6, 2);
+          ctx.fillRect(px + 1, py + 6, 2, 2);
+          ctx.fillRect(px + 7, py + 6, 2, 2);
+
+        } else if (a.id === 'gymTmt') {
+          // Mayweather Gym: gold/black TMT logo banner, speedbag
+          ctx.fillStyle = getPalColor(0);
+          ctx.fillRect(px, py, pw, ph);
+          ctx.fillStyle = getPalColor(10); // Gold TMT banner
+          ctx.fillRect(px + 4, py + 3, 14, 5);
+          printPico('TMT', px + 5, py + 3, 0, 1);
+          ctx.fillStyle = getPalColor(8); // Speedbag
+          ctx.fillRect(px + pw - 9, py + 4, 5, 8);
+          ctx.fillStyle = getPalColor(6);
+          ctx.fillRect(px + pw - 7, py + 2, 1, 2);
+
+        } else {
+          // Broner Problem Gym: red brick gym wall, heavy bag
+          ctx.fillStyle = getPalColor(2);
+          ctx.fillRect(px, py, pw, ph);
+          ctx.fillStyle = getPalColor(8);
+          for (let by = py + 3; by < py + ph; by += 4) {
+            ctx.fillRect(px, by, pw, 1);
+          }
+          ctx.fillStyle = getPalColor(0); // Heavy bag
+          ctx.fillRect(px + pw - 10, py + 4, 6, 12);
+          ctx.fillStyle = getPalColor(6);
+          ctx.fillRect(px + pw - 8, py + 2, 2, 2);
+        }
+
+        // Stage ropes overlay on thumbnail
+        ctx.strokeStyle = getPalColor(a.colors.ropes);
+        ctx.beginPath();
+        ctx.moveTo(px, py + 16); ctx.lineTo(px + pw, py + 16);
+        ctx.stroke();
+
+        // Arena name & tag
+        const shortName = a.name.length > 7 ? a.name.slice(0, 7) : a.name;
+        const nameW = shortName.length * 5 - 1;
+        const nameX = cx + Math.floor((cardW - nameW) / 2);
+        printPico(shortName, nameX, cy + 28, isSelected ? 10 : 7, 1);
+
+        const shortTag = a.tag.length > 7 ? a.tag.slice(0, 7) : a.tag;
+        const tagW = shortTag.length * 5 - 1;
+        const tagX = cx + Math.floor((cardW - tagW) / 2);
+        printPico(shortTag, tagX, cy + 36, isSelected ? 11 : 6, 1);
+        // Pulsing selection outline
+        if (isSelected && Math.floor(globalFrameCount / 10) % 2 === 0) {
+          ctx.strokeStyle = getPalColor(7);
+          ctx.strokeRect(cx - 1, cy - 1, cardW + 2, cardH + 2);
+        }
+      });
+
+      printPicoCenter('ARROWS: CHOOSE   X: FIGHT', 121, 7, 1);
+    }
+
+    // === BATTLE SCREEN RENDERER (DYNAMIC ARENA ATMOSPHERE) ===
+    function drawBattleScreen() {
+      const arena = ARENAS[selectedArenaIdx] || ARENAS[0];
+
+      ctx.fillStyle = getPalColor(0);
+      ctx.fillRect(0, 0, 128, 128);
+
+      // ── Top Header & Health Bars ──
+      ctx.fillStyle = getPalColor(1);
+      ctx.fillRect(0, 0, 128, 16);
+
+      // P1 Health Bar
+      ctx.fillStyle = getPalColor(0);
+      ctx.fillRect(3, 2, 44, 6);
+      ctx.fillStyle = getPalColor(8);
+      ctx.fillRect(4, 3, 42, 4);
+      ctx.fillStyle = getPalColor(11);
+      ctx.fillRect(4, 3, Math.max(0, Math.floor(42 * (p1.hp / 100))), 4);
+      ctx.fillStyle = getPalColor(7);
+      ctx.fillRect(4, 3, Math.max(0, Math.floor(42 * (p1.hp / 100))), 1);
+      ctx.strokeStyle = getPalColor(5);
+      ctx.strokeRect(3, 2, 44, 6);
+
+      // P2 Health Bar
+      ctx.fillStyle = getPalColor(0);
+      ctx.fillRect(81, 2, 44, 6);
+      ctx.fillStyle = getPalColor(8);
+      ctx.fillRect(82, 3, 42, 4);
+      ctx.fillStyle = getPalColor(11);
+      ctx.fillRect(82, 3, Math.max(0, Math.floor(42 * (p2.hp / 100))), 4);
+      ctx.fillStyle = getPalColor(7);
+      ctx.fillRect(82, 3, Math.max(0, Math.floor(42 * (p2.hp / 100))), 1);
+      ctx.strokeStyle = getPalColor(5);
+      ctx.strokeRect(81, 2, 44, 6);
+
+      // Fighter Names
+      printPico(p1.name || 'BRONER', 4, 9, 10, 1);
+      const p2Name = p2.name || 'DEEN';
+      printPico(p2Name, 128 - p2Name.length * 5 - 4, 9, 10, 1);
+
+      // Round Timer
+      const timerStr = roundTimer < 10 ? '0' + roundTimer : String(roundTimer);
+      ctx.fillStyle = getPalColor(0);
+      ctx.fillRect(52, 1, 24, 13);
+      ctx.strokeStyle = getPalColor(10);
+      ctx.strokeRect(52, 1, 24, 13);
+      printPicoCenter(timerStr, 3, 7, 1, true);
+      printPicoCenter('RND 1', 9, 10, 1);
+
+      // ── DYNAMIC ARENA ATMOSPHERE & BACKGROUND ──
+      drawPicoDitheredCrowd(arena.colors.crowdBg, arena.colors.crowdDit);
+
+      // Dynamic Camera Flash FX in crowd
+      if (Math.random() < 0.14 || impactFxTimer > 0) {
+        const flashX = 42 + Math.floor(Math.random() * 44);
+        const flashY = 16 + Math.floor(Math.random() * 26);
+        ctx.fillStyle = getPalColor(7);
+        ctx.fillRect(flashX, flashY, 2, 2);
+      }
+
+      // Center Stage Backdrop (X: 41..87, Y: 17..113)
+      ctx.fillStyle = getPalColor(arena.colors.backdrop);
+      ctx.fillRect(41, 17, 46, 96);
+
+      // Arena-Specific Dynamic Lighting & Effects
+      if (arena.id === 'vegas' || arena.id === 'misfits') {
+        // Moving searchlight / laser beams across roof
+        const beam1X = 64 + Math.round(Math.sin(globalFrameCount * 0.04) * 18);
+        const beam2X = 64 + Math.round(Math.cos(globalFrameCount * 0.03) * 18);
+        ctx.fillStyle = arena.id === 'vegas' ? 'rgba(255, 236, 39, 0.25)' : 'rgba(41, 173, 255, 0.25)';
+        ctx.beginPath();
+        ctx.moveTo(64, 17);
+        ctx.lineTo(beam1X - 6, 46);
+        ctx.lineTo(beam1X + 6, 46);
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.moveTo(64, 17);
+        ctx.lineTo(beam2X - 6, 46);
+        ctx.lineTo(beam2X + 6, 46);
+        ctx.fill();
+
+      } else if (arena.id === 'warehouse') {
+        // Pulsing Kick Neon Logo in background
+        const neonPulse = Math.floor(globalFrameCount / 12) % 2 === 0;
+        ctx.fillStyle = neonPulse ? getPalColor(11) : getPalColor(3);
+        ctx.fillRect(56, 24, 16, 6);
+        ctx.fillStyle = getPalColor(0);
+        printPico('KICK', 57, 25, neonPulse ? 7 : 11, 1);
+
+      } else if (arena.id === 'miamiHouse') {
+        // Sunset pink glow band
+        ctx.fillStyle = getPalColor(14);
+        ctx.fillRect(41, 32, 46, 6);
+        // Neon palm tree silhouette
+        ctx.fillStyle = getPalColor(0);
+        ctx.fillRect(45, 24, 2, 14);
+        ctx.fillRect(43, 22, 6, 3);
+      }
+
+      // Ring Canvas Floor
+      ctx.fillStyle = getPalColor(arena.colors.floor);
+      ctx.fillRect(41, 88, 46, 25);
+
+      // Ring Ropes & Turnbuckles
+      ctx.strokeStyle = getPalColor(arena.colors.ropes);
+      ctx.lineWidth = 1;
       ctx.beginPath();
-      ctx.moveTo(41, 45); ctx.lineTo(86, 45);
-      ctx.moveTo(41, 65); ctx.lineTo(86, 65);
-      ctx.moveTo(41, 85); ctx.lineTo(86, 85);
+      ctx.moveTo(41, 46); ctx.lineTo(87, 46);
+      ctx.moveTo(41, 64); ctx.lineTo(87, 64);
+      ctx.moveTo(41, 82); ctx.lineTo(87, 82);
       ctx.stroke();
 
-      ctx.fillStyle = getPalColor(5);
-      ctx.fillRect(41, 90, 46, 23);
+      // Turnbuckle pads (Theme Accent Colors)
+      ctx.fillStyle = getPalColor(arena.colors.accent);
+      ctx.fillRect(41, 44, 2, 40);
+      ctx.fillRect(85, 44, 2, 40);
 
-      drawBoxer(41, 50, true, p1.anim, p1.animTimer);
-      drawBoxer(65, 50, false, p2.anim, p2.animTimer);
+      // Live Stream Chat Broadcast Ticker
+      streamChatTimer++;
+      if (streamChatTimer > 140) {
+        streamChatTimer = 0;
+        streamChatIdx = (streamChatIdx + 1) % KICK_STREAM_CHAT.length;
+      }
 
+      ctx.fillStyle = 'rgba(0,0,0,0.92)';
+      ctx.fillRect(41, 101, 46, 12);
+      ctx.strokeStyle = getPalColor(arena.colors.accent);
+      ctx.strokeRect(41, 101, 46, 12);
+
+      // Stream badge and chat message
+      printPico('LIVE 142K', 43, 102, arena.colors.accent, 1);
+      const chatMsg = KICK_STREAM_CHAT[streamChatIdx] || 'RING RUSH LIVE';
+      const shortChat = chatMsg.length > 11 ? chatMsg.slice(0, 11) : chatMsg;
+      printPico(shortChat, 43, 107, 7, 1);
+
+      // Animated Boxers (Grounded on floor Y=90, facing each other)
+      drawBoxer(52, 90, true, p1.anim, p1.animTimer);
+      drawBoxer(76, 90, false, p2.anim, p2.animTimer);
+
+      // Hit Impact Spark FX
       if (impactFxTimer > 0) {
         impactFxTimer--;
         ctx.fillStyle = getPalColor(10);
@@ -2381,33 +3168,54 @@
         ctx.fillRect(impactFxX - 1, impactFxY - 1, 3, 3);
       }
 
+      // Draw Left (P1) and Right (P2) Playfields
       p1.draw();
       p2.draw();
 
+      // Particles & Floating Combo Texts
       globalParticles.forEach(p => p.draw());
       globalFloatingTexts.forEach(t => t.draw());
 
+      // Bottom HUD: Super Meter Gauges
       ctx.fillStyle = getPalColor(0);
       ctx.fillRect(0, 114, 128, 14);
 
-      ctx.fillStyle = getPalColor(10);
-      ctx.fillRect(4, 118, 40 * (p1.superMeter / 100), 4);
-      ctx.fillRect(84, 118, 40 * (p2.superMeter / 100), 4);
+      // P1 Super Gauge
+      const p1SuperW = Math.floor(34 * (p1.superMeter / 100));
+      ctx.fillStyle = getPalColor(1);
+      ctx.fillRect(4, 117, 34, 5);
+      ctx.fillStyle = (p1.superMeter >= 100 && Math.floor(globalFrameCount / 6) % 2 === 0) ? getPalColor(7) : getPalColor(10);
+      ctx.fillRect(4, 117, p1SuperW, 5);
+      ctx.strokeStyle = getPalColor(5);
+      ctx.strokeRect(4, 117, 34, 5);
+      printPico('SP', 40, 117, p1.superMeter >= 100 ? 10 : 7, 1);
 
-      ctx.fillStyle = getPalColor(7);
-      ctx.fillText('SP', 46, 123);
-      ctx.fillText('SP', 74, 123);
+      // Center Super Status Indicator
+      if (p1.superMeter >= 100 || p2.superMeter >= 100) {
+        printPicoCenter('SUPER READY', 117, 8, 1, true);
+      }
 
-      ctx.fillStyle = getPalColor(10);
-      ctx.font = '7px monospace';
-      ctx.fillText('HI:' + highScore, 4, 22);
+      // P2 Super Gauge
+      const p2SuperW = Math.floor(34 * (p2.superMeter / 100));
+      ctx.fillStyle = getPalColor(1);
+      ctx.fillRect(90, 117, 34, 5);
+      ctx.fillStyle = (p2.superMeter >= 100 && Math.floor(globalFrameCount / 6) % 2 === 0) ? getPalColor(7) : getPalColor(10);
+      ctx.fillRect(90, 117, p2SuperW, 5);
+      ctx.strokeStyle = getPalColor(5);
+      ctx.strokeRect(90, 117, 34, 5);
+      printPico('SP', 78, 117, p2.superMeter >= 100 ? 10 : 7, 1);
 
+      // Knockout Banner Overlay
       if (gameState === 'KO') {
-        ctx.fillStyle = 'rgba(0,0,0,0.75)';
-        ctx.fillRect(0, 45, 128, 38);
-        ctx.fillStyle = getPalColor(10);
-        ctx.font = 'bold 12px monospace';
-        ctx.fillText(koMessage, 10, 68);
+        ctx.fillStyle = 'rgba(0,0,0,0.92)';
+        ctx.fillRect(0, 40, 128, 48);
+        ctx.strokeStyle = getPalColor(10);
+        ctx.strokeRect(0, 40, 128, 48);
+        printPicoCenter('K.O.!', 44, 8, 2, true);
+        printPicoCenter(koMessage, 60, 10, 1, true);
+        if (Math.floor(globalFrameCount / 15) % 2 === 0) {
+          printPicoCenter('PRESS START TO REMATCH', 74, 7, 1);
+        }
       }
     }
 
@@ -2427,6 +3235,8 @@
       }
 
       ctx.save();
+      ctx.scale(2, 2); // 2x high-DPI scaling for ultra-sharp typography & pixel art
+
       if (cameraShake > 0) {
         const rx = (Math.random() * cameraShake - cameraShake / 2);
         const ry = (Math.random() * cameraShake - cameraShake / 2);
@@ -2441,6 +3251,10 @@
         drawModeSelectScreen();
       } else if (appState === 'CHAR_SELECT') {
         drawCharSelectScreen();
+      } else if (appState === 'FIGHTER_BIO') {
+        drawFighterBioScreen();
+      } else if (appState === 'ARENA_SELECT') {
+        drawArenaSelectScreen();
       } else {
         drawBattleScreen();
       }
@@ -2461,11 +3275,15 @@
       const f1 = ROSTER[p1SelectIdx];
       const f2 = ROSTER[p2SelectIdx];
 
+      p1.fighterId = f1.id;
+      p2.fighterId = f2.id;
       p1.name = f1.name;
       p2.name = f2.name;
       p1.score = 0; p2.score = 0;
       p1.comboCount = 0; p2.comboCount = 0;
       p1.dropCount = 0; p2.dropCount = 0;
+      p1.pityBreakerCount = 0; p2.pityBreakerCount = 0;
+      p1.pendingGarbage = 0; p2.pendingGarbage = 0;
 
       if (selectedModeIdx === 0) { // 1P vs CPU
         p1.isAi = false;
@@ -2492,6 +3310,8 @@
       p2.powerGems = Array(ROWS).fill(null).map(() => Array(COLS).fill(false));
       p1.counterTimers = Array(ROWS).fill(null).map(() => Array(COLS).fill(3));
       p2.counterTimers = Array(ROWS).fill(null).map(() => Array(COLS).fill(3));
+      p1.counterColors = Array(ROWS).fill(null).map(() => Array(COLS).fill(0));
+      p2.counterColors = Array(ROWS).fill(null).map(() => Array(COLS).fill(0));
       p1.squish = Array(ROWS).fill(null).map(() => Array(COLS).fill(0));
       p2.squish = Array(ROWS).fill(null).map(() => Array(COLS).fill(0));
 
@@ -2500,8 +3320,6 @@
       p1.pair = null;
       p2.pair = null;
 
-      // Clear any leftover animation / chain state from the previous round so
-      // rematches start from a neutral idle pose with no pending clears.
       for (const p of [p1, p2]) {
         p.anim = 'IDLE';
         p.animTimer = 0;
@@ -2509,9 +3327,10 @@
         p.lockDelay = 0;
         p.aiTimer = 0;
         p.clearTimer = 0;
-        p.pendingClear = null;
-        p.comboCount = 0;
+        p.superActive = false;
+        p.superTimer = 0;
       }
+
       impactTriggeredP1 = false;
       impactTriggeredP2 = false;
       impactFxTimer = 0;
@@ -2524,6 +3343,7 @@
       timerFrameCounter = 0;
       gameState = 'PLAYING';
       appState = 'PLAYING';
+      play808Sfx('bell');
     }
 
     function update() {
@@ -2534,95 +3354,41 @@
         lockCountdown--;
         if (lockCountdown <= 0) {
           lockCountdown = -1;
-          startMatch();
+          appState = 'ARENA_SELECT';
         }
       }
 
       if (appState !== 'PLAYING' && appState !== 'KO') return;
-
       if (!p1 || !p2) return;
+
+      timerFrameCounter++;
+      if (timerFrameCounter >= 60) {
+        timerFrameCounter = 0;
+        if (roundTimer > 0) {
+          roundTimer--;
+          if (roundTimer === 0) {
+            if (p1.hp > p2.hp) triggerKO(1);
+            else if (p2.hp > p1.hp) triggerKO(2);
+            else triggerKO(0);
+          }
+        }
+      }
+
+      idleP1.update();
+      idleP2.update();
 
       p1.update();
       p2.update();
 
-      globalParticles.forEach(p => p.update());
-      globalParticles = globalParticles.filter(p => p.life > 0);
-
-      globalFloatingTexts.forEach(t => t.update());
-      globalFloatingTexts = globalFloatingTexts.filter(t => t.life > 0);
-
-      if (gameState === 'PLAYING') {
-        // HP-based knockout: a fighter reduced to 0 HP loses immediately.
-        // Without this check the match could only end via timer expiry or board
-        // overflow, leaving damage dealt by gem detonations meaningless.
-        if (p1.hp <= 0 || p2.hp <= 0) {
-          gameState = 'KO';
-          appState = 'KO';
-          play808Sfx('ko');
-          cameraShake = Math.max(cameraShake, 14);
-          flashFrames = Math.max(flashFrames, 5);
-          if (p1.hp <= 0 && p2.hp <= 0) {
-            koMessage = 'DOUBLE K.O.!';
-          } else if (p1.hp <= 0) {
-            koMessage = 'K.O.! ' + (p2.name || 'P2') + ' WINS!';
-          } else {
-            koMessage = 'K.O.! ' + (p1.name || 'P1') + ' WINS!';
-          }
-        } else {
-          timerFrameCounter++;
-          if (timerFrameCounter >= 60) {
-            timerFrameCounter = 0;
-            if (roundTimer > 0) {
-              roundTimer--;
-            } else {
-              gameState = 'KO';
-              appState = 'KO';
-              play808Sfx('ko');
-              if (p1.hp > p2.hp) {
-                koMessage = 'TIME! ' + p1.name + ' WINS!';
-              } else if (p2.hp > p1.hp) {
-                koMessage = 'TIME! ' + p2.name + ' WINS!';
-              } else {
-                koMessage = 'TIME! DRAW!';
-              }
-            }
-          }
-        }
+      for (let i = globalParticles.length - 1; i >= 0; i--) {
+        globalParticles[i].update();
+        if (globalParticles[i].life <= 0) globalParticles.splice(i, 1);
       }
-    }
 
-    let lastTime = performance.now();
-    const step = 1000 / 60;
-
-    function tick() {
-      const now = performance.now();
-      let delta = now - lastTime;
-      if (delta > 250) delta = 250;
-
-      while (delta >= step) {
-        update();
-        lastTime += step;
-        delta -= step;
+      for (let i = globalFloatingTexts.length - 1; i >= 0; i--) {
+        globalFloatingTexts[i].update();
+        if (globalFloatingTexts[i].life <= 0) globalFloatingTexts.splice(i, 1);
       }
-      render();
-    }
-
-    function loop() {
-      tick();
-      requestAnimationFrame(loop);
-    }
-    requestAnimationFrame(loop);
-
-    // === UNIFIED KEYBOARD CONTROL MANAGER ===
-    const isStartKey = (k) => k === 'x' || k === 'X' || k === 'z' || k === 'Z' || k === 'Enter' || k === ' ';
-
-    // Returns to the character select screen for an immediate rematch.
-    function rematchToCharSelect() {
-      appState = 'CHAR_SELECT';
-      gameState = 'PLAYING';
-      p1Locked = false;
-      p2Locked = false;
-      lockCountdown = -1;
     }
 
     window.addEventListener('keydown', (e) => {
@@ -2642,24 +3408,82 @@
           appState = 'CHAR_SELECT';
           p1Locked = false;
           p2Locked = false;
-          p1SelectIdx = 0; // Broner
-          p2SelectIdx = 1; // Deen
+          p1SelectIdx = 0;
+          p2SelectIdx = 1;
         }
         return;
       }
 
       if (appState === 'CHAR_SELECT') {
         if (!p1Locked) {
+          const prev = p1SelectIdx;
           if (e.key === 'ArrowLeft') p1SelectIdx = (p1SelectIdx + 13) % 14;
           if (e.key === 'ArrowRight') p1SelectIdx = (p1SelectIdx + 1) % 14;
           if (e.key === 'ArrowUp') p1SelectIdx = (p1SelectIdx + 7) % 14;
           if (e.key === 'ArrowDown') p1SelectIdx = (p1SelectIdx + 7) % 14;
+          if (p1SelectIdx !== prev) play808Sfx('nav');
+        }
+
+        // P2 cursor controls — only in 2P Local mode
+        if (selectedModeIdx === 1 && !p2Locked) {
+          const prev = p2SelectIdx;
+          if (e.key === 'a' || e.key === 'A') p2SelectIdx = (p2SelectIdx + 13) % 14;
+          if (e.key === 'd' || e.key === 'D') p2SelectIdx = (p2SelectIdx + 1) % 14;
+          if (e.key === 'w' || e.key === 'W') p2SelectIdx = (p2SelectIdx + 7) % 14;
+          if (e.key === 's' || e.key === 'S') p2SelectIdx = (p2SelectIdx + 7) % 14;
+          if (p2SelectIdx !== prev) play808Sfx('nav');
+        }
+        if (selectedModeIdx === 1 && !p2Locked && (e.key === 'f' || e.key === 'F')) {
+          p2Locked = true;
+          play808Sfx('confirm');
+        }
+
+        if ((e.key === 'b' || e.key === 'B') && !(p1Locked && p2Locked)) {
+          bioFighterIdx = p1SelectIdx;
+          appState = 'FIGHTER_BIO';
+          play808Sfx('nav');
         }
 
         if (isStartKey(e.key)) {
           p1Locked = true;
-          // In 1P vs CPU or CPU vs CPU, auto lock P2
-          p2Locked = true;
+          play808Sfx('confirm');
+          if (selectedModeIdx !== 1) {
+            p2Locked = true;
+          }
+        }
+        return;
+      }
+
+      if (appState === 'FIGHTER_BIO') {
+        const prev = bioFighterIdx;
+        if (e.key === 'ArrowLeft') bioFighterIdx = (bioFighterIdx + 13) % 14;
+        if (e.key === 'ArrowRight') bioFighterIdx = (bioFighterIdx + 1) % 14;
+        if (bioFighterIdx !== prev) play808Sfx('nav');
+        if (isStartKey(e.key) || e.key === 'Backspace' || e.key === 'Escape' || e.key === 'b' || e.key === 'B') {
+          appState = 'CHAR_SELECT';
+          p1SelectIdx = bioFighterIdx;
+          play808Sfx('nav');
+        }
+        return;
+      }
+
+      if (appState === 'ARENA_SELECT') {
+        const prev = selectedArenaIdx;
+        if (e.key === 'ArrowLeft') selectedArenaIdx = (selectedArenaIdx + 5) % 6;
+        if (e.key === 'ArrowRight') selectedArenaIdx = (selectedArenaIdx + 1) % 6;
+        if (e.key === 'ArrowUp') selectedArenaIdx = (selectedArenaIdx + 3) % 6;
+        if (e.key === 'ArrowDown') selectedArenaIdx = (selectedArenaIdx + 3) % 6;
+        if (selectedArenaIdx !== prev) play808Sfx('nav');
+        if (isStartKey(e.key)) {
+          play808Sfx('confirm');
+          startMatch();
+        }
+        if (e.key === 'Escape' || e.key === 'Backspace') {
+          appState = 'CHAR_SELECT';
+          p1Locked = false;
+          p2Locked = false;
+          lockCountdown = -1;
+          play808Sfx('nav');
         }
         return;
       }
@@ -2718,31 +3542,48 @@
     };
 
     bindBtn('btnLeft', () => {
-      if (appState === 'CHAR_SELECT') p1SelectIdx = (p1SelectIdx + 13) % 14;
+      if (appState === 'CHAR_SELECT' && !p1Locked) { p1SelectIdx = (p1SelectIdx + 13) % 14; play808Sfx('nav'); }
+      else if (appState === 'FIGHTER_BIO') { bioFighterIdx = (bioFighterIdx + 13) % 14; play808Sfx('nav'); }
+      else if (appState === 'ARENA_SELECT') { selectedArenaIdx = (selectedArenaIdx + 3) % 4; play808Sfx('nav'); }
+      else if (appState === 'PLAYING') p1.move(-1);
+    });
+
+    bindBtn('btnLeft', () => {
+      if (appState === 'MODE_SELECT') selectedModeIdx = (selectedModeIdx + 2) % 3;
+      else if (appState === 'CHAR_SELECT' && !p1Locked) { p1SelectIdx = (p1SelectIdx + 13) % 14; play808Sfx('nav'); }
+      else if (appState === 'FIGHTER_BIO') { bioFighterIdx = (bioFighterIdx + 13) % 14; play808Sfx('nav'); }
+      else if (appState === 'ARENA_SELECT') { selectedArenaIdx = (selectedArenaIdx + 5) % 6; play808Sfx('nav'); }
       else if (appState === 'PLAYING') p1.move(-1);
     });
 
     bindBtn('btnRight', () => {
-      if (appState === 'CHAR_SELECT') p1SelectIdx = (p1SelectIdx + 1) % 14;
+      if (appState === 'MODE_SELECT') selectedModeIdx = (selectedModeIdx + 1) % 3;
+      else if (appState === 'CHAR_SELECT' && !p1Locked) { p1SelectIdx = (p1SelectIdx + 1) % 14; play808Sfx('nav'); }
+      else if (appState === 'FIGHTER_BIO') { bioFighterIdx = (bioFighterIdx + 1) % 14; play808Sfx('nav'); }
+      else if (appState === 'ARENA_SELECT') { selectedArenaIdx = (selectedArenaIdx + 1) % 6; play808Sfx('nav'); }
       else if (appState === 'PLAYING') p1.move(1);
     });
 
     bindBtn('btnDown', () => {
       if (appState === 'MODE_SELECT') selectedModeIdx = (selectedModeIdx + 1) % 3;
-      else if (appState === 'CHAR_SELECT') p1SelectIdx = (p1SelectIdx + 7) % 14;
+      else if (appState === 'CHAR_SELECT' && !p1Locked) { p1SelectIdx = (p1SelectIdx + 7) % 14; play808Sfx('nav'); }
+      else if (appState === 'ARENA_SELECT') { selectedArenaIdx = (selectedArenaIdx + 3) % 6; play808Sfx('nav'); }
       else if (appState === 'PLAYING') p1.dropSoft();
     });
 
     bindBtn('btnUp', () => {
       if (appState === 'MODE_SELECT') selectedModeIdx = (selectedModeIdx + 2) % 3;
-      else if (appState === 'CHAR_SELECT') p1SelectIdx = (p1SelectIdx + 7) % 14;
+      else if (appState === 'CHAR_SELECT' && !p1Locked) { p1SelectIdx = (p1SelectIdx + 7) % 14; play808Sfx('nav'); }
+      else if (appState === 'ARENA_SELECT') { selectedArenaIdx = (selectedArenaIdx + 3) % 6; play808Sfx('nav'); }
       else if (appState === 'PLAYING') p1.dropHard();
     });
 
     bindBtn('btnO', () => {
       if (appState === 'TITLE') appState = 'MODE_SELECT';
       else if (appState === 'MODE_SELECT') { appState = 'CHAR_SELECT'; p1Locked = false; p2Locked = false; }
-      else if (appState === 'CHAR_SELECT') { p1Locked = true; p2Locked = true; }
+      else if (appState === 'CHAR_SELECT') { p1Locked = true; if (selectedModeIdx !== 1) p2Locked = true; play808Sfx('confirm'); }
+      else if (appState === 'FIGHTER_BIO') { appState = 'CHAR_SELECT'; p1SelectIdx = bioFighterIdx; play808Sfx('nav'); }
+      else if (appState === 'ARENA_SELECT') { play808Sfx('confirm'); startMatch(); }
       else if (appState === 'KO') rematchToCharSelect();
       else if (appState === 'PLAYING') p1.rotate(-1);
     });
@@ -2750,7 +3591,9 @@
     bindBtn('btnX', () => {
       if (appState === 'TITLE') appState = 'MODE_SELECT';
       else if (appState === 'MODE_SELECT') { appState = 'CHAR_SELECT'; p1Locked = false; p2Locked = false; }
-      else if (appState === 'CHAR_SELECT') { p1Locked = true; p2Locked = true; }
+      else if (appState === 'CHAR_SELECT') { p1Locked = true; if (selectedModeIdx !== 1) p2Locked = true; play808Sfx('confirm'); }
+      else if (appState === 'FIGHTER_BIO') { appState = 'CHAR_SELECT'; p1SelectIdx = bioFighterIdx; play808Sfx('nav'); }
+      else if (appState === 'ARENA_SELECT') { play808Sfx('confirm'); startMatch(); }
       else if (appState === 'KO') rematchToCharSelect();
       else if (appState === 'PLAYING') {
         if (p1.superMeter >= 100) p1.triggerSuper();
@@ -2786,6 +3629,31 @@
       } else if (appState === 'MODE_SELECT') {
         appState = 'CHAR_SELECT';
         p1Locked = false; p2Locked = false;
+      } else if (appState === 'FIGHTER_BIO') {
+        appState = 'CHAR_SELECT';
+        p1SelectIdx = bioFighterIdx;
+        play808Sfx('nav');
+      } else if (appState === 'ARENA_SELECT') {
+        const rect = canvasEl.getBoundingClientRect();
+        const clickX = ((e.clientX - rect.left) / rect.width) * 128;
+        const clickY = ((e.clientY - rect.top) / rect.height) * 128;
+        // 2x3 cards: start (6,18), cardW 36, cardH 46, gapX 4, gapY 4
+        for (let idx = 0; idx < 6; idx++) {
+          const r = Math.floor(idx / 3);
+          const c = idx % 3;
+          const cx = 6 + c * 40;
+          const cy = 18 + r * 50;
+          if (clickX >= cx && clickX <= cx + 36 && clickY >= cy && clickY <= cy + 46) {
+            if (selectedArenaIdx === idx) {
+              play808Sfx('confirm');
+              startMatch();
+            } else {
+              selectedArenaIdx = idx;
+              play808Sfx('nav');
+            }
+            return;
+          }
+        }
       } else if (appState === 'KO') {
         rematchToCharSelect();
       } else if (appState === 'CHAR_SELECT') {
@@ -2793,23 +3661,36 @@
         const clickX = ((e.clientX - rect.left) / rect.width) * 128;
         const clickY = ((e.clientY - rect.top) / rect.height) * 128;
 
-        // Check grid click (X: 8..124, Y: 15..51)
+        // Portrait panel opens the bio screen instead of locking
+        if (clickX >= 8 && clickX <= 38 && clickY >= 58 && clickY <= 106 && !p1Locked) {
+          bioFighterIdx = p1SelectIdx;
+          appState = 'FIGHTER_BIO';
+          play808Sfx('nav');
+          return;
+        }
+
+        // Check grid click (X: 8..124, Y: 15..51) — selects, then locks
         if (clickY >= 15 && clickY <= 51 && clickX >= 8 && clickX <= 124) {
           const col = Math.floor((clickX - 8) / 17);
           const row = Math.floor((clickY - 15) / 18);
           const idx = row * 7 + col;
           if (idx >= 0 && idx < 14) {
             p1SelectIdx = idx;
-            p1Locked = true;
-            p2Locked = true;
           }
-        } else {
-          p1Locked = true;
-          p2Locked = true;
         }
+        p1Locked = true;
+        if (selectedModeIdx !== 1) p2Locked = true;
+        play808Sfx('confirm');
       }
     });
     }
+
+    function gameLoop() {
+      update();
+      render();
+      requestAnimationFrame(gameLoop);
+    }
+    requestAnimationFrame(gameLoop);
   </script>
 </body>
 </html>

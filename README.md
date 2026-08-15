@@ -1,14 +1,14 @@
 # CRASH OUT: RING RUSH — PICO-8 PUZZLE BOXING
 
-**Version:** `v1.0.0-alpha.1` (Alpha 1.0 Release)
+**Version:** `v1.3.0` (Capcom-Grade Arcade & Multi-Arena Overhaul)
 
 ![Title Screen](assets/pico8_title.jpg)
 
-**Crash Out: Ring Rush** is an 8-bit arcade versus puzzle-fighter developed specifically for the **PICO-8 Fantasy Console**. It fuses the head-to-head mechanics of Capcom's *Super Puzzle Fighter II Turbo* with the viral Kick warehouse boxing stream culture hosted by **Adrien "The Problem" Broner** and **Deen The Great**.
+**Crash Out: Ring Rush** is an 8-bit arcade versus puzzle-fighter developed for the **PICO-8 Fantasy Console**. It fuses the competitive mechanics of Capcom's *Super Puzzle Fighter II Turbo* with the viral Kick warehouse boxing stream culture hosted by **Adrien "The Problem" Broner** and **Deen The Great**.
 
 ---
 
-## 🎮 Play Live (v1.0.0-alpha.1)
+## 🎮 Play Live (v1.3.0)
 
 - ⚡ **Play Live in Browser (GitHub Pages)**: **[officebeats.github.io/beats-social-media-boxer-game](https://officebeats.github.io/beats-social-media-boxer-game/)**
 - 🕹️ **Native PICO-8 Cartridge**: Load [`crash_out.p8`](crash_out.p8) directly inside PICO-8 using `pico8 -run crash_out.p8`.
@@ -18,9 +18,20 @@
 - **Arrow Down**: Soft drop
 - **Arrow Up**: Hard drop (Instant lock)
 - **Z**: Rotate Counter-Clockwise
-- **X**: Rotate Clockwise / Trigger SUPER
+- **X**: Rotate Clockwise / Confirm / Trigger SUPER (when 100%)
+- **B**: View Fighter Bio (Character Select)
 
 ---
+
+## 🌟 New in v1.3.0
+- 🥊 **Full 14-Fighter Roster Revamp**: Signature 6x4 counter drop patterns, super moves, streamer superchats, and crowd reactions for all 14 fighters.
+- 🏟️ **6 Dynamic Arenas**: Kick Warehouse, Vegas Casino Strip (with moving searchlights), London Misfits 00X (stadium floodlights), Miami Stream Mansion (pool & dusk), Mayweather TMT Gym, and Detroit Problem Gym.
+- 💎 **Pure Puzzle Fighter Core Engine**: 3D beveled gems, power gem multi-cell fusion, pulsating circular crash breaker orbs, stone countdown timers ($3\to 2\to 1$), real-time garbage offsetting, and pity breaker timers.
+- 🔤 **100% Native 4x5 Pixel Font Engine**: Direct bitmap font matrix delivering razor-sharp retro typography across all screens with zero blur.
+- 👁️ **100% Direction-Normalized Sprites**: All 14 fighters on disk natively face right, ensuring Player 1 and Player 2 always face each other eye-to-eye in both idle and all 4 punch animations.
+- 🎨 **Authentic Deen the Great Likeness**: Golden-caramel light-skinned Black complexion with clean buzz cut.
+- 🔴 **Zero Foot Artifacts**: Clean alpha transparency with grounded boots on the ring canvas floor at $Y=90$ and elliptical drop shadows.
+- 📺 **Live Broadcast Stream HUD**: Real-time Kick chat ticker with viewer counters and donation alerts.
 
 ## 🥊 Visual Targets & Screen Gallery
 
