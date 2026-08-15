@@ -3394,6 +3394,11 @@
         if (globalFloatingTexts[i].life <= 0) globalFloatingTexts.splice(i, 1);
       }
     }
+    function isStartKey(k) {
+      if (!k) return false;
+      const key = String(k).toLowerCase();
+      return key === 'x' || key === 'z' || key === 'c' || key === 'enter' || key === ' ' || key === 'space';
+    }
 
     window.addEventListener('keydown', (e) => {
       initAudio();
@@ -3544,13 +3549,6 @@
       btn.addEventListener('touchstart', handler, { passive: false });
       btn.addEventListener('click', handler);
     };
-
-    bindBtn('btnLeft', () => {
-      if (appState === 'CHAR_SELECT' && !p1Locked) { p1SelectIdx = (p1SelectIdx + 13) % 14; play808Sfx('nav'); }
-      else if (appState === 'FIGHTER_BIO') { bioFighterIdx = (bioFighterIdx + 13) % 14; play808Sfx('nav'); }
-      else if (appState === 'ARENA_SELECT') { selectedArenaIdx = (selectedArenaIdx + 3) % 4; play808Sfx('nav'); }
-      else if (appState === 'PLAYING') p1.move(-1);
-    });
 
     bindBtn('btnLeft', () => {
       if (appState === 'MODE_SELECT') selectedModeIdx = (selectedModeIdx + 2) % 3;
