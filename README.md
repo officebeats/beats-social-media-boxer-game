@@ -1,6 +1,6 @@
 # CRASH OUT: RING RUSH — PICO-8 PUZZLE BOXING
 
-**Version:** `v1.4.0` (Stream Guest Roster & Dynamic Arenas Release)
+**Version:** `v1.5.0` (Verified Viral Stream Guest Roster & 56-Punch Overhaul)
 
 ![Title Screen](assets/pico8_title.jpg)
 
@@ -8,7 +8,7 @@
 
 ---
 
-## 🎮 Play Live (v1.4.0)
+## 🎮 Play Live (v1.5.0)
 
 - ⚡ **Play Live in Browser (GitHub Pages)**: **[officebeats.github.io/beats-social-media-boxer-game](https://officebeats.github.io/beats-social-media-boxer-game/)**
 - 🕹️ **Native PICO-8 Cartridge**: Load [`crash_out.p8`](crash_out.p8) directly inside PICO-8 using `pico8 -run crash_out.p8`.
@@ -23,16 +23,16 @@
 
 ---
 
-## 🌟 New in v1.4.0
-- 🥊 **Stream Guest Roster**: Replaced non-guest Floyd with viral Kick sparring guest **SNEAKO** (with custom 16-bit headgear sprite and 4-quadrant punch grid).
+## 🌟 New in v1.5.0
+- 🥊 **Verified Viral Stream Guest Roster**: Added viral Kick warehouse personalities **HSTikkyTokky** (`hstikky`), **Fousey G7** (`fousey`), and **Sneako** (`sneako`), replacing non-guests Floyd and Walid with custom 16-bit Capcom pixel art sprites and 4-quadrant punch grids.
+- 🥊 **100% Normalized Punch Engine (All 56 Sprites)**: Rebuilt every punch quadrant across all 14 fighters to guarantee every single strike (Jab, Straight, Hook, Uppercut) lunges directly into the opponent's chest on both sides of the ring.
 - 🏟️ **6 Dynamic Arenas**: Kick Warehouse (pulsing neon), Vegas Strip (moving searchlights), London Misfits 00X (stadium floodlights), Miami Stream Mansion (pool & dusk), Mayweather TMT Gym, and Detroit Problem Gym.
 - 🎨 **Authentic Deen the Great Likeness**: Golden-caramel light-skinned Black complexion with sharp buzz cut.
-- 👁️ **100% Direction-Normalized Sprites**: All 14 fighters on disk natively face right, ensuring Player 1 and Player 2 always face each other eye-to-eye in both idle and all 4 punch animations.
+- 👁️ **100% Direction-Normalized Sprites**: All 14 fighters natively face right, ensuring Player 1 and Player 2 always face each other eye-to-eye.
 - 💎 **Pure Puzzle Fighter Core Engine**: 3D beveled gems, power gem multi-cell fusion, pulsating circular crash breaker orbs, stone countdown timers, and real-time garbage offsetting.
 - 🔤 **100% Native 4x5 Pixel Font Engine**: Direct bitmap font matrix delivering razor-sharp retro typography across all screens with zero blur.
 - 🔴 **Zero Foot Artifacts**: Clean alpha transparency with grounded boots on the ring canvas floor at $Y=90$ and elliptical drop shadows.
 - 📺 **Live Broadcast Stream HUD**: Real-time Kick chat ticker with viewer counters and donation alerts.
-## 🥊 Visual Targets & Screen Gallery
 
 ### Title Screen
 ![Title Screen](assets/pico8_title.jpg)

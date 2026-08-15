@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>CRASH OUT: RING RUSH (v1.4.0) — PICO-8 Native Transparent Boxing</title>
+  <title>CRASH OUT: RING RUSH (v1.5.0) — PICO-8 Native Transparent Boxing</title>
   <style>
     :root {
       --pico-black: #000000;
@@ -759,11 +759,11 @@
         [1, 4, 3, 2, 1, 4],
         [2, 3, 4, 1, 2, 3]
       ],
-      walid: [ // Reverse Diagonal Steps (Shark Attack Combo - mirrors Deen)
-        [4, 3, 2, 1, 4, 3],
-        [3, 2, 1, 4, 3, 2],
-        [2, 1, 4, 3, 2, 1],
-        [1, 4, 3, 2, 1, 4]
+      hstikky: [ // UK Tikky Bomb (Heavy Blue & Yellow Alternating Columns)
+        [2, 2, 4, 4, 2, 2],
+        [2, 2, 4, 4, 2, 2],
+        [4, 4, 2, 2, 4, 4],
+        [4, 4, 2, 2, 4, 4]
       ],
       abrown: [ // CT Checkerboard Dance (CT KO Dance - flashy alternating grids)
         [4, 1, 4, 1, 4, 1],
@@ -771,11 +771,11 @@
         [2, 3, 2, 3, 2, 3],
         [3, 2, 3, 2, 3, 2]
       ],
-      tank: [ // Heavy Red Power Slabs (Tank Uppercut - boss tier)
-        [1, 1, 1, 1, 1, 1],
-        [1, 1, 1, 1, 1, 1],
-        [4, 4, 2, 2, 3, 3],
-        [4, 4, 2, 2, 3, 3]
+      fousey: [ // G7 Crash Out (Hyper Chaos Cascade)
+        [1, 4, 1, 4, 1, 4],
+        [4, 1, 4, 1, 4, 1],
+        [2, 2, 1, 1, 4, 4],
+        [1, 1, 4, 4, 2, 2]
       ],
       sneako: [ // Red Pill Defensive Ring (Leaf in the Wind - outer perimeter guard)
         [1, 1, 1, 1, 1, 1],
@@ -2108,38 +2108,38 @@
     // Idle: single full-body stance (1024x1024)
     // Punches: 2x2 grid — TL=jab, TR=straight, BL=hook, BR=uppercut (1024x1024)
     const bronerIdleRaw = new Image();
-    bronerIdleRaw.src = 'assets/broner_sprite.jpg?v=700';
+    bronerIdleRaw.src = 'assets/broner_sprite.jpg?v=900';
     let bronerIdleCanvas = null;
     bronerIdleRaw.onload = () => { bronerIdleCanvas = createTransparentCanvas(bronerIdleRaw); };
 
     const deenIdleRaw = new Image();
-    deenIdleRaw.src = 'assets/deen_sprite.jpg?v=700';
+    deenIdleRaw.src = 'assets/deen_sprite.jpg?v=900';
     let deenIdleCanvas = null;
     deenIdleRaw.onload = () => { deenIdleCanvas = createTransparentCanvas(deenIdleRaw); };
 
     const bronerPunchRaw = new Image();
-    bronerPunchRaw.src = 'assets/broner_punches.jpg?v=700';
+    bronerPunchRaw.src = 'assets/broner_punches.jpg?v=900';
     let bronerPunchCanvas = null;
     bronerPunchRaw.onload = () => { bronerPunchCanvas = createTransparentCanvas(bronerPunchRaw); };
 
     const deenPunchRaw = new Image();
-    deenPunchRaw.src = 'assets/deen_punches.jpg?v=700';
+    deenPunchRaw.src = 'assets/deen_punches.jpg?v=900';
     let deenPunchCanvas = null;
     deenPunchRaw.onload = () => { deenPunchCanvas = createTransparentCanvas(deenPunchRaw); };
 
     // 16-bit Capcom Arcade Sprites & Punch Grids Map for ALL 14 Roster Fighters
     const ROSTER_IDLE_CANVASES = {};
     const ROSTER_PUNCH_CANVASES = {};
-    const rosterIds = ['broner', 'deen', 'ryan', 'n3on', 'rayj', 'blueface', 'chrisean', 'rampage', 'adin', 'charleston', 'walid', 'abrown', 'tank', 'sneako'];
+    const rosterIds = ['broner', 'deen', 'ryan', 'n3on', 'rayj', 'blueface', 'chrisean', 'rampage', 'adin', 'charleston', 'hstikky', 'abrown', 'fousey', 'sneako'];
     rosterIds.forEach(id => {
       const imgIdle = new Image();
-      imgIdle.src = 'assets/' + id + '_sprite.jpg?v=700';
+      imgIdle.src = 'assets/' + id + '_sprite.jpg?v=900';
       imgIdle.onload = () => {
         ROSTER_IDLE_CANVASES[id] = createTransparentCanvas(imgIdle);
       };
 
       const imgPunch = new Image();
-      imgPunch.src = 'assets/' + id + '_punches.jpg?v=700';
+      imgPunch.src = 'assets/' + id + '_punches.jpg?v=900';
       imgPunch.onload = () => {
         ROSTER_PUNCH_CANVASES[id] = createTransparentCanvas(imgPunch);
       };
@@ -2327,9 +2327,9 @@
       { id: 'rampage', name: 'RAMPAGE', fullName: 'RAMPAGE JACKSON', stance: 'POWER SLAMMER', move: 'RAMPAGE SLAM', pwr: 96, spd: 65, def: 85, color: 4 },
       { id: 'adin', name: 'ADIN', fullName: 'ADIN ROSS', stance: 'BALANCED DEFENSE', move: 'STREAM RAID BOMB', pwr: 78, spd: 82, def: 80, color: 9 },
       { id: 'charleston', name: 'C. WHITE', fullName: 'CHARLESTON WHITE', stance: 'ERRATIC COUNTER', move: 'MICROPHONE RANT', pwr: 72, spd: 88, def: 82, color: 10 },
-      { id: 'walid', name: 'WALID', fullName: 'WALID SHARKS', stance: 'FAST COUNTER', move: 'SHARK ATTACK COMBO', pwr: 84, spd: 90, def: 72, color: 12 },
+      { id: 'hstikky', name: 'HSTIKKY', fullName: 'HSTIKKYTOKKY', stance: 'UK FITNESS BRAWLER', move: 'TIKKY BOMB', pwr: 88, spd: 86, def: 80, color: 12 },
       { id: 'abrown', name: 'A. BROWN', fullName: 'ANTONIO BROWN', stance: 'SHOWBOAT STYLE', move: 'CT KO DANCE', pwr: 82, spd: 88, def: 74, color: 10 },
-      { id: 'tank', name: 'TANK', fullName: 'GERVONTA DAVIS', stance: 'SOUTHPAW POWER', move: 'TANK UPPERCUT KO', pwr: 98, spd: 90, def: 88, color: 8 },
+      { id: 'fousey', name: 'FOUSEY', fullName: 'FOUSEY G7', stance: 'G7 HYPER ENERGY', move: 'G7 CRASH OUT', pwr: 85, spd: 82, def: 75, color: 9 },
       { id: 'sneako', name: 'SNEAKO', fullName: 'SNEAKO STREAMER', stance: 'HEADGEAR SPARRER', move: 'RED PILL COUNTER', pwr: 78, spd: 88, def: 76, color: 8 }
     ];
 
@@ -2470,7 +2470,7 @@
       const words = String(text).toUpperCase().split(' ');
       let line = '';
       let curY = Math.floor(y);
-      const lineH = 7 * scale;
+      const lineH = 6 * scale;
       const charAdvance = 5 * scale;
 
       for (let i = 0; i < words.length; i++) {
@@ -2568,9 +2568,9 @@
       rampage: { skin: 4, hair: 0, trunks: 8, gloves: 8, chain: 6, feature: 'mma' },
       adin: { skin: 15, hair: 4, trunks: 2, gloves: 8, feature: 'curly' },
       charleston: { skin: 4, hair: 0, trunks: 10, gloves: 8, feature: 'hat' },
-      walid: { skin: 15, hair: 0, trunks: 12, gloves: 14, feature: 'counter' },
+      hstikky: { skin: 15, hair: 4, trunks: 12, gloves: 12, chain: 6, feature: 'styled' },
       abrown: { skin: 4, hair: 0, trunks: 10, gloves: 10, chain: 10, feature: 'dance' },
-      tank: { skin: 4, hair: 0, trunks: 8, gloves: 8, feature: 'southpaw' },
+      fousey: { skin: 15, hair: 0, trunks: 9, gloves: 8, feature: 'baldBeard' },
       sneako: { skin: 15, hair: 0, trunks: 8, gloves: 8, feature: 'headgear' }
     };
 
@@ -2587,9 +2587,9 @@
       rampage: { nickname: 'RAMPAGE', bio: 'MMA LEGEND CRASHING THE BOXING RING. THE SLAM HITS LIKE A TRUCK.', quote: 'DONT START NOTHIN.', record: 'MMA 22-10' },
       adin: { nickname: 'ADIN ROSS', bio: 'KICK COLLABORATOR WHO RAIDED THE WAREHOUSE. THE BOMB DROPS HARD.', quote: 'WE GO LIVE, WE GO BIG.', record: '3-1 (2 KO)' },
       charleston: { nickname: 'C. WHITE', bio: 'ERRATIC TAUNT COUNTER. RANTS AT THE ROPES, THEN LANDS THE RIGHT.', quote: 'WHO ELSE WOULD I BE?', record: '5-2 (3 KO)' },
-      walid: { nickname: 'SHARKS', bio: 'FAST COUNTER-PUNCHER AND DEENS RIVAL. THE SHARK COMBO BITES.', quote: 'IM AFTER THAT SPOT.', record: '15-4 (11 KO)' },
+      hstikky: { nickname: 'TIKKY', bio: 'VIRAL UK FITNESS & BOXING STREAMER. FAMOUS WAREHOUSE BRAWL SURVIVOR.', quote: 'DONT CHAT TO ME, YEAH?', record: '3-0 (2 KO)' },
       abrown: { nickname: 'A.B.', bio: 'NFL STAR WHO SHOWBOATS AND STRIKES. THE CT KO DANCE FOLLOWS.', quote: 'CTE? NAH, CT KO.', record: '12-1 (10 KO)' },
-      tank: { nickname: 'TANK', bio: 'SOUTHPAW POWERHOUSE. THE UPPERCUT ENDS ROUNDS AND DREAMS.', quote: 'IM HERE TO PUT YALL DOWN.', record: '30-0 (28 KO)' },
+      fousey: { nickname: 'G7', bio: 'LEGENDARY KICK STREAMER. HYPER-ENERGY BRAWLER WHO NEVER BACKS DOWN.', quote: 'G7 NEVER DIE, LOCK IN!', record: '1-1 (1 KO)' },
       sneako: { nickname: 'THE CREATIVE', bio: 'VIRAL KICK SPARRING GUEST. SURVIVED THE STRICKLAND STORM ON LIVE STREAM.', quote: 'LEAF IN THE WIND, LOCK IN.', record: '2-1 (1 KO)' }
     };
 
@@ -2665,9 +2665,9 @@
       }
 
       // Beard & Chain
-      if (f.id === 'broner' || f.id === 'rampage' || f.id === 'tank') {
+      if (f.id === 'broner' || f.id === 'rampage' || f.id === 'fousey') {
         ctx.fillStyle = getPalColor(0);
-        ctx.fillRect(4 * s, 7.5 * s, 9 * s, 2.5 * s);
+        ctx.fillRect(4 * s, 6.5 * s, 9 * s, 3.5 * s);
       }
       if (details.chain) {
         ctx.fillStyle = getPalColor(details.chain);
@@ -2860,11 +2860,11 @@
       drawStatBar('SPD', f.spd, 46, 52, 50, 10);
       drawStatBar('DEF', f.def, 46, 60, 50, 12);
 
-      // Lower section: bio description, quote, record (Dynamic non-overlapping layout)
-      const bioEndY = printPicoWrap(bio.bio, 8, 78, 112, 7, 1);
-      const quoteEndY = printPicoWrap('"' + bio.quote + '"', 8, bioEndY + 2, 112, 14, 1);
-      printPico('RECORD ' + bio.record, 8, quoteEndY + 2, 10, 1, true);
-      printPicoCenter('ARROWS: BROWSE   X: BACK', 121, 6, 1);
+      // Lower section: bio description, quote, record (Tightened clean layout)
+      const bioEndY = printPicoWrap(bio.bio, 8, 76, 112, 7, 1);
+      const quoteEndY = printPicoWrap('"' + bio.quote + '"', 8, bioEndY + 1, 112, 14, 1);
+      printPico('RECORD ' + bio.record, 8, quoteEndY + 1, 10, 1, true);
+      printPicoCenter('ARROWS: BROWSE   X: BACK', 122, 6, 1);
     }
     // === ARENA STAGE SELECT RENDERER (6 DYNAMIC VENUES) ===
     function drawArenaSelectScreen() {
