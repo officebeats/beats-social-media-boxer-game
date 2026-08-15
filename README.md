@@ -1,6 +1,6 @@
 # CRASH OUT: RING RUSH — PICO-8 PUZZLE BOXING
 
-**Version:** `v1.3.0` (Capcom-Grade Arcade & Multi-Arena Overhaul)
+**Version:** `v1.4.0` (Stream Guest Roster & Dynamic Arenas Release)
 
 ![Title Screen](assets/pico8_title.jpg)
 
@@ -8,7 +8,7 @@
 
 ---
 
-## 🎮 Play Live (v1.3.0)
+## 🎮 Play Live (v1.4.0)
 
 - ⚡ **Play Live in Browser (GitHub Pages)**: **[officebeats.github.io/beats-social-media-boxer-game](https://officebeats.github.io/beats-social-media-boxer-game/)**
 - 🕹️ **Native PICO-8 Cartridge**: Load [`crash_out.p8`](crash_out.p8) directly inside PICO-8 using `pico8 -run crash_out.p8`.
@@ -23,16 +23,15 @@
 
 ---
 
-## 🌟 New in v1.3.0
-- 🥊 **Full 14-Fighter Roster Revamp**: Signature 6x4 counter drop patterns, super moves, streamer superchats, and crowd reactions for all 14 fighters.
-- 🏟️ **6 Dynamic Arenas**: Kick Warehouse, Vegas Casino Strip (with moving searchlights), London Misfits 00X (stadium floodlights), Miami Stream Mansion (pool & dusk), Mayweather TMT Gym, and Detroit Problem Gym.
-- 💎 **Pure Puzzle Fighter Core Engine**: 3D beveled gems, power gem multi-cell fusion, pulsating circular crash breaker orbs, stone countdown timers ($3\to 2\to 1$), real-time garbage offsetting, and pity breaker timers.
-- 🔤 **100% Native 4x5 Pixel Font Engine**: Direct bitmap font matrix delivering razor-sharp retro typography across all screens with zero blur.
+## 🌟 New in v1.4.0
+- 🥊 **Stream Guest Roster**: Replaced non-guest Floyd with viral Kick sparring guest **SNEAKO** (with custom 16-bit headgear sprite and 4-quadrant punch grid).
+- 🏟️ **6 Dynamic Arenas**: Kick Warehouse (pulsing neon), Vegas Strip (moving searchlights), London Misfits 00X (stadium floodlights), Miami Stream Mansion (pool & dusk), Mayweather TMT Gym, and Detroit Problem Gym.
+- 🎨 **Authentic Deen the Great Likeness**: Golden-caramel light-skinned Black complexion with sharp buzz cut.
 - 👁️ **100% Direction-Normalized Sprites**: All 14 fighters on disk natively face right, ensuring Player 1 and Player 2 always face each other eye-to-eye in both idle and all 4 punch animations.
-- 🎨 **Authentic Deen the Great Likeness**: Golden-caramel light-skinned Black complexion with clean buzz cut.
+- 💎 **Pure Puzzle Fighter Core Engine**: 3D beveled gems, power gem multi-cell fusion, pulsating circular crash breaker orbs, stone countdown timers, and real-time garbage offsetting.
+- 🔤 **100% Native 4x5 Pixel Font Engine**: Direct bitmap font matrix delivering razor-sharp retro typography across all screens with zero blur.
 - 🔴 **Zero Foot Artifacts**: Clean alpha transparency with grounded boots on the ring canvas floor at $Y=90$ and elliptical drop shadows.
 - 📺 **Live Broadcast Stream HUD**: Real-time Kick chat ticker with viewer counters and donation alerts.
-
 ## 🥊 Visual Targets & Screen Gallery
 
 ### Title Screen

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>CRASH OUT: RING RUSH (v1.3.0) — PICO-8 Native Transparent Boxing</title>
+  <title>CRASH OUT: RING RUSH (v1.4.0) — PICO-8 Native Transparent Boxing</title>
   <style>
     :root {
       --pico-black: #000000;
@@ -777,11 +777,11 @@
         [4, 4, 2, 2, 3, 3],
         [4, 4, 2, 2, 3, 3]
       ],
-      floyd: [ // The 50-0 Perfect Checkerboard (Final Boss Tier)
-        [1, 2, 3, 4, 1, 2],
-        [2, 1, 4, 3, 2, 1],
-        [3, 4, 1, 2, 3, 4],
-        [4, 3, 2, 1, 4, 3]
+      sneako: [ // Red Pill Defensive Ring (Leaf in the Wind - outer perimeter guard)
+        [1, 1, 1, 1, 1, 1],
+        [1, 4, 2, 2, 4, 1],
+        [1, 2, 4, 4, 2, 1],
+        [1, 1, 1, 1, 1, 1]
       ]
     };
 
@@ -2130,7 +2130,7 @@
     // 16-bit Capcom Arcade Sprites & Punch Grids Map for ALL 14 Roster Fighters
     const ROSTER_IDLE_CANVASES = {};
     const ROSTER_PUNCH_CANVASES = {};
-    const rosterIds = ['broner', 'deen', 'ryan', 'n3on', 'rayj', 'blueface', 'chrisean', 'rampage', 'adin', 'charleston', 'walid', 'abrown', 'tank', 'floyd'];
+    const rosterIds = ['broner', 'deen', 'ryan', 'n3on', 'rayj', 'blueface', 'chrisean', 'rampage', 'adin', 'charleston', 'walid', 'abrown', 'tank', 'sneako'];
     rosterIds.forEach(id => {
       const imgIdle = new Image();
       imgIdle.src = 'assets/' + id + '_sprite.jpg?v=700';
@@ -2330,7 +2330,7 @@
       { id: 'walid', name: 'WALID', fullName: 'WALID SHARKS', stance: 'FAST COUNTER', move: 'SHARK ATTACK COMBO', pwr: 84, spd: 90, def: 72, color: 12 },
       { id: 'abrown', name: 'A. BROWN', fullName: 'ANTONIO BROWN', stance: 'SHOWBOAT STYLE', move: 'CT KO DANCE', pwr: 82, spd: 88, def: 74, color: 10 },
       { id: 'tank', name: 'TANK', fullName: 'GERVONTA DAVIS', stance: 'SOUTHPAW POWER', move: 'TANK UPPERCUT KO', pwr: 98, spd: 90, def: 88, color: 8 },
-      { id: 'floyd', name: 'FLOYD', fullName: 'FLOYD MAYWEATHER', stance: '50-0 PHILLY SHELL', move: 'SHOULDER ROLL', pwr: 92, spd: 96, def: 100, color: 10 }
+      { id: 'sneako', name: 'SNEAKO', fullName: 'SNEAKO STREAMER', stance: 'HEADGEAR SPARRER', move: 'RED PILL COUNTER', pwr: 78, spd: 88, def: 76, color: 8 }
     ];
 
     // Navigation & State Management
@@ -2571,7 +2571,7 @@
       walid: { skin: 15, hair: 0, trunks: 12, gloves: 14, feature: 'counter' },
       abrown: { skin: 4, hair: 0, trunks: 10, gloves: 10, chain: 10, feature: 'dance' },
       tank: { skin: 4, hair: 0, trunks: 8, gloves: 8, feature: 'southpaw' },
-      floyd: { skin: 4, hair: 0, trunks: 10, gloves: 10, feature: 'tmt' }
+      sneako: { skin: 15, hair: 0, trunks: 8, gloves: 8, feature: 'headgear' }
     };
 
     // Fighter bios for the FIGHTER_BIO screen (nickname, bio, quote, record).
@@ -2590,7 +2590,7 @@
       walid: { nickname: 'SHARKS', bio: 'FAST COUNTER-PUNCHER AND DEENS RIVAL. THE SHARK COMBO BITES.', quote: 'IM AFTER THAT SPOT.', record: '15-4 (11 KO)' },
       abrown: { nickname: 'A.B.', bio: 'NFL STAR WHO SHOWBOATS AND STRIKES. THE CT KO DANCE FOLLOWS.', quote: 'CTE? NAH, CT KO.', record: '12-1 (10 KO)' },
       tank: { nickname: 'TANK', bio: 'SOUTHPAW POWERHOUSE. THE UPPERCUT ENDS ROUNDS AND DREAMS.', quote: 'IM HERE TO PUT YALL DOWN.', record: '30-0 (28 KO)' },
-      floyd: { nickname: 'MONEY', bio: '50-0 PHILLY SHELL LEGEND. THE SHOULDER ROLL MAKES PUNCHES MISS.', quote: 'NOTHING EASY, ALL MONEY.', record: '50-0 (27 KO)' }
+      sneako: { nickname: 'THE CREATIVE', bio: 'VIRAL KICK SPARRING GUEST. SURVIVED THE STRICKLAND STORM ON LIVE STREAM.', quote: 'LEAF IN THE WIND, LOCK IN.', record: '2-1 (1 KO)' }
     };
 
     // Arena stage select data. Palette indices theme crowd, backdrop, ropes,
@@ -2646,9 +2646,13 @@
         ctx.fillRect(3.5 * s, 0 * s, 10 * s, 1 * s);
       } else if (details.feature === 'tmt') {
         ctx.fillStyle = getPalColor(10);
-        ctx.fillRect(3 * s, -1.5 * s, 11 * s, 3.5 * s);
+      } else if (details.feature === 'headgear') {
         ctx.fillStyle = getPalColor(0);
-        ctx.fillRect(1 * s, 1 * s, 7 * s, 1.5 * s);
+        ctx.fillRect(2 * s, -1 * s, 13 * s, 4 * s);
+        ctx.fillRect(2 * s, 2 * s, 2.5 * s, 8 * s);
+        ctx.fillRect(12.5 * s, 2 * s, 2.5 * s, 8 * s);
+        ctx.fillStyle = getPalColor(8);
+        ctx.fillRect(4.5 * s, 0 * s, 8 * s, 1.5 * s);
       } else if (details.feature === 'ponytail') {
         ctx.fillRect(3 * s, 0 * s, 11 * s, 2.5 * s);
         ctx.fillRect(13 * s, 1.5 * s, 3 * s, 6 * s);
@@ -2661,7 +2665,7 @@
       }
 
       // Beard & Chain
-      if (f.id === 'broner' || f.id === 'rampage' || f.id === 'floyd' || f.id === 'tank') {
+      if (f.id === 'broner' || f.id === 'rampage' || f.id === 'tank') {
         ctx.fillStyle = getPalColor(0);
         ctx.fillRect(4 * s, 7.5 * s, 9 * s, 2.5 * s);
       }
