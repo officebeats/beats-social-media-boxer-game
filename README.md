@@ -1,6 +1,6 @@
 # CRASH OUT: RING RUSH — PICO-8 PUZZLE BOXING
 
-**Version:** `v1.6.0` (Stream Regulars: Coach Bang Williams & Proportional Fousey G7)
+**Version:** `v1.7.0` (Full 14-Fighter Special Moves & Animation Polish Release)
 
 ![Title Screen](assets/pico8_title.jpg)
 
@@ -8,7 +8,7 @@
 
 ---
 
-## 🎮 Play Live (v1.6.0)
+## 🎮 Play Live (v1.7.0)
 
 - ⚡ **Play Live in Browser (GitHub Pages)**: **[officebeats.github.io/beats-social-media-boxer-game](https://officebeats.github.io/beats-social-media-boxer-game/)**
 - 🕹️ **Native PICO-8 Cartridge**: Load [`crash_out.p8`](crash_out.p8) directly inside PICO-8 using `pico8 -run crash_out.p8`.
@@ -23,7 +23,8 @@
 
 ---
 
-## 🌟 New in v1.6.0
+## 🌟 New in v1.7.0
+- 💥 **14 Unique Special Moves & Cut-Ins**: Every character now features signature punch animations, custom damage scaling, and board-clearing effects (e.g. *Bang Body Combo*, *G7 Crash Out*, *Red Pill Counter*, *Flash Left Hook*, *About Billions*).
 - 🥊 **Stream Regular Added**: **BANG WILLIAMS** (`bang` / Coach Bang), longtime Kick warehouse boxing trainer, added with custom 16-bit Capcom pixel art idle sprite and 4-quadrant punch grid.
 - 🥊 **Proportional Fousey G7 Overhaul**: Completely re-proportioned Fousey's idle sprite and punch sheet to match the authentic 16-bit Capcom arcade boxer build (eliminating the oversized chibi head mismatch).
 - 🥊 **100% Normalized 56-Punch Engine**: Rebuilt every punch quadrant across all 14 fighters to guarantee every single strike (Jab, Straight, Hook, Uppercut) lunges directly into the opponent's chest on both sides of the ring.

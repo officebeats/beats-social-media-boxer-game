@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>CRASH OUT: RING RUSH (v1.6.0) — PICO-8 Native Transparent Boxing</title>
+  <title>CRASH OUT: RING RUSH (v1.7.0) — PICO-8 Native Transparent Boxing</title>
   <style>
     :root {
       --pico-black: #000000;
@@ -1019,14 +1019,13 @@
         flashFrames = 8;
         play808Sfx('super');
         triggerHaptic(50);
-        this.anim = 'UPPERCUT';
         opponent.anim = 'FLINCH';
         this.animTimer = 72;
         opponent.animTimer = 72;
 
         switch (fId) {
           case 'broner': {
-            // ABOUT BILLIONS / PHILLY SHELL: Converts own counter blocks to power gems & reflects 14 garbage
+            this.anim = 'HOOK';
             let converted = 0;
             for (let r = 0; r < ROWS; r++) {
               for (let c = 0; c < COLS; c++) {
@@ -1038,26 +1037,26 @@
               }
             }
             this.detectPowerGems();
-            opponent.hp = Math.max(0, opponent.hp - 30);
+            opponent.hp = Math.max(0, opponent.hp - 32);
             opponent.receiveGarbage(14);
-            globalFloatingTexts.push(new FloatingText('ABOUT BILLIONS!', 48, 30, 10));
-            globalFloatingTexts.push(new FloatingText('-30 HP!', 58, 42, 8));
+            globalFloatingTexts.push(new FloatingText('ABOUT BILLIONS!', 46, 30, 10));
+            globalFloatingTexts.push(new FloatingText('-32 HP!', 58, 42, 8));
             break;
           }
           case 'deen': {
-            // SOUTHPAW ROCKET FLURRY: Turns columns 2 & 3 into crash gems & deals 35 damage
+            this.anim = 'STRAIGHT';
             for (let r = 0; r < ROWS; r++) {
               if (this.grid[r][2] >= 1 && this.grid[r][2] <= 4) this.grid[r][2] += 4;
               if (this.grid[r][3] >= 1 && this.grid[r][3] <= 4) this.grid[r][3] += 4;
             }
             opponent.hp = Math.max(0, opponent.hp - 35);
             opponent.receiveGarbage(12);
-            globalFloatingTexts.push(new FloatingText('SOUTHPAW ROCKET!', 44, 30, 12));
+            globalFloatingTexts.push(new FloatingText('LIGHTNING STRAIGHT!', 40, 30, 12));
             globalFloatingTexts.push(new FloatingText('-35 HP!', 58, 42, 8));
             break;
           }
           case 'ryan': {
-            // FLASH LEFT HOOK: Slices bottom 4 rows and sends 15 garbage
+            this.anim = 'HOOK';
             for (let r = ROWS - 4; r < ROWS; r++) {
               for (let c = 0; c < COLS; c++) {
                 this.grid[r][c] = 0;
@@ -1065,13 +1064,13 @@
               }
             }
             this.applyGravity();
-            opponent.hp = Math.max(0, opponent.hp - 32);
+            opponent.hp = Math.max(0, opponent.hp - 34);
             opponent.receiveGarbage(15);
-            globalFloatingTexts.push(new FloatingText('FLASH LEFT HOOK!', 46, 30, 8));
+            globalFloatingTexts.push(new FloatingText('FLASH LEFT HOOK!', 44, 30, 7));
             break;
           }
           case 'n3on': {
-            // CRASH OUT SPAM: Randomly converts 8 gems into crash gems
+            this.anim = 'JAB';
             let count = 0;
             for (let r = ROWS - 1; r >= 0 && count < 8; r--) {
               for (let c = 0; c < COLS && count < 8; c++) {
@@ -1087,7 +1086,7 @@
             break;
           }
           case 'rayj': {
-            // GLASSES FLASH COUNTER: Instantly converts all counter gems to normal gems
+            this.anim = 'STRAIGHT';
             for (let r = 0; r < ROWS; r++) {
               for (let c = 0; c < COLS; c++) {
                 if (this.grid[r][c] === 10) {
@@ -1102,7 +1101,7 @@
             break;
           }
           case 'blueface': {
-            // FAMOUS HOOK COMBO: Clears outer columns 0 and 5, deals 30 damage
+            this.anim = 'HOOK';
             for (let r = 0; r < ROWS; r++) {
               this.grid[r][0] = 0; this.powerGems[r][0] = false;
               this.grid[r][5] = 0; this.powerGems[r][5] = false;
@@ -1114,7 +1113,7 @@
             break;
           }
           case 'chrisean': {
-            // BADDIE OVERHAND: Converts green and yellow gems to red power gems
+            this.anim = 'HOOK';
             for (let r = 0; r < ROWS; r++) {
               for (let c = 0; c < COLS; c++) {
                 if (this.grid[r][c] === 3 || this.grid[r][c] === 4) this.grid[r][c] = 1;
@@ -1128,7 +1127,7 @@
             break;
           }
           case 'rampage': {
-            // RAMPAGE SLAM: Heavy slam dealing 42 damage + 24px camera shake
+            this.anim = 'UPPERCUT';
             cameraShake = 24;
             opponent.hp = Math.max(0, opponent.hp - 42);
             opponent.receiveGarbage(16);
@@ -1137,64 +1136,74 @@
             break;
           }
           case 'adin': {
-            // STREAM RAID BOMB: Spawns double Rainbow Diamond
+            this.anim = 'UPPERCUT';
             this.pair = { x: 2, y: 0, rot: 0, g1: 9, g2: 9, vy: 0 };
             this.state = 'FALLING';
-            opponent.hp = Math.max(0, opponent.hp - 20);
+            opponent.hp = Math.max(0, opponent.hp - 22);
             globalFloatingTexts.push(new FloatingText('STREAM RAID BOMB!', 42, 30, 10));
             break;
           }
           case 'charleston': {
-            // MICROPHONE RANT: Dumps 14 counter blocks with timer 7
+            this.anim = 'STRAIGHT';
             opponent.hp = Math.max(0, opponent.hp - 26);
             opponent.receiveGarbage(14);
             globalFloatingTexts.push(new FloatingText('MICROPHONE RANT!', 44, 30, 10));
             break;
           }
-          case 'walid': {
-            // SHARK ATTACK COMBO: Clears blue and yellow gems and deals 34 damage
-            for (let r = 0; r < ROWS; r++) {
+          case 'bang': {
+            this.anim = 'HOOK';
+            cameraShake = 22;
+            for (let r = ROWS - 3; r < ROWS; r++) {
               for (let c = 0; c < COLS; c++) {
-                if (this.grid[r][c] === 2 || this.grid[r][c] === 4 || this.grid[r][c] === 6 || this.grid[r][c] === 8) {
-                  this.grid[r][c] = 0;
-                  this.powerGems[r][c] = false;
-                }
+                opponent.grid[r][c] = 10;
+                opponent.counterTimers[r][c] = 4;
               }
             }
-            this.applyGravity();
-            opponent.hp = Math.max(0, opponent.hp - 34);
-            opponent.receiveGarbage(12);
-            globalFloatingTexts.push(new FloatingText('SHARK ATTACK!', 48, 30, 12));
+            opponent.hp = Math.max(0, opponent.hp - 36);
+            opponent.receiveGarbage(14);
+            globalFloatingTexts.push(new FloatingText('BANG BODY COMBO!', 44, 30, 10));
+            globalFloatingTexts.push(new FloatingText('-36 HP!', 58, 42, 8));
             break;
           }
           case 'abrown': {
-            // CT KO DANCE: Flashy dance dumps 15 garbage blocks
+            this.anim = 'STRAIGHT';
             opponent.hp = Math.max(0, opponent.hp - 30);
             opponent.receiveGarbage(15);
             globalFloatingTexts.push(new FloatingText('CT KO DANCE!', 50, 30, 10));
             break;
           }
-          case 'tank': {
-            // TANK UPPERCUT KO: Devastating 48 damage bomb + 18 garbage
-            cameraShake = 22;
-            opponent.hp = Math.max(0, opponent.hp - 48);
-            opponent.receiveGarbage(18);
-            globalFloatingTexts.push(new FloatingText('TANK UPPERCUT KO!', 42, 30, 8));
-            globalFloatingTexts.push(new FloatingText('-48 HP!', 58, 42, 8));
+          case 'fousey': {
+            this.anim = 'UPPERCUT';
+            cameraShake = 24;
+            let fCount = 0;
+            for (let r = 0; r < ROWS && fCount < 6; r++) {
+              for (let c = 0; c < COLS && fCount < 6; c++) {
+                if (opponent.grid[r][c] !== 0) {
+                  opponent.grid[r][c] = 10;
+                  opponent.counterTimers[r][c] = 4;
+                  fCount++;
+                }
+              }
+            }
+            opponent.hp = Math.max(0, opponent.hp - 38);
+            opponent.receiveGarbage(16);
+            globalFloatingTexts.push(new FloatingText('G7 CRASH OUT!', 48, 30, 9));
+            globalFloatingTexts.push(new FloatingText('-38 HP!', 58, 42, 8));
             break;
           }
-          case 'floyd': {
-            // 50-0 SHOULDER ROLL: Absorbs all incoming pending garbage and heals HP
+          case 'sneako': {
+            this.anim = 'STRAIGHT';
             const absorbed = this.pendingGarbage;
             this.pendingGarbage = 0;
-            this.hp = Math.min(100, this.hp + 25 + Math.floor(absorbed * 1.5));
-            opponent.hp = Math.max(0, opponent.hp - 20);
-            opponent.receiveGarbage(12);
-            globalFloatingTexts.push(new FloatingText('50-0 SHOULDER ROLL!', 40, 30, 10));
-            globalFloatingTexts.push(new FloatingText('+25 HP HEAL!', 50, 42, 11));
+            this.hp = Math.min(100, this.hp + 20 + Math.floor(absorbed * 1.2));
+            opponent.hp = Math.max(0, opponent.hp - 32);
+            opponent.receiveGarbage(14);
+            globalFloatingTexts.push(new FloatingText('RED PILL COUNTER!', 42, 30, 8));
+            globalFloatingTexts.push(new FloatingText('+20 HP HEAL!', 50, 42, 11));
             break;
           }
           default: {
+            this.anim = 'UPPERCUT';
             opponent.hp = Math.max(0, opponent.hp - 35);
             opponent.receiveGarbage(12);
             globalFloatingTexts.push(new FloatingText('SUPER FINISHER!', 48, 30, 10));
