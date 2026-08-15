@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>CRASH OUT: RING RUSH (v1.5.0) — PICO-8 Native Transparent Boxing</title>
+  <title>CRASH OUT: RING RUSH (v1.6.0) — PICO-8 Native Transparent Boxing</title>
   <style>
     :root {
       --pico-black: #000000;
@@ -759,11 +759,11 @@
         [1, 4, 3, 2, 1, 4],
         [2, 3, 4, 1, 2, 3]
       ],
-      hstikky: [ // UK Tikky Bomb (Heavy Blue & Yellow Alternating Columns)
-        [2, 2, 4, 4, 2, 2],
-        [2, 2, 4, 4, 2, 2],
-        [4, 4, 2, 2, 4, 4],
-        [4, 4, 2, 2, 4, 4]
+      bang: [ // Bang Body Combo (Heavy Gold & Red Power Columns)
+        [4, 4, 1, 1, 4, 4],
+        [4, 4, 1, 1, 4, 4],
+        [1, 1, 4, 4, 1, 1],
+        [1, 1, 4, 4, 1, 1]
       ],
       abrown: [ // CT Checkerboard Dance (CT KO Dance - flashy alternating grids)
         [4, 1, 4, 1, 4, 1],
@@ -2108,38 +2108,38 @@
     // Idle: single full-body stance (1024x1024)
     // Punches: 2x2 grid — TL=jab, TR=straight, BL=hook, BR=uppercut (1024x1024)
     const bronerIdleRaw = new Image();
-    bronerIdleRaw.src = 'assets/broner_sprite.jpg?v=900';
+    bronerIdleRaw.src = 'assets/broner_sprite.jpg?v=1000';
     let bronerIdleCanvas = null;
     bronerIdleRaw.onload = () => { bronerIdleCanvas = createTransparentCanvas(bronerIdleRaw); };
 
     const deenIdleRaw = new Image();
-    deenIdleRaw.src = 'assets/deen_sprite.jpg?v=900';
+    deenIdleRaw.src = 'assets/deen_sprite.jpg?v=1000';
     let deenIdleCanvas = null;
     deenIdleRaw.onload = () => { deenIdleCanvas = createTransparentCanvas(deenIdleRaw); };
 
     const bronerPunchRaw = new Image();
-    bronerPunchRaw.src = 'assets/broner_punches.jpg?v=900';
+    bronerPunchRaw.src = 'assets/broner_punches.jpg?v=1000';
     let bronerPunchCanvas = null;
     bronerPunchRaw.onload = () => { bronerPunchCanvas = createTransparentCanvas(bronerPunchRaw); };
 
     const deenPunchRaw = new Image();
-    deenPunchRaw.src = 'assets/deen_punches.jpg?v=900';
+    deenPunchRaw.src = 'assets/deen_punches.jpg?v=1000';
     let deenPunchCanvas = null;
     deenPunchRaw.onload = () => { deenPunchCanvas = createTransparentCanvas(deenPunchRaw); };
 
     // 16-bit Capcom Arcade Sprites & Punch Grids Map for ALL 14 Roster Fighters
     const ROSTER_IDLE_CANVASES = {};
     const ROSTER_PUNCH_CANVASES = {};
-    const rosterIds = ['broner', 'deen', 'ryan', 'n3on', 'rayj', 'blueface', 'chrisean', 'rampage', 'adin', 'charleston', 'hstikky', 'abrown', 'fousey', 'sneako'];
+    const rosterIds = ['broner', 'deen', 'ryan', 'n3on', 'rayj', 'blueface', 'chrisean', 'rampage', 'adin', 'charleston', 'bang', 'abrown', 'fousey', 'sneako'];
     rosterIds.forEach(id => {
       const imgIdle = new Image();
-      imgIdle.src = 'assets/' + id + '_sprite.jpg?v=900';
+      imgIdle.src = 'assets/' + id + '_sprite.jpg?v=1000';
       imgIdle.onload = () => {
         ROSTER_IDLE_CANVASES[id] = createTransparentCanvas(imgIdle);
       };
 
       const imgPunch = new Image();
-      imgPunch.src = 'assets/' + id + '_punches.jpg?v=900';
+      imgPunch.src = 'assets/' + id + '_punches.jpg?v=1000';
       imgPunch.onload = () => {
         ROSTER_PUNCH_CANVASES[id] = createTransparentCanvas(imgPunch);
       };
@@ -2327,7 +2327,7 @@
       { id: 'rampage', name: 'RAMPAGE', fullName: 'RAMPAGE JACKSON', stance: 'POWER SLAMMER', move: 'RAMPAGE SLAM', pwr: 96, spd: 65, def: 85, color: 4 },
       { id: 'adin', name: 'ADIN', fullName: 'ADIN ROSS', stance: 'BALANCED DEFENSE', move: 'STREAM RAID BOMB', pwr: 78, spd: 82, def: 80, color: 9 },
       { id: 'charleston', name: 'C. WHITE', fullName: 'CHARLESTON WHITE', stance: 'ERRATIC COUNTER', move: 'MICROPHONE RANT', pwr: 72, spd: 88, def: 82, color: 10 },
-      { id: 'hstikky', name: 'HSTIKKY', fullName: 'HSTIKKYTOKKY', stance: 'UK FITNESS BRAWLER', move: 'TIKKY BOMB', pwr: 88, spd: 86, def: 80, color: 12 },
+      { id: 'bang', name: 'BANG', fullName: 'BANG WILLIAMS', stance: 'WAREHOUSE TRAINER', move: 'BANG BODY COMBO', pwr: 90, spd: 85, def: 88, color: 10 },
       { id: 'abrown', name: 'A. BROWN', fullName: 'ANTONIO BROWN', stance: 'SHOWBOAT STYLE', move: 'CT KO DANCE', pwr: 82, spd: 88, def: 74, color: 10 },
       { id: 'fousey', name: 'FOUSEY', fullName: 'FOUSEY G7', stance: 'G7 HYPER ENERGY', move: 'G7 CRASH OUT', pwr: 85, spd: 82, def: 75, color: 9 },
       { id: 'sneako', name: 'SNEAKO', fullName: 'SNEAKO STREAMER', stance: 'HEADGEAR SPARRER', move: 'RED PILL COUNTER', pwr: 78, spd: 88, def: 76, color: 8 }
@@ -2568,7 +2568,7 @@
       rampage: { skin: 4, hair: 0, trunks: 8, gloves: 8, chain: 6, feature: 'mma' },
       adin: { skin: 15, hair: 4, trunks: 2, gloves: 8, feature: 'curly' },
       charleston: { skin: 4, hair: 0, trunks: 10, gloves: 8, feature: 'hat' },
-      hstikky: { skin: 15, hair: 4, trunks: 12, gloves: 12, chain: 6, feature: 'styled' },
+      bang: { skin: 4, hair: 0, trunks: 0, gloves: 0, chain: 10, feature: 'fade' },
       abrown: { skin: 4, hair: 0, trunks: 10, gloves: 10, chain: 10, feature: 'dance' },
       fousey: { skin: 15, hair: 0, trunks: 9, gloves: 8, feature: 'baldBeard' },
       sneako: { skin: 15, hair: 0, trunks: 8, gloves: 8, feature: 'headgear' }
@@ -2587,7 +2587,7 @@
       rampage: { nickname: 'RAMPAGE', bio: 'MMA LEGEND CRASHING THE BOXING RING. THE SLAM HITS LIKE A TRUCK.', quote: 'DONT START NOTHIN.', record: 'MMA 22-10' },
       adin: { nickname: 'ADIN ROSS', bio: 'KICK COLLABORATOR WHO RAIDED THE WAREHOUSE. THE BOMB DROPS HARD.', quote: 'WE GO LIVE, WE GO BIG.', record: '3-1 (2 KO)' },
       charleston: { nickname: 'C. WHITE', bio: 'ERRATIC TAUNT COUNTER. RANTS AT THE ROPES, THEN LANDS THE RIGHT.', quote: 'WHO ELSE WOULD I BE?', record: '5-2 (3 KO)' },
-      hstikky: { nickname: 'TIKKY', bio: 'VIRAL UK FITNESS & BOXING STREAMER. FAMOUS WAREHOUSE BRAWL SURVIVOR.', quote: 'DONT CHAT TO ME, YEAH?', record: '3-0 (2 KO)' },
+      bang: { nickname: 'COACH BANG', bio: 'LONGTIME WAREHOUSE COACH. RUNS THE PADS AND COUNTERS WITH POWER.', quote: 'STAY SHARP, WORK THE BODY!', record: '18-2 (12 KO)' },
       abrown: { nickname: 'A.B.', bio: 'NFL STAR WHO SHOWBOATS AND STRIKES. THE CT KO DANCE FOLLOWS.', quote: 'CTE? NAH, CT KO.', record: '12-1 (10 KO)' },
       fousey: { nickname: 'G7', bio: 'LEGENDARY KICK STREAMER. HYPER-ENERGY BRAWLER WHO NEVER BACKS DOWN.', quote: 'G7 NEVER DIE, LOCK IN!', record: '1-1 (1 KO)' },
       sneako: { nickname: 'THE CREATIVE', bio: 'VIRAL KICK SPARRING GUEST. SURVIVED THE STRICKLAND STORM ON LIVE STREAM.', quote: 'LEAF IN THE WIND, LOCK IN.', record: '2-1 (1 KO)' }
@@ -2665,7 +2665,7 @@
       }
 
       // Beard & Chain
-      if (f.id === 'broner' || f.id === 'rampage' || f.id === 'fousey') {
+      if (f.id === 'broner' || f.id === 'rampage' || f.id === 'fousey' || f.id === 'bang') {
         ctx.fillStyle = getPalColor(0);
         ctx.fillRect(4 * s, 6.5 * s, 9 * s, 3.5 * s);
       }
