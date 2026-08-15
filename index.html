@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>CRASH OUT: RING RUSH (v1.8.0) — PICO-8 Native Transparent Boxing</title>
+  <title>CRASH OUT: RING RUSH (v1.9.0) — PICO-8 Native Transparent Boxing</title>
   <style>
     :root {
       --pico-black: #000000;
@@ -2063,6 +2063,15 @@
     p1 = new Board(1, 4, true);  // AI P1
     p2 = new Board(2, 88, true); // AI P2
 
+    function triggerKO(winnerId) {
+      gameState = 'KO';
+      appState = 'KO';
+      const winnerName = (winnerId === 1 ? (p1 ? p1.name : 'P1') : (winnerId === 2 ? (p2 ? p2.name : 'P2') : 'DRAW'));
+      koMessage = winnerId === 0 ? 'DRAW MATCH!' : 'K.O.! ' + winnerName + ' WINS!';
+      play808Sfx('ko');
+      play808Sfx('bell');
+      cameraShake = Math.max(cameraShake, 16);
+    }
     let impactFxTimer = 0;
     let impactFxX = 58;
     let impactFxY = 56;
@@ -2117,22 +2126,22 @@
     // Idle: single full-body stance (1024x1024)
     // Punches: 2x2 grid — TL=jab, TR=straight, BL=hook, BR=uppercut (1024x1024)
     const bronerIdleRaw = new Image();
-    bronerIdleRaw.src = 'assets/broner_sprite.jpg?v=1100';
+    bronerIdleRaw.src = 'assets/broner_sprite.jpg?v=1200';
     let bronerIdleCanvas = null;
     bronerIdleRaw.onload = () => { bronerIdleCanvas = createTransparentCanvas(bronerIdleRaw); };
 
     const deenIdleRaw = new Image();
-    deenIdleRaw.src = 'assets/deen_sprite.jpg?v=1100';
+    deenIdleRaw.src = 'assets/deen_sprite.jpg?v=1200';
     let deenIdleCanvas = null;
     deenIdleRaw.onload = () => { deenIdleCanvas = createTransparentCanvas(deenIdleRaw); };
 
     const bronerPunchRaw = new Image();
-    bronerPunchRaw.src = 'assets/broner_punches.jpg?v=1100';
+    bronerPunchRaw.src = 'assets/broner_punches.jpg?v=1200';
     let bronerPunchCanvas = null;
     bronerPunchRaw.onload = () => { bronerPunchCanvas = createTransparentCanvas(bronerPunchRaw); };
 
     const deenPunchRaw = new Image();
-    deenPunchRaw.src = 'assets/deen_punches.jpg?v=1100';
+    deenPunchRaw.src = 'assets/deen_punches.jpg?v=1200';
     let deenPunchCanvas = null;
     deenPunchRaw.onload = () => { deenPunchCanvas = createTransparentCanvas(deenPunchRaw); };
 
@@ -2142,13 +2151,13 @@
     const rosterIds = ['broner', 'deen', 'ryan', 'n3on', 'rayj', 'blueface', 'chrisean', 'rampage', 'adin', 'charleston', 'bang', 'abrown', 'fousey', 'sneako'];
     rosterIds.forEach(id => {
       const imgIdle = new Image();
-      imgIdle.src = 'assets/' + id + '_sprite.jpg?v=1100';
+      imgIdle.src = 'assets/' + id + '_sprite.jpg?v=1200';
       imgIdle.onload = () => {
         ROSTER_IDLE_CANVASES[id] = createTransparentCanvas(imgIdle);
       };
 
       const imgPunch = new Image();
-      imgPunch.src = 'assets/' + id + '_punches.jpg?v=1100';
+      imgPunch.src = 'assets/' + id + '_punches.jpg?v=1200';
       imgPunch.onload = () => {
         ROSTER_PUNCH_CANVASES[id] = createTransparentCanvas(imgPunch);
       };
@@ -2208,32 +2217,33 @@
       if (anim === 'JAB' || anim === 'STRAIGHT' || anim === 'HOOK' || anim === 'UPPERCUT') {
         punchQuad = PUNCH_QUAD[anim] || 0;
 
+        // Smooth lunge without rotational warping or morphing
         if (progress < 0.15) {
-          extProgress = smoothstep(0.0, 0.15, progress) * 0.3;
-          bodyTilt = (isP1 ? -1 : 1) * extProgress * 0.08;
-        } else if (progress < 0.35) {
-          usePunch = true;
-          extProgress = 0.3 + smoothstep(0.15, 0.35, progress) * 0.7;
+          // Windup: lean back slightly (no bodyTilt, pure horizontal step)
+          extProgress = -0.15 * Math.sin((progress / 0.15) * Math.PI);
+          usePunch = false;
         } else if (progress < 0.65) {
+          // Extension & Hold: punch frame with forward step
           usePunch = true;
           extProgress = 1.0;
         } else {
-          extProgress = 1.0 - smoothstep(0.65, 1.00, progress);
-          if (progress < 0.80) usePunch = true;
+          // Smooth recovery back to idle
+          usePunch = (progress < 0.82);
+          const ret = (progress - 0.65) / 0.35;
+          extProgress = 1.0 - ret;
         }
 
-        const lungeDist = extProgress * 7.0;
+        const lungeDist = extProgress * 7.5;
         horzShift = isP1 ? lungeDist : -lungeDist;
 
         const impactFlag = isP1 ? impactTriggeredP1 : impactTriggeredP2;
-        if (progress >= 0.42 && progress < 0.58 && !impactFlag) {
+        if (progress >= 0.38 && progress < 0.62 && !impactFlag) {
           if (isP1) impactTriggeredP1 = true; else impactTriggeredP2 = true;
           triggerImpactBurst(isP1 ? 62 : 66, anim === 'UPPERCUT' ? 56 : anim === 'HOOK' ? 58 : 62);
           triggerHaptic(30);
         } else if (progress >= 0.90) {
           if (isP1) impactTriggeredP1 = false; else impactTriggeredP2 = false;
         }
-
       } else if (anim === 'FLINCH') {
         let fp = 0;
         if (progress < 0.40) fp = 0;
@@ -3230,6 +3240,17 @@
           printPicoCenter('PRESS START TO REMATCH', 74, 7, 1);
         }
       }
+    }
+
+    function rematchToCharSelect() {
+      appState = 'CHAR_SELECT';
+      gameState = 'PLAYING';
+      p1Locked = false;
+      p2Locked = false;
+      lockCountdown = -1;
+      if (p1) { p1.hp = 100; p1.superMeter = 0; p1.anim = 'IDLE'; p1.pendingGarbage = 0; }
+      if (p2) { p2.hp = 100; p2.superMeter = 0; p2.anim = 'IDLE'; p2.pendingGarbage = 0; }
+      play808Sfx('confirm');
     }
 
     function render() {
