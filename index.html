@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>CRASH OUT: RING RUSH (v1.7.0) — PICO-8 Native Transparent Boxing</title>
+  <title>CRASH OUT: RING RUSH (v1.8.0) — PICO-8 Native Transparent Boxing</title>
   <style>
     :root {
       --pico-black: #000000;
@@ -2117,22 +2117,22 @@
     // Idle: single full-body stance (1024x1024)
     // Punches: 2x2 grid — TL=jab, TR=straight, BL=hook, BR=uppercut (1024x1024)
     const bronerIdleRaw = new Image();
-    bronerIdleRaw.src = 'assets/broner_sprite.jpg?v=1000';
+    bronerIdleRaw.src = 'assets/broner_sprite.jpg?v=1100';
     let bronerIdleCanvas = null;
     bronerIdleRaw.onload = () => { bronerIdleCanvas = createTransparentCanvas(bronerIdleRaw); };
 
     const deenIdleRaw = new Image();
-    deenIdleRaw.src = 'assets/deen_sprite.jpg?v=1000';
+    deenIdleRaw.src = 'assets/deen_sprite.jpg?v=1100';
     let deenIdleCanvas = null;
     deenIdleRaw.onload = () => { deenIdleCanvas = createTransparentCanvas(deenIdleRaw); };
 
     const bronerPunchRaw = new Image();
-    bronerPunchRaw.src = 'assets/broner_punches.jpg?v=1000';
+    bronerPunchRaw.src = 'assets/broner_punches.jpg?v=1100';
     let bronerPunchCanvas = null;
     bronerPunchRaw.onload = () => { bronerPunchCanvas = createTransparentCanvas(bronerPunchRaw); };
 
     const deenPunchRaw = new Image();
-    deenPunchRaw.src = 'assets/deen_punches.jpg?v=1000';
+    deenPunchRaw.src = 'assets/deen_punches.jpg?v=1100';
     let deenPunchCanvas = null;
     deenPunchRaw.onload = () => { deenPunchCanvas = createTransparentCanvas(deenPunchRaw); };
 
@@ -2142,13 +2142,13 @@
     const rosterIds = ['broner', 'deen', 'ryan', 'n3on', 'rayj', 'blueface', 'chrisean', 'rampage', 'adin', 'charleston', 'bang', 'abrown', 'fousey', 'sneako'];
     rosterIds.forEach(id => {
       const imgIdle = new Image();
-      imgIdle.src = 'assets/' + id + '_sprite.jpg?v=1000';
+      imgIdle.src = 'assets/' + id + '_sprite.jpg?v=1100';
       imgIdle.onload = () => {
         ROSTER_IDLE_CANVASES[id] = createTransparentCanvas(imgIdle);
       };
 
       const imgPunch = new Image();
-      imgPunch.src = 'assets/' + id + '_punches.jpg?v=1000';
+      imgPunch.src = 'assets/' + id + '_punches.jpg?v=1100';
       imgPunch.onload = () => {
         ROSTER_PUNCH_CANVASES[id] = createTransparentCanvas(imgPunch);
       };
