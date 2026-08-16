@@ -258,9 +258,9 @@
     // PICO-8 TRANSPARENT SPRITE ENGINE v9.0.0
     // - 100% Transparent Background Keying for Fighter Sprites (ZERO WHITE BOXES!)
     // - Spritesheet Keyframe Animation Slicing (`sspr()`) for JAB, STRAIGHT, HOOK, UPPERCUT, FLINCH!
-    // - Anatomical Shoulder Joint Punch Anchor at Y = -24!
-    // - 100% Viewport Edge-to-Edge PICO-8 Engine Canvas & Native Touch Controls!
-    // =========================================================================
+    <button class="pico-btn" id="btnMode">MODE: 1P VS CPU</button>
+    <button class="pico-btn" id="btnAudio">AUDIO: OFF</button>
+    <button class="pico-btn" id="btnReset">RESET CART</button>
 
     const PICO_PALETTE = [
       '#000000', '#1D2B53', '#7E2553', '#008751',
@@ -293,7 +293,7 @@
 
 
     // WebAudio PICO-8 Chiptune Synth -> Chillhop Trap Sequencer
-    let audioEnabled = true;
+    let audioEnabled = false;
     let audioCtx = null;
     let musicGainNode = null;
     let musicInterval = null;
@@ -2114,6 +2114,20 @@
       globalFloatingTexts.push(new FloatingText('KNOCKDOWN! 10-COUNT!', 38, 40, 10));
     }
 
+    function playerMashStamina() {
+      if (appState !== 'KNOCKDOWN' || !knockdownData) return;
+      if (knockdownData.fallenId === 1) {
+        knockdownData.stamina = Math.min(100, knockdownData.stamina + 11.5);
+        play808Sfx('step');
+        triggerHaptic(25);
+        cameraShake = Math.max(cameraShake, 3);
+        globalFloatingTexts.push(new FloatingText('+MASH!', 56, 36, 11));
+        if (knockdownData.stamina >= 100) {
+          heGetsUp();
+        }
+      }
+    }
+
     function heGetsUp() {
       if (!knockdownData) return;
       const fallenId = knockdownData.fallenId;
@@ -3114,38 +3128,49 @@
 
       // Pulsing Red Vignette Border
       if (Math.floor(globalFrameCount / 8) % 2 === 0) {
-        ctx.strokeStyle = 'rgba(255, 0, 77, 0.45)';
+        ctx.strokeStyle = 'rgba(255, 0, 77, 0.55)';
         ctx.lineWidth = 3;
         ctx.strokeRect(1, 1, 126, 126);
       }
 
       // Referee Center Count Box
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.90)';
-      ctx.fillRect(32, 34, 64, 54);
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.92)';
+      ctx.fillRect(28, 28, 72, 64);
       ctx.strokeStyle = getPalColor(10);
       ctx.lineWidth = 1;
-      ctx.strokeRect(32, 34, 64, 54);
+      ctx.strokeRect(28, 28, 72, 64);
 
-      printPicoCenter('REFEREE COUNT!', 37, 8, 1, true);
+      printPicoCenter('REFEREE COUNT!', 32, 8, 1, true);
 
       // Huge Countdown Number
       const countNum = String(Math.min(10, knockdownData.count));
-      printPicoCenter(countNum, 47, 10, 2, true);
+      printPicoCenter(countNum, 41, 10, 2, true);
 
-      // Get-Up Stamina Progress Bar
+      // High-Visibility Recovery Prompt
       const isPlayerFallen = (knockdownData.fallenId === 1);
-      const hint = isPlayerFallen ? 'GET UP! CLEAR GEMS!' : 'OPPONENT DOWN!';
-      printPicoCenter(hint, 67, isPlayerFallen ? 11 : 6, 1);
+      if (isPlayerFallen) {
+        const pulseCol = Math.floor(globalFrameCount / 10) % 2 === 0 ? 10 : 7;
+        printPicoCenter('MASH Z/X / TAP!', 59, pulseCol, 1, true);
+        printPicoCenter('STAMINA ' + Math.min(100, Math.floor(knockdownData.stamina)) + '%', 67, 11, 1);
+      } else {
+        printPicoCenter('OPPONENT DOWN!', 59, 6, 1);
+        printPicoCenter('COUNT ' + knockdownData.count + '/10', 67, 10, 1);
+      }
 
-      // Bar
+      // Stamina Bar
       ctx.fillStyle = getPalColor(0);
-      ctx.fillRect(38, 75, 52, 6);
+      ctx.fillRect(34, 76, 60, 6);
       ctx.strokeStyle = getPalColor(7);
-      ctx.strokeRect(38, 75, 52, 6);
+      ctx.strokeRect(34, 76, 60, 6);
 
-      const fillW = Math.max(0, Math.min(50, Math.floor(50 * (knockdownData.stamina / 100))));
-      ctx.fillStyle = getPalColor(11);
-      ctx.fillRect(39, 76, fillW, 4);
+      const fillW = Math.max(0, Math.min(58, Math.floor(58 * (knockdownData.stamina / 100))));
+      ctx.fillStyle = getPalColor(isPlayerFallen ? 11 : 8);
+      ctx.fillRect(35, 77, fillW, 4);
+
+      // Bottom hint
+      if (isPlayerFallen) {
+        printPicoCenter('OR CLEAR GEMS FOR +35%', 84, 10, 1);
+      }
     }
 
     // === VICTORY CHAMPIONSHIP END SCREEN ===
@@ -3902,7 +3927,12 @@
         if (cameraShake < 0.5) cameraShake = 0;
       }
 
-      if (appState === 'TITLE') {
+      if (appState === 'KNOCKDOWN') {
+          playerMashStamina();
+          return;
+        }
+
+        if (appState === 'TITLE') {
         drawTitleScreen();
       } else if (appState === 'MODE_SELECT') {
         drawModeSelectScreen();
@@ -4076,7 +4106,24 @@
 
       if (appState === 'KNOCKDOWN') {
         if (knockdownData) {
+          if (knockdownData.count > 10) {
+            endRound(knockdownData.fallenId === 1 ? 2 : 1, '10-COUNT K.O.!');
+            return;
+          }
+
           knockdownData.timer++;
+
+          // CPU Opponent recovery grit scaling
+          if (knockdownData.fallenId === 2 && selectedModeIdx === 0) {
+            const stage = campaignState.active ? campaignState.stageIdx : 0;
+            const gritGain = (stage <= 1 ? 0.35 : (stage <= 3 ? 0.65 : 1.15));
+            knockdownData.stamina += gritGain;
+            if (knockdownData.stamina >= 100) {
+              heGetsUp();
+              return;
+            }
+          }
+
           if (knockdownData.timer >= knockdownData.refSpeed) {
             knockdownData.timer = 0;
             knockdownData.count++;
@@ -4305,6 +4352,18 @@
         if (isStartKey(e.key) || e.key === 'r' || e.key === 'R') {
           rematchToCharSelect();
         }
+        return;
+      }
+
+      // KNOCKDOWN: ANY KEY BUILDS STAMINA
+      if (appState === 'KNOCKDOWN') {
+        playerMashStamina();
+        if (e.key === 'ArrowLeft') { e.preventDefault(); p1.move(-1); }
+        if (e.key === 'ArrowRight') { e.preventDefault(); p1.move(1); }
+        if (e.key === 'ArrowDown') { e.preventDefault(); p1.dropSoft(); }
+        if (e.key === 'ArrowUp') { e.preventDefault(); p1.dropHard(); }
+        if (e.key === 'z' || e.key === 'Z') p1.rotate(-1);
+        if (e.key === 'x' || e.key === 'X') p1.rotate(1);
         return;
       }
 
