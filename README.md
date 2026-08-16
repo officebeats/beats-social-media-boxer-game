@@ -1,6 +1,6 @@
 # CRASH OUT: RING RUSH — PICO-8 PUZZLE BOXING
 
-**Version:** `v2.3.0` (Game Boy Advance Mobile Handheld Shell & 12-Skin Theme Switcher Release)
+**Version:** `v2.4.0` (Pocket Taco Controller & Landscape Viewport Support Release)
 
 ![Title Screen](assets/pico8_title.jpg)
 
@@ -8,7 +8,7 @@
 
 ---
 
-## 🎮 Play Live (v2.3.0)
+## 🎮 Play Live (v2.4.0)
 
 - ⚡ **Play Live in Browser (GitHub Pages)**: **[officebeats.github.io/beats-social-media-boxer-game](https://officebeats.github.io/beats-social-media-boxer-game/)**
 - 🕹️ **Native PICO-8 Cartridge**: Load [`crash_out.p8`](crash_out.p8) directly inside PICO-8 using `pico8 -run crash_out.p8`.
@@ -23,8 +23,14 @@
 
 ---
 
-## 🌟 New in v2.3.0
-- 🎮 **Game Boy Advance (GBA) Mobile Handheld Console Shell**: Mobile viewports now transform into an authentic GBA handheld device featuring an ergonomic curved body, glass screen bezel with green power LED, molded cross D-Pad, angled A/B action buttons, L/R shoulder triggers, and rubber Start/Select pills.
+## 🌟 New in v2.4.0
+- 🌮 **Pocket Taco & Horizontal Clamp Controller Support**: Native HTML5 Gamepad API driver automatically detects and maps Pocket Taco, Backbone One, Razer Kishi, GameSir, and all standard Bluetooth/USB gamepads:
+  - **D-Pad / Left Stick**: Move Left/Right, Soft Drop (Down), Hard Drop (Up / R).
+  - **A / B / X / Y Buttons**: A (Drop/Super/Confirm), B (Rotate/Back), X (Rotate CCW), Y (Super Finisher).
+  - **Shoulder Triggers & Center Pills**: L1/L2 (Back), R1/R2 (Super/Hard Drop), Select (Mode), Start (Confirm/Pause).
+  - **Knockdown Mashing Support**: Mash any controller button to build stamina and beat the 10-count!
+- 📱 **Landscape Handheld Viewport Resizing**: Mobile devices docked into horizontal controllers automatically expand to full width (`@media orientation: landscape`), centering the 1:1 PICO-8 screen at maximum vertical height flanked by ergonomic side controls.
+- 🎮 **Game Boy Advance (GBA) Mobile Handheld Console Shell**: Mobile viewports transform into an authentic GBA handheld device with power LED and molded D-Pad.
 - 🎨 **12 Dynamic GBA Handheld Console Skins**: Tap the top-bar **\`🎨 SKIN\`** button at any time to instantly cycle through 12 authentic hardware themes:
   1. **Classic Indigo** (2001 Original GBA Violet & Burgundy)
   2. **Championship Gold** (TMT / About Billions Luxury SP)

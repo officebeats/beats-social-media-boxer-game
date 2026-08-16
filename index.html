@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>CRASH OUT: RING RUSH (v2.3.0) — PICO-8 Native Transparent Boxing</title>
+  <title>CRASH OUT: RING RUSH (v2.4.0) — PICO-8 Native Transparent Boxing</title>
   <style>
     :root {
       --pico-black: #000000;
@@ -374,6 +374,109 @@
       letter-spacing: 0.5px;
       text-shadow: 1px 1px 0px #000000;
     }
+  
+    /* 🌮 POCKET TACO & HORIZONTAL CLAMP CONTROLLER LANDSCAPE RESIZING */
+    @media (orientation: landscape), (min-aspect-ratio: 1.2) {
+      body {
+        background-color: #050608;
+      }
+
+      .gba-shell {
+        width: 100vw;
+        max-width: 960px;
+        height: 100vh;
+        height: 100dvh;
+        max-height: 100%;
+        border-radius: 24px;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 18px;
+      }
+
+      /* Side grips in landscape */
+      .gba-shell::before, .gba-shell::after {
+        top: 25px;
+        width: 90px;
+        height: 5px;
+        background: repeating-linear-gradient(90deg, var(--gba-grip) 0px, var(--gba-grip) 4px, transparent 4px, transparent 12px);
+      }
+      .gba-shell::before { left: 40px; top: 8px; }
+      .gba-shell::after { right: 40px; top: 8px; }
+
+      .gba-top-bar {
+        position: absolute;
+        top: 6px;
+        left: 20px;
+        right: 20px;
+        width: auto;
+      }
+
+      .gba-screen-bezel {
+        order: 2;
+        width: auto;
+        height: calc(100vh - 20px);
+        height: calc(100dvh - 20px);
+        max-height: 480px;
+        aspect-ratio: 1 / 1;
+        padding: 6px 10px 8px 10px;
+      }
+
+      canvas#picoCanvas {
+        height: 80%;
+        max-height: 380px;
+        width: auto;
+      }
+
+      .gba-controls-area {
+        order: 1;
+        width: auto;
+        flex-direction: column;
+        justify-content: center;
+        gap: 20px;
+        padding: 0;
+      }
+
+      .gba-dpad {
+        grid-template-columns: repeat(3, 44px);
+        grid-template-rows: repeat(3, 44px);
+      }
+
+      .gba-action-buttons {
+        order: 3;
+        transform: rotate(-14deg);
+        gap: 16px;
+      }
+
+      .btn-gba-action {
+        width: 54px;
+        height: 54px;
+        font-size: 17px;
+      }
+
+      .gba-center-pills {
+        position: absolute;
+        bottom: 8px;
+        left: 50%;
+        transform: translateX(-50%);
+        gap: 36px;
+      }
+    }
+
+    /* Gamepad Connected HUD Badge */
+    body.gamepad-active .power-led {
+      background-color: var(--pico-blue) !important;
+      box-shadow: 0px 0px 10px var(--pico-blue) !important;
+    }
+    body.gamepad-active .power-text::after {
+      content: ' • TACO GP';
+      color: var(--pico-blue);
+      font-weight: 900;
+    }
+    body.gamepad-active .btn-dir, body.gamepad-active .btn-gba-action {
+      opacity: 0.75;
+    }
+
   </style>
 </head>
 <body>
@@ -4377,7 +4480,160 @@
       play808Sfx('bell');
     }
 
+    
+    // =========================================================================
+    // 🌮 POCKET TACO & STANDARD HTML5 GAMEPAD API DRIVER
+    // =========================================================================
+    let gamepadConnected = false;
+    let lastGpButtons = {};
+    let gpNavDebounce = 0;
+
+    window.addEventListener('gamepadconnected', (e) => {
+      gamepadConnected = true;
+      document.body.classList.add('gamepad-active');
+      play808Sfx('confirm');
+      globalFloatingTexts.push(new FloatingText('TACO CONTROLLER CONNECTED!', 32, 40, 11));
+    });
+
+    window.addEventListener('gamepaddisconnected', (e) => {
+      gamepadConnected = false;
+      document.body.classList.remove('gamepad-active');
+    });
+
+    function pollGamepadInput() {
+      const gamepads = navigator.getGamepads ? navigator.getGamepads() : [];
+      if (!gamepads) return;
+      const gp = gamepads[0] || gamepads[1] || gamepads[2] || gamepads[3];
+      if (!gp) return;
+
+      if (!gamepadConnected) {
+        gamepadConnected = true;
+        document.body.classList.add('gamepad-active');
+      }
+
+      initAudio();
+
+      const isDown = (idx) => gp.buttons[idx] && (gp.buttons[idx].pressed || gp.buttons[idx].value > 0.5);
+      const isJustPressed = (idx) => {
+        const pressed = isDown(idx);
+        const wasPressed = !!lastGpButtons[idx];
+        return pressed && !wasPressed;
+      };
+
+      const axisX = gp.axes[0] !== undefined ? gp.axes[0] : (gp.axes[6] || 0);
+      const axisY = gp.axes[1] !== undefined ? gp.axes[1] : (gp.axes[7] || 0);
+
+      const dpadLeft = isDown(14) || axisX < -0.5;
+      const dpadRight = isDown(15) || axisX > 0.5;
+      const dpadUp = isDown(12) || axisY < -0.5;
+      const dpadDown = isDown(13) || axisY > 0.5;
+
+      const btnA = isJustPressed(0); // A / Cross
+      const btnB = isJustPressed(1); // B / Circle
+      const btnX = isJustPressed(2); // X / Square
+      const btnY = isJustPressed(3); // Y / Triangle
+      const btnL = isJustPressed(4) || isJustPressed(6); // L1 / L2
+      const btnR = isJustPressed(5) || isJustPressed(7); // R1 / R2
+      const btnSelect = isJustPressed(8);
+      const btnStart = isJustPressed(9);
+
+      if (gpNavDebounce > 0) gpNavDebounce--;
+
+      // Global Start / Back actions
+      if (btnStart) {
+        if (appState === 'TITLE') { appState = 'MODE_SELECT'; play808Sfx('confirm'); }
+        else if (appState === 'MODE_SELECT') { appState = 'CHAR_SELECT'; p1Locked = false; p2Locked = false; play808Sfx('confirm'); }
+        else if (appState === 'CHAR_SELECT') { p1Locked = true; if (selectedModeIdx !== 1) p2Locked = true; play808Sfx('confirm'); }
+        else if (appState === 'LADDER_BRACKET') { appState = 'STAGE_INTRO'; play808Sfx('confirm'); }
+        else if (appState === 'STAGE_INTRO') { startMatch(); }
+        else if (appState === 'STAGE_VICTORY_CUTSCENE') { appState = 'LADDER_SHOP'; play808Sfx('confirm'); }
+        else if (appState === 'LADDER_SHOP') { campaignState.stageIdx++; saveCampaign(); appState = 'LADDER_BRACKET'; play808Sfx('confirm'); }
+        else if (appState === 'VICTORY_END') { campaignState.active = false; appState = 'TITLE'; play808Sfx('confirm'); }
+        else if (appState === 'CONTINUE_SCREEN') { campaignState.continues--; saveCampaign(); startMatch(); }
+        else if (appState === 'KO') { rematchToCharSelect(); }
+      }
+
+      if (btnB || btnSelect || btnL) {
+        if (appState !== 'TITLE' && appState !== 'PLAYING' && appState !== 'KNOCKDOWN') {
+          goBack();
+        }
+      }
+
+      // In KNOCKDOWN: any button press mashes stamina
+      if (appState === 'KNOCKDOWN') {
+        if (btnA || btnB || btnX || btnY || btnL || btnR || btnStart) {
+          playerMashStamina();
+        }
+      }
+
+      // Menu Navigation via D-Pad
+      if (gpNavDebounce === 0) {
+        if (appState === 'MODE_SELECT') {
+          if (dpadUp) { selectedModeIdx = (selectedModeIdx + 3) % 4; gpNavDebounce = 12; play808Sfx('nav'); }
+          if (dpadDown) { selectedModeIdx = (selectedModeIdx + 1) % 4; gpNavDebounce = 12; play808Sfx('nav'); }
+          if (btnA) {
+            appState = 'CHAR_SELECT';
+            p1Locked = false; p2Locked = false;
+            p1SelectIdx = 0; p2SelectIdx = 1;
+            play808Sfx('confirm');
+          }
+        } else if (appState === 'CHAR_SELECT' && !p1Locked) {
+          if (dpadLeft) { p1SelectIdx = (p1SelectIdx + 13) % 14; gpNavDebounce = 12; play808Sfx('nav'); }
+          if (dpadRight) { p1SelectIdx = (p1SelectIdx + 1) % 14; gpNavDebounce = 12; play808Sfx('nav'); }
+          if (dpadUp || dpadDown) { p1SelectIdx = (p1SelectIdx + 7) % 14; gpNavDebounce = 12; play808Sfx('nav'); }
+          if (btnA) { p1Locked = true; if (selectedModeIdx !== 1) p2Locked = true; play808Sfx('confirm'); }
+          if (btnX) { bioFighterIdx = p1SelectIdx; appState = 'FIGHTER_BIO'; play808Sfx('nav'); }
+        } else if (appState === 'ARENA_SELECT') {
+          if (dpadLeft) { selectedArenaIdx = (selectedArenaIdx + 5) % 6; gpNavDebounce = 12; play808Sfx('nav'); }
+          if (dpadRight) { selectedArenaIdx = (selectedArenaIdx + 1) % 6; gpNavDebounce = 12; play808Sfx('nav'); }
+          if (dpadUp || dpadDown) { selectedArenaIdx = (selectedArenaIdx + 3) % 6; gpNavDebounce = 12; play808Sfx('nav'); }
+          if (btnA) { play808Sfx('confirm'); startMatch(); }
+        } else if (appState === 'LADDER_SHOP') {
+          if (dpadUp) { shopSelectedIdx = (shopSelectedIdx + 5) % 6; gpNavDebounce = 12; play808Sfx('nav'); }
+          if (dpadDown) { shopSelectedIdx = (shopSelectedIdx + 1) % 6; gpNavDebounce = 12; play808Sfx('nav'); }
+          if (btnA) {
+            if (shopSelectedIdx === 5) {
+              campaignState.stageIdx++; saveCampaign(); appState = 'LADDER_BRACKET'; play808Sfx('confirm');
+            } else if (shopSelectedIdx === 0 && campaignState.upgrades.pwr < 3) {
+              const cost = CAMPAIGN_UPGRADE_TIERS.pwr[campaignState.upgrades.pwr].cost;
+              if (campaignState.purse >= cost) { campaignState.purse -= cost; campaignState.upgrades.pwr++; saveCampaign(); play808Sfx('fuse'); }
+            } else if (shopSelectedIdx === 1 && campaignState.upgrades.def < 3) {
+              const cost = CAMPAIGN_UPGRADE_TIERS.def[campaignState.upgrades.def].cost;
+              if (campaignState.purse >= cost) { campaignState.purse -= cost; campaignState.upgrades.def++; saveCampaign(); play808Sfx('fuse'); }
+            } else if (shopSelectedIdx === 2 && campaignState.upgrades.spd < 3) {
+              const cost = CAMPAIGN_UPGRADE_TIERS.spd[campaignState.upgrades.spd].cost;
+              if (campaignState.purse >= cost) { campaignState.purse -= cost; campaignState.upgrades.spd++; saveCampaign(); play808Sfx('fuse'); }
+            }
+          }
+        }
+      }
+
+      // IN-BATTLE GAMEPLAY INPUTS
+      if ((appState === 'PLAYING' || appState === 'KNOCKDOWN') && p1) {
+        if (gpNavDebounce === 0) {
+          if (dpadLeft) { p1.move(-1); gpNavDebounce = 9; }
+          if (dpadRight) { p1.move(1); gpNavDebounce = 9; }
+        }
+        if (dpadDown) { p1.dropSoft(); }
+        if (isJustPressed(12) || btnR) { p1.dropHard(); }
+        if (btnB || btnX) { p1.rotate(-1); }
+        if (btnA) {
+          if (p1.superMeter >= 100) p1.triggerSuper();
+          else p1.rotate(1);
+        }
+        if (btnY) {
+          if (p1.superMeter >= 100) p1.triggerSuper();
+        }
+      }
+
+      // Update button cache
+      for (let i = 0; i < 16; i++) {
+        lastGpButtons[i] = isDown(i);
+      }
+    }
+
     function update() {
+      pollGamepadInput();
       globalFrameCount++;
       window.globalFrameCount = globalFrameCount;
 
