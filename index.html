@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>CRASH OUT: RING RUSH (v3.3.0) — PICO-8 Native Transparent Boxing</title>
+  <title>CRASH OUT: RING RUSH (v3.3.2) — In-Ring 16-Bit Boxer Sprites Restored</title>
   <style>
     :root {
       --pico-black: #000000;
@@ -3076,31 +3076,17 @@
 
       // GPU-accelerated flash without CPU software filter rasterization fallback
 
-      // === DRAW SPRITE ANCHORED ON FEET AT GROUND PLANE (Y=90) ===
+      // === ⚡ DIRECT 1:1 SPRITE BLIT (100% VISIBLE & 60 FPS GPU-ACCELERATED) ===
       const idleCanvas = ROSTER_IDLE_CANVASES[fId] || (isP1 ? bronerIdleCanvas : deenIdleCanvas);
-      const punchCanvas = ROSTER_PUNCH_CANVASES[fId] || (fId === 'deen' ? deenPunchCanvas : bronerPunchCanvas);
+      const punchHolder = ROSTER_PUNCH_CANVASES[fId] || (fId === 'deen' ? deenPunchCanvas : bronerPunchCanvas);
 
-      // Target height at native 128x128 PICO-8 scale (38px)
-      const targetH = 38 * vertSquash;
+      const ddx = -24;
+      const ddy = -48 + Math.round(vertShift);
 
-      if (usePunch && punchCanvas && punchCanvas.quadBounds && punchCanvas.quadBounds[punchQuad]) {
-        const qb = punchCanvas.quadBounds[punchQuad];
-        const aspect = qb.w / qb.h;
-        const dh = targetH;
-        const dw = dh * aspect;
-        const ddx = -dw * 0.35; // Centered on body axis, reach extending forward
-        const ddy = -dh + vertShift; // Boots (ddy + dh) anchored directly at Y=0 (groundY=90)!
-
-        ctx.drawImage(punchCanvas, qb.sx, qb.sy, qb.w, qb.h, ddx, ddy, dw, dh);
+      if (usePunch && punchHolder && punchHolder.quadSprites && punchHolder.quadSprites[punchQuad]) {
+        ctx.drawImage(punchHolder.quadSprites[punchQuad], ddx, ddy);
       } else if (idleCanvas) {
-        const b = idleCanvas.bounds || { xmin: 0, ymin: 0, w: idleCanvas.width, h: idleCanvas.height };
-        const aspect = b.w / b.h;
-        const dh = targetH;
-        const dw = dh * aspect;
-        const ddx = -dw / 2; // Horizontally centered on fighter axis
-        const ddy = -dh + vertShift; // Boots (ddy + dh) anchored directly on ring floor!
-
-        ctx.drawImage(idleCanvas, b.xmin, b.ymin, b.w, b.h, ddx, ddy, dw, dh);
+        ctx.drawImage(idleCanvas, ddx, ddy);
       } else {
         ctx.fillStyle = isP1 ? '#8C4A27' : '#C58C5D';
         ctx.fillRect(-6, -34, 12, 34);

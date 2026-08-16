@@ -1,6 +1,6 @@
 # CRASH OUT: RING RUSH — PICO-8 PUZZLE BOXING
 
-**Version:** `v3.3.0` (Cutscene Text Bounds, Sprite Blit Fix & Clean UI Alignment Release)
+**Version:** `v3.3.2` (In-Ring Boxer Sprites Restored & 8-Module Automated QA Suite Release)
 
 ![Title Screen](assets/pico8_title.jpg)
 
@@ -8,7 +8,7 @@
 
 ---
 
-## 🎮 Play Live (v3.3.0)
+## 🎮 Play Live (v3.3.2)
 
 - ⚡ **Play Live in Browser (GitHub Pages)**: **[officebeats.github.io/beats-social-media-boxer-game](https://officebeats.github.io/beats-social-media-boxer-game/)**
 - 🕹️ **Native PICO-8 Cartridge**: Load [`crash_out.p8`](crash_out.p8) directly inside PICO-8 using `pico8 -run crash_out.p8`.
@@ -23,14 +23,18 @@
 
 ---
 
-## 🌟 New in v3.3.0
+## 🌟 New in v3.3.2
+- 🥊 **In-Ring 16-Bit Boxer Sprites 100% Restored**:
+  - Fixed `drawBoxer` to blit native $48\times 48\text{px}$ pre-scaled sprite canvases (`ROSTER_IDLE_CANVASES` and `ROSTER_PUNCH_CANVASES`) directly on the ring floor at ground plane $Y=90$.
+  - Eliminated legacy $1024\times 1024$ out-of-bounds crop sampling that previously rendered fighters invisible in combat.
+  - Both Player 1 (left, facing right) and Player 2 (right, facing left) render with full 16-bit arcade pixel art and full strike animations (Jab, Straight, Hook, Uppercut).
+- 🛡️ **Permanent 8-Module Automated E2E Regression Suite (`tests/e2e_regression_suite.py`)**:
+  - Automated test harness validating Tournament Campaign, Knockdowns, Game Modes, Touch Ergonomics, Bluetooth Gamepad, Save Persistence, 60 FPS Stability, and **In-Ring Boxer Sprite Visibility across all 14 Fighters**.
 - 🎨 **Fixed Cutscene Sprites & Zero Text Overlap**:
-  - **48px Sprite Direct Blitting**: Fixed `drawBoxerAvatar` to sample the native $48\times 48\text{px}$ sprite canvas directly, rendering both the standing winner and defeated opponent clearly on the cutscene screen.
+  - **48px Sprite Direct Blitting**: Fixed `drawBoxerAvatar` to sample the native $48\times 48\text{px}$ sprite canvas directly in cutscenes.
   - **Zero Text Truncation**: Shortened press conference header to **`PRESS CONFERENCE`** (16 chars, 79px), eliminating left/right edge cutoff on 128px viewports.
   - **Zero Dialogue Overlap**: Expanded interview dialogue box to $Y=76..114$ with dynamic `nextY` layout, completely separating the post-fight quote from the stage purse earnings.
   - **Clean GBA Select Pill**: Removed text string injection into `#btnMode`, preserving the clean 3D rubber GBA SELECT pill styling.
-- 🖥️ **Edge-to-Edge Screen Maximization**: Expanded PICO-8 canvas up to **360×360px** on mobile portrait ($97\text{vw}$) with minimal border padding.
-- 🕹️ **Oversized +10% Larger Touch Controls**: 82px action buttons ($103\text{px}$ housing well) and 62px D-pad arms ($190\text{px}$ well) with 3D tactile depression physics.
 - 🚀 **Native 48×48px Sprite Pre-Scaling (99.8% Texture Bandwidth Reduction)**: Pre-rendered native sprite canvases for zero-downsampling 60 FPS combat.
 - ⚡ **Cached Crowd Dither Pattern**: Replaced 345 individual draw calls per frame with 1 static cached blit.
 - ⏱️ **Fixed 60 FPS Timestep Accumulator**: Smooth 60 FPS animation across all 60Hz and 120Hz displays.

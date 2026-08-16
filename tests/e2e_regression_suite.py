@@ -328,10 +328,65 @@ async def run_qa_suite():
         print("  ✓ 60 FPS locked GPU rendering confirmed with 0 runtime errors [PASS]")
         metrics.passed += 1
 
-        print("\n" + "=" * 75)
-        print(f"🎉 QA SUMMARY: {metrics.passed}/7 MODULES PASSED (0 FAILURES, 0 ERRORS)")
-        print("=" * 75)
+        # ---------------------------------------------------------------------
+        # TEST MODULE 8: IN-RING BOXER SPRITE VISIBILITY & PUNCH INTEGRITY
+        # ---------------------------------------------------------------------
+        print("\n[MODULE 8] In-Ring Boxer Sprite Visibility & Punch Animations (All 14 Fighters)")
+        fighters = ['broner', 'deen', 'ryan', 'n3on', 'rayj', 'blueface', 'chrisean', 'rampage', 'adin', 'charleston', 'bang', 'abrown', 'fousey', 'sneako']
+        for i, f in enumerate(fighters):
+            await evaluate(f"""
+                window.p1SelectIdx = {i};
+                window.p2SelectIdx = {(i + 1) % 14};
+                window.startMatch();
+                window.appState = 'PLAYING';
+                window.gameState = 'PLAYING';
+            """)
+            await asyncio.sleep(0.05)
+            sprite_ok = await evaluate("""
+                (() => {
+                    const ctx = document.getElementById('picoCanvas').getContext('2d');
+                    const p1Data = ctx.getImageData(46, 60, 14, 28).data;
+                    let p1Visible = 0;
+                    for (let j = 0; j < p1Data.length; j += 4) {
+                        if (p1Data[j+3] > 0) p1Visible++;
+                    }
+                    const p2Data = ctx.getImageData(68, 60, 14, 28).data;
+                    let p2Visible = 0;
+                    for (let j = 0; j < p2Data.length; j += 4) {
+                        if (p2Data[j+3] > 0) p2Visible++;
+                    }
+                    return { p1: p1Visible, p2: p2Visible };
+                })()
+            """)
+            assert sprite_ok['p1'] > 150 and sprite_ok['p2'] > 150, f"Fighter {f} sprite not visible in combat! P1={sprite_ok['p1']}, P2={sprite_ok['p2']}"
+        print(f"  ✓ All 14 Roster Fighters verified visible in combat [PASS]")
 
+        # Verify Punch Animations
+        for punch in ['JAB', 'STRAIGHT', 'HOOK', 'UPPERCUT']:
+            await evaluate(f"""
+                window.p1.anim = '{punch}';
+                window.p1.animTimer = 36;
+                window.drawGame();
+            """)
+            await asyncio.sleep(0.05)
+            punch_pixels = await evaluate("""
+                (() => {
+                    const ctx = document.getElementById('picoCanvas').getContext('2d');
+                    const data = ctx.getImageData(46, 50, 20, 38).data;
+                    let visible = 0;
+                    for (let j = 0; j < data.length; j += 4) {
+                        if (data[j+3] > 0) visible++;
+                    }
+                    return visible;
+                })()
+            """)
+            assert punch_pixels > 200, f"Punch animation {punch} rendering failed"
+        print("  ✓ All 4 Punch Animations (Jab, Straight, Hook, Uppercut) verified [PASS]")
+        metrics.passed += 1
+
+        print("\n" + "=" * 75)
+        print(f"🎉 QA SUMMARY: {metrics.passed}/8 MODULES PASSED (0 FAILURES, 0 ERRORS)")
+        print("=" * 75)
     chrome_proc.terminate()
 
 if __name__ == "__main__":
