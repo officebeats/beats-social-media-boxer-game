@@ -4382,8 +4382,6 @@
         const isP1 = (p1SelectIdx === idx);
         const isP2 = (p2SelectIdx === idx);
 
-        // Base cell
-        ctx.fillStyle = getPalColor(0);
         const isUnlocked = isFighterUnlocked(f.id);
 
         // Base cell
@@ -4392,19 +4390,20 @@
         ctx.strokeStyle = getPalColor(isUnlocked ? f.color : 5);
         ctx.strokeRect(cx, cy, cellW, cellH);
 
-        // Mini avatar (render portrait if unlocked, silhouette if locked)
+        // Mini avatar
         const thumbCanvas = ROSTER_IDLE_CANVASES[f.id] || (idx === 0 ? bronerIdleCanvas : deenIdleCanvas);
-        if (thumbCanvas) {
-          const srcW = thumbCanvas.width === 192 ? 48 : thumbCanvas.width;
-          if (isUnlocked) {
+        if (isUnlocked) {
+          if (thumbCanvas) {
+            const srcW = thumbCanvas.width === 192 ? 48 : thumbCanvas.width;
             ctx.drawImage(thumbCanvas, 0, 0, srcW, 48, cx + 1, cy + 1, cellW - 2, cellH - 6);
           } else {
-            ctx.fillStyle = getPalColor(1);
-            ctx.fillRect(cx + 1, cy + 1, cellW - 2, cellH - 6);
-            printPicoCenter('?', cx + Math.floor(cellW / 2), cy + 2, 5, 1, true);
+            drawBoxerAvatar(ctx, f, cx - 1, cy - 2, false);
           }
-        }
-        if (!isUnlocked) {
+        } else {
+          // Clean locked silhouette cell
+          ctx.fillStyle = getPalColor(0);
+          ctx.fillRect(cx + 1, cy + 1, cellW - 2, cellH - 6);
+          printPico('?', cx + 6, cy + 3, 5, 1);
           // Red lock badge
           ctx.fillStyle = getPalColor(8);
           ctx.fillRect(cx + cellW - 5, cy + 1, 4, 4);
@@ -4456,14 +4455,14 @@
 
       if (!isSelectedUnlocked) {
         // Locked Portrait Display
-        printPicoCenter('?', 23, 68, 5, 2, true);
-        printPicoCenter('LOCKED', 23, 94, 8, 1, true);
+        printPico('?', 20, 68, 5, 2);
+        printPico('LOCK', 13, 92, 8, 1);
 
         const reqSt = FIGHTER_UNLOCK_STAGE[selectedFighter.id] || 1;
-        printPico(selectedFighter.fullName, 42, 56, 5, 1, true);
-        printPico('LOCKED FIGHTER', 42, 66, 8, 1, true);
-        printPico('BEAT STAGE ' + reqSt + ' IN', 42, 78, 7, 1);
-        printPico('ROAD TO GOLD TO UNLOCK', 42, 88, 10, 1);
+        printPico(selectedFighter.fullName, 42, 58, 5, 1, true);
+        printPico('LOCKED FIGHTER', 42, 68, 8, 1, true);
+        printPico('BEAT STAGE ' + reqSt + ' IN', 42, 80, 7, 1);
+        printPico('ROAD TO GOLD', 42, 90, 10, 1);
         printPicoCenter('ARROWS: MOVE  [LOCKED]', 121, 8, 1, true);
       } else {
         const outfitList = ROSTER_OUTFITS[selectedFighter.id] || ['DEFAULT', 'ALT'];
