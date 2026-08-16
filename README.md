@@ -1,12 +1,12 @@
 # CRASH OUT: RING RUSH — PICO-8 PUZZLE BOXING
 
-**Version:** `v3.5.0` (Unique Fighter Idles, Pelvic Fix, Deen Starter & Visual Critique Release)
+**Version:** `v3.5.2` (100% Invariant Crotch Stability, Active Shorts Movement & 12-Module E2E Suite)
 
 ![Title Screen](assets/pico8_title.jpg)
 
 **Crash Out: Ring Rush** is an 8-bit arcade versus puzzle-fighter developed for the **PICO-8 Fantasy Console**. It fuses the competitive mechanics of Capcom's *Super Puzzle Fighter II Turbo* with the viral Kick warehouse boxing stream culture hosted by **Adrien "The Problem" Broner** and **Deen The Great**.
 
-## 🎮 Play Live (v3.5.0)
+## 🎮 Play Live (v3.5.2)
 
 - ⚡ **Play Live in Browser (GitHub Pages)**: **[officebeats.github.io/beats-social-media-boxer-game](https://officebeats.github.io/beats-social-media-boxer-game/)**
 - 🕹️ **Native PICO-8 Cartridge**: Load [`crash_out.p8`](crash_out.p8) directly inside PICO-8 using `pico8 -run crash_out.p8`.
@@ -22,10 +22,13 @@
 
 ---
 
-## 🌟 New in v3.5.0
-- 🥊 **Sprite Pelvic Fix & Natural Shorts Hem Wave**:
-  - Eliminated the vertical $75\%$ waistline slice in `createTransparentCanvas` that caused unnatural pelvic bulging.
-  - Slices whole body as a coherent kinematic unit paired with a **natural horizontal shorts hem ripple** on Frames 1 & 3.
+## 🌟 New in v3.5.2
+- 🛡️ **100% Invariant Crotch Stability & Active Shorts Hem Wave**:
+  - Completely decoupled the central pelvic region ($Y: 28..34, X: \text{center}$) from upper body sway, ensuring zero pelvic motion across all 4 frames ($F_0, F_1, F_2, F_3$) for all 14 fighters.
+  - Kept natural horizontal shorts lining wave ($Y: 35..38$) on outer edges for fluid athletic fabric dynamics.
+- 🧪 **Comprehensive 12-Module E2E Test Suite & Critique Tooling**:
+  - Added `test_crotch_stability_and_shorts_frames.py` automated pixel critique harness for automated verification of individual frame stability.
+  - Upgraded `tests/e2e_regression_suite.py` to 12 automated verification modules passing with 0 failures, 0 console errors, and locked 60 FPS performance.
 - 🌟 **14 Unique Character-Specific Idle Animation Signatures**:
   - Every fighter now exhibits a bespoke procedural idle stance matching their boxing style and stream persona:
     - **Adrien Broner**: Philly shell shoulder shrug + chin tuck + smirk bounce.

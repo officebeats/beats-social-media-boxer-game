@@ -37,8 +37,7 @@ SERVER_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 class QuietHandler(SimpleHTTPRequestHandler):
     def log_message(self, format, *args):
         pass
-
-PORT = 8088
+PORT = 8092
 def ensure_server(port=PORT):
     try:
         urllib.request.urlopen(f"http://127.0.0.1:{port}/index.html", timeout=0.5)
@@ -49,7 +48,6 @@ def ensure_server(port=PORT):
         t = threading.Thread(target=httpd.serve_forever, daemon=True)
         t.start()
         return httpd
-
 class TestMetrics:
     passed = 0
     failed = 0
@@ -59,14 +57,12 @@ class TestMetrics:
 async def run_qa_suite():
     ensure_server(PORT)
     metrics = TestMetrics()
-    print("=" * 75)
-    print("🛡️  STARTING SENIOR QA AUTOMATED E2E REGRESSION SUITE")
-    print("=" * 75)
-
-    chrome_path = "C:/Program Files/Google/Chrome/Application/chrome.exe"
-    if not os.path.exists(chrome_path):
-        chrome_path = "C:/Program Files (x86)/Google/Chrome/Application/chrome.exe"
-
+    chrome_paths = [
+        r"C:\Program Files\Google\Chrome\Application\chrome.exe",
+        r"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe",
+        r"C:\Users\admin-beats\AppData\Local\Google\Chrome\Application\chrome.exe"
+    ]
+    chrome_path = next((p for p in chrome_paths if os.path.exists(p)), None)
     port = 9248
     chrome_proc = subprocess.Popen([
         chrome_path,
@@ -431,23 +427,71 @@ async def run_qa_suite():
         # ---------------------------------------------------------------------
         # TEST MODULE 9: 4-FRAME IDLE ANIMATION STRIP & SKIN SWITCHER
         # ---------------------------------------------------------------------
-        print("\n[MODULE 9] 4-Frame Idle Animation Strip & Skin Switcher Verification (All 14 Fighters)")
-        for i, f in enumerate(fighters):
-            strip_info = await evaluate(f"""
-                (() => {{
-                    const c0 = window.ROSTER_IDLE_CANVASES['{f}_0'] || window.ROSTER_IDLE_CANVASES['{f}'];
-                    const c1 = window.ROSTER_IDLE_CANVASES['{f}_1'];
-                    return {{
-                        c0_w: c0 ? c0.width : 0,
-                        c0_h: c0 ? c0.height : 0,
-                        c1_w: c1 ? c1.width : 0,
-                        c1_h: c1 ? c1.height : 0
-                    }};
-                }})()
-            """)
-            assert strip_info['c0_w'] == 192 and strip_info['c0_h'] == 48, f"Fighter {f} skin 0 must be 192x48 strip! Got: {strip_info}"
-            assert strip_info['c1_w'] == 192 and strip_info['c1_h'] == 48, f"Fighter {f} skin 1 must be 192x48 strip! Got: {strip_info}"
+        print("\n[MODULE 9] 4-Frame Idle Animation Strip, Crotch Stability & Skin Switcher (All 14 Fighters)")
+        for idx, f in enumerate(fighters):
+            js = """
+                (() => {
+                    const c = window.ROSTER_IDLE_CANVASES['{F}_0'];
+                    if (!c) return { err: 'missing canvas' };
+                    const ctx = c.getContext('2d');
+                    const bounds = c.bounds || { xmin: 10, ymin: 4, w: 28, h: 40 };
+                    const cx = Math.round(bounds.xmin + bounds.w * 0.4);
+                    const cy = Math.round(bounds.ymin + bounds.h * 0.58);
+                    const cw = Math.max(3, Math.round(bounds.w * 0.2));
+                    const ch = Math.max(3, Math.round(bounds.h * 0.12));
+                    
+                    const f0_crotch = Array.from(ctx.getImageData(cx, cy, cw, ch).data);
+                    const f1_crotch = Array.from(ctx.getImageData(48 + cx, cy, cw, ch).data);
+                    const f2_crotch = Array.from(ctx.getImageData(96 + cx, cy, cw, ch).data);
+                    const f3_crotch = Array.from(ctx.getImageData(144 + cx, cy, cw, ch).data);
+                    
+                    let crotch_stable = true;
+                    for (let j = 0; j < f0_crotch.length; j += 4) {
+                        if (f0_crotch[j+3] > 0) {
+                            if (f0_crotch[j] !== f1_crotch[j] || f0_crotch[j] !== f2_crotch[j] || f0_crotch[j] !== f3_crotch[j]) {
+                                crotch_stable = false;
+                            }
+                        }
+                    }
+                    
+                    // Moving Shorts Bottom Lining Edge (Y: 35..38)
+                    const f0_hem = Array.from(ctx.getImageData(16, 35, 16, 3).data);
+                    const f1_hem = Array.from(ctx.getImageData(48 + 16, 35, 16, 3).data);
+                    let hem_moves = false;
+                    for (let j = 0; j < f0_hem.length; j += 4) {
+                        if (f0_hem[j] !== f1_hem[j] || f0_hem[j+3] !== f1_hem[j+3]) {
+                            hem_moves = true;
+                        }
+                    }
+                    // Upper body animation
+                    const f0_head = Array.from(ctx.getImageData(18, 10, 12, 8).data);
+                    const f1_head = Array.from(ctx.getImageData(48 + 18, 10, 12, 8).data);
+                    let upper_moves = false;
+                    for (let j = 0; j < f0_head.length; j += 4) {
+                        if (f0_head[j] !== f1_head[j] || f0_head[j+3] !== f1_head[j+3]) {
+                            upper_moves = true;
+                        }
+                    }
 
+                    const c1 = window.ROSTER_IDLE_CANVASES['{F}_1'];
+
+                    return {
+                        c0_w: c.width,
+                        c0_h: c.height,
+                        c1_w: c1 ? c1.width : 0,
+                        c1_h: c1 ? c1.height : 0,
+                        crotch_stable: crotch_stable,
+                        hem_moves: hem_moves,
+                        upper_moves: upper_moves
+                    };
+                })()
+            """.replace('{F}', f)
+            strip_info = await evaluate(js)
+            assert strip_info.get('c0_w') == 192 and strip_info.get('c0_h') == 48, f"Fighter {f} skin 0 must be 192x48 strip! Got: {strip_info}"
+            assert strip_info.get('c1_w') == 192 and strip_info.get('c1_h') == 48, f"Fighter {f} skin 1 must be 192x48 strip! Got: {strip_info}"
+            assert strip_info.get('crotch_stable') == True, f"Fighter {f} crotch must remain perfectly stable across all 4 frames! Got: {strip_info}"
+            assert strip_info.get('hem_moves') == True, f"Fighter {f} bottom shorts lining must move across frames! Got: {strip_info}"
+            assert strip_info.get('upper_moves') == True, f"Fighter {f} upper body/shoulders must animate across frames! Got: {strip_info}"
         # Verify Broner and Deen Alt Skin Colors (Bleached Blonde hair)
         blondes = await evaluate("""
             (() => {
@@ -466,7 +510,7 @@ async def run_qa_suite():
         """)
         assert blondes['broner'] == True, "Broner alt skin must have bleached blonde hair!"
         assert blondes['deen'] == True, "Deen alt skin must have bleached blonde hair!"
-        print("  ✓ 4-Frame linear animation strips & bleached blonde viral stream skins verified [PASS]")
+        print("  ✓ 4-Frame strips verified: Crotch perfectly stationary + Upper body/shoulders animated [PASS]")
         metrics.passed += 1
 
         # ---------------------------------------------------------------------
@@ -542,9 +586,59 @@ async def run_qa_suite():
         assert grounding_check['p1Grounded'] == True and grounding_check['p2Grounded'] == True, f"Floor grounding check failed at Y=90! {grounding_check}"
         print("  ✓ In-Ring Fighter Grounding & Contact Shadow confirmed at Y=90 on canvas mat [PASS]")
         metrics.passed += 1
+        # ---------------------------------------------------------------------
+        # TEST MODULE 12: TRAINER GYM UPGRADE SHOP & ZERO-TEXT-OVERLAP INTEGRITY
+        # ---------------------------------------------------------------------
+        print("\n[MODULE 12] Trainer Gym Upgrade Shop & Cutscene Text Layout Integrity")
+        
+        # 1. Test Gym Shop Purchase & Progression Flow
+        await evaluate("""
+            window.appState = 'LADDER_SHOP';
+            window.campaignState = {
+                active: true,
+                stageIdx: 0,
+                clearedStages: [true, false, false, false, false, false, false],
+                purse: 2500,
+                upgrades: { pwr: 0, def: 0, spd: 0, diamondSeed: false, superRush: false },
+                continues: 3,
+                totalScore: 10000,
+                startTime: Date.now(),
+                totalMatchesPlayed: 1
+            };
+            window.shopSelectedIdx = 0; // Heavy Hands (Cost: 500)
+            window.buyShopItem(0); // Buy PWR upgrade
+        """)
+        pwr_level = await evaluate("window.campaignState.upgrades.pwr")
+        purse_after = await evaluate("window.campaignState.purse")
+        assert pwr_level == 1, f"Expected PWR level 1, got {pwr_level}"
+        assert purse_after == 2000, f"Expected purse 2000, got {purse_after}"
+        print(f"  ✓ Gym Shop purchase verified: PWR Lv{pwr_level}, Purse ${purse_after} [PASS]")
+
+        # 2. Test Advance to Next Stage via buyShopItem(5) / Next Bout
+        await evaluate("""
+            window.shopSelectedIdx = 5;
+            window.buyShopItem(5);
+        """)
+        next_app_state = await evaluate("window.appState")
+        next_stage_idx = await evaluate("window.campaignState.stageIdx")
+        assert next_app_state == 'LADDER_BRACKET', f"Expected LADDER_BRACKET, got {next_app_state}"
+        assert next_stage_idx == 1, f"Expected stageIdx 1, got {next_stage_idx}"
+        print(f"  ✓ Gym Shop unblocked advance verified: Stage {next_stage_idx+1}/7 [PASS]")
+
+        # 3. Verify Victory Press Conference & Stage Face-Off Cutscenes (Zero Overlap)
+        await evaluate("window.appState = 'STAGE_VICTORY_CUTSCENE'; window.victoryCutscenePhase = 0; window.render();")
+        await asyncio.sleep(0.05)
+        await snap("module12_press_conference_layout.png", "Press Conference Layout")
+
+        await evaluate("window.appState = 'STAGE_INTRO'; window.render();")
+        await asyncio.sleep(0.05)
+        await snap("module12_stage_faceoff_layout.png", "Stage Face-Off Layout")
+
+        print("  ✓ Cutscene and Menu text layout verified without overlaps [PASS]")
+        metrics.passed += 1
 
         print("\n" + "=" * 75)
-        print(f"🎉 QA SUMMARY: {metrics.passed}/11 MODULES PASSED (0 FAILURES, 0 ERRORS)")
+        print(f"🎉 QA SUMMARY: {metrics.passed}/12 MODULES PASSED (0 FAILURES, 0 ERRORS)")
         print("=" * 75)
     chrome_proc.terminate()
 

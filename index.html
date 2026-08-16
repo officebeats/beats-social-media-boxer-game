@@ -2933,70 +2933,89 @@
       const dw = Math.round(dh * aspect);
       const dx = Math.round((48 - dw) / 2);
       const dy = 48 - dh; // Boots anchored at Y=48
+      // Dimensions of body sections:
+      const upperH = Math.round(bounds.h * 0.48); // Head, chest, shoulders, arms (top 48%)
+      const upperDh = Math.round(dh * 0.48);
 
-      // Frame 0 (x=0..47): Neutral Athletic High-Guard Stance
-      sCtx.drawImage(rawCanvas, bounds.xmin, bounds.ymin, bounds.w, bounds.h, dx, dy, dw, dh);
+      const crotchSrcY = bounds.ymin + upperH; // Waistband and crotch (48% to 68% height)
+      const crotchH = Math.round(bounds.h * 0.20);
+      const crotchDh = Math.round(dh * 0.20);
+      const crotchY = dy + upperDh; // Fixed invariant Y position across ALL 4 frames!
 
-      // Frame 1 (x=48..95): Coherent Athletic Dip + Unique Fighter Signatures (ZERO Crotch/Pelvic Distortion)
-      // Natural whole-body dip (dy + 1) as a single solid piece
-      sCtx.drawImage(rawCanvas, bounds.xmin, bounds.ymin, bounds.w, bounds.h, 48 + dx, dy + 1, dw, dh);
+      const hemSrcY = bounds.ymin + upperH + crotchH; // Bottom horizontal lining edge of shorts (68% to 76% height)
+      const hemH = Math.round(bounds.h * 0.08);
+      const hemDh = Math.round(dh * 0.08);
+      const hemY = crotchY + crotchDh;
 
-      // Unique Character-Specific Signature Gestures on Frame 1 (Head/Shoulders/Arms only):
+      const lowerSrcY = bounds.ymin + upperH + crotchH + hemH; // Legs & boots (bottom 24%)
+      const lowerH = bounds.h - (upperH + crotchH + hemH);
+      const lowerDh = dh - (upperDh + crotchDh + hemDh);
+      const lowerY = hemY + hemDh;
+
+      // FRAME 0 (x=0..47): Neutral Athletic High-Guard Stance
+      sCtx.drawImage(rawCanvas, bounds.xmin, bounds.ymin, bounds.w, upperH, dx, dy, dw, upperDh);
+      sCtx.drawImage(rawCanvas, bounds.xmin, crotchSrcY, bounds.w, crotchH, dx, crotchY, dw, crotchDh);
+      sCtx.drawImage(rawCanvas, bounds.xmin, hemSrcY, bounds.w, hemH, dx, hemY, dw, hemDh);
+      sCtx.drawImage(rawCanvas, bounds.xmin, lowerSrcY, bounds.w, lowerH, dx, lowerY, dw, lowerDh);
+
+      // FRAME 1 (x=48..95): Athletic Dip (Upper Body Only) + Stationary Crotch + Bottom Shorts Lining Wave
+      sCtx.drawImage(rawCanvas, bounds.xmin, bounds.ymin, bounds.w, upperH, 48 + dx, dy + 1, dw, upperDh);
+      // 2. Central crotch STAYS PERFECTLY STILL at fixed invariant (48 + dx, crotchY, dw, crotchDh)
+      sCtx.drawImage(rawCanvas, bounds.xmin, crotchSrcY, bounds.w, crotchH, 48 + dx, crotchY, dw, crotchDh);
+      // 3. Bottom horizontal lining edge of shorts moves horizontally by +1px
+      sCtx.drawImage(rawCanvas, bounds.xmin, hemSrcY, bounds.w, hemH, 48 + dx + 1, hemY, dw, hemDh);
+      // 4. Legs & boots grounded at fixed Y
+      sCtx.drawImage(rawCanvas, bounds.xmin, lowerSrcY, bounds.w, lowerH, 48 + dx, lowerY, dw, lowerDh);
+
+      // Unique Character Gestures on Frame 1 (Head/Shoulders/Arms ONLY in upper torso Y < 0.35):
       if (id === 'broner') {
-        // Philly Shell shoulder roll shrug (left shoulder elevated)
-        sCtx.drawImage(rawCanvas, bounds.xmin, bounds.ymin + Math.round(bounds.h * 0.25), Math.round(bounds.w * 0.35), Math.round(bounds.h * 0.25), 48 + dx - 1, dy + Math.round(dh * 0.24), Math.round(dw * 0.35), Math.round(dh * 0.25));
+        sCtx.drawImage(rawCanvas, bounds.xmin, bounds.ymin + Math.round(bounds.h * 0.15), Math.round(bounds.w * 0.32), Math.round(bounds.h * 0.15), 48 + dx - 1, dy + Math.round(dh * 0.14), Math.round(dw * 0.32), Math.round(dh * 0.15));
       } else if (id === 'deen') {
-        // Southpaw explosive lead right hand flick
-        sCtx.drawImage(rawCanvas, bounds.xmin + Math.round(bounds.w * 0.45), bounds.ymin + Math.round(bounds.h * 0.32), Math.round(bounds.w * 0.3), Math.round(bounds.h * 0.25), 48 + dx + Math.round(dw * 0.45) + 1, dy + 1 + Math.round(dh * 0.32), Math.round(dw * 0.3), Math.round(dh * 0.25));
+        sCtx.drawImage(rawCanvas, bounds.xmin + Math.round(bounds.w * 0.68), bounds.ymin + Math.round(bounds.h * 0.18), Math.round(bounds.w * 0.32), Math.round(bounds.h * 0.15), 48 + dx + Math.round(dw * 0.68) + 1, dy + 1 + Math.round(dh * 0.18), Math.round(dw * 0.32), Math.round(dh * 0.15));
       } else if (id === 'ryan') {
-        // Flash left hook coil
-        sCtx.drawImage(rawCanvas, bounds.xmin + Math.round(bounds.w * 0.1), bounds.ymin + Math.round(bounds.h * 0.35), Math.round(bounds.w * 0.35), Math.round(bounds.h * 0.25), 48 + dx + Math.round(dw * 0.1) - 1, dy + 1 + Math.round(dh * 0.34), Math.round(dw * 0.35), Math.round(dh * 0.25));
+        sCtx.drawImage(rawCanvas, bounds.xmin, bounds.ymin + Math.round(bounds.h * 0.18), Math.round(bounds.w * 0.32), Math.round(bounds.h * 0.15), 48 + dx - 1, dy + 1 + Math.round(dh * 0.17), Math.round(dw * 0.32), Math.round(dh * 0.15));
       } else if (id === 'n3on') {
-        // Hyper streamer glove tap (gloves shifted inwards)
-        sCtx.drawImage(rawCanvas, bounds.xmin + Math.round(bounds.w * 0.35), bounds.ymin + Math.round(bounds.h * 0.35), Math.round(bounds.w * 0.35), Math.round(bounds.h * 0.25), 48 + dx + Math.round(dw * 0.35) - 1, dy + 1 + Math.round(dh * 0.35), Math.round(dw * 0.35), Math.round(dh * 0.25));
+        sCtx.drawImage(rawCanvas, bounds.xmin + Math.round(bounds.w * 0.25), bounds.ymin, Math.round(bounds.w * 0.5), Math.round(bounds.h * 0.25), 48 + dx + Math.round(dw * 0.25) - 1, dy + 1, Math.round(dw * 0.5), Math.round(dh * 0.25));
       } else if (id === 'rayj') {
-        // Slick sunglasses adjust gesture
-        sCtx.drawImage(rawCanvas, bounds.xmin + Math.round(bounds.w * 0.35), bounds.ymin + Math.round(bounds.h * 0.12), Math.round(bounds.w * 0.3), Math.round(bounds.h * 0.15), 48 + dx + Math.round(dw * 0.35) + 1, dy + Math.round(dh * 0.12), Math.round(dw * 0.3), Math.round(dh * 0.15));
+        sCtx.drawImage(rawCanvas, bounds.xmin + Math.round(bounds.w * 0.25), bounds.ymin + Math.round(bounds.h * 0.08), Math.round(bounds.w * 0.5), Math.round(bounds.h * 0.15), 48 + dx + Math.round(dw * 0.25) + 1, dy + Math.round(dh * 0.08), Math.round(dw * 0.5), Math.round(dh * 0.15));
       } else if (id === 'blueface') {
-        // Low hands groove sway
-        sCtx.drawImage(rawCanvas, bounds.xmin, bounds.ymin + Math.round(bounds.h * 0.4), bounds.w, Math.round(bounds.h * 0.25), 48 + dx + 1, dy + 1 + Math.round(dh * 0.42), dw, Math.round(dh * 0.25));
+        sCtx.drawImage(rawCanvas, bounds.xmin + Math.round(bounds.w * 0.25), bounds.ymin + Math.round(bounds.h * 0.05), Math.round(bounds.w * 0.5), Math.round(bounds.h * 0.18), 48 + dx + Math.round(dw * 0.25) - 1, dy + 1 + Math.round(dh * 0.05), Math.round(dw * 0.5), Math.round(dh * 0.18));
       } else if (id === 'chrisean') {
-        // Tight peekaboo guard bob
-        sCtx.drawImage(rawCanvas, bounds.xmin + Math.round(bounds.w * 0.25), bounds.ymin + Math.round(bounds.h * 0.25), Math.round(bounds.w * 0.5), Math.round(bounds.h * 0.3), 48 + dx + Math.round(dw * 0.25), dy + 1 + Math.round(dh * 0.23), Math.round(dw * 0.5), Math.round(dh * 0.3));
+        sCtx.drawImage(rawCanvas, bounds.xmin + Math.round(bounds.w * 0.2), bounds.ymin + Math.round(bounds.h * 0.12), Math.round(bounds.w * 0.6), Math.round(bounds.h * 0.20), 48 + dx + Math.round(dw * 0.2), dy + 1 + Math.round(dh * 0.11), Math.round(dw * 0.6), Math.round(dh * 0.20));
       } else if (id === 'rampage') {
-        // Heavy tank wide stance stomp
-        sCtx.drawImage(rawCanvas, bounds.xmin, bounds.ymin + Math.round(bounds.h * 0.75), bounds.w, Math.round(bounds.h * 0.25), 48 + dx, dy + Math.round(dh * 0.75), dw, Math.round(dh * 0.25));
+        sCtx.drawImage(rawCanvas, bounds.xmin + Math.round(bounds.w * 0.2), bounds.ymin, Math.round(bounds.w * 0.6), Math.round(bounds.h * 0.25), 48 + dx + Math.round(dw * 0.2), dy + 1, Math.round(dw * 0.6), Math.round(dh * 0.25));
+      } else if (id === 'adin') {
+        sCtx.drawImage(rawCanvas, bounds.xmin + Math.round(bounds.w * 0.25), bounds.ymin + Math.round(bounds.h * 0.05), Math.round(bounds.w * 0.5), Math.round(bounds.h * 0.18), 48 + dx + Math.round(dw * 0.25) + 1, dy + 1 + Math.round(dh * 0.05), Math.round(dw * 0.5), Math.round(dh * 0.18));
       } else if (id === 'charleston') {
-        // Pointing taunt gesture
-        sCtx.drawImage(rawCanvas, bounds.xmin + Math.round(bounds.w * 0.5), bounds.ymin + Math.round(bounds.h * 0.3), Math.round(bounds.w * 0.3), Math.round(bounds.h * 0.25), 48 + dx + Math.round(dw * 0.5) + 1, dy + 1 + Math.round(dh * 0.28), Math.round(dw * 0.3), Math.round(dh * 0.25));
+        sCtx.drawImage(rawCanvas, bounds.xmin + Math.round(bounds.w * 0.25), bounds.ymin, Math.round(bounds.w * 0.5), Math.round(bounds.h * 0.20), 48 + dx + Math.round(dw * 0.25) + 1, dy + 1, Math.round(dw * 0.5), Math.round(dh * 0.20));
       } else if (id === 'bang') {
-        // Pad-trainer deep chest expansion
-        sCtx.drawImage(rawCanvas, bounds.xmin, bounds.ymin + Math.round(bounds.h * 0.2), bounds.w, Math.round(bounds.h * 0.3), 48 + dx, dy + 1 + Math.round(dh * 0.18), dw, Math.round(dh * 0.3));
+        sCtx.drawImage(rawCanvas, bounds.xmin + Math.round(bounds.w * 0.2), bounds.ymin + Math.round(bounds.h * 0.15), Math.round(bounds.w * 0.6), Math.round(bounds.h * 0.20), 48 + dx + Math.round(dw * 0.2), dy + 1 + Math.round(dh * 0.13), Math.round(dw * 0.6), Math.round(dh * 0.20));
       } else if (id === 'abrown') {
-        // Showboat dance shimmy
-        sCtx.drawImage(rawCanvas, bounds.xmin, bounds.ymin, bounds.w, Math.round(bounds.h * 0.5), 48 + dx + 1, dy + 1, dw, Math.round(dh * 0.5));
+        sCtx.drawImage(rawCanvas, bounds.xmin + Math.round(bounds.w * 0.68), bounds.ymin + Math.round(bounds.h * 0.18), Math.round(bounds.w * 0.32), Math.round(bounds.h * 0.15), 48 + dx + Math.round(dw * 0.68) + 1, dy + 1 + Math.round(dh * 0.18), Math.round(dw * 0.32), Math.round(dh * 0.15));
       } else if (id === 'fousey') {
-        // G7 forward pulse lunge
-        sCtx.drawImage(rawCanvas, bounds.xmin, bounds.ymin, bounds.w, bounds.h, 48 + dx + 1, dy + 1, dw, dh);
+        sCtx.drawImage(rawCanvas, bounds.xmin + Math.round(bounds.w * 0.2), bounds.ymin, Math.round(bounds.w * 0.6), Math.round(bounds.h * 0.28), 48 + dx + Math.round(dw * 0.2) + 1, dy + 1, Math.round(dw * 0.6), Math.round(dh * 0.28));
       } else if (id === 'sneako') {
-        // Sparring weave
-        sCtx.drawImage(rawCanvas, bounds.xmin, bounds.ymin + Math.round(bounds.h * 0.1), bounds.w, Math.round(bounds.h * 0.3), 48 + dx - 1, dy + 1 + Math.round(dh * 0.1), dw, Math.round(dh * 0.3));
+        sCtx.drawImage(rawCanvas, bounds.xmin + Math.round(bounds.w * 0.2), bounds.ymin, Math.round(bounds.w * 0.6), Math.round(bounds.h * 0.28), 48 + dx + Math.round(dw * 0.2) - 1, dy + 1, Math.round(dw * 0.6), Math.round(dh * 0.28));
       }
 
-      // Frame 2 (x=96..143): Coherent Spring Extension & Head Bob (boots anchored on mat)
-      sCtx.drawImage(rawCanvas, bounds.xmin, bounds.ymin, bounds.w, bounds.h, 96 + dx, dy - 1, dw, dh);
-      // Keep boot soles grounded flat at Y=48
-      const bootH = Math.max(2, Math.round(dh * 0.08));
-      const bootSrcY = bounds.ymin + bounds.h - Math.max(2, Math.round(bounds.h * 0.08));
-      sCtx.drawImage(rawCanvas, bounds.xmin, bootSrcY, bounds.w, Math.max(2, Math.round(bounds.h * 0.08)), 96 + dx, dy + dh - bootH, dw, bootH);
+      // FRAME 2 (x=96..143): Spring Extension & Head Bob
+      sCtx.drawImage(rawCanvas, bounds.xmin, bounds.ymin, bounds.w, upperH, 96 + dx, dy - 1, dw, upperDh);
+      sCtx.drawImage(rawCanvas, bounds.xmin, crotchSrcY, bounds.w, crotchH, 96 + dx, crotchY, dw, crotchDh);
+      sCtx.drawImage(rawCanvas, bounds.xmin, hemSrcY, bounds.w, hemH, 96 + dx, hemY, dw, hemDh);
+      sCtx.drawImage(rawCanvas, bounds.xmin, lowerSrcY, bounds.w, lowerH, 96 + dx, lowerY, dw, lowerDh);
 
-      // Frame 3 (x=144..191): Guard Reset & Lead Glove Rhythm Twitch
-      sCtx.drawImage(rawCanvas, bounds.xmin, bounds.ymin, bounds.w, bounds.h, 144 + dx, dy, dw, dh);
-      // Lead glove 1px rhythm twitch
-      sCtx.drawImage(rawCanvas, bounds.xmin + Math.round(bounds.w * 0.4), bounds.ymin + Math.round(bounds.h * 0.35), Math.round(bounds.w * 0.25), Math.round(bounds.h * 0.25), 144 + dx + Math.round(dw * 0.4) + 1, dy + Math.round(dh * 0.35), Math.round(dw * 0.25), Math.round(dh * 0.25));
+      // FRAME 3 (x=144..191): Guard Reset & Lead Glove Rhythm Twitch
+      sCtx.drawImage(rawCanvas, bounds.xmin, bounds.ymin, bounds.w, upperH, 144 + dx, dy, dw, upperDh);
+      sCtx.drawImage(rawCanvas, bounds.xmin, crotchSrcY, bounds.w, crotchH, 144 + dx, crotchY, dw, crotchDh);
+      // Bottom horizontal lining edge moves horizontally by -1px
+      sCtx.drawImage(rawCanvas, bounds.xmin, hemSrcY, bounds.w, hemH, 144 + dx - 1, hemY, dw, hemDh);
+      sCtx.drawImage(rawCanvas, bounds.xmin, lowerSrcY, bounds.w, lowerH, 144 + dx, lowerY, dw, lowerDh);
+      // Lead glove 1px rhythm twitch in upper area (strictly above Y=28)
+      sCtx.drawImage(rawCanvas, bounds.xmin + Math.round(bounds.w * 0.4), bounds.ymin + Math.round(bounds.h * 0.20), Math.round(bounds.w * 0.25), Math.round(bounds.h * 0.16), 144 + dx + Math.round(dw * 0.4) + 1, dy + Math.round(dh * 0.20), Math.round(dw * 0.25), Math.round(dh * 0.16));
       spriteCanvas.bounds = bounds;
       return spriteCanvas;
     }
+
     const PUNCH_FLIPS = {
       'broner': [0, 3],      // JAB, UPPERCUT
       'deen': [2, 3],        // HOOK, UPPERCUT
@@ -3979,13 +3998,13 @@
           ctx.fillRect(fx, fy, 3, 3);
         }
 
-        // Top Header (Shortened to fit 128px screen perfectly)
+        // Top Header
         ctx.fillStyle = getPalColor(0);
         ctx.fillRect(0, 0, 128, 18);
         printPicoCenter(`STAGE ${st.stageNum} VICTORY!`, 3, 10, 1, true);
         printPicoCenter('PRESS CONFERENCE', 10, 7, 1);
 
-        // Authentic Capcom Boxer Cutscene Sprites: Winner Standing (Left), Opponent Defeated (Right)
+        // Authentic Capcom Boxer Cutscene Sprites
         drawBoxerAvatar(ctx, p1Obj, 36, 66, true, false, false);
         drawBoxerAvatar(ctx, p2Obj, 92, 66, true, true, true);
 
@@ -3996,18 +4015,18 @@
         ctx.strokeRect(16, 64, 96, 11);
         printPicoCenter(`${p1Obj.name} WINS BY K.O.!`, 67, 0, 1, true);
 
-        // Post-Fight Interview Box (Expanded height Y=76..114 to prevent text overlap)
+        // Post-Fight Interview Box
         ctx.fillStyle = 'rgba(0,0,0,0.94)';
         ctx.fillRect(6, 76, 116, 38);
         ctx.strokeStyle = getPalColor(arena.colors.accent);
         ctx.strokeRect(6, 76, 116, 38);
 
         const quote = POST_FIGHT_QUOTES[p1Obj.id] || "WE PUT HIM DOWN! ON TO THE NEXT!";
-        const nextY = printPicoWrap(`"${quote}"`, 10, 79, 108, 10, 1);
-        printPico(`STAGE PURSE: +$${lastPurseEarned}`, 10, Math.max(104, nextY + 1), 11, 1);
+        const dY = printPicoWrap(`"${quote}"`, 10, 79, 108, 10, 1);
+        printPico(`STAGE PURSE: +$${lastPurseEarned}`, 10, Math.min(104, Math.max(94, dY + 1)), 11, 1);
 
         if (Math.floor(globalFrameCount / 20) % 2 === 0) {
-          printPicoCenter('PRESS X: TOURNAMENT LADDER >>', 118, 10, 1, true);
+          printPicoCenter('PRESS X: LADDER >>', 118, 10, 1, true);
         }
       } else {
         // --- PHASE 1: PUNCH-OUT VERTICAL RANKING LADDER CLIMB ---
@@ -4068,8 +4087,9 @@
       // Top Stage Header
       ctx.fillStyle = getPalColor(0);
       ctx.fillRect(0, 0, 128, 20);
-      printPicoCenter(`STAGE ${st.stageNum}: ${st.name}`, 3, 10, 1, true);
-      printPicoCenter(st.location, 11, 7, 1);
+      printPicoCenter(`STAGE ${st.stageNum} FACE-OFF`, 3, 10, 1, true);
+      const locStr = st.location.length > 24 ? st.location.slice(0, 24) : st.location;
+      printPicoCenter(locStr, 11, 7, 1);
 
       // Authentic Capcom Boxer Cutscene Sprites (P1 facing right, P2 facing left)
       const p1Obj = ROSTER[p1SelectIdx];
@@ -4092,11 +4112,109 @@
       ctx.strokeRect(6, 68, 116, 44);
 
       const d = getStageIntroDialogue(campaignState.stageIdx, p1Obj.id);
-      printPicoWrap(`${p2Obj.name}: "${d.opp}"`, 10, 72, 108, 10, 1);
-      printPicoWrap(`${p1Obj.name}: "${d.player}"`, 10, 90, 108, 11, 1);
+      const oppText = `${p2Obj.name}: "${d.opp}"`;
+      const dY1 = printPicoWrap(oppText, 10, 71, 108, 10, 1);
+      const plyText = `${p1Obj.name}: "${d.player}"`;
+      printPicoWrap(plyText, 10, Math.min(93, Math.max(83, dY1 + 1)), 108, 11, 1);
 
       if (Math.floor(globalFrameCount / 20) % 2 === 0) {
-        printPicoCenter('PRESS X: RING THE BELL!', 118, 10, 1, true);
+        printPicoCenter('PRESS X: RING BELL!', 118, 10, 1, true);
+      }
+    }
+
+    // === TRAINER GYM UPGRADE SHOP ===
+    function buyShopItem(idx) {
+      if (idx === 5) {
+        advanceCampaignStage();
+        appState = 'LADDER_BRACKET';
+        play808Sfx('confirm');
+        return;
+      }
+      if (idx === 0) {
+        if (campaignState.upgrades.pwr >= 3) {
+          globalFloatingTexts.push(new FloatingText('POWER MAXED!', 42, 40, 10));
+          play808Sfx('nav');
+          return;
+        }
+        const cost = CAMPAIGN_UPGRADE_TIERS.pwr[campaignState.upgrades.pwr].cost;
+        if (campaignState.purse >= cost) {
+          campaignState.purse -= cost;
+          campaignState.upgrades.pwr++;
+          saveCampaign();
+          play808Sfx('fuse');
+          globalFloatingTexts.push(new FloatingText('POWER UPGRADED!', 36, 40, 10));
+        } else {
+          globalFloatingTexts.push(new FloatingText('NEED $' + cost + ' CASH!', 36, 40, 8));
+          play808Sfx('nav');
+        }
+      } else if (idx === 1) {
+        if (campaignState.upgrades.def >= 3) {
+          globalFloatingTexts.push(new FloatingText('DEFENSE MAXED!', 36, 40, 10));
+          play808Sfx('nav');
+          return;
+        }
+        const cost = CAMPAIGN_UPGRADE_TIERS.def[campaignState.upgrades.def].cost;
+        if (campaignState.purse >= cost) {
+          campaignState.purse -= cost;
+          campaignState.upgrades.def++;
+          saveCampaign();
+          play808Sfx('fuse');
+          globalFloatingTexts.push(new FloatingText('DEFENSE UPGRADED!', 34, 40, 10));
+        } else {
+          globalFloatingTexts.push(new FloatingText('NEED $' + cost + ' CASH!', 36, 40, 8));
+          play808Sfx('nav');
+        }
+      } else if (idx === 2) {
+        if (campaignState.upgrades.spd >= 3) {
+          globalFloatingTexts.push(new FloatingText('SPEED MAXED!', 42, 40, 10));
+          play808Sfx('nav');
+          return;
+        }
+        const cost = CAMPAIGN_UPGRADE_TIERS.spd[campaignState.upgrades.spd].cost;
+        if (campaignState.purse >= cost) {
+          campaignState.purse -= cost;
+          campaignState.upgrades.spd++;
+          saveCampaign();
+          play808Sfx('fuse');
+          globalFloatingTexts.push(new FloatingText('SPEED UPGRADED!', 36, 40, 10));
+        } else {
+          globalFloatingTexts.push(new FloatingText('NEED $' + cost + ' CASH!', 36, 40, 8));
+          play808Sfx('nav');
+        }
+      } else if (idx === 3) {
+        if (campaignState.upgrades.diamondSeed) {
+          globalFloatingTexts.push(new FloatingText('ALREADY OWNED!', 36, 40, 10));
+          play808Sfx('nav');
+          return;
+        }
+        const cost = 1500;
+        if (campaignState.purse >= cost) {
+          campaignState.purse -= cost;
+          campaignState.upgrades.diamondSeed = true;
+          saveCampaign();
+          play808Sfx('fuse');
+          globalFloatingTexts.push(new FloatingText('DIAMOND SEED!', 38, 40, 10));
+        } else {
+          globalFloatingTexts.push(new FloatingText('NEED $' + cost + ' CASH!', 36, 40, 8));
+          play808Sfx('nav');
+        }
+      } else if (idx === 4) {
+        if (campaignState.upgrades.superRush) {
+          globalFloatingTexts.push(new FloatingText('ALREADY OWNED!', 36, 40, 10));
+          play808Sfx('nav');
+          return;
+        }
+        const cost = 1200;
+        if (campaignState.purse >= cost) {
+          campaignState.purse -= cost;
+          campaignState.upgrades.superRush = true;
+          saveCampaign();
+          play808Sfx('fuse');
+          globalFloatingTexts.push(new FloatingText('SUPER RUSH!', 42, 40, 10));
+        } else {
+          globalFloatingTexts.push(new FloatingText('NEED $' + cost + ' CASH!', 36, 40, 8));
+          play808Sfx('nav');
+        }
       }
     }
 
@@ -4145,9 +4263,8 @@
         }
       });
 
-      printPicoCenter('UP/DOWN: SELECT   X/TOUCH: BUY/ADVANCE', 118, 7, 1);
+      printPicoCenter('UP/DOWN: SELECT   X/START: ADVANCE', 118, 7, 1);
     }
-
     // === KNOCKDOWN REFEREE COUNTDOWN OVERLAY ===
     function drawKnockdownOverlay() {
       if (!knockdownData) return;
@@ -4746,21 +4863,22 @@
       ctx.strokeStyle = getPalColor(5);
       ctx.strokeRect(81, 2, 44, 6);
 
-      // Fighter Names & Round Win Gloves ⭐ ⭐
-      printPico(p1.name || 'BRONER', 4, 9, 10, 1);
+      // Fighter Names & Round Win Gloves ⭐ ⭐ (Zero Overlap Guaranteed)
+      const p1Name = p1.name || 'DEEN';
+      const shortP1 = p1Name.length > 5 ? p1Name.slice(0, 5) : p1Name;
+      printPico(shortP1, 4, 9, 10, 1);
       for (let w = 0; w < 2; w++) {
         ctx.fillStyle = (w < p1RoundsWon) ? getPalColor(10) : getPalColor(5);
         ctx.fillRect(36 + w * 5, 9, 4, 4);
       }
 
-      const p2Name = p2.name || 'DEEN';
+      const p2Name = p2.name || 'BRONER';
+      const shortP2 = p2Name.length > 5 ? p2Name.slice(0, 5) : p2Name;
       for (let w = 0; w < 2; w++) {
         ctx.fillStyle = (w < p2RoundsWon) ? getPalColor(10) : getPalColor(5);
         ctx.fillRect(82 + w * 5, 9, 4, 4);
       }
-      printPico(p2Name, 128 - p2Name.length * 5 - 4, 9, 10, 1);
-
-      // Round Timer
+      printPico(shortP2, 95, 9, 10, 1);
       const timerStr = roundTimer < 10 ? '0' + roundTimer : String(roundTimer);
       ctx.fillStyle = getPalColor(0);
       ctx.fillRect(52, 1, 24, 13);
@@ -4865,9 +4983,6 @@
         for (let lx = 43; lx < 87; lx += 6) {
           ctx.beginPath(); ctx.moveTo(lx, 17); ctx.lineTo(lx, 46); ctx.stroke();
         }
-        if (Math.random() < 0.25) {
-          globalParticles.push(new Particle(50 + Math.random() * 28, 88, (Math.random() - 0.5) * 0.5, -1.2, 6, 20, 2));
-        }
 
       } else if (arena.id === 'tokyo') {
         // Tokyo Neon Cyber Dome: Scrolling kanji/LED ticker
@@ -4963,11 +5078,10 @@
       ctx.strokeRect(4, 117, 34, 5);
       printPico('SP', 40, 117, p1.superMeter >= 100 ? 10 : 7, 1);
 
-      // Center Super Status Indicator
+      // Center Super Status Indicator (Placed cleanly between gauges)
       if (p1.superMeter >= 100 || p2.superMeter >= 100) {
-        printPicoCenter('SUPER READY', 117, 8, 1, true);
+        printPicoCenter('READY', 117, 8, 1, true);
       }
-
       // P2 Super Gauge
       const p2SuperW = Math.floor(34 * (p2.superMeter / 100));
       ctx.fillStyle = getPalColor(1);
@@ -5357,16 +5471,7 @@
           if (dpadUp) { shopSelectedIdx = (shopSelectedIdx + 5) % 6; gpNavDebounce = 12; play808Sfx('nav'); }
           if (dpadDown) { shopSelectedIdx = (shopSelectedIdx + 1) % 6; gpNavDebounce = 12; play808Sfx('nav'); }
           if (btnA) {
-            if (shopSelectedIdx === 5) {
-              advanceCampaignStage(); appState = 'LADDER_BRACKET'; play808Sfx('confirm');
-              if (campaignState.purse >= cost) { campaignState.purse -= cost; campaignState.upgrades.pwr++; saveCampaign(); play808Sfx('fuse'); }
-            } else if (shopSelectedIdx === 1 && campaignState.upgrades.def < 3) {
-              const cost = CAMPAIGN_UPGRADE_TIERS.def[campaignState.upgrades.def].cost;
-              if (campaignState.purse >= cost) { campaignState.purse -= cost; campaignState.upgrades.def++; saveCampaign(); play808Sfx('fuse'); }
-            } else if (shopSelectedIdx === 2 && campaignState.upgrades.spd < 3) {
-              const cost = CAMPAIGN_UPGRADE_TIERS.spd[campaignState.upgrades.spd].cost;
-              if (campaignState.purse >= cost) { campaignState.purse -= cost; campaignState.upgrades.spd++; saveCampaign(); play808Sfx('fuse'); }
-            }
+            buyShopItem(shopSelectedIdx);
           }
         }
       }
@@ -5486,31 +5591,6 @@
 
       p1.update();
       p2.update();
-
-      for (let i = 0; i < MAX_PARTICLES; i++) {
-        const p = particlePool[i];
-        if (p.active) {
-          p.x += p.vx;
-          p.y += p.vy;
-          p.vy += 0.12;
-          p.life--;
-          if (p.life <= 0) p.active = false;
-        }
-      }
-
-      for (let i = 0; i < MAX_FLOATING_TEXTS; i++) {
-        const t = floatingTextPool[i];
-        if (t.active) {
-          t.y -= 0.35;
-          t.life--;
-          if (t.life <= 0) t.active = false;
-        }
-      }
-    }
-    function isStartKey(k) {
-      if (!k) return false;
-      const key = String(k).toLowerCase();
-      return key === 'x' || key === 'z' || key === 'c' || key === 'enter' || key === ' ' || key === 'space';
     }
 
     window.addEventListener('keydown', (e) => {
@@ -5583,28 +5663,10 @@
         return;
       }
       if (appState === 'LADDER_SHOP') {
-        if (e.key === 'ArrowUp') shopSelectedIdx = (shopSelectedIdx + 5) % 6;
-        if (e.key === 'ArrowDown') shopSelectedIdx = (shopSelectedIdx + 1) % 6;
+        if (e.key === 'ArrowUp') { shopSelectedIdx = (shopSelectedIdx + 5) % 6; play808Sfx('nav'); }
+        if (e.key === 'ArrowDown') { shopSelectedIdx = (shopSelectedIdx + 1) % 6; play808Sfx('nav'); }
         if (isStartKey(e.key)) {
-          if (shopSelectedIdx === 5) {
-            // Advance to next stage!
-            advanceCampaignStage();
-            appState = 'LADDER_BRACKET';
-            play808Sfx('confirm');
-          } else if (shopSelectedIdx === 0 && campaignState.upgrades.pwr < 3) {
-            const cost = CAMPAIGN_UPGRADE_TIERS.pwr[campaignState.upgrades.pwr].cost;
-            if (campaignState.purse >= cost) { campaignState.purse -= cost; campaignState.upgrades.pwr++; saveCampaign(); play808Sfx('fuse'); }
-          } else if (shopSelectedIdx === 1 && campaignState.upgrades.def < 3) {
-            const cost = CAMPAIGN_UPGRADE_TIERS.def[campaignState.upgrades.def].cost;
-            if (campaignState.purse >= cost) { campaignState.purse -= cost; campaignState.upgrades.def++; saveCampaign(); play808Sfx('fuse'); }
-          } else if (shopSelectedIdx === 2 && campaignState.upgrades.spd < 3) {
-            const cost = CAMPAIGN_UPGRADE_TIERS.spd[campaignState.upgrades.spd].cost;
-            if (campaignState.purse >= cost) { campaignState.purse -= cost; campaignState.upgrades.spd++; saveCampaign(); play808Sfx('fuse'); }
-          } else if (shopSelectedIdx === 3 && !campaignState.upgrades.diamondSeed) {
-            if (campaignState.purse >= 1500) { campaignState.purse -= 1500; campaignState.upgrades.diamondSeed = true; saveCampaign(); play808Sfx('fuse'); }
-          } else if (shopSelectedIdx === 4 && !campaignState.upgrades.superRush) {
-            if (campaignState.purse >= 1200) { campaignState.purse -= 1200; campaignState.upgrades.superRush = true; saveCampaign(); play808Sfx('fuse'); }
-          }
+          buyShopItem(shopSelectedIdx);
         }
         return;
       }
@@ -5829,11 +5891,12 @@
           play808Sfx('confirm');
         } else {
           victoryCutscenePhase = 0;
+          shopSelectedIdx = 5; // Default cursor to >> NEXT BOUT <<
           appState = 'LADDER_SHOP';
           play808Sfx('confirm');
         }
-      } else if (appState === 'STAGE_INTRO') {
-        startMatch();
+      } else if (appState === 'LADDER_SHOP') {
+        buyShopItem(shopSelectedIdx);
       } else if (appState === 'VICTORY_END') {
         campaignState.active = false;
         appState = 'TITLE';
@@ -5872,18 +5935,18 @@
         } else {
           play808Sfx('nav');
         }
-      } else if (appState === 'LADDER_BRACKET') {
-        appState = 'STAGE_INTRO';
-        play808Sfx('confirm');
       } else if (appState === 'STAGE_VICTORY_CUTSCENE') {
         if (victoryCutscenePhase === 0) {
           victoryCutscenePhase = 1;
           play808Sfx('confirm');
         } else {
           victoryCutscenePhase = 0;
+          shopSelectedIdx = 5; // Default cursor to >> NEXT BOUT <<
           appState = 'LADDER_SHOP';
           play808Sfx('confirm');
         }
+      } else if (appState === 'LADDER_SHOP') {
+        buyShopItem(shopSelectedIdx);
       } else if (appState === 'STAGE_INTRO') {
         startMatch();
       } else if (appState === 'VICTORY_END') {
@@ -5930,18 +5993,18 @@
 
     bindBtn('btnStart', () => {
       if (appState === 'TITLE') { appState = 'MODE_SELECT'; play808Sfx('confirm'); }
-      else if (appState === 'MODE_SELECT') {
-        if (selectedModeIdx === 0) {
-          const saved = loadCampaign();
-          if (saved && typeof saved.stageIdx === 'number' && saved.stageIdx > 0 && saved.stageIdx < CAMPAIGN_STAGES.length - 1) {
-            campaignState = saved;
+        if (appState === 'STAGE_VICTORY_CUTSCENE') {
+          if (victoryCutscenePhase === 0) {
+            victoryCutscenePhase = 1;
+            play808Sfx('confirm');
           } else {
-            campaignState = { active: true, stageIdx: 0, clearedStages: [false, false, false, false, false, false, false], purse: 0, upgrades: { pwr: 0, def: 0, spd: 0, diamondSeed: false, superRush: false }, continues: 3, totalScore: 0, startTime: Date.now(), totalMatchesPlayed: 0 };
-            saveCampaign();
+            victoryCutscenePhase = 0;
+            shopSelectedIdx = 5; // Default cursor to >> NEXT BOUT <<
+            appState = 'LADDER_SHOP';
+            play808Sfx('confirm');
           }
+          return;
         }
-        appState = 'CHAR_SELECT'; p1Locked = false; p2Locked = false; play808Sfx('confirm');
-      }
       else if (appState === 'CHAR_SELECT') {
         if (isFighterUnlocked(ROSTER[p1SelectIdx].id)) {
           p1Locked = true; if (selectedModeIdx !== 2) p2Locked = true; play808Sfx('confirm');
@@ -6044,30 +6107,11 @@
           return;
         }
         if (appState === 'LADDER_SHOP') {
-          // Check if an upgrade item was clicked (6 rows at Y=22 + idx*15)
           for (let s = 0; s < 6; s++) {
             const sy = 22 + s * 15;
             if (clickY >= sy && clickY <= sy + 13 && clickX >= 6 && clickX <= 122) {
               shopSelectedIdx = s;
-              if (s === 5) {
-                // Next Bout!
-                advanceCampaignStage();
-                appState = 'LADDER_BRACKET';
-                play808Sfx('confirm');
-              } else if (s === 0 && campaignState.upgrades.pwr < 3) {
-                const cost = CAMPAIGN_UPGRADE_TIERS.pwr[campaignState.upgrades.pwr].cost;
-                if (campaignState.purse >= cost) { campaignState.purse -= cost; campaignState.upgrades.pwr++; saveCampaign(); play808Sfx('fuse'); }
-              } else if (s === 1 && campaignState.upgrades.def < 3) {
-                const cost = CAMPAIGN_UPGRADE_TIERS.def[campaignState.upgrades.def].cost;
-                if (campaignState.purse >= cost) { campaignState.purse -= cost; campaignState.upgrades.def++; saveCampaign(); play808Sfx('fuse'); }
-              } else if (s === 2 && campaignState.upgrades.spd < 3) {
-                const cost = CAMPAIGN_UPGRADE_TIERS.spd[campaignState.upgrades.spd].cost;
-                if (campaignState.purse >= cost) { campaignState.purse -= cost; campaignState.upgrades.spd++; saveCampaign(); play808Sfx('fuse'); }
-              } else if (s === 3 && !campaignState.upgrades.diamondSeed) {
-                if (campaignState.purse >= 1500) { campaignState.purse -= 1500; campaignState.upgrades.diamondSeed = true; saveCampaign(); play808Sfx('fuse'); }
-              } else if (s === 4 && !campaignState.upgrades.superRush) {
-                if (campaignState.purse >= 1200) { campaignState.purse -= 1200; campaignState.upgrades.superRush = true; saveCampaign(); play808Sfx('fuse'); }
-              }
+              buyShopItem(s);
               return;
             }
           }
@@ -6199,6 +6243,7 @@
     window.unlockedFighters = unlockedFighters;
     window.unlockFighter = unlockFighter;
     window.isFighterUnlocked = isFighterUnlocked;
+    window.buyShopItem = buyShopItem;
 
     requestAnimationFrame((time) => { lastLoopTime = time; gameLoop(time); });
   </script>
