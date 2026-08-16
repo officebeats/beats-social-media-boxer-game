@@ -1,6 +1,6 @@
 # CRASH OUT: RING RUSH — PICO-8 PUZZLE BOXING
 
-**Version:** `v2.6.0` (Maximized Button Touch Targets & Dedicated Knockdown Pause Release)
+**Version:** `v2.7.0` (Pocket Taco Bluetooth Mobile Controller & Tournament Ladder Release)
 
 ![Title Screen](assets/pico8_title.jpg)
 
@@ -8,7 +8,7 @@
 
 ---
 
-## 🎮 Play Live (v2.6.0)
+## 🎮 Play Live (v2.7.0)
 
 - ⚡ **Play Live in Browser (GitHub Pages)**: **[officebeats.github.io/beats-social-media-boxer-game](https://officebeats.github.io/beats-social-media-boxer-game/)**
 - 🕹️ **Native PICO-8 Cartridge**: Load [`crash_out.p8`](crash_out.p8) directly inside PICO-8 using `pico8 -run crash_out.p8`.
@@ -23,15 +23,11 @@
 
 ---
 
-## 🌟 New in v2.6.0
-- 🕹️ **Maximized Touch Controls**:
-  - **Enlarged Action Buttons**: Increased A & B button diameters to **60px** ($76\times 76\text{px}$ touch target with housing well) for effortless mobile tapping.
-  - **Expanded D-Pad**: Increased D-Pad arm dimensions to **46px** ($144\times 144\text{px}$ housing well).
-- ⏸️ **Dedicated Knockdown Countdown Pause**: Falling blocks, gravity, and piece spawning are completely paused during the referee 10-count so player attention is 100% focused on mashing to get back up.
-- 🥊 **Fixed Single-Player Stage Match Start**: Fixed a bug where pressing A or X in `STAGE_INTRO` skipped the fight; matches now start immediately against the designated stage opponent.
-- 🕹️ **Ultra-Realistic 3D Molded Game Boy Buttons**: Cylindrical housing wells, 3D convex tactile buttons with 5px depression physics, and molded D-Pad center dish.
-- 🖥️ **Maximized PICO-8 Screen Size**: Slimmed down bezel margins to expand the 1:1 PICO-8 canvas up to **320×320px in portrait** and **420×420px in landscape**.
-- 🌮 **Pocket Taco & Horizontal Clamp Controller Support**: Native HTML5 Gamepad API driver automatically detects and maps Pocket Taco, Backbone One, Razer Kishi, GameSir, and all standard Bluetooth/USB gamepads.
+## 🌟 New in v2.7.0
+- 🌮 **Pocket Taco Bluetooth Controller Support**: Seamless support for compact Bluetooth mobile controllers in portrait orientation, featuring automatic connection detection, power LED indicator (`POWER • TACO BT`), and dual Gamepad API + Keyboard HID mapping for D-Pad, A/B/X/Y, triggers, and knockdown mashing.
+- 🏆 **Verified 7-Stage Tournament Ladder Campaign (28–35 Min)**: Full tournament progression across all 7 stages with pre-fight trash talk cutscenes, Post-Fight Press Conference victory interviews, and Trainer Gym Shop upgrades.
+- ⏸️ **Dedicated Knockdown Countdown Pause**: Falling blocks and piece spawning pause during the referee 10-count so player focus is 100% on mashing to get back up.
+- 🕹️ **Maximized Touch Controls & 12 GBA Skins**: Enlarged 60px action buttons, 46px D-pad arms, 3D molded housing wells, and real-time skin switching across all 12 GBA console themes.
 - 🎨 **12 Dynamic GBA Handheld Console Skins**: Tap the top-bar **\`🎨 SKIN\`** button at any time to instantly cycle through 12 authentic hardware themes:
   1. **Classic Indigo** (2001 Original GBA Violet & Burgundy)
   2. **Championship Gold** (TMT / About Billions Luxury SP)

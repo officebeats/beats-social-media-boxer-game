@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>CRASH OUT: RING RUSH (v2.6.0) — PICO-8 Native Transparent Boxing</title>
+  <title>CRASH OUT: RING RUSH (v2.7.0) — PICO-8 Native Transparent Boxing</title>
   <style>
     :root {
       --pico-black: #000000;
@@ -3125,11 +3125,11 @@
       },
       {
         stageNum: 4,
-        fighterId: 'walid',
+        fighterId: 'bang',
         arenaId: 'gymBroner',
-        name: 'CO-HOST RIVALRY',
+        name: 'COACH BANG GYM BRAWL',
         location: 'CINCINNATI, OH (PROBLEM GYM)',
-        dialogue: { opp: "DEEN AIN'T HERE TO SAVE YOU!", player: "ABOUT BILLIONS. TIME TO WORK." },
+        dialogue: { opp: "WORK THE BODY! TIME FOR WAREHOUSE DISCIPLINE.", player: "ABOUT BILLIONS! TIME TO WORK." },
         aiConfig: { dropInterval: 30, aiTimerInterval: 12, mistakeRate: 0.15, powerGemFocus: 0.65 },
         purse: 2500
       },
@@ -3173,7 +3173,7 @@
       superRush: { cost: 1200, label: 'SUPER RUSH', desc: '+30% FASTER SUPER CHARGE' }
     };
 
-    let campaignState = {
+    var campaignState = {
       active: false,
       stageIdx: 0,
       purse: 0,
@@ -3183,10 +3183,11 @@
       startTime: 0,
       totalMatchesPlayed: 0
     };
+    window.campaignState = campaignState;
 
     function saveCampaign() {
       try {
-        localStorage.setItem('ringrush_campaign', JSON.stringify(campaignState));
+        localStorage.setItem('ringrush_campaign', JSON.stringify(window.campaignState || campaignState));
       } catch(e) {}
     }
 
@@ -4467,11 +4468,14 @@
     function startMatch() {
       switchMusicTrack();
 
+      const f1 = ROSTER[p1SelectIdx] || ROSTER[0];
+
       if (selectedModeIdx === 0) {
         // Campaign Mode (30 Min Road to Gold)
         campaignState.active = true;
         const st = CAMPAIGN_STAGES[campaignState.stageIdx] || CAMPAIGN_STAGES[0];
-        const f2Idx = ROSTER.findIndex(r => r.id === st.fighterId);
+        const oppId = (st.fighterId === f1.id) ? (f1.id === 'broner' ? 'deen' : 'broner') : st.fighterId;
+        const f2Idx = ROSTER.findIndex(r => r.id === oppId);
         p2SelectIdx = (f2Idx >= 0) ? f2Idx : 1;
         const arenaIdx = ARENAS.findIndex(a => a.id === st.arenaId);
         selectedArenaIdx = (arenaIdx >= 0) ? arenaIdx : 0;
@@ -4491,9 +4495,7 @@
       knockdownsP2 = 0;
       knockdownData = null;
 
-      const f1 = ROSTER[p1SelectIdx];
-      const f2 = ROSTER[p2SelectIdx];
-
+      const f2 = ROSTER[p2SelectIdx] || ROSTER[1];
       p1.fighterId = f1.id;
       p2.fighterId = f2.id;
       p1.name = f1.name;
