@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>CRASH OUT: RING RUSH (v3.1.0) — PICO-8 Native Transparent Boxing</title>
+  <title>CRASH OUT: RING RUSH (v3.2.0) — PICO-8 Native Transparent Boxing</title>
   <style>
     :root {
       --pico-black: #000000;
@@ -122,7 +122,7 @@
       flex-direction: column;
       align-items: center;
       justify-content: space-between;
-      padding: 6px 12px 10px 12px;
+      padding: 4px 6px 8px 6px;
       overflow: hidden;
     }
 
@@ -189,9 +189,9 @@
     .gba-screen-bezel {
       width: 100%;
       background: radial-gradient(circle at center, var(--gba-bezel) 0%, #0c0d10 100%);
-      border-radius: 16px;
-      padding: 4px 8px 6px 8px;
-      border: 3px solid #060608;
+      border-radius: 10px;
+      padding: 2px 4px 4px 4px;
+      border: 2px solid #060608;
       box-shadow: inset 0px 0px 16px rgba(0, 0, 0, 0.98), 0px 4px 12px rgba(0, 0, 0, 0.6);
       display: flex;
       flex-direction: column;
@@ -246,10 +246,10 @@
       box-shadow: 0px 1px 2px #000000;
     }
 
-    /* 🖥️ EDGE-MAXIMIZED 1:1 PICO-8 CANVAS */
+    /* 🖥️ EDGE-TO-EDGE MAXIMIZED 1:1 PICO-8 CANVAS */
     canvas#picoCanvas {
       width: 100%;
-      max-width: min(88vw, 320px);
+      max-width: min(97vw, 380px);
       aspect-ratio: 1 / 1;
       image-rendering: pixelated;
       image-rendering: crisp-edges;
@@ -279,10 +279,10 @@
       padding: 6px 4px 2px 4px;
     }
 
-    /* 3D RECESSED D-PAD HOUSING WELL (+25% LARGER) */
+    /* 3D RECESSED D-PAD HOUSING WELL (+10% LARGER) */
     .dpad-well {
-      width: 172px;
-      height: 172px;
+      width: 190px;
+      height: 190px;
       border-radius: 50%;
       background: radial-gradient(circle at 50% 50%, rgba(0,0,0,0.60) 0%, rgba(0,0,0,0.30) 100%);
       box-shadow: inset 0px 5px 10px rgba(0,0,0,0.95), 0px 2px 2px rgba(255,255,255,0.25);
@@ -291,11 +291,11 @@
       justify-content: center;
     }
 
-    /* 3D MOLDED GBA CROSS D-PAD WITH EMBOSSED ARROWS (+25% LARGER) */
+    /* 3D MOLDED GBA CROSS D-PAD WITH EMBOSSED ARROWS (+10% LARGER) */
     .gba-dpad {
       display: grid;
-      grid-template-columns: repeat(3, 56px);
-      grid-template-rows: repeat(3, 56px);
+      grid-template-columns: repeat(3, 62px);
+      grid-template-rows: repeat(3, 62px);
       gap: 0px;
       filter: drop-shadow(0px 6px 8px rgba(0, 0, 0, 0.90));
     }
@@ -344,15 +344,15 @@
       filter: drop-shadow(0px 6px 8px rgba(0, 0, 0, 0.85));
     }
 
-    /* 3D CONVEX PHYSICAL ACTION BUTTONS (+25% LARGER) */
+    /* 3D CONVEX PHYSICAL ACTION BUTTONS (+10% LARGER) */
     .btn-gba-action {
-      width: 74px;
-      height: 74px;
+      width: 82px;
+      height: 82px;
       border-radius: 50%;
       background: radial-gradient(circle at 35% 25%, rgba(255,255,255,0.48) 0%, transparent 45%), radial-gradient(circle at 50% 50%, var(--gba-btn) 0%, var(--gba-btn-shadow) 100%);
       border: 2px solid rgba(255, 255, 255, 0.32);
       color: var(--gba-text);
-      font-size: 18px;
+      font-size: 20px;
       font-weight: 900;
       display: flex;
       flex-direction: column;
@@ -368,6 +368,12 @@
       box-shadow: 0px 1px 0px var(--gba-btn-shadow), 0px 2px 4px rgba(0, 0, 0, 0.8), inset 0px 1px 3px rgba(0, 0, 0, 0.8);
     }
 
+    .btn-gba-action span {
+      font-size: 8px;
+      font-weight: 900;
+      letter-spacing: 0.5px;
+      margin-top: 1px;
+    }
     .btn-gba-action span {
       font-size: 7px;
       letter-spacing: 0.5px;
@@ -391,8 +397,8 @@
     }
 
     .btn-pill {
-      width: 52px;
-      height: 15px;
+      width: 58px;
+      height: 18px;
       background: linear-gradient(180deg, var(--gba-dpad) 0%, #121216 100%);
       border: 1px solid rgba(255, 255, 255, 0.18);
       border-radius: 6px;

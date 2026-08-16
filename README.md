@@ -1,6 +1,6 @@
 # CRASH OUT: RING RUSH — PICO-8 PUZZLE BOXING
 
-**Version:** `v3.1.0` (Native 48px Sprite Pre-Scaling, Crowd Cache & 60 FPS Accumulator Release)
+**Version:** `v3.2.0` (Edge-to-Edge Screen Maximization & +10% Larger Touch Buttons Release)
 
 ![Title Screen](assets/pico8_title.jpg)
 
@@ -8,7 +8,7 @@
 
 ---
 
-## 🎮 Play Live (v3.1.0)
+## 🎮 Play Live (v3.2.0)
 
 - ⚡ **Play Live in Browser (GitHub Pages)**: **[officebeats.github.io/beats-social-media-boxer-game](https://officebeats.github.io/beats-social-media-boxer-game/)**
 - 🕹️ **Native PICO-8 Cartridge**: Load [`crash_out.p8`](crash_out.p8) directly inside PICO-8 using `pico8 -run crash_out.p8`.
@@ -23,15 +23,19 @@
 
 ---
 
-## 🌟 New in v3.1.0
-- 🚀 **Native 48×48px Sprite Pre-Scaling (99.8% Texture Bandwidth Reduction)**:
-  - Eliminated on-the-fly 1024×1024 bilinear downsampling on every frame in `drawBoxer`. All idle and punch sprites are pre-rendered into native 48×48 canvases on load, reducing texture copy overhead from 1,048,576 pixels to 2,304 pixels per blit.
-- ⚡ **Cached Crowd Dither Pattern**: Replaced 345 individual `fillRect(1,1)` draw calls per frame with a single static cached offscreen canvas blit, eliminating 20,000 draw calls per second.
-- ⏱️ **Fixed 60 FPS Timestep Accumulator**: Implemented `performance.now()` delta-time accumulation in `gameLoop()`, ensuring fluid 60 FPS animation on 60Hz displays and 120Hz ProMotion screens with zero micro-stutter.
-- 🥊 **Punch-Out Style 2-Phase Victory Cutscene & Ranking Ladder Climb**: Immediately upon knocking out an opponent, view the in-ring press conference followed by the vertical ranking ladder climb with flashing red **`K.O.`** stamp and purse breakdown.
-- 🎙️ **Authentic 2026 Kick Warehouse Stream Catchphrases**: Real stream lines across all 7 stages (*"ABOUT BILLIONS!"*, *"LIGHTNING STRAIGHT!"*, *"CRASHING OUT!"*, *"777 IN THE CHAT!"*).
-- 🕹️ **25% Larger Touch Control Buttons**: 74px action buttons and 56px D-pad arms with 3D cylindrical housing wells and tactile haptics on every press.
-- 🌮 **Pocket Taco Bluetooth Controller Support**: Seamless support for compact Bluetooth mobile controllers in portrait orientation with Gamepad API & Keyboard HID mapping.
+## 🌟 New in v3.2.0
+- 🖥️ **Edge-to-Edge Screen Maximization**:
+  - Expanded the PICO-8 canvas to **$360\times 360\text{px}$** in mobile portrait, stretching edge-to-edge across the handheld chassis with minimal border padding.
+  - In landscape / Pocket Taco mode, canvas expands up to **$480\times 480\text{px}$** at maximum vertical viewport height.
+- 🕹️ **Additional +10% Larger Touch Controls**:
+  - **Oversized Action Buttons**: Expanded A & B button diameters from 74px $\rightarrow$ **82px** ($103\times 103\text{px}$ touch target with housing well).
+  - **Maximized D-Pad**: Expanded directional arms from 56px $\rightarrow$ **62px** ($186\times 186\text{px}$ footprint, $190\text{px}$ housing well).
+  - **Enlarged Start & Select Pills**: Scaled from 52×15px $\rightarrow$ **58×18px**.
+- 🚀 **Native 48×48px Sprite Pre-Scaling (99.8% Texture Bandwidth Reduction)**: Pre-rendered native sprite canvases for zero-downsampling 60 FPS combat.
+- ⚡ **Cached Crowd Dither Pattern**: Replaced 345 individual draw calls per frame with 1 static cached blit.
+- ⏱️ **Fixed 60 FPS Timestep Accumulator**: Smooth 60 FPS animation across all 60Hz and 120Hz displays.
+- 🥊 **Punch-Out Style 2-Phase Victory Cutscene & Ranking Ladder Climb**: Post-fight press conference followed by tournament ladder climb with red `K.O.` stamp.
+- 🎙️ **Authentic 2026 Kick Warehouse Stream Catchphrases**: Real stream lines across all 7 stages (*"ABOUT BILLIONS!"*, *"LIGHTNING STRAIGHT!"*, *"CRASHING OUT!"*).
   5. **Arctic White** (Clean Snow White & Slate Blue)
   6. **Flame Red** (SP Classic Gloss Red & Gold)
   7. **Cobalt Blue** (Deep Metallic Blue & Yellow)
