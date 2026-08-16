@@ -5128,8 +5128,8 @@
         p2SelectIdx = (f2Idx >= 0) ? f2Idx : 1;
         const arenaIdx = ARENAS.findIndex(a => a.id === st.arenaId);
         selectedArenaIdx = (arenaIdx >= 0) ? arenaIdx : 0;
-      } else if (selectedModeIdx === 1) {
-        // Quick 1P vs CPU
+      } else if (selectedModeIdx === 1 || selectedModeIdx === 3) {
+        // Quick 1P vs CPU or CPU Watch Demo
         campaignState.active = false;
         do { p2SelectIdx = Math.floor(Math.random() * ROSTER.length); }
         while (p2SelectIdx === p1SelectIdx);
@@ -5289,7 +5289,7 @@
         }
         else if (appState === 'CHAR_SELECT') {
           if (isFighterUnlocked(ROSTER[p1SelectIdx].id)) {
-            p1Locked = true; if (selectedModeIdx !== 1) p2Locked = true; play808Sfx('confirm');
+            p1Locked = true; if (selectedModeIdx !== 2) p2Locked = true; play808Sfx('confirm');
           } else {
             play808Sfx('nav');
           }
@@ -5330,16 +5330,23 @@
             }
             appState = 'CHAR_SELECT';
             p1Locked = false; p2Locked = false;
-            p1SelectIdx = 0; p2SelectIdx = 1;
+            p1SelectIdx = isFighterUnlocked('deen') ? 1 : 0;
+            p2SelectIdx = 0;
             play808Sfx('confirm');
           }
+        } else if (appState === 'CHAR_SELECT') {
+          if (dpadLeft) { p1SelectIdx = (p1SelectIdx + 13) % 14; gpNavDebounce = 12; play808Sfx('nav'); }
+          if (dpadRight) { p1SelectIdx = (p1SelectIdx + 1) % 14; gpNavDebounce = 12; play808Sfx('nav'); }
+          if (dpadUp || dpadDown) { p1SelectIdx = (p1SelectIdx + 7) % 14; gpNavDebounce = 12; play808Sfx('nav'); }
+          if (btnY) { p1SkinIdx = (p1SkinIdx === 0 ? 1 : 0); gpNavDebounce = 12; play808Sfx('nav'); }
           if (btnA) {
             if (isFighterUnlocked(ROSTER[p1SelectIdx].id)) {
-              p1Locked = true; if (selectedModeIdx !== 1) p2Locked = true; play808Sfx('confirm');
+              p1Locked = true; if (selectedModeIdx !== 2) p2Locked = true; play808Sfx('confirm');
             } else {
               play808Sfx('nav');
             }
           }
+          if (btnX) { bioFighterIdx = p1SelectIdx; appState = 'FIGHTER_BIO'; play808Sfx('nav'); }
         } else if (appState === 'ARENA_SELECT') {
           if (dpadLeft) { selectedArenaIdx = (selectedArenaIdx + 8) % 9; gpNavDebounce = 12; play808Sfx('nav'); }
           if (dpadRight) { selectedArenaIdx = (selectedArenaIdx + 1) % 9; gpNavDebounce = 12; play808Sfx('nav'); }
@@ -5636,7 +5643,7 @@
         }
 
         // P2 cursor controls — only in 2P Local mode
-        if (selectedModeIdx === 1 && !p2Locked) {
+        if (selectedModeIdx === 2 && !p2Locked) {
           const prev = p2SelectIdx;
           if (e.key === 'a' || e.key === 'A') p2SelectIdx = (p2SelectIdx + 13) % 14;
           if (e.key === 'd' || e.key === 'D') p2SelectIdx = (p2SelectIdx + 1) % 14;
@@ -5644,7 +5651,7 @@
           if (e.key === 's' || e.key === 'S') p2SelectIdx = (p2SelectIdx + 7) % 14;
           if (p2SelectIdx !== prev) play808Sfx('nav');
         }
-        if (selectedModeIdx === 1 && !p2Locked && (e.key === 'f' || e.key === 'F')) {
+        if (selectedModeIdx === 2 && !p2Locked && (e.key === 'f' || e.key === 'F')) {
           p2Locked = true;
           play808Sfx('confirm');
         }
@@ -5663,7 +5670,7 @@
           if (isFighterUnlocked(ROSTER[p1SelectIdx].id)) {
             p1Locked = true;
             play808Sfx('confirm');
-            if (selectedModeIdx !== 1) {
+            if (selectedModeIdx !== 2) {
               p2Locked = true;
             }
           } else {
@@ -5772,7 +5779,7 @@
     };
 
     bindBtn('btnLeft', () => { triggerHaptic(18);
-      if (appState === 'MODE_SELECT') selectedModeIdx = (selectedModeIdx + 2) % 3;
+      if (appState === 'MODE_SELECT') selectedModeIdx = (selectedModeIdx + 3) % 4;
       else if (appState === 'CHAR_SELECT' && !p1Locked) { p1SelectIdx = (p1SelectIdx + 13) % 14; play808Sfx('nav'); }
       else if (appState === 'FIGHTER_BIO') { bioFighterIdx = (bioFighterIdx + 13) % 14; play808Sfx('nav'); }
       else if (appState === 'ARENA_SELECT') { selectedArenaIdx = (selectedArenaIdx + 8) % 9; play808Sfx('nav'); }
@@ -5780,7 +5787,7 @@
     });
 
     bindBtn('btnRight', () => { triggerHaptic(18);
-      if (appState === 'MODE_SELECT') selectedModeIdx = (selectedModeIdx + 1) % 3;
+      if (appState === 'MODE_SELECT') selectedModeIdx = (selectedModeIdx + 1) % 4;
       else if (appState === 'CHAR_SELECT' && !p1Locked) { p1SelectIdx = (p1SelectIdx + 1) % 14; play808Sfx('nav'); }
       else if (appState === 'FIGHTER_BIO') { bioFighterIdx = (bioFighterIdx + 1) % 14; play808Sfx('nav'); }
       else if (appState === 'ARENA_SELECT') { selectedArenaIdx = (selectedArenaIdx + 1) % 9; play808Sfx('nav'); }
@@ -5788,19 +5795,18 @@
     });
 
     bindBtn('btnDown', () => { triggerHaptic(18);
-      if (appState === 'MODE_SELECT') selectedModeIdx = (selectedModeIdx + 1) % 3;
+      if (appState === 'MODE_SELECT') selectedModeIdx = (selectedModeIdx + 1) % 4;
       else if (appState === 'CHAR_SELECT' && !p1Locked) { p1SelectIdx = (p1SelectIdx + 7) % 14; play808Sfx('nav'); }
       else if (appState === 'ARENA_SELECT') { selectedArenaIdx = (selectedArenaIdx + 3) % 9; play808Sfx('nav'); }
       else if (appState === 'PLAYING') p1.dropSoft();
     });
 
     bindBtn('btnUp', () => { triggerHaptic(18);
-      if (appState === 'MODE_SELECT') selectedModeIdx = (selectedModeIdx + 2) % 3;
+      if (appState === 'MODE_SELECT') selectedModeIdx = (selectedModeIdx + 3) % 4;
       else if (appState === 'CHAR_SELECT' && !p1Locked) { p1SelectIdx = (p1SelectIdx + 7) % 14; play808Sfx('nav'); }
       else if (appState === 'ARENA_SELECT') { selectedArenaIdx = (selectedArenaIdx + 6) % 9; play808Sfx('nav'); }
       else if (appState === 'PLAYING') p1.dropHard();
     });
-
     bindBtn('btnO', () => { triggerHaptic(18);
       if (appState === 'TITLE') {
         appState = 'MODE_SELECT';
@@ -5812,13 +5818,11 @@
       } else if (appState === 'CHAR_SELECT') {
         if (isFighterUnlocked(ROSTER[p1SelectIdx].id)) {
           p1Locked = true;
-          if (selectedModeIdx !== 1) p2Locked = true;
+          if (selectedModeIdx !== 2) p2Locked = true;
           play808Sfx('confirm');
         } else {
           play808Sfx('nav');
         }
-        appState = 'STAGE_INTRO';
-        play808Sfx('confirm');
       } else if (appState === 'STAGE_VICTORY_CUTSCENE') {
         if (victoryCutscenePhase === 0) {
           victoryCutscenePhase = 1;
@@ -5863,7 +5867,7 @@
       } else if (appState === 'CHAR_SELECT') {
         if (isFighterUnlocked(ROSTER[p1SelectIdx].id)) {
           p1Locked = true;
-          if (selectedModeIdx !== 1) p2Locked = true;
+          if (selectedModeIdx !== 2) p2Locked = true;
           play808Sfx('confirm');
         } else {
           play808Sfx('nav');
@@ -5940,7 +5944,7 @@
       }
       else if (appState === 'CHAR_SELECT') {
         if (isFighterUnlocked(ROSTER[p1SelectIdx].id)) {
-          p1Locked = true; if (selectedModeIdx !== 1) p2Locked = true; play808Sfx('confirm');
+          p1Locked = true; if (selectedModeIdx !== 2) p2Locked = true; play808Sfx('confirm');
         } else {
           play808Sfx('nav');
         }
@@ -6012,8 +6016,8 @@
           appState = 'CHAR_SELECT';
           p1Locked = false;
           p2Locked = false;
-          p1SelectIdx = 0;
-          p2SelectIdx = 1;
+          p1SelectIdx = isFighterUnlocked('deen') ? 1 : 0;
+          p2SelectIdx = 0;
           play808Sfx('confirm');
           return;
         }
@@ -6146,7 +6150,7 @@
           }
           if (isFighterUnlocked(ROSTER[p1SelectIdx].id)) {
             p1Locked = true;
-            if (selectedModeIdx !== 1) p2Locked = true;
+            if (selectedModeIdx !== 2) p2Locked = true;
             play808Sfx('confirm');
           } else {
             play808Sfx('nav');
