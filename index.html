@@ -2091,6 +2091,7 @@
     }
 
     // DYNAMIC COLOR-KEYING TRANSPARENCY HELPER
+    // DYNAMIC COLOR-KEYING TRANSPARENCY & AUTO-CROP BOUNDS HELPER
     function createTransparentCanvas(img) {
       const offCanvas = document.createElement('canvas');
       const w = img.naturalWidth || img.width || 22;
@@ -2105,20 +2106,42 @@
       // Sample top-left corner color
       const bgR = data[0], bgG = data[1], bgB = data[2];
 
-      for (let i = 0; i < data.length; i += 4) {
-        const r = data[i], g = data[i+1], b = data[i+2];
-        
-        // Background color distance
-        const dist = Math.sqrt(Math.pow(r - bgR, 2) + Math.pow(g - bgG, 2) + Math.pow(b - bgB, 2));
-        // Pure black background or white corner flash
-        const isBlack = (r < 18 && g < 18 && b < 18);
-        const isWhite = (r > 240 && g > 240 && b > 240);
+      let minX = w, maxX = 0, minY = h, maxY = 0;
+      let hasFg = false;
 
-        if (dist < 28 || isBlack || isWhite) {
-          data[i+3] = 0; // Alpha = 0 (100% transparent)
+      for (let y = 0; y < h; y++) {
+        for (let x = 0; x < w; x++) {
+          const idx = (y * w + x) * 4;
+          const r = data[idx], g = data[idx+1], b = data[idx+2];
+          
+          // Background color distance
+          const dist = Math.sqrt(Math.pow(r - bgR, 2) + Math.pow(g - bgG, 2) + Math.pow(b - bgB, 2));
+          // Pure black background or white corner flash
+          const isBlack = (r < 18 && g < 18 && b < 18);
+          const isWhite = (r > 240 && g > 240 && b > 240);
+
+          if (dist < 28 || isBlack || isWhite) {
+            data[idx+3] = 0; // Alpha = 0 (100% transparent)
+          } else {
+            hasFg = true;
+            if (x < minX) minX = x;
+            if (x > maxX) maxX = x;
+            if (y < minY) minY = y;
+            if (y > maxY) maxY = y;
+          }
         }
       }
       offCtx.putImageData(imgData, 0, 0);
+
+      offCanvas.bounds = hasFg ? {
+        xmin: minX,
+        xmax: maxX,
+        ymin: minY,
+        ymax: maxY,
+        w: maxX - minX + 1,
+        h: maxY - minY + 1
+      } : { xmin: 0, xmax: w - 1, ymin: 0, ymax: h - 1, w, h };
+
       return offCanvas;
     }
 
@@ -2160,6 +2183,7 @@
       const qw = w / 2;
       const qh = h / 2;
       const flips = PUNCH_FLIPS[id] || [];
+      const quadBounds = [];
 
       for (let q = 0; q < 4; q++) {
         const col = q % 2;
@@ -2177,7 +2201,32 @@
           nCtx.drawImage(rawCanvas, sx, sy, qw, qh, sx, sy, qw, qh);
         }
         nCtx.restore();
+
+        // Scan this quadrant's tight bounding box in normCanvas
+        const qImgData = nCtx.getImageData(sx, sy, qw, qh).data;
+        let qMinX = qw, qMaxX = 0, qMinY = qh, qMaxY = 0;
+        let qHasFg = false;
+        for (let y = 0; y < qh; y++) {
+          for (let x = 0; x < qw; x++) {
+            const idx = (y * qw + x) * 4;
+            if (qImgData[idx+3] > 0) {
+              qHasFg = true;
+              if (x < qMinX) qMinX = x;
+              if (x > qMaxX) qMaxX = x;
+              if (y < qMinY) qMinY = y;
+              if (y > qMaxY) qMaxY = y;
+            }
+          }
+        }
+        quadBounds.push(qHasFg ? {
+          sx: sx + qMinX,
+          sy: sy + qMinY,
+          w: qMaxX - qMinX + 1,
+          h: qMaxY - qMinY + 1
+        } : { sx, sy, w: qw, h: qh });
       }
+
+      normCanvas.quadBounds = quadBounds;
       return normCanvas;
     }
 
@@ -2364,22 +2413,31 @@
         ctx.filter = 'brightness(2.5) contrast(1.5)';
       }
 
-      // === DRAW SPRITE ANCHORED ON FEET AT GROUND PLANE ===
+      // === DRAW SPRITE ANCHORED ON FEET AT GROUND PLANE (Y=90) ===
       const idleCanvas = ROSTER_IDLE_CANVASES[fId] || (isP1 ? bronerIdleCanvas : deenIdleCanvas);
       const punchCanvas = ROSTER_PUNCH_CANVASES[fId] || (fId === 'deen' ? deenPunchCanvas : bronerPunchCanvas);
-      const dw = 40;
-      const dh = 40 * vertSquash;
-      const ddx = -20;
-      const ddy = -40 + vertShift; // Boots at Y=0 (groundY), head at Y=-40
 
-      if (usePunch && punchCanvas) {
-        const pw = punchCanvas.width / 2;
-        const ph = punchCanvas.height / 2;
-        const col = punchQuad % 2;
-        const row = Math.floor(punchQuad / 2);
-        ctx.drawImage(punchCanvas, col * pw, row * ph, pw, ph, ddx, ddy, dw, dh);
+      // Target height at native 128x128 PICO-8 scale (38px)
+      const targetH = 38 * vertSquash;
+
+      if (usePunch && punchCanvas && punchCanvas.quadBounds && punchCanvas.quadBounds[punchQuad]) {
+        const qb = punchCanvas.quadBounds[punchQuad];
+        const aspect = qb.w / qb.h;
+        const dh = targetH;
+        const dw = dh * aspect;
+        const ddx = -dw * 0.35; // Centered on body axis, reach extending forward
+        const ddy = -dh + vertShift; // Boots (ddy + dh) anchored directly at Y=0 (groundY=90)!
+
+        ctx.drawImage(punchCanvas, qb.sx, qb.sy, qb.w, qb.h, ddx, ddy, dw, dh);
       } else if (idleCanvas) {
-        ctx.drawImage(idleCanvas, 0, 0, idleCanvas.width, idleCanvas.height, ddx, ddy, dw, dh);
+        const b = idleCanvas.bounds || { xmin: 0, ymin: 0, w: idleCanvas.width, h: idleCanvas.height };
+        const aspect = b.w / b.h;
+        const dh = targetH;
+        const dw = dh * aspect;
+        const ddx = -dw / 2; // Horizontally centered on fighter axis
+        const ddy = -dh + vertShift; // Boots (ddy + dh) anchored directly on ring floor!
+
+        ctx.drawImage(idleCanvas, b.xmin, b.ymin, b.w, b.h, ddx, ddy, dw, dh);
       } else {
         ctx.fillStyle = isP1 ? '#8C4A27' : '#C58C5D';
         ctx.fillRect(-6, -34, 12, 34);
