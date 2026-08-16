@@ -1297,44 +1297,85 @@
     class BoxerIdleController {
       constructor(isP1) {
         this.isP1 = isP1;
-        this.actionState = 'SHOULDER_ROLL';
+        this.actionState = isP1 ? 'SHOULDER_ROLL' : 'SHUFFLE';
         this.frameIndex = 0;
-        this.timer = 0;
-        this.duration = 80;
+        this.timer = isP1 ? 0 : 42;
+        this.duration = isP1 ? 80 : 105;
+        // Independent continuous animation accumulator (Desynchronized baseline)
+        this.animTime = isP1 ? 0.0 : 19.5;
+        // Distinct, non-harmonic frame cycle intervals (P1: ~7.2 ticks, P2: ~9.1 ticks)
+        this.framePeriod = isP1 ? 7.2 : 9.1;
+        this.stutterPause = 0;
+        this.feintTimer = isP1 ? 55 : 120;
       }
 
-      update() {
+      update(fId = 'broner') {
         this.timer++;
+
+        // Archetype-Specific Athletic Cadence Speeds (Frames per tick multiplier):
+        // Speed brawlers: fast snappy cadence
+        // Power punchers: heavy grounded cadence
+        // Counter specialists: rhythmic relaxed cadence
+        let speedMult = 1.0;
+        if (fId === 'ryan' || fId === 'deen' || fId === 'n3on' || fId === 'sneako') {
+          speedMult = this.isP1 ? 1.15 : 1.08;
+        } else if (fId === 'rampage' || fId === 'bang' || fId === 'blueface' || fId === 'chrisean') {
+          speedMult = this.isP1 ? 0.88 : 0.82;
+        } else if (fId === 'abrown' || fId === 'adin' || fId === 'fousey') {
+          speedMult = this.isP1 ? 1.04 : 0.95;
+        } else {
+          // Broner, Ray J, Charleston
+          speedMult = this.isP1 ? 1.00 : 0.90;
+        }
+
+        // Organic non-linear breathing speed with sinusoidal frequency micro-jitter
+        const breathingJitter = Math.sin(this.timer * 0.05 + (this.isP1 ? 0 : 2.7)) * 0.07;
+        const step = (speedMult + breathingJitter) * (this.stutterPause > 0 ? 0.25 : 1.0);
+        this.animTime += step;
+
+        if (this.stutterPause > 0) {
+          this.stutterPause--;
+        }
+
+        // Random Organic Athletic Feint / Rhythm Resets (Occurs independently every ~3-5 seconds)
+        this.feintTimer--;
+        if (this.feintTimer <= 0) {
+          this.stutterPause = 8 + Math.floor(Math.random() * 12); // Momentary assessment pause
+          this.feintTimer = 130 + Math.floor(Math.random() * 150);
+        }
+
         if (this.timer >= this.duration) {
           this.timer = 0;
           const actions = ['SHOULDER_ROLL', 'DUCK', 'HIGH_BLOCK', 'SLIP', 'SHUFFLE'];
           this.actionState = actions[Math.floor(Math.random() * actions.length)];
-          this.duration = 80 + Math.floor(Math.random() * 90);
+          this.duration = 70 + Math.floor(Math.random() * 95);
         }
       }
 
       getFrameIndex() {
-        // Authentic Capcom 4-Frame Athletic Idle Bounce Cycle (7.5 FPS = 8 frames per tick at 60Hz)
-        // Frame 0: Neutral Athletic Guard | Frame 1: Elastic Knee Dip | Frame 2: Spring Extension | Frame 3: Glove Twitch
-        const phase = this.isP1 ? 0 : 4;
-        return Math.floor((globalFrameCount + phase) / 8) % 4;
+        // 100% Desynchronized Frame Index based on independent non-harmonic periods
+        return Math.floor(this.animTime / this.framePeriod) % 4;
       }
 
       getOffsets() {
         let dx = 0;
         let dy = 0;
-        const shuffleX = Math.sin(globalFrameCount * 0.04 + (this.isP1 ? 0 : 2.5)) * 1.0;
+        // Independent harmonic horizontal breathing and stance drift
+        const freq = this.isP1 ? 0.036 : 0.042;
+        const phaseOff = this.isP1 ? 0.0 : 2.75;
+        const shuffleX = Math.sin(this.animTime * freq + phaseOff) * 1.2;
         dx += shuffleX;
+
         const progress = Math.sin((this.timer / Math.max(1, this.duration)) * Math.PI);
 
         if (this.actionState === 'SHOULDER_ROLL') {
-          dx += (this.isP1 ? 2.0 : -2.0) * progress;
-          dy -= progress * 0.5;
+          dx += (this.isP1 ? 1.8 : -1.8) * progress;
+          dy -= progress * 0.4;
         } else if (this.actionState === 'SLIP') {
           const slipWave = Math.sin((this.timer / Math.max(1, this.duration)) * Math.PI * 2);
-          dx += (this.isP1 ? 2.5 : -2.5) * slipWave;
+          dx += (this.isP1 ? 2.2 : -2.2) * slipWave;
         } else if (this.actionState === 'DUCK') {
-          dy += progress * 1.5;
+          dy += progress * 1.4;
         }
 
         return { dx, dy };
@@ -3879,21 +3920,26 @@
       ctx.fillStyle = getPalColor(11);
       ctx.fillRect(18, 100, 92, 1);
 
-      // Dynamic Hero Boxer Exhibition (Adrien Broner vs Deen The Great in 4-frame idle animation)
-      const frameIdx = Math.floor(globalFrameCount / 8) % 4;
+      // Dynamic Hero Boxer Exhibition (Adrien Broner vs Deen The Great in Desynchronized 4-frame idle animation)
+      // Broner: Rhythmic 8-frame Philly shell cadence (0.105 speed) + shoulder sway
+      const bronerFrame = Math.floor(globalFrameCount * 0.105) % 4;
+      const bronerSway = Math.sin(globalFrameCount * 0.038) * 1.5;
       const bCanvas = ROSTER_IDLE_CANVASES['broner_0'] || ROSTER_IDLE_CANVASES['broner'] || bronerIdleCanvas;
       if (bCanvas) {
-        const srcX = (bCanvas.width === 192) ? frameIdx * 48 : 0;
+        const srcX = (bCanvas.width === 192) ? bronerFrame * 48 : 0;
         const srcW = (bCanvas.width === 192) ? 48 : bCanvas.width;
-        ctx.drawImage(bCanvas, srcX, 0, srcW, 48, 20, 56, 40, 44);
+        ctx.drawImage(bCanvas, srcX, 0, srcW, 48, 20 + Math.round(bronerSway), 56, 40, 44);
       }
 
+      // Deen The Great: Lightning 7-frame southpaw ball-of-feet cadence (0.142 speed) + lead hand flick
+      const deenFrame = Math.floor((globalFrameCount * 0.142) + 2.3) % 4;
+      const deenSway = Math.sin(globalFrameCount * 0.051 + 1.4) * 1.2;
       const dCanvas = ROSTER_IDLE_CANVASES['deen_0'] || ROSTER_IDLE_CANVASES['deen'] || deenIdleCanvas;
       if (dCanvas) {
         ctx.save();
-        ctx.translate(108, 56);
+        ctx.translate(108 + Math.round(deenSway), 56);
         ctx.scale(-1, 1);
-        const srcX = (dCanvas.width === 192) ? frameIdx * 48 : 0;
+        const srcX = (dCanvas.width === 192) ? deenFrame * 48 : 0;
         const srcW = (dCanvas.width === 192) ? 48 : dCanvas.width;
         ctx.drawImage(dCanvas, srcX, 0, srcW, 48, 0, 0, 40, 44);
         ctx.restore();
@@ -6081,8 +6127,10 @@
         }
       }
 
-      idleP1.update();
-      idleP2.update();
+      const f1Obj = ROSTER[p1SelectIdx];
+      const f2Obj = ROSTER[p2SelectIdx];
+      idleP1.update(f1Obj ? f1Obj.id : 'broner');
+      idleP2.update(f2Obj ? f2Obj.id : 'deen');
 
       p1.update();
       p2.update();
