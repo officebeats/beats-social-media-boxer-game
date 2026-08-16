@@ -1,6 +1,6 @@
 # CRASH OUT: RING RUSH — PICO-8 PUZZLE BOXING
 
-**Version:** `v3.2.0` (Edge-to-Edge Screen Maximization & +10% Larger Touch Buttons Release)
+**Version:** `v3.3.0` (Cutscene Text Bounds, Sprite Blit Fix & Clean UI Alignment Release)
 
 ![Title Screen](assets/pico8_title.jpg)
 
@@ -8,7 +8,7 @@
 
 ---
 
-## 🎮 Play Live (v3.2.0)
+## 🎮 Play Live (v3.3.0)
 
 - ⚡ **Play Live in Browser (GitHub Pages)**: **[officebeats.github.io/beats-social-media-boxer-game](https://officebeats.github.io/beats-social-media-boxer-game/)**
 - 🕹️ **Native PICO-8 Cartridge**: Load [`crash_out.p8`](crash_out.p8) directly inside PICO-8 using `pico8 -run crash_out.p8`.
@@ -23,14 +23,14 @@
 
 ---
 
-## 🌟 New in v3.2.0
-- 🖥️ **Edge-to-Edge Screen Maximization**:
-  - Expanded the PICO-8 canvas to **$360\times 360\text{px}$** in mobile portrait, stretching edge-to-edge across the handheld chassis with minimal border padding.
-  - In landscape / Pocket Taco mode, canvas expands up to **$480\times 480\text{px}$** at maximum vertical viewport height.
-- 🕹️ **Additional +10% Larger Touch Controls**:
-  - **Oversized Action Buttons**: Expanded A & B button diameters from 74px $\rightarrow$ **82px** ($103\times 103\text{px}$ touch target with housing well).
-  - **Maximized D-Pad**: Expanded directional arms from 56px $\rightarrow$ **62px** ($186\times 186\text{px}$ footprint, $190\text{px}$ housing well).
-  - **Enlarged Start & Select Pills**: Scaled from 52×15px $\rightarrow$ **58×18px**.
+## 🌟 New in v3.3.0
+- 🎨 **Fixed Cutscene Sprites & Zero Text Overlap**:
+  - **48px Sprite Direct Blitting**: Fixed `drawBoxerAvatar` to sample the native $48\times 48\text{px}$ sprite canvas directly, rendering both the standing winner and defeated opponent clearly on the cutscene screen.
+  - **Zero Text Truncation**: Shortened press conference header to **`PRESS CONFERENCE`** (16 chars, 79px), eliminating left/right edge cutoff on 128px viewports.
+  - **Zero Dialogue Overlap**: Expanded interview dialogue box to $Y=76..114$ with dynamic `nextY` layout, completely separating the post-fight quote from the stage purse earnings.
+  - **Clean GBA Select Pill**: Removed text string injection into `#btnMode`, preserving the clean 3D rubber GBA SELECT pill styling.
+- 🖥️ **Edge-to-Edge Screen Maximization**: Expanded PICO-8 canvas up to **360×360px** on mobile portrait ($97\text{vw}$) with minimal border padding.
+- 🕹️ **Oversized +10% Larger Touch Controls**: 82px action buttons ($103\text{px}$ housing well) and 62px D-pad arms ($190\text{px}$ well) with 3D tactile depression physics.
 - 🚀 **Native 48×48px Sprite Pre-Scaling (99.8% Texture Bandwidth Reduction)**: Pre-rendered native sprite canvases for zero-downsampling 60 FPS combat.
 - ⚡ **Cached Crowd Dither Pattern**: Replaced 345 individual draw calls per frame with 1 static cached blit.
 - ⏱️ **Fixed 60 FPS Timestep Accumulator**: Smooth 60 FPS animation across all 60Hz and 120Hz displays.
