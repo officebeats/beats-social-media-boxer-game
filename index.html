@@ -261,9 +261,22 @@
     // =========================================================================
 
     const PICO_PALETTE = [
-      '#AB5236', '#5F574F', '#C2C3C7', '#FFF1E8',
-      '#FF004D', '#FFA300', '#FFEC27', '#00E436',
-      '#29ADFF', '#83769C', '#FF77A8', '#FFCCAA'
+      '#000000', // 0: Black
+      '#1D2B53', // 1: Dark Blue
+      '#7E2553', // 2: Dark Purple
+      '#008751', // 3: Dark Green
+      '#AB5236', // 4: Brown
+      '#5F574F', // 5: Dark Gray
+      '#C2C3C7', // 6: Light Gray
+      '#FFF1E8', // 7: White
+      '#FF004D', // 8: Red
+      '#FFA300', // 9: Orange
+      '#FFEC27', // 10: Yellow
+      '#00E436', // 11: Green
+      '#29ADFF', // 12: Blue
+      '#83769C', // 13: Lavender
+      '#FF77A8', // 14: Pink
+      '#FFCCAA'  // 15: Peach
     ];
 
     let activePalMap = Array.from({length: 16}, (_, i) => i);
@@ -2973,7 +2986,7 @@
 
       ctx.fillStyle = getPalColor(0);
       ctx.fillRect(0, 0, 128, 16);
-      printPicoCenter('SELECT GAME MODE', 5, 10, 1, true);
+      printPico('<', 4, 5, 6, 1); printPicoCenter('SELECT GAME MODE', 5, 10, 1, true);
 
       const saved = loadCampaign();
       const modes = [
@@ -3006,7 +3019,7 @@
 
       ctx.fillStyle = getPalColor(1);
       ctx.fillRect(0, 0, 128, 16);
-      printPicoCenter('ROAD TO GOLD TOURNAMENT', 5, 10, 1, true);
+      printPico('<', 4, 5, 6, 1); printPicoCenter('ROAD TO GOLD TOURNAMENT', 5, 10, 1, true);
 
       const curSt = campaignState.stageIdx;
       for (let i = 0; i < CAMPAIGN_STAGES.length; i++) {
@@ -3079,7 +3092,7 @@
 
       ctx.fillStyle = getPalColor(0);
       ctx.fillRect(0, 0, 128, 18);
-      printPicoCenter('TRAINER GYM UPGRADE SHOP', 3, 10, 1, true);
+      printPico('<', 4, 3, 6, 1); printPicoCenter('TRAINER GYM UPGRADE SHOP', 3, 10, 1, true);
       printPicoCenter(`PURSE: $${campaignState.purse}`, 10, 11, 1);
 
       const items = [
@@ -3968,6 +3981,50 @@
       ctx.restore();
     }
 
+    function goBack() {
+      if (appState === 'MODE_SELECT') {
+        appState = 'TITLE';
+        play808Sfx('nav');
+      } else if (appState === 'CHAR_SELECT') {
+        p1Locked = false;
+        p2Locked = false;
+        lockCountdown = -1;
+        appState = 'MODE_SELECT';
+        play808Sfx('nav');
+      } else if (appState === 'FIGHTER_BIO') {
+        appState = 'CHAR_SELECT';
+        p1SelectIdx = bioFighterIdx;
+        play808Sfx('nav');
+      } else if (appState === 'LADDER_BRACKET') {
+        p1Locked = false;
+        p2Locked = false;
+        lockCountdown = -1;
+        appState = 'CHAR_SELECT';
+        play808Sfx('nav');
+      } else if (appState === 'STAGE_INTRO') {
+        appState = (selectedModeIdx === 0 ? 'LADDER_BRACKET' : 'CHAR_SELECT');
+        play808Sfx('nav');
+      } else if (appState === 'ARENA_SELECT') {
+        p1Locked = false;
+        p2Locked = false;
+        lockCountdown = -1;
+        appState = 'CHAR_SELECT';
+        play808Sfx('nav');
+      } else if (appState === 'LADDER_SHOP') {
+        saveCampaign();
+        appState = 'MODE_SELECT';
+        play808Sfx('nav');
+      } else if (appState === 'VICTORY_END' || appState === 'CONTINUE_SCREEN' || appState === 'KO') {
+        campaignState.active = false;
+        appState = 'TITLE';
+        play808Sfx('nav');
+      } else if (appState === 'PLAYING') {
+        appState = 'MODE_SELECT';
+        gameState = 'PAUSE';
+        play808Sfx('nav');
+      }
+    }
+
     function startMatch() {
       switchMusicTrack();
 
@@ -4178,6 +4235,14 @@
 
     window.addEventListener('keydown', (e) => {
       initAudio();
+
+      if (e.key === 'Escape' || e.key === 'Backspace') {
+        if (appState !== 'TITLE') {
+          e.preventDefault();
+          goBack();
+          return;
+        }
+      }
 
       if (appState === 'TITLE') {
         appState = 'MODE_SELECT';
@@ -4556,6 +4621,12 @@
         const rect = canvasEl.getBoundingClientRect();
         const clickX = ((e.clientX - rect.left) / rect.width) * 128;
         const clickY = ((e.clientY - rect.top) / rect.height) * 128;
+
+        // Top-Left Back Button (< BACK)
+        if (clickX <= 28 && clickY <= 16 && appState !== 'TITLE' && appState !== 'PLAYING') {
+          goBack();
+          return;
+        }
 
         if (appState === 'TITLE') {
           appState = 'MODE_SELECT';
