@@ -2937,17 +2937,11 @@
       // Frame 0 (x=0..47): Neutral Athletic High-Guard Stance
       sCtx.drawImage(rawCanvas, bounds.xmin, bounds.ymin, bounds.w, bounds.h, dx, dy, dw, dh);
 
-      // Frame 1 (x=48..95): Coherent Athletic Dip + Shorts Hem Wave + Unique Fighter Signatures
-      // 1. Natural whole-body dip (dy + 1) without pelvic stretching
+      // Frame 1 (x=48..95): Coherent Athletic Dip + Unique Fighter Signatures (ZERO Crotch/Pelvic Distortion)
+      // Natural whole-body dip (dy + 1) as a single solid piece
       sCtx.drawImage(rawCanvas, bounds.xmin, bounds.ymin, bounds.w, bounds.h, 48 + dx, dy + 1, dw, dh);
-      // 2. Trunks Hem Horizontal Wave (lower 3px of trunks shift horizontally by +1px)
-      const hemY = dy + 1 + Math.round(dh * 0.62);
-      const hemH = Math.max(2, Math.round(dh * 0.08));
-      const hemSrcY = bounds.ymin + Math.round(bounds.h * 0.62);
-      const hemSrcH = Math.max(2, Math.round(bounds.h * 0.08));
-      sCtx.drawImage(rawCanvas, bounds.xmin, hemSrcY, bounds.w, hemSrcH, 48 + dx + 1, hemY, dw, hemH);
 
-      // 3. Unique Character-Specific Signature Gestures on Frame 1:
+      // Unique Character-Specific Signature Gestures on Frame 1 (Head/Shoulders/Arms only):
       if (id === 'broner') {
         // Philly Shell shoulder roll shrug (left shoulder elevated)
         sCtx.drawImage(rawCanvas, bounds.xmin, bounds.ymin + Math.round(bounds.h * 0.25), Math.round(bounds.w * 0.35), Math.round(bounds.h * 0.25), 48 + dx - 1, dy + Math.round(dh * 0.24), Math.round(dw * 0.35), Math.round(dh * 0.25));
@@ -2996,13 +2990,10 @@
       const bootSrcY = bounds.ymin + bounds.h - Math.max(2, Math.round(bounds.h * 0.08));
       sCtx.drawImage(rawCanvas, bounds.xmin, bootSrcY, bounds.w, Math.max(2, Math.round(bounds.h * 0.08)), 96 + dx, dy + dh - bootH, dw, bootH);
 
-      // Frame 3 (x=144..191): Guard Reset + Reverse Shorts Hem Wave
+      // Frame 3 (x=144..191): Guard Reset & Lead Glove Rhythm Twitch
       sCtx.drawImage(rawCanvas, bounds.xmin, bounds.ymin, bounds.w, bounds.h, 144 + dx, dy, dw, dh);
-      // Reverse hem wave (-1px shift)
-      sCtx.drawImage(rawCanvas, bounds.xmin, hemSrcY, bounds.w, hemSrcH, 144 + dx - 1, hemY - 1, dw, hemH);
       // Lead glove 1px rhythm twitch
       sCtx.drawImage(rawCanvas, bounds.xmin + Math.round(bounds.w * 0.4), bounds.ymin + Math.round(bounds.h * 0.35), Math.round(bounds.w * 0.25), Math.round(bounds.h * 0.25), 144 + dx + Math.round(dw * 0.4) + 1, dy + Math.round(dh * 0.35), Math.round(dw * 0.25), Math.round(dh * 0.25));
-
       spriteCanvas.bounds = bounds;
       return spriteCanvas;
     }

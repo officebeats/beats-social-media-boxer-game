@@ -524,19 +524,19 @@ async def run_qa_suite():
         grounding_check = await evaluate("""
             (() => {
                 const ctx = document.getElementById('picoCanvas').getContext('2d');
-                // Check floor contact area around P1 (X: 46..58, Y: 89..91)
-                const p1Floor = ctx.getImageData(46, 89, 12, 3).data;
-                let p1Grounded = false;
+                // Check floor contact area around P1 boots (X: 46..58, Y: 86..90)
+                const p1Floor = ctx.getImageData(46, 86, 12, 5).data;
+                let p1Grounded = 0;
                 for (let j = 0; j < p1Floor.length; j += 4) {
-                    if (p1Floor[j+3] > 0) p1Grounded = true;
+                    if (p1Floor[j+3] > 0) p1Grounded++;
                 }
-                // Check floor contact area around P2 (X: 70..82, Y: 89..91)
-                const p2Floor = ctx.getImageData(70, 89, 12, 3).data;
-                let p2Grounded = false;
+                // Check floor contact area around P2 boots (X: 70..82, Y: 86..90)
+                const p2Floor = ctx.getImageData(70, 86, 12, 5).data;
+                let p2Grounded = 0;
                 for (let j = 0; j < p2Floor.length; j += 4) {
-                    if (p2Floor[j+3] > 0) p2Grounded = true;
+                    if (p2Floor[j+3] > 0) p2Grounded++;
                 }
-                return { p1Grounded, p2Grounded };
+                return { p1Grounded: p1Grounded > 10, p2Grounded: p2Grounded > 10 };
             })()
         """)
         assert grounding_check['p1Grounded'] == True and grounding_check['p2Grounded'] == True, f"Floor grounding check failed at Y=90! {grounding_check}"
