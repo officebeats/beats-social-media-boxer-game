@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>CRASH OUT: RING RUSH (v3.0.0) — PICO-8 Native Transparent Boxing</title>
+  <title>CRASH OUT: RING RUSH (v3.1.0) — PICO-8 Native Transparent Boxing</title>
   <style>
     :root {
       --pico-black: #000000;
@@ -2704,20 +2704,21 @@
       }
     }
 
-    // DYNAMIC COLOR-KEYING TRANSPARENCY HELPER
-    // DYNAMIC COLOR-KEYING TRANSPARENCY & AUTO-CROP BOUNDS HELPER
+    // =========================================================================
+    // ⚡ ULTRA-FAST PRE-SCALED SPRITE ENGINE (ZERO RUNTIME DOWNSAMPLING)
+    // =========================================================================
     function createTransparentCanvas(img) {
-      const offCanvas = document.createElement('canvas');
       const w = img.naturalWidth || img.width || 22;
       const h = img.naturalHeight || img.height || 40;
-      offCanvas.width = w;
-      offCanvas.height = h;
-      const offCtx = offCanvas.getContext('2d');
-      offCtx.drawImage(img, 0, 0);
-      const imgData = offCtx.getImageData(0, 0, w, h);
+      
+      const rawCanvas = document.createElement('canvas');
+      rawCanvas.width = w;
+      rawCanvas.height = h;
+      const rawCtx = rawCanvas.getContext('2d');
+      rawCtx.drawImage(img, 0, 0);
+      
+      const imgData = rawCtx.getImageData(0, 0, w, h);
       const data = imgData.data;
-
-      // Sample top-left corner color
       const bgR = data[0], bgG = data[1], bgB = data[2];
 
       let minX = w, maxX = 0, minY = h, maxY = 0;
@@ -2728,14 +2729,12 @@
           const idx = (y * w + x) * 4;
           const r = data[idx], g = data[idx+1], b = data[idx+2];
           
-          // Background color distance
           const dist = Math.sqrt(Math.pow(r - bgR, 2) + Math.pow(g - bgG, 2) + Math.pow(b - bgB, 2));
-          // Pure black background or white corner flash
           const isBlack = (r < 18 && g < 18 && b < 18);
           const isWhite = (r > 240 && g > 240 && b > 240);
 
           if (dist < 28 || isBlack || isWhite) {
-            data[idx+3] = 0; // Alpha = 0 (100% transparent)
+            data[idx+3] = 0;
           } else {
             hasFg = true;
             if (x < minX) minX = x;
@@ -2745,59 +2744,58 @@
           }
         }
       }
-      offCtx.putImageData(imgData, 0, 0);
+      rawCtx.putImageData(imgData, 0, 0);
 
-      offCanvas.bounds = hasFg ? {
-        xmin: minX,
-        xmax: maxX,
-        ymin: minY,
-        ymax: maxY,
-        w: maxX - minX + 1,
-        h: maxY - minY + 1
+      const bounds = hasFg ? {
+        xmin: minX, xmax: maxX, ymin: minY, ymax: maxY,
+        w: maxX - minX + 1, h: maxY - minY + 1
       } : { xmin: 0, xmax: w - 1, ymin: 0, ymax: h - 1, w, h };
 
-      return offCanvas;
+      // Pre-render into native 48x48 PICO-8 sprite canvas (ZERO RUNTIME DOWNSCALE)
+      const spriteCanvas = document.createElement('canvas');
+      spriteCanvas.width = 48;
+      spriteCanvas.height = 48;
+      const sCtx = spriteCanvas.getContext('2d');
+      sCtx.imageSmoothingEnabled = false;
+
+      const aspect = bounds.w / bounds.h;
+      const dh = 38;
+      const dw = Math.round(dh * aspect);
+      const dx = Math.round((48 - dw) / 2);
+      const dy = 48 - dh; // Boots anchored at Y=48
+
+      sCtx.drawImage(rawCanvas, bounds.xmin, bounds.ymin, bounds.w, bounds.h, dx, dy, dw, dh);
+      spriteCanvas.bounds = bounds;
+      return spriteCanvas;
     }
 
-    // === LOAD ONLY 2 CLEAN SOURCE IMAGES PER BOXER ===
-    // Idle: single full-body stance (1024x1024)
-    // Punches: 2x2 grid — TL=jab, TR=straight, BL=hook, BR=uppercut (1024x1024)
-    const bronerIdleRaw = new Image();
-    bronerIdleRaw.src = 'assets/broner_sprite.jpg?v=1200';
-    let bronerIdleCanvas = null;
-    bronerIdleRaw.onload = () => { bronerIdleCanvas = createTransparentCanvas(bronerIdleRaw); };
-
-    const deenIdleRaw = new Image();
-    deenIdleRaw.src = 'assets/deen_sprite.jpg?v=1200';
-    let deenIdleCanvas = null;
-    deenIdleRaw.onload = () => { deenIdleCanvas = createTransparentCanvas(deenIdleRaw); };
-
-    const PUNCH_FLIPS = {
-      'broner': [0, 3],      // JAB, UPPERCUT
-      'deen': [2, 3],        // HOOK, UPPERCUT
-      'ryan': [2, 3],        // HOOK, UPPERCUT
-      'n3on': [0, 1, 3],     // JAB, STRAIGHT, UPPERCUT
-      'rayj': [2],           // HOOK
-      'charleston': [3],     // UPPERCUT
-      'bang': [3],           // UPPERCUT
-      'abrown': [3],         // UPPERCUT
-      'sneako': [3]          // UPPERCUT
-    };
-
     function createNormalizedPunchCanvas(img, id) {
-      const rawCanvas = createTransparentCanvas(img);
-      const w = rawCanvas.width;
-      const h = rawCanvas.height;
-      const normCanvas = document.createElement('canvas');
-      normCanvas.width = w;
-      normCanvas.height = h;
-      const nCtx = normCanvas.getContext('2d');
-      nCtx.imageSmoothingEnabled = false;
+      const w = img.naturalWidth || img.width || 1024;
+      const h = img.naturalHeight || img.height || 1024;
+      
+      const rawCanvas = document.createElement('canvas');
+      rawCanvas.width = w;
+      rawCanvas.height = h;
+      const rawCtx = rawCanvas.getContext('2d');
+      rawCtx.drawImage(img, 0, 0);
+      
+      const imgData = rawCtx.getImageData(0, 0, w, h);
+      const data = imgData.data;
+      const bgR = data[0], bgG = data[1], bgB = data[2];
+
+      for (let i = 0; i < data.length; i += 4) {
+        const r = data[i], g = data[i+1], b = data[i+2];
+        const dist = Math.sqrt(Math.pow(r - bgR, 2) + Math.pow(g - bgG, 2) + Math.pow(b - bgB, 2));
+        const isBlack = (r < 18 && g < 18 && b < 18);
+        const isWhite = (r > 240 && g > 240 && b > 240);
+        if (dist < 28 || isBlack || isWhite) data[i+3] = 0;
+      }
+      rawCtx.putImageData(imgData, 0, 0);
 
       const qw = w / 2;
       const qh = h / 2;
       const flips = PUNCH_FLIPS[id] || [];
-      const quadBounds = [];
+      const quadSprites = [];
 
       for (let q = 0; q < 4; q++) {
         const col = q % 2;
@@ -2805,25 +2803,29 @@
         const sx = col * qw;
         const sy = row * qh;
 
-        nCtx.save();
-        if (flips.includes(q)) {
-          // Flip this quadrant horizontally within its cell so it faces RIGHT (toward opponent)
-          nCtx.translate(sx + qw, sy);
-          nCtx.scale(-1, 1);
-          nCtx.drawImage(rawCanvas, sx, sy, qw, qh, 0, 0, qw, qh);
-        } else {
-          nCtx.drawImage(rawCanvas, sx, sy, qw, qh, sx, sy, qw, qh);
-        }
-        nCtx.restore();
+        // Quad offscreen
+        const qCanvas = document.createElement('canvas');
+        qCanvas.width = qw;
+        qCanvas.height = qh;
+        const qCtx = qCanvas.getContext('2d');
+        qCtx.imageSmoothingEnabled = false;
 
-        // Scan this quadrant's tight bounding box in normCanvas
-        const qImgData = nCtx.getImageData(sx, sy, qw, qh).data;
+        if (flips.includes(q)) {
+          qCtx.translate(qw, 0);
+          qCtx.scale(-1, 1);
+          qCtx.drawImage(rawCanvas, sx, sy, qw, qh, 0, 0, qw, qh);
+        } else {
+          qCtx.drawImage(rawCanvas, sx, sy, qw, qh, 0, 0, qw, qh);
+        }
+
+        // Bounding box of quad
+        const qData = qCtx.getImageData(0, 0, qw, qh).data;
         let qMinX = qw, qMaxX = 0, qMinY = qh, qMaxY = 0;
         let qHasFg = false;
         for (let y = 0; y < qh; y++) {
           for (let x = 0; x < qw; x++) {
             const idx = (y * qw + x) * 4;
-            if (qImgData[idx+3] > 0) {
+            if (qData[idx+3] > 0) {
               qHasFg = true;
               if (x < qMinX) qMinX = x;
               if (x > qMaxX) qMaxX = x;
@@ -2832,16 +2834,32 @@
             }
           }
         }
-        quadBounds.push(qHasFg ? {
-          sx: sx + qMinX,
-          sy: sy + qMinY,
-          w: qMaxX - qMinX + 1,
-          h: qMaxY - qMinY + 1
-        } : { sx, sy, w: qw, h: qh });
+
+        const qb = qHasFg ? {
+          xmin: qMinX, xmax: qMaxX, ymin: qMinY, ymax: qMaxY,
+          w: qMaxX - qMinX + 1, h: qMaxY - qMinY + 1
+        } : { xmin: 0, xmax: qw - 1, ymin: 0, ymax: qh - 1, w: qw, h: qh };
+
+        // Pre-scale punch quad to native 48x48
+        const pSprite = document.createElement('canvas');
+        pSprite.width = 48;
+        pSprite.height = 48;
+        const pCtx = pSprite.getContext('2d');
+        pCtx.imageSmoothingEnabled = false;
+
+        const aspect = qb.w / qb.h;
+        const dh = 38;
+        const dw = Math.round(dh * aspect);
+        const dx = Math.round((48 - dw) / 2);
+        const dy = 48 - dh;
+
+        pCtx.drawImage(qCanvas, qb.xmin, qb.ymin, qb.w, qb.h, dx, dy, dw, dh);
+        pSprite.bounds = qb;
+        quadSprites.push(pSprite);
       }
 
-      normCanvas.quadBounds = quadBounds;
-      return normCanvas;
+      const holder = { quadSprites: quadSprites, width: 48, height: 48 };
+      return holder;
     }
 
     const bronerPunchRaw = new Image();
@@ -3313,18 +3331,30 @@
     var shopSelectedIdx = 0;
     var continueCountdown = 9;
     var continueFrameTimer = 0;
-    function drawPicoDitheredCrowd(crowdBg = 1, crowdDit = 2) {
-      ctx.fillStyle = getPalColor(crowdBg);
-      ctx.fillRect(41, 15, 46, 30);
-
-      ctx.fillStyle = getPalColor(crowdDit);
-      for (let y = 15; y < 45; y += 2) {
-        for (let x = 41; x < 87; x += 2) {
-          if ((x + y) % 4 === 0) {
-            ctx.fillRect(x, y, 1, 1);
+    // ⚡ CACHED CROWD DITHER CANVAS (1 SINGLE DRAW CALL INSTEAD OF 345)
+    const CROWD_CANVAS_CACHE = {};
+    function getCrowdCanvas(crowdBg, crowdDit) {
+      const key = crowdBg + '_' + crowdDit;
+      if (!CROWD_CANVAS_CACHE[key]) {
+        const c = document.createElement('canvas');
+        c.width = 46;
+        c.height = 30;
+        const cx = c.getContext('2d');
+        cx.fillStyle = getPalColor(crowdBg);
+        cx.fillRect(0, 0, 46, 30);
+        cx.fillStyle = getPalColor(crowdDit);
+        for (let y = 0; y < 30; y += 2) {
+          for (let x = 0; x < 46; x += 2) {
+            if ((x + y) % 4 === 0) cx.fillRect(x, y, 1, 1);
           }
         }
+        CROWD_CANVAS_CACHE[key] = c;
       }
+      return CROWD_CANVAS_CACHE[key];
+    }
+
+    function drawPicoDitheredCrowd(crowdBg = 1, crowdDit = 2) {
+      ctx.drawImage(getCrowdCanvas(crowdBg, crowdDit), 41, 15);
     }
 
     // =========================================================================
@@ -5574,12 +5604,25 @@
       });
     }
 
-    function gameLoop() {
-      update();
+    // ⚡ FIXED 60 FPS TIMESTEP ACCUMULATOR (FLUID FLUID 60 FPS ON 60HZ & 120HZ PROMOTION)
+    let lastLoopTime = performance.now();
+    let loopAccumulator = 0;
+    const TIME_PER_FRAME = 1000 / 60; // Exactly 16.666ms per update
+
+    function gameLoop(currentTime) {
+      const frameDelta = Math.min(100, currentTime - lastLoopTime);
+      lastLoopTime = currentTime;
+      loopAccumulator += frameDelta;
+
+      while (loopAccumulator >= TIME_PER_FRAME) {
+        update();
+        loopAccumulator -= TIME_PER_FRAME;
+      }
+
       render();
       requestAnimationFrame(gameLoop);
     }
-    requestAnimationFrame(gameLoop);
+    requestAnimationFrame((time) => { lastLoopTime = time; gameLoop(time); });
   </script>
 </body>
 </html>

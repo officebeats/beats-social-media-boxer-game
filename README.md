@@ -1,6 +1,6 @@
 # CRASH OUT: RING RUSH — PICO-8 PUZZLE BOXING
 
-**Version:** `v3.0.0` (Punch-Out Cutscene Engine, Ranking Ladder Climb & Stream Dialogue Release)
+**Version:** `v3.1.0` (Native 48px Sprite Pre-Scaling, Crowd Cache & 60 FPS Accumulator Release)
 
 ![Title Screen](assets/pico8_title.jpg)
 
@@ -8,7 +8,7 @@
 
 ---
 
-## 🎮 Play Live (v3.0.0)
+## 🎮 Play Live (v3.1.0)
 
 - ⚡ **Play Live in Browser (GitHub Pages)**: **[officebeats.github.io/beats-social-media-boxer-game](https://officebeats.github.io/beats-social-media-boxer-game/)**
 - 🕹️ **Native PICO-8 Cartridge**: Load [`crash_out.p8`](crash_out.p8) directly inside PICO-8 using `pico8 -run crash_out.p8`.
@@ -23,12 +23,13 @@
 
 ---
 
-## 🌟 New in v3.0.0
-- 🥊 **Punch-Out Style 2-Phase Victory Cutscene & Ranking Ladder Climb**:
-  - **Phase 0 (In-Ring Decision & Stream Press Conference)**: Immediately upon winning each Road to Gold bout, the referee raises the winner's hand in victory, flashbulbs pop across the arena, the defeated opponent sits dazed on their corner stool, and post-fight viral stream quotes appear (*"AND THAT'S ABOUT BILLIONS! CAN'T TOUCH THIS!"*).
-  - **Phase 1 (Punch-Out Tournament Ranking Ladder Climb)**: Shows the full 7-stage tournament ladder tree where the defeated opponent's portrait gets a flashing red **`K.O.`** stamp, the player's avatar hops UP the ladder to the next rank, and purse bonuses are tallied before entering the Trainer Gym Shop.
-- 🎙️ **Authentic 2026 Kick Warehouse Stream Catchphrases & Dialogues**: Dynamic pre-fight and post-fight dialogues for all 7 tournament stages featuring real stream catchphrases (*"ABOUT BILLIONS!"*, *"LIGHTNING STRAIGHT!"*, *"CRASHING OUT!"*, *"WAREHOUSE DISCIPLINE!"*, *"777 IN THE CHAT!"*).
-- ⚡ **iOS Safari 60 FPS Hardware Performance Optimization**: Removed `ctx.filter` to eliminate CPU software rasterization and built zero-allocation particle/text object pools for locked 60 FPS combat on iPhones.
+## 🌟 New in v3.1.0
+- 🚀 **Native 48×48px Sprite Pre-Scaling (99.8% Texture Bandwidth Reduction)**:
+  - Eliminated on-the-fly 1024×1024 bilinear downsampling on every frame in `drawBoxer`. All idle and punch sprites are pre-rendered into native 48×48 canvases on load, reducing texture copy overhead from 1,048,576 pixels to 2,304 pixels per blit.
+- ⚡ **Cached Crowd Dither Pattern**: Replaced 345 individual `fillRect(1,1)` draw calls per frame with a single static cached offscreen canvas blit, eliminating 20,000 draw calls per second.
+- ⏱️ **Fixed 60 FPS Timestep Accumulator**: Implemented `performance.now()` delta-time accumulation in `gameLoop()`, ensuring fluid 60 FPS animation on 60Hz displays and 120Hz ProMotion screens with zero micro-stutter.
+- 🥊 **Punch-Out Style 2-Phase Victory Cutscene & Ranking Ladder Climb**: Immediately upon knocking out an opponent, view the in-ring press conference followed by the vertical ranking ladder climb with flashing red **`K.O.`** stamp and purse breakdown.
+- 🎙️ **Authentic 2026 Kick Warehouse Stream Catchphrases**: Real stream lines across all 7 stages (*"ABOUT BILLIONS!"*, *"LIGHTNING STRAIGHT!"*, *"CRASHING OUT!"*, *"777 IN THE CHAT!"*).
 - 🕹️ **25% Larger Touch Control Buttons**: 74px action buttons and 56px D-pad arms with 3D cylindrical housing wells and tactile haptics on every press.
 - 🌮 **Pocket Taco Bluetooth Controller Support**: Seamless support for compact Bluetooth mobile controllers in portrait orientation with Gamepad API & Keyboard HID mapping.
   5. **Arctic White** (Clean Snow White & Slate Blue)
