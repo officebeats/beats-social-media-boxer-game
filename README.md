@@ -1,6 +1,6 @@
 # CRASH OUT: RING RUSH — PICO-8 PUZZLE BOXING
 
-**Version:** `v2.5.0` (Ultra-Realistic 3D GBA Tactile Buttons & Maximized Screen Release)
+**Version:** `v2.6.0` (Maximized Button Touch Targets & Dedicated Knockdown Pause Release)
 
 ![Title Screen](assets/pico8_title.jpg)
 
@@ -8,7 +8,7 @@
 
 ---
 
-## 🎮 Play Live (v2.5.0)
+## 🎮 Play Live (v2.6.0)
 
 - ⚡ **Play Live in Browser (GitHub Pages)**: **[officebeats.github.io/beats-social-media-boxer-game](https://officebeats.github.io/beats-social-media-boxer-game/)**
 - 🕹️ **Native PICO-8 Cartridge**: Load [`crash_out.p8`](crash_out.p8) directly inside PICO-8 using `pico8 -run crash_out.p8`.
@@ -23,14 +23,14 @@
 
 ---
 
-## 🌟 New in v2.5.0
-- 🕹️ **Ultra-Realistic 3D Molded Game Boy Buttons**:
-  - **Cylindrical Plastic Housing Wells**: Action buttons and D-Pad sit within physical 3D recessed housing wells with ambient occlusion and specular rim lighting.
-  - **3D Convex Tactile Action Buttons**: Buttons have true physical curvature with top specular gloss highlights and 5px mechanical depression physics on touch (`:active`).
-  - **Molded Cross D-Pad with Center Dish**: Features a circular thumb dish, chamfered directional arms, and embossed directional arrows with dynamic press tilt.
-  - **Fluid Multi-Touch & Pointer Sliding**: PICO-8 touch controls support continuous directional thumb sliding across the D-Pad and multi-touch button holds.
-  - **Micro-Haptic & Audio Feedback**: Tactile vibration pulse (`navigator.vibrate(12)`) and mechanical click on every press.
-- 🖥️ **Maximized PICO-8 Screen Size**: Slimmed down bezel margins to expand the 1:1 PICO-8 canvas up to **320×320px in portrait** ($\sim 20\%$ larger display area) and **420×420px in landscape**.
+## 🌟 New in v2.6.0
+- 🕹️ **Maximized Touch Controls**:
+  - **Enlarged Action Buttons**: Increased A & B button diameters to **60px** ($76\times 76\text{px}$ touch target with housing well) for effortless mobile tapping.
+  - **Expanded D-Pad**: Increased D-Pad arm dimensions to **46px** ($144\times 144\text{px}$ housing well).
+- ⏸️ **Dedicated Knockdown Countdown Pause**: Falling blocks, gravity, and piece spawning are completely paused during the referee 10-count so player attention is 100% focused on mashing to get back up.
+- 🥊 **Fixed Single-Player Stage Match Start**: Fixed a bug where pressing A or X in `STAGE_INTRO` skipped the fight; matches now start immediately against the designated stage opponent.
+- 🕹️ **Ultra-Realistic 3D Molded Game Boy Buttons**: Cylindrical housing wells, 3D convex tactile buttons with 5px depression physics, and molded D-Pad center dish.
+- 🖥️ **Maximized PICO-8 Screen Size**: Slimmed down bezel margins to expand the 1:1 PICO-8 canvas up to **320×320px in portrait** and **420×420px in landscape**.
 - 🌮 **Pocket Taco & Horizontal Clamp Controller Support**: Native HTML5 Gamepad API driver automatically detects and maps Pocket Taco, Backbone One, Razer Kishi, GameSir, and all standard Bluetooth/USB gamepads.
 - 🎨 **12 Dynamic GBA Handheld Console Skins**: Tap the top-bar **\`🎨 SKIN\`** button at any time to instantly cycle through 12 authentic hardware themes:
   1. **Classic Indigo** (2001 Original GBA Violet & Burgundy)

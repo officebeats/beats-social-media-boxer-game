@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>CRASH OUT: RING RUSH (v2.5.0) — PICO-8 Native Transparent Boxing</title>
+  <title>CRASH OUT: RING RUSH (v2.6.0) — PICO-8 Native Transparent Boxing</title>
   <style>
     :root {
       --pico-black: #000000;
@@ -281,8 +281,8 @@
 
     /* 3D RECESSED D-PAD HOUSING WELL */
     .dpad-well {
-      width: 124px;
-      height: 124px;
+      width: 144px;
+      height: 144px;
       border-radius: 50%;
       background: radial-gradient(circle at 50% 50%, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.25) 100%);
       box-shadow: inset 0px 4px 8px rgba(0,0,0,0.95), 0px 1px 1px rgba(255,255,255,0.25);
@@ -291,11 +291,11 @@
       justify-content: center;
     }
 
-    /* 3D MOLDED GBA CROSS D-PAD WITH EMBOSSED ARROWS */
+    /* 3D MOLDED GBA CROSS D-PAD WITH EMBOSSED ARROWS (MAXIMIZED) */
     .gba-dpad {
       display: grid;
-      grid-template-columns: repeat(3, 38px);
-      grid-template-rows: repeat(3, 38px);
+      grid-template-columns: repeat(3, 46px);
+      grid-template-rows: repeat(3, 46px);
       gap: 0px;
       filter: drop-shadow(0px 5px 6px rgba(0, 0, 0, 0.85));
     }
@@ -346,8 +346,8 @@
 
     /* 3D CONVEX PHYSICAL ACTION BUTTONS (REAL-LIFE DEPTH) */
     .btn-gba-action {
-      width: 50px;
-      height: 50px;
+      width: 60px;
+      height: 60px;
       border-radius: 50%;
       background: radial-gradient(circle at 35% 25%, rgba(255,255,255,0.45) 0%, transparent 45%), radial-gradient(circle at 50% 50%, var(--gba-btn) 0%, var(--gba-btn-shadow) 100%);
       border: 2px solid rgba(255, 255, 255, 0.28);
@@ -2195,7 +2195,7 @@
       update() {
         this.tickVisuals();
 
-        if (appState !== 'PLAYING' && appState !== 'KNOCKDOWN') return;
+        if (appState !== 'PLAYING') return;
 
         if (this.state === 'SPAWN') {
           this.spawnPair();
@@ -5125,10 +5125,6 @@
         play808Sfx('confirm');
       } else if (appState === 'STAGE_INTRO') {
         startMatch();
-        campaignState.stageIdx++;
-        saveCampaign();
-        appState = 'LADDER_BRACKET';
-        play808Sfx('confirm');
       } else if (appState === 'VICTORY_END') {
         campaignState.active = false;
         appState = 'TITLE';
@@ -5171,10 +5167,6 @@
         play808Sfx('confirm');
       } else if (appState === 'STAGE_INTRO') {
         startMatch();
-        campaignState.stageIdx++;
-        saveCampaign();
-        appState = 'LADDER_BRACKET';
-        play808Sfx('confirm');
       } else if (appState === 'VICTORY_END') {
         campaignState.active = false;
         appState = 'TITLE';
