@@ -1,14 +1,12 @@
 # CRASH OUT: RING RUSH — PICO-8 PUZZLE BOXING
 
-**Version:** `v3.3.3` (Strict 7-Stage Tournament Campaign & Anti-Skip Guard Release)
+**Version:** `v3.4.0` (Multi-Frame Boxing Idle Stances, Alt Outfits & 9 Dynamic Arenas Release)
 
 ![Title Screen](assets/pico8_title.jpg)
 
 **Crash Out: Ring Rush** is an 8-bit arcade versus puzzle-fighter developed for the **PICO-8 Fantasy Console**. It fuses the competitive mechanics of Capcom's *Super Puzzle Fighter II Turbo* with the viral Kick warehouse boxing stream culture hosted by **Adrien "The Problem" Broner** and **Deen The Great**.
 
----
-
-## 🎮 Play Live (v3.3.3)
+## 🎮 Play Live (v3.4.0)
 
 - ⚡ **Play Live in Browser (GitHub Pages)**: **[officebeats.github.io/beats-social-media-boxer-game](https://officebeats.github.io/beats-social-media-boxer-game/)**
 - 🕹️ **Native PICO-8 Cartridge**: Load [`crash_out.p8`](crash_out.p8) directly inside PICO-8 using `pico8 -run crash_out.p8`.
@@ -19,10 +17,55 @@
 - **Arrow Up**: Hard drop (Instant lock)
 - **Z**: Rotate Counter-Clockwise
 - **X**: Rotate Clockwise / Confirm / Trigger SUPER (when 100%)
+- **Y / C / Touch Badge**: Switch Fighter Outfit (Classic vs Alt Viral Skin)
 - **B**: View Fighter Bio (Character Select)
 
 ---
 
+## 🌟 New in v3.4.0
+- 🥊 **4-Frame Athletic Boxing Idle Stances**:
+  - Replaced static wobbles with authentic $192\times 48\text{px}$ linear 4-frame animation strips playing at 7.5 FPS.
+  - **Frame 0**: Neutral High-Guard Athletic Stance (weight centered, chin tucked).
+  - **Frame 1**: Elastic Dip & Knee Flexion (torso dips 1px, hands pump downward, athletic coil).
+  - **Frame 2**: Spring Extension & Head Bob (bouncing up on balls of feet, torso rises 1px, boots grounded).
+  - **Frame 3**: Guard Reset & Lead Glove Rhythm Twitch (lead glove flick and guard reset).
+- 🎽 **14 Verified Stream Guests & Alternative Outfits (Skins)**:
+  - Added 2nd outfit/skin to all 14 fighters toggleable in Character Select (`Y` key / Gamepad `Y` / `SELECT` / touching the outfit badge):
+    - **Adrien Broner**: Classic Gold Trunks ↔ **Bleached Blonde Wave & White/Neon Green Trunks** (*Viral July/August 2026 Stream Look*).
+    - **Deen The Great**: Misfits Black Afro & Gold ↔ **Bleached Blonde Afro & Chrome Silver/Hot Pink Trunks** (*Wave Check Stream Look*).
+    - **Ryan Garcia**: Black Quiff ↔ **Golden Crown & White/Gold Silk Stream Robe**.
+    - **N3ON**: Crashout Blue ↔ **Padded Headgear & Neon Orange Gym Gear**.
+    - **Ray J**: Emerald Trunks ↔ **Gold Aviator Sunglasses & Luxury Platinum Silk Robe**.
+    - **Blueface**: Famous Blue ↔ **Street Brawl Cash Bandana & Chino Pants**.
+    - **Chrisean Rock**: Baddie Pink ↔ **Braided Crown & Camo Combat Trunks**.
+    - **Rampage Jackson**: Tank Black ↔ **Pride FC Camo Trunks & Silver Monster Chain**.
+    - **Adin Ross**: 777 Hoodie ↔ **White Designer Tee & High Roller Vegas Gold Trunks**.
+    - **Charleston White**: Fedora Hat ↔ **Cowboy Hat & Southern Leather Vest**.
+    - **Coach Bang**: Coach Grey ↔ **Corner Tracksuit & Digital Stopwatch**.
+    - **Antonio Brown (AB)**: CT Showboat ↔ **Retro Football Jersey & Platinum Helmet Cap**.
+    - **Fousey**: G7 Headband ↔ **Spiritual Mala Beads & Black Gym Tank**.
+    - **Sneako**: Matrix Sparrer ↔ **Red Pill Hoodie & Stealth Black Sparring Gear**.
+- 💥 **Game Mechanics & Combat Game Feel Polish**:
+  - **360° Super Move Meter Bursts**: Full radial burst particle rings triggering on 100% meter and super attack activation.
+  - **Dynamic Floating Combo Cascade Banners**: Floating banners for `COMBO x2`, `COMBO x3`, and `SUPER CASCADE!`.
+  - **Pulsating Power Gem & Counter Badges**: High-contrast stone countdown blocks (3 $\rightarrow$ 2 $\rightarrow$ 1) with crack particle bursts and pulsing gold outlines for fused power gems.
+  - **Tightened Drop Latency**: Instant soft drop lock-in at ground plane with full wall-kick and floor-kick rotation priority.
+- 🔴 **Arcade Home Screen Showcase**:
+  - Live Kick Stream Status Marquee Ticker with flashing red recording LED (`LIVE 148K  KICK.COM/BRONER`).
+  - Dynamic Hero Boxer Exhibition featuring animated Adrien Broner and Deen The Great bouncing in 4-frame idle animation in center ring.
+  - Integrated arcade cheat-sheet controls prompt.
+- 🏟️ **9 Dynamic Animated Arenas (Expanded from 6)**:
+  1. **Kick Warehouse (Austin, TX)**: Pulsing animated Kick green neon sign + forklift strobe beacon + live stream chat ticker.
+  2. **Vegas Casino Arena (Las Vegas, NV)**: Dual golden spotlights sweeping across sky + gold coin sparkles on knockdowns.
+  3. **Misfits London Arena (London, UK)**: Cyan/blue laser light beams + flashing paparazzi flashbulbs.
+  4. **Miami Stream Mansion (Miami, FL)**: Sunset pink gradient glow + swaying neon palm tree + turquoise pool water ripple reflections.
+  5. **TMT Vegas Gym (Las Vegas, NV)**: Floyd's solid gold heavy bag + green cash stack accents + ceiling spotlights.
+  6. **Cincinnati Problem Gym (Cincinnati, OH)**: Red brick wall + flashing red warning siren beacon + heavy bag chain sway.
+  7. **[NEW] Dubai Penthouse Helipad (Dubai, UAE)**: Rotating Burj Khalifa aerial beacon spotlight + gold rope tassels.
+  8. **[NEW] Underground Fight Cage (Atlanta, GA)**: Steel fight cage chainlink lattice + rising floor steam vents.
+  9. **[NEW] Tokyo Neon Dome (Tokyo, JP)**: High-speed scrolling Japanese kanji LED ticker (`TOKYO RUSH`) + magenta laser grid.
+- 🛡️ **Permanent 10-Module Automated E2E Regression Suite (`tests/e2e_regression_suite.py`)**:
+  - Comprehensive CDP automated test harness covering all 10 modules with 0 failures, 0 console errors, and locked 60 FPS performance.
 ## 🌟 New in v3.3.3
 - 🏆 **Strict 7-Stage Tournament Campaign & Anti-Skip Guard**:
   - Implemented strict stage clearance tracking (`clearedStages: [false x 7]`), mathematically preventing players from skipping to Champion without defeating all 7 opponents in sequence.
