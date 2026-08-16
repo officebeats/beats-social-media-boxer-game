@@ -2749,29 +2749,29 @@
     }
 
     // Navigation & State Management
-    let appState = 'TITLE'; // 'TITLE', 'MODE_SELECT', 'CHAR_SELECT', 'LADDER_BRACKET', 'STAGE_INTRO', 'LADDER_SHOP', 'VICTORY_END', 'CONTINUE_SCREEN', 'PLAYING', 'KNOCKDOWN', 'KO'
-    let selectedModeIdx = 0; // 0: CAMPAIGN (30 MIN), 1: QUICK 1P VS CPU, 2: 2P LOCAL, 3: CPU DEMO
-    let p1SelectIdx = 0;
-    let p2SelectIdx = 1;
-    let p1Locked = false;
-    let p2Locked = false;
-    let lockCountdown = -1;
-    let selectedArenaIdx = 0;
-    let bioFighterIdx = 0;
+    var appState = 'TITLE'; // 'TITLE', 'MODE_SELECT', 'CHAR_SELECT', 'LADDER_BRACKET', 'STAGE_INTRO', 'LADDER_SHOP', 'VICTORY_END', 'CONTINUE_SCREEN', 'PLAYING', 'KNOCKDOWN', 'KO'
+    window.appState = appState;
+    var selectedModeIdx = 0; // 0: CAMPAIGN (30 MIN), 1: QUICK 1P VS CPU, 2: 2P LOCAL, 3: CPU DEMO
+    var p1SelectIdx = 0;
+    var p2SelectIdx = 1;
+    var p1Locked = false;
+    var p2Locked = false;
+    var lockCountdown = -1;
+    var selectedArenaIdx = 0;
+    var bioFighterIdx = 0;
 
     // Multi-Round & Knockdown State
-    let p1RoundsWon = 0;
-    let p2RoundsWon = 0;
-    let currentRound = 1;
-    let knockdownsP1 = 0;
-    let knockdownsP2 = 0;
-    let knockdownData = null; // { fallenId: 1|2, count: 1..10, timer: 0, stamina: 0, refSpeed: 52 }
-    let roundTransitionTimer = 0;
-    let roundTransitionText = '';
-    let shopSelectedIdx = 0;
-    let continueCountdown = 9;
-    let continueFrameTimer = 0;
-
+    var p1RoundsWon = 0;
+    var p2RoundsWon = 0;
+    var currentRound = 1;
+    var knockdownsP1 = 0;
+    var knockdownsP2 = 0;
+    var knockdownData = null; // { fallenId: 1|2, count: 1..10, timer: 0, stamina: 0, refSpeed: 52 }
+    var roundTransitionTimer = 0;
+    var roundTransitionText = '';
+    var shopSelectedIdx = 0;
+    var continueCountdown = 9;
+    var continueFrameTimer = 0;
     function drawPicoDitheredCrowd(crowdBg = 1, crowdDit = 2) {
       ctx.fillStyle = getPalColor(crowdBg);
       ctx.fillRect(41, 15, 46, 30);
@@ -4134,9 +4134,8 @@
       initAudio();
 
       if (appState === 'TITLE') {
-        if (isStartKey(e.key)) {
-          appState = 'MODE_SELECT';
-        }
+        appState = 'MODE_SELECT';
+        play808Sfx('confirm');
         return;
       }
 
@@ -4385,23 +4384,89 @@
     });
 
     bindBtn('btnO', () => {
-      if (appState === 'TITLE') appState = 'MODE_SELECT';
-      else if (appState === 'MODE_SELECT') { appState = 'CHAR_SELECT'; p1Locked = false; p2Locked = false; }
-      else if (appState === 'CHAR_SELECT') { p1Locked = true; if (selectedModeIdx !== 1) p2Locked = true; play808Sfx('confirm'); }
-      else if (appState === 'FIGHTER_BIO') { appState = 'CHAR_SELECT'; p1SelectIdx = bioFighterIdx; play808Sfx('nav'); }
-      else if (appState === 'ARENA_SELECT') { play808Sfx('confirm'); startMatch(); }
-      else if (appState === 'KO') rematchToCharSelect();
-      else if (appState === 'PLAYING') p1.rotate(-1);
+      if (appState === 'TITLE') {
+        appState = 'MODE_SELECT';
+        play808Sfx('confirm');
+      } else if (appState === 'MODE_SELECT') {
+        appState = 'CHAR_SELECT';
+        p1Locked = false; p2Locked = false;
+        play808Sfx('confirm');
+      } else if (appState === 'CHAR_SELECT') {
+        p1Locked = true;
+        if (selectedModeIdx !== 1) p2Locked = true;
+        play808Sfx('confirm');
+      } else if (appState === 'LADDER_BRACKET') {
+        appState = 'STAGE_INTRO';
+        play808Sfx('confirm');
+      } else if (appState === 'STAGE_INTRO') {
+        startMatch();
+      } else if (appState === 'LADDER_SHOP') {
+        campaignState.stageIdx++;
+        saveCampaign();
+        appState = 'LADDER_BRACKET';
+        play808Sfx('confirm');
+      } else if (appState === 'VICTORY_END') {
+        campaignState.active = false;
+        appState = 'TITLE';
+        play808Sfx('confirm');
+      } else if (appState === 'CONTINUE_SCREEN') {
+        campaignState.continues--;
+        saveCampaign();
+        startMatch();
+      } else if (appState === 'FIGHTER_BIO') {
+        appState = 'CHAR_SELECT';
+        p1SelectIdx = bioFighterIdx;
+        play808Sfx('nav');
+      } else if (appState === 'ARENA_SELECT') {
+        play808Sfx('confirm');
+        startMatch();
+      } else if (appState === 'KO') {
+        rematchToCharSelect();
+      } else if (appState === 'PLAYING' || appState === 'KNOCKDOWN') {
+        p1.rotate(-1);
+      }
     });
 
     bindBtn('btnX', () => {
-      if (appState === 'TITLE') appState = 'MODE_SELECT';
-      else if (appState === 'MODE_SELECT') { appState = 'CHAR_SELECT'; p1Locked = false; p2Locked = false; }
-      else if (appState === 'CHAR_SELECT') { p1Locked = true; if (selectedModeIdx !== 1) p2Locked = true; play808Sfx('confirm'); }
-      else if (appState === 'FIGHTER_BIO') { appState = 'CHAR_SELECT'; p1SelectIdx = bioFighterIdx; play808Sfx('nav'); }
-      else if (appState === 'ARENA_SELECT') { play808Sfx('confirm'); startMatch(); }
-      else if (appState === 'KO') rematchToCharSelect();
-      else if (appState === 'PLAYING') {
+      if (appState === 'TITLE') {
+        appState = 'MODE_SELECT';
+        play808Sfx('confirm');
+      } else if (appState === 'MODE_SELECT') {
+        appState = 'CHAR_SELECT';
+        p1Locked = false; p2Locked = false;
+        play808Sfx('confirm');
+      } else if (appState === 'CHAR_SELECT') {
+        p1Locked = true;
+        if (selectedModeIdx !== 1) p2Locked = true;
+        play808Sfx('confirm');
+      } else if (appState === 'LADDER_BRACKET') {
+        appState = 'STAGE_INTRO';
+        play808Sfx('confirm');
+      } else if (appState === 'STAGE_INTRO') {
+        startMatch();
+      } else if (appState === 'LADDER_SHOP') {
+        campaignState.stageIdx++;
+        saveCampaign();
+        appState = 'LADDER_BRACKET';
+        play808Sfx('confirm');
+      } else if (appState === 'VICTORY_END') {
+        campaignState.active = false;
+        appState = 'TITLE';
+        play808Sfx('confirm');
+      } else if (appState === 'CONTINUE_SCREEN') {
+        campaignState.continues--;
+        saveCampaign();
+        startMatch();
+      } else if (appState === 'FIGHTER_BIO') {
+        appState = 'CHAR_SELECT';
+        p1SelectIdx = bioFighterIdx;
+        play808Sfx('nav');
+      } else if (appState === 'ARENA_SELECT') {
+        play808Sfx('confirm');
+        startMatch();
+      } else if (appState === 'KO') {
+        rematchToCharSelect();
+      } else if (appState === 'PLAYING' || appState === 'KNOCKDOWN') {
         if (p1.superMeter >= 100) p1.triggerSuper();
         else p1.rotate(1);
       }
@@ -4429,66 +4494,155 @@
     const canvasEl = document.getElementById('picoCanvas');
     if (canvasEl) {
       canvasEl.addEventListener('click', (e) => {
-      initAudio();
-      if (appState === 'TITLE') {
-        appState = 'MODE_SELECT';
-      } else if (appState === 'MODE_SELECT') {
-        appState = 'CHAR_SELECT';
-        p1Locked = false; p2Locked = false;
-      } else if (appState === 'FIGHTER_BIO') {
-        appState = 'CHAR_SELECT';
-        p1SelectIdx = bioFighterIdx;
-        play808Sfx('nav');
-      } else if (appState === 'ARENA_SELECT') {
-        const rect = canvasEl.getBoundingClientRect();
-        const clickX = ((e.clientX - rect.left) / rect.width) * 128;
-        const clickY = ((e.clientY - rect.top) / rect.height) * 128;
-        // 2x3 cards: start (6,18), cardW 36, cardH 46, gapX 4, gapY 4
-        for (let idx = 0; idx < 6; idx++) {
-          const r = Math.floor(idx / 3);
-          const c = idx % 3;
-          const cx = 6 + c * 40;
-          const cy = 18 + r * 50;
-          if (clickX >= cx && clickX <= cx + 36 && clickY >= cy && clickY <= cy + 46) {
-            if (selectedArenaIdx === idx) {
-              play808Sfx('confirm');
-              startMatch();
-            } else {
-              selectedArenaIdx = idx;
-              play808Sfx('nav');
-            }
-            return;
-          }
-        }
-      } else if (appState === 'KO') {
-        rematchToCharSelect();
-      } else if (appState === 'CHAR_SELECT') {
+        initAudio();
         const rect = canvasEl.getBoundingClientRect();
         const clickX = ((e.clientX - rect.left) / rect.width) * 128;
         const clickY = ((e.clientY - rect.top) / rect.height) * 128;
 
-        // Portrait panel opens the bio screen instead of locking
-        if (clickX >= 8 && clickX <= 38 && clickY >= 58 && clickY <= 106 && !p1Locked) {
-          bioFighterIdx = p1SelectIdx;
-          appState = 'FIGHTER_BIO';
+        if (appState === 'TITLE') {
+          appState = 'MODE_SELECT';
+          play808Sfx('confirm');
+          return;
+        }
+
+        if (appState === 'MODE_SELECT') {
+          // Check which mode was clicked (4 rows: Y=20..116, H=20 each, gap 4)
+          for (let m = 0; m < 4; m++) {
+            const my = 20 + m * 24;
+            if (clickY >= my && clickY <= my + 20 && clickX >= 8 && clickX <= 120) {
+              selectedModeIdx = m;
+              break;
+            }
+          }
+          if (selectedModeIdx === 0) {
+            const saved = loadCampaign();
+            if (saved && saved.stageIdx > 0) {
+              campaignState = saved;
+            } else {
+              campaignState = { active: true, stageIdx: 0, purse: 0, upgrades: { pwr: 0, def: 0, spd: 0, diamondSeed: false, superRush: false }, continues: 3, totalScore: 0, startTime: Date.now() };
+            }
+          }
+          appState = 'CHAR_SELECT';
+          p1Locked = false;
+          p2Locked = false;
+          p1SelectIdx = 0;
+          p2SelectIdx = 1;
+          play808Sfx('confirm');
+          return;
+        }
+
+        if (appState === 'LADDER_BRACKET') {
+          appState = 'STAGE_INTRO';
+          play808Sfx('confirm');
+          return;
+        }
+
+        if (appState === 'STAGE_INTRO') {
+          startMatch();
+          return;
+        }
+
+        if (appState === 'LADDER_SHOP') {
+          // Check if an upgrade item was clicked (6 rows at Y=22 + idx*15)
+          for (let s = 0; s < 6; s++) {
+            const sy = 22 + s * 15;
+            if (clickY >= sy && clickY <= sy + 13 && clickX >= 6 && clickX <= 122) {
+              shopSelectedIdx = s;
+              if (s === 5) {
+                // Next Bout!
+                campaignState.stageIdx++;
+                saveCampaign();
+                appState = 'LADDER_BRACKET';
+                play808Sfx('confirm');
+              } else if (s === 0 && campaignState.upgrades.pwr < 3) {
+                const cost = CAMPAIGN_UPGRADE_TIERS.pwr[campaignState.upgrades.pwr].cost;
+                if (campaignState.purse >= cost) { campaignState.purse -= cost; campaignState.upgrades.pwr++; saveCampaign(); play808Sfx('fuse'); }
+              } else if (s === 1 && campaignState.upgrades.def < 3) {
+                const cost = CAMPAIGN_UPGRADE_TIERS.def[campaignState.upgrades.def].cost;
+                if (campaignState.purse >= cost) { campaignState.purse -= cost; campaignState.upgrades.def++; saveCampaign(); play808Sfx('fuse'); }
+              } else if (s === 2 && campaignState.upgrades.spd < 3) {
+                const cost = CAMPAIGN_UPGRADE_TIERS.spd[campaignState.upgrades.spd].cost;
+                if (campaignState.purse >= cost) { campaignState.purse -= cost; campaignState.upgrades.spd++; saveCampaign(); play808Sfx('fuse'); }
+              } else if (s === 3 && !campaignState.upgrades.diamondSeed) {
+                if (campaignState.purse >= 1500) { campaignState.purse -= 1500; campaignState.upgrades.diamondSeed = true; saveCampaign(); play808Sfx('fuse'); }
+              } else if (s === 4 && !campaignState.upgrades.superRush) {
+                if (campaignState.purse >= 1200) { campaignState.purse -= 1200; campaignState.upgrades.superRush = true; saveCampaign(); play808Sfx('fuse'); }
+              }
+              return;
+            }
+          }
+          return;
+        }
+
+        if (appState === 'VICTORY_END') {
+          campaignState.active = false;
+          appState = 'TITLE';
+          play808Sfx('confirm');
+          return;
+        }
+
+        if (appState === 'CONTINUE_SCREEN') {
+          campaignState.continues--;
+          saveCampaign();
+          startMatch();
+          return;
+        }
+
+        if (appState === 'FIGHTER_BIO') {
+          appState = 'CHAR_SELECT';
+          p1SelectIdx = bioFighterIdx;
           play808Sfx('nav');
           return;
         }
 
-        // Check grid click (X: 8..124, Y: 15..51) — selects, then locks
-        if (clickY >= 15 && clickY <= 51 && clickX >= 8 && clickX <= 124) {
-          const col = Math.floor((clickX - 8) / 17);
-          const row = Math.floor((clickY - 15) / 18);
-          const idx = row * 7 + col;
-          if (idx >= 0 && idx < 14) {
-            p1SelectIdx = idx;
+        if (appState === 'ARENA_SELECT') {
+          for (let idx = 0; idx < 6; idx++) {
+            const r = Math.floor(idx / 3);
+            const c = idx % 3;
+            const cx = 6 + c * 40;
+            const cy = 18 + r * 50;
+            if (clickX >= cx && clickX <= cx + 36 && clickY >= cy && clickY <= cy + 46) {
+              if (selectedArenaIdx === idx) {
+                play808Sfx('confirm');
+                startMatch();
+              } else {
+                selectedArenaIdx = idx;
+                play808Sfx('nav');
+              }
+              return;
+            }
           }
+          return;
         }
-        p1Locked = true;
-        if (selectedModeIdx !== 1) p2Locked = true;
-        play808Sfx('confirm');
-      }
-    });
+
+        if (appState === 'KO') {
+          rematchToCharSelect();
+          return;
+        }
+
+        if (appState === 'CHAR_SELECT') {
+          // Portrait panel opens the bio screen
+          if (clickX >= 8 && clickX <= 38 && clickY >= 58 && clickY <= 106 && !p1Locked) {
+            bioFighterIdx = p1SelectIdx;
+            appState = 'FIGHTER_BIO';
+            play808Sfx('nav');
+            return;
+          }
+
+          // Check grid click (X: 8..124, Y: 15..51) — selects, then locks
+          if (clickY >= 15 && clickY <= 51 && clickX >= 8 && clickX <= 124) {
+            const col = Math.floor((clickX - 8) / 17);
+            const row = Math.floor((clickY - 15) / 18);
+            const idx = row * 7 + col;
+            if (idx >= 0 && idx < 14) {
+              p1SelectIdx = idx;
+            }
+          }
+          p1Locked = true;
+          if (selectedModeIdx !== 1) p2Locked = true;
+          play808Sfx('confirm');
+        }
+      });
     }
 
     function gameLoop() {
