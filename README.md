@@ -1,6 +1,6 @@
 # CRASH OUT: RING RUSH — PICO-8 PUZZLE BOXING
 
-**Version:** `v2.9.0` (iOS Safari 60 FPS Performance Optimization & 25% Larger Buttons Release)
+**Version:** `v3.0.0` (Punch-Out Cutscene Engine, Ranking Ladder Climb & Stream Dialogue Release)
 
 ![Title Screen](assets/pico8_title.jpg)
 
@@ -8,7 +8,7 @@
 
 ---
 
-## 🎮 Play Live (v2.9.0)
+## 🎮 Play Live (v3.0.0)
 
 - ⚡ **Play Live in Browser (GitHub Pages)**: **[officebeats.github.io/beats-social-media-boxer-game](https://officebeats.github.io/beats-social-media-boxer-game/)**
 - 🕹️ **Native PICO-8 Cartridge**: Load [`crash_out.p8`](crash_out.p8) directly inside PICO-8 using `pico8 -run crash_out.p8`.
@@ -23,17 +23,14 @@
 
 ---
 
-## 🌟 New in v2.9.0
-- ⚡ **iOS Safari 60 FPS Hardware Performance Optimization**:
-  - **Removed CPU-Throttling `ctx.filter`**: Replaced WebKit software rasterization fallbacks with GPU hardware-accelerated flash overlays, maintaining locked 60 FPS on iPhones.
-  - **Zero-Allocation Particle & Text Pools**: Completely eliminated heap object creation and `splice()` garbage collection pauses during heavy gem combo cascades.
-- 🕹️ **25% Larger Touch Control Buttons**:
-  - **Oversized Action Buttons**: Expanded A & B button diameters from 60px $\rightarrow$ **74px** ($93\times 93\text{px}$ touch target with housing well) for effortless mobile thumb reach.
-  - **Maximized D-Pad**: Expanded directional arms from 46px $\rightarrow$ **56px** ($168\times 168\text{px}$ D-Pad footprint, $172\text{px}$ circular well).
-  - **Enlarged Start & Select Pills**: Scaled to **52×15px**.
-- 📳 **Tactile Haptic Feedback Across All Touch Controls**: Instant micro-vibration pulse (`navigator.vibrate(18)`) whenever pressing any D-Pad direction, A/B button, L/R shoulder trigger, or Start/Select pill.
-- 🎙️ **Authentic 2026 Kick Warehouse Stream Catchphrases & Dialogues**: Pre-fight faceoffs and post-fight press conferences across all 7 campaign stages with iconic stream lines.
-  4. **Kick Stealth** (Matte Black & Cyberpunk Green)
+## 🌟 New in v3.0.0
+- 🥊 **Punch-Out Style 2-Phase Victory Cutscene & Ranking Ladder Climb**:
+  - **Phase 0 (In-Ring Decision & Stream Press Conference)**: Immediately upon winning each Road to Gold bout, the referee raises the winner's hand in victory, flashbulbs pop across the arena, the defeated opponent sits dazed on their corner stool, and post-fight viral stream quotes appear (*"AND THAT'S ABOUT BILLIONS! CAN'T TOUCH THIS!"*).
+  - **Phase 1 (Punch-Out Tournament Ranking Ladder Climb)**: Shows the full 7-stage tournament ladder tree where the defeated opponent's portrait gets a flashing red **`K.O.`** stamp, the player's avatar hops UP the ladder to the next rank, and purse bonuses are tallied before entering the Trainer Gym Shop.
+- 🎙️ **Authentic 2026 Kick Warehouse Stream Catchphrases & Dialogues**: Dynamic pre-fight and post-fight dialogues for all 7 tournament stages featuring real stream catchphrases (*"ABOUT BILLIONS!"*, *"LIGHTNING STRAIGHT!"*, *"CRASHING OUT!"*, *"WAREHOUSE DISCIPLINE!"*, *"777 IN THE CHAT!"*).
+- ⚡ **iOS Safari 60 FPS Hardware Performance Optimization**: Removed `ctx.filter` to eliminate CPU software rasterization and built zero-allocation particle/text object pools for locked 60 FPS combat on iPhones.
+- 🕹️ **25% Larger Touch Control Buttons**: 74px action buttons and 56px D-pad arms with 3D cylindrical housing wells and tactile haptics on every press.
+- 🌮 **Pocket Taco Bluetooth Controller Support**: Seamless support for compact Bluetooth mobile controllers in portrait orientation with Gamepad API & Keyboard HID mapping.
   5. **Arctic White** (Clean Snow White & Slate Blue)
   6. **Flame Red** (SP Classic Gloss Red & Gold)
   7. **Cobalt Blue** (Deep Metallic Blue & Yellow)

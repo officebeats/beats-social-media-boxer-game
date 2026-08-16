@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>CRASH OUT: RING RUSH (v2.9.0) — PICO-8 Native Transparent Boxing</title>
+  <title>CRASH OUT: RING RUSH (v3.0.0) — PICO-8 Native Transparent Boxing</title>
   <style>
     :root {
       --pico-black: #000000;
@@ -2574,19 +2574,23 @@
       if (winnerId === 1) p1RoundsWon++;
       else if (winnerId === 2) p2RoundsWon++;
 
-      cameraShake = 20;
+      cameraShake = 22;
       play808Sfx('ko');
       play808Sfx('bell');
 
-      // Check if match is decided (best 2 of 3)
-      if (p1RoundsWon >= 2 || p2RoundsWon >= 2) {
+      if (campaignState.active) {
+        // In Road to Gold campaign: each bout is a decisive tournament stage knockout!
         triggerMatchVictory(winnerId, customMsg);
       } else {
-        // Start next round transition
-        roundTransitionTimer = 110;
-        currentRound++;
-        roundTransitionText = 'ROUND ' + (currentRound - 1) + ' OVER!';
-        appState = 'ROUND_TRANSITION';
+        // In 2P Local / Quick Exhibition: best 2 of 3 rounds
+        if (p1RoundsWon >= 2 || p2RoundsWon >= 2) {
+          triggerMatchVictory(winnerId, customMsg);
+        } else {
+          roundTransitionTimer = 110;
+          currentRound++;
+          roundTransitionText = 'ROUND ' + (currentRound - 1) + ' OVER!';
+          appState = 'ROUND_TRANSITION';
+        }
       }
     }
 
@@ -2661,7 +2665,7 @@
             appState = 'VICTORY_END';
           } else {
             // Show Post-Fight Press Conference Cutscene before Gym Shop!
-            appState = 'STAGE_VICTORY_CUTSCENE';
+            victoryCutscenePhase = 0; appState = 'STAGE_VICTORY_CUTSCENE';
           }
           play808Sfx('confirm');
         } else {
@@ -3557,54 +3561,103 @@
     let lastPurseEarned = 0;
     let lastSweepBonus = 0;
     let lastHpBonus = 0;
+    var victoryCutscenePhase = 0; // 0: Press Conference / In-Ring Decision, 1: Punch-Out Ranking Ladder Climb
+    window.victoryCutscenePhase = victoryCutscenePhase;
     function drawStageVictoryCutsceneScreen() {
       const st = CAMPAIGN_STAGES[campaignState.stageIdx] || CAMPAIGN_STAGES[0];
       const arena = ARENAS.find(a => a.id === st.arenaId) || ARENAS[0];
+      const p1Obj = ROSTER[p1SelectIdx] || ROSTER[0];
+      const oppId = (st.fighterId === p1Obj.id) ? (p1Obj.id === 'broner' ? 'deen' : 'broner') : st.fighterId;
+      const p2Obj = ROSTER.find(r => r.id === oppId) || ROSTER[1];
 
-      ctx.fillStyle = getPalColor(arena.colors.backdrop);
-      ctx.fillRect(0, 0, 128, 128);
+      if (victoryCutscenePhase === 0) {
+        // --- PHASE 0: PUNCH-OUT IN-RING VICTORY & PRESS CONFERENCE ---
+        ctx.fillStyle = getPalColor(arena.colors.backdrop);
+        ctx.fillRect(0, 0, 128, 128);
 
-      drawPicoDitheredCrowd(arena.colors.crowdBg, arena.colors.crowdDit);
+        drawPicoDitheredCrowd(arena.colors.crowdBg, arena.colors.crowdDit);
 
-      // Flashing Camera Lights
-      if (Math.random() < 0.35) {
-        const fx = 10 + Math.floor(Math.random() * 108);
-        const fy = 10 + Math.floor(Math.random() * 35);
-        ctx.fillStyle = getPalColor(7);
-        ctx.fillRect(fx, fy, 3, 3);
-      }
+        // Flashing Camera Lights
+        if (Math.random() < 0.35) {
+          const fx = 10 + Math.floor(Math.random() * 108);
+          const fy = 10 + Math.floor(Math.random() * 35);
+          ctx.fillStyle = getPalColor(7);
+          ctx.fillRect(fx, fy, 3, 3);
+        }
 
-      // Top Stage Header
-      ctx.fillStyle = getPalColor(0);
-      ctx.fillRect(0, 0, 128, 18);
-      printPicoCenter(`STAGE ${st.stageNum} VICTORY!`, 3, 10, 1, true);
-      printPicoCenter('POST-FIGHT PRESS CONFERENCE', 10, 7, 1);
+        // Top Header
+        ctx.fillStyle = getPalColor(0);
+        ctx.fillRect(0, 0, 128, 18);
+        printPicoCenter(`STAGE ${st.stageNum} VICTORY!`, 3, 10, 1, true);
+        printPicoCenter('POST-FIGHT PRESS CONFERENCE', 10, 7, 1);
 
-      // Fighter Cutscene Models: Winner Standing (Left), Loser Down (Right)
-      const p1Obj = ROSTER[p1SelectIdx];
-      const p2Obj = ROSTER.find(r => r.id === st.fighterId) || ROSTER[1];
-      drawBoxerAvatar(ctx, p1Obj, 36, 68, true, false, false);
-      drawBoxerAvatar(ctx, p2Obj, 92, 68, true, true, true); // Defeated opponent flat on canvas
+        // Authentic Capcom Boxer Cutscene Sprites: Winner Standing (Left), Opponent Defeated (Right)
+        drawBoxerAvatar(ctx, p1Obj, 36, 68, true, false, false);
+        drawBoxerAvatar(ctx, p2Obj, 92, 68, true, true, true); // Defeated opponent flat on canvas
 
-      // Winner Banner
-      ctx.fillStyle = getPalColor(10);
-      ctx.fillRect(20, 68, 88, 11);
-      ctx.strokeStyle = getPalColor(0);
-      ctx.strokeRect(20, 68, 88, 11);
-      printPicoCenter(`${p1Obj.name} WINS BOUT!`, 71, 0, 1, true);
+        // Winner Knockout Banner
+        ctx.fillStyle = getPalColor(10);
+        ctx.fillRect(16, 68, 96, 11);
+        ctx.strokeStyle = getPalColor(0);
+        ctx.strokeRect(16, 68, 96, 11);
+        printPicoCenter(`${p1Obj.name} WINS BY K.O.!`, 71, 0, 1, true);
 
-      // Post-Fight Interview Box
-      ctx.fillStyle = 'rgba(0,0,0,0.92)';
-      ctx.fillRect(6, 81, 116, 34);
-      ctx.strokeStyle = getPalColor(arena.colors.accent);
-      ctx.strokeRect(6, 81, 116, 34);
+        // Post-Fight Interview Box
+        ctx.fillStyle = 'rgba(0,0,0,0.92)';
+        ctx.fillRect(6, 81, 116, 34);
+        ctx.strokeStyle = getPalColor(arena.colors.accent);
+        ctx.strokeRect(6, 81, 116, 34);
 
-      const quote = POST_FIGHT_QUOTES[p1Obj.id] || "WE PUT HIM DOWN! ON TO THE NEXT!";
-      printPicoWrap(`"${quote}"`, 10, 84, 108, 10, 1);
-      printPico(`STAGE PURSE: +$${lastPurseEarned}`, 10, 104, 11, 1);
+        const quote = POST_FIGHT_QUOTES[p1Obj.id] || "WE PUT HIM DOWN! ON TO THE NEXT!";
+        printPicoWrap(`"${quote}"`, 10, 84, 108, 10, 1);
+        printPico(`STAGE PURSE: +$${lastPurseEarned}`, 10, 104, 11, 1);
 
-      if (Math.floor(globalFrameCount / 20) % 2 === 0) {
-        printPicoCenter('PRESS X: ENTER TRAINER GYM SHOP', 118, 10, 1, true);
+        if (Math.floor(globalFrameCount / 20) % 2 === 0) {
+          printPicoCenter('PRESS X: TOURNAMENT LADDER >>', 118, 10, 1, true);
+        }
+      } else {
+        // --- PHASE 1: PUNCH-OUT VERTICAL RANKING LADDER CLIMB ---
+        ctx.fillStyle = getPalColor(0);
+        ctx.fillRect(0, 0, 128, 128);
+
+        ctx.fillStyle = getPalColor(1);
+        ctx.fillRect(0, 0, 128, 16);
+        printPicoCenter('TOURNAMENT RANKING CLIMB', 5, 10, 1, true);
+
+        const curSt = campaignState.stageIdx;
+        for (let i = 0; i < CAMPAIGN_STAGES.length; i++) {
+          const s = CAMPAIGN_STAGES[i];
+          const y = 18 + i * 13;
+          const isJustCleared = (i === curSt);
+          const isBeaten = (i <= curSt);
+          const isNext = (i === curSt + 1);
+
+          ctx.fillStyle = isJustCleared ? getPalColor(8) : (isBeaten ? getPalColor(3) : (isNext ? getPalColor(10) : getPalColor(1)));
+          ctx.fillRect(6, y, 116, 11);
+          ctx.strokeStyle = isJustCleared ? getPalColor(10) : getPalColor(0);
+          ctx.strokeRect(6, y, 116, 11);
+
+          const prefix = isBeaten ? '[KO] ' : (isNext ? '>>> ' : '    ');
+          const stLabel = `STG ${s.stageNum}: ${s.fighterId.toUpperCase()}`;
+          printPico(prefix + stLabel, 10, y + 2, isJustCleared ? 7 : (isNext ? 0 : 7), 1);
+          printPico(`+$${s.purse}`, 88, y + 2, isJustCleared ? 10 : (isNext ? 8 : 6), 1);
+
+          // Giant Flashing KO Stamp on beaten fighter
+          if (isJustCleared && Math.floor(globalFrameCount / 8) % 2 === 0) {
+            ctx.fillStyle = getPalColor(8);
+            ctx.fillRect(52, y - 1, 24, 13);
+            ctx.strokeStyle = getPalColor(10);
+            ctx.strokeRect(52, y - 1, 24, 13);
+            printPicoCenter('K.O.!', y + 2, 7, 1, true);
+          }
+        }
+
+        // Animated Player Avatar climbing rank
+        drawBoxerAvatar(ctx, p1Obj, 110, 100, false, false, false);
+
+        if (Math.floor(globalFrameCount / 20) % 2 === 0) {
+          printPicoCenter('PRESS X: ENTER GYM SHOP >>', 118, 10, 1, true);
+        }
       }
     }
 
@@ -4969,8 +5022,14 @@
 
       if (appState === 'STAGE_VICTORY_CUTSCENE') {
         if (isStartKey(e.key)) {
-          appState = 'LADDER_SHOP';
-          play808Sfx('confirm');
+          if (victoryCutscenePhase === 0) {
+            victoryCutscenePhase = 1;
+            play808Sfx('confirm');
+          } else {
+            victoryCutscenePhase = 0;
+            appState = 'LADDER_SHOP';
+            play808Sfx('confirm');
+          }
         }
         return;
       }
@@ -5215,8 +5274,14 @@
         appState = 'STAGE_INTRO';
         play808Sfx('confirm');
       } else if (appState === 'STAGE_VICTORY_CUTSCENE') {
-        appState = 'LADDER_SHOP';
-        play808Sfx('confirm');
+        if (victoryCutscenePhase === 0) {
+          victoryCutscenePhase = 1;
+          play808Sfx('confirm');
+        } else {
+          victoryCutscenePhase = 0;
+          appState = 'LADDER_SHOP';
+          play808Sfx('confirm');
+        }
       } else if (appState === 'STAGE_INTRO') {
         startMatch();
       } else if (appState === 'VICTORY_END') {
@@ -5257,8 +5322,14 @@
         appState = 'STAGE_INTRO';
         play808Sfx('confirm');
       } else if (appState === 'STAGE_VICTORY_CUTSCENE') {
-        appState = 'LADDER_SHOP';
-        play808Sfx('confirm');
+        if (victoryCutscenePhase === 0) {
+          victoryCutscenePhase = 1;
+          play808Sfx('confirm');
+        } else {
+          victoryCutscenePhase = 0;
+          appState = 'LADDER_SHOP';
+          play808Sfx('confirm');
+        }
       } else if (appState === 'STAGE_INTRO') {
         startMatch();
       } else if (appState === 'VICTORY_END') {
@@ -5385,8 +5456,14 @@
           return;
         }
         if (appState === 'STAGE_VICTORY_CUTSCENE') {
-          appState = 'LADDER_SHOP';
-          play808Sfx('confirm');
+          if (victoryCutscenePhase === 0) {
+            victoryCutscenePhase = 1;
+            play808Sfx('confirm');
+          } else {
+            victoryCutscenePhase = 0;
+            appState = 'LADDER_SHOP';
+            play808Sfx('confirm');
+          }
           return;
         }
 
