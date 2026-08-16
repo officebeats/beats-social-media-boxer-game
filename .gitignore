@@ -22,3 +22,9 @@ android/
 .idea/
 *.swp
 *.swo
+
+# OMX local runtime state
+.omx/state/
+.omx/logs/
+.omx/notepad.md
+.omx/project-memory.json

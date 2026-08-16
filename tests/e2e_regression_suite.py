@@ -37,7 +37,7 @@ SERVER_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 class QuietHandler(SimpleHTTPRequestHandler):
     def log_message(self, format, *args):
         pass
-PORT = 8092
+PORT = 8000
 def ensure_server(port=PORT):
     try:
         urllib.request.urlopen(f"http://127.0.0.1:{port}/index.html", timeout=0.5)
@@ -63,11 +63,12 @@ async def run_qa_suite():
         r"C:\Users\admin-beats\AppData\Local\Google\Chrome\Application\chrome.exe"
     ]
     chrome_path = next((p for p in chrome_paths if os.path.exists(p)), None)
-    port = 9248
+    port = 9255
     chrome_proc = subprocess.Popen([
         chrome_path,
         "--headless=new",
         f"--remote-debugging-port={port}",
+        f"--user-data-dir=C:/tmp/chrome_e2e_prof_{port}",
         "--disable-gpu",
         "--no-sandbox",
         "--window-size=412,892",
@@ -101,8 +102,9 @@ async def run_qa_suite():
                 
         async def evaluate(expr):
             res = await call("Runtime.evaluate", {"expression": expr, "returnByValue": True})
+            if "exceptionDetails" in res:
+                print(f"JS Exception in evaluate: {res.get('exceptionDetails')}")
             return res.get("result", {}).get("value")
-
         async def snap(filename, label):
             res = await call("Page.captureScreenshot", {"format": "png"})
             b64 = res.get("data", "")
@@ -428,51 +430,61 @@ async def run_qa_suite():
         # TEST MODULE 9: 4-FRAME IDLE ANIMATION STRIP & SKIN SWITCHER
         # ---------------------------------------------------------------------
         print("\n[MODULE 9] 4-Frame Idle Animation Strip, Crotch Stability & Skin Switcher (All 14 Fighters)")
+        for _ in range(50):
+            loaded_count = await evaluate("Object.keys(window.ROSTER_IDLE_CANVASES || {}).length")
+            if loaded_count and loaded_count >= 14:
+                break
+            await asyncio.sleep(0.1)
         for idx, f in enumerate(fighters):
             js = """
                 (() => {
                     const c = window.ROSTER_IDLE_CANVASES['{F}_0'];
                     if (!c) return { err: 'missing canvas' };
-                    const ctx = c.getContext('2d');
-                    const bounds = c.bounds || { xmin: 10, ymin: 4, w: 28, h: 40 };
-                    const cx = Math.round(bounds.xmin + bounds.w * 0.4);
-                    const cy = Math.round(bounds.ymin + bounds.h * 0.58);
-                    const cw = Math.max(3, Math.round(bounds.w * 0.2));
-                    const ch = Math.max(3, Math.round(bounds.h * 0.12));
+                    const bounds = c.bounds || { w: 28, h: 40 };
+                    const dh = 38;
+                    const aspect = bounds.w / bounds.h;
+                    const dw = Math.round(dh * aspect);
+                    const dx = Math.round((48 - dw) / 2);
+                    const dy = 48 - dh;
+                    const upperDh = Math.round(dh * 0.48);
+                    const crotchY = dy + upperDh;
+                    const crotchDh = Math.max(2, Math.round(dh * 0.05));
+                    const cx = dx + Math.round(dw * 0.38);
+                    const cw = Math.max(3, Math.round(dw * 0.24));
                     
-                    const f0_crotch = Array.from(ctx.getImageData(cx, cy, cw, ch).data);
-                    const f1_crotch = Array.from(ctx.getImageData(48 + cx, cy, cw, ch).data);
-                    const f2_crotch = Array.from(ctx.getImageData(96 + cx, cy, cw, ch).data);
-                    const f3_crotch = Array.from(ctx.getImageData(144 + cx, cy, cw, ch).data);
-                    
+                    const f0_crotch = Array.from(ctx.getImageData(cx, crotchY, cw, crotchDh).data);
+                    const f1_crotch = Array.from(ctx.getImageData(48 + cx, crotchY, cw, crotchDh).data);
+                    const f2_crotch = Array.from(ctx.getImageData(96 + cx, crotchY, cw, crotchDh).data);
+                    const f3_crotch = Array.from(ctx.getImageData(144 + cx, crotchY, cw, crotchDh).data);
                     let crotch_stable = true;
+                    let diffs = [];
                     for (let j = 0; j < f0_crotch.length; j += 4) {
                         if (f0_crotch[j+3] > 0) {
                             if (f0_crotch[j] !== f1_crotch[j] || f0_crotch[j] !== f2_crotch[j] || f0_crotch[j] !== f3_crotch[j]) {
                                 crotch_stable = false;
+                                diffs.push({ j, f0: f0_crotch.slice(j, j+4), f1: f1_crotch.slice(j, j+4), f2: f2_crotch.slice(j, j+4), f3: f3_crotch.slice(j, j+4) });
                             }
                         }
                     }
                     
-                    // Moving Shorts Bottom Lining Edge (Y: 35..38)
-                    const f0_hem = Array.from(ctx.getImageData(16, 35, 16, 3).data);
-                    const f1_hem = Array.from(ctx.getImageData(48 + 16, 35, 16, 3).data);
+                    // Moving Shorts Bottom Fabric Wave (Y: 32..35, strictly above knees)
+                    const f0_hem = Array.from(ctx.getImageData(16, 32, 16, 3).data);
+                    const f1_hem = Array.from(ctx.getImageData(48 + 16, 32, 16, 3).data);
                     let hem_moves = false;
                     for (let j = 0; j < f0_hem.length; j += 4) {
                         if (f0_hem[j] !== f1_hem[j] || f0_hem[j+3] !== f1_hem[j+3]) {
                             hem_moves = true;
                         }
                     }
-                    // Upper body animation
-                    const f0_head = Array.from(ctx.getImageData(18, 10, 12, 8).data);
-                    const f1_head = Array.from(ctx.getImageData(48 + 18, 10, 12, 8).data);
+                    // Upper body animation across upper torso
+                    const f0_upper = Array.from(ctx.getImageData(dx, dy, dw, upperDh - 2).data);
+                    const f1_upper = Array.from(ctx.getImageData(48 + dx, dy, dw, upperDh - 2).data);
                     let upper_moves = false;
-                    for (let j = 0; j < f0_head.length; j += 4) {
-                        if (f0_head[j] !== f1_head[j] || f0_head[j+3] !== f1_head[j+3]) {
+                    for (let j = 0; j < f0_upper.length; j += 4) {
+                        if (f0_upper[j] !== f1_upper[j] || f0_upper[j+3] !== f1_upper[j+3]) {
                             upper_moves = true;
                         }
                     }
-
                     const c1 = window.ROSTER_IDLE_CANVASES['{F}_1'];
 
                     return {
@@ -481,6 +493,11 @@ async def run_qa_suite():
                         c1_w: c1 ? c1.width : 0,
                         c1_h: c1 ? c1.height : 0,
                         crotch_stable: crotch_stable,
+                        diffs: diffs,
+                        cx: cx,
+                        crotchY: crotchY,
+                        cw: cw,
+                        crotchDh: crotchDh,
                         hem_moves: hem_moves,
                         upper_moves: upper_moves
                     };
@@ -591,7 +608,36 @@ async def run_qa_suite():
         # ---------------------------------------------------------------------
         print("\n[MODULE 12] Trainer Gym Upgrade Shop & Cutscene Text Layout Integrity")
         
-        # 1. Test Gym Shop Purchase & Progression Flow
+        # 1. Test Mode Select via Keyboard & Gamepad (CPU Watch Demo selectability)
+        await evaluate("""
+            window.appState = 'MODE_SELECT';
+            window.selectedModeIdx = 0;
+            window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown' }));
+            window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown' }));
+            window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown' }));
+        """)
+        mode3_idx = await evaluate("window.selectedModeIdx")
+        assert mode3_idx == 3, f"Expected selectedModeIdx 3 (CPU DEMO), got {mode3_idx}"
+        
+        # Confirm CPU DEMO with 'x'
+        await evaluate("window.dispatchEvent(new KeyboardEvent('keydown', { key: 'x' }));")
+        mode_app_state = await evaluate("window.appState")
+        assert mode_app_state == 'CHAR_SELECT', f"Expected CHAR_SELECT, got {mode_app_state}"
+        print("  ✓ Game Mode Menu: CPU Watch Demo cleanly navigable & selectable via keyboard [PASS]")
+
+        # 2. Test Ladder Bracket 'X' Button Response
+        await evaluate("window.appState = 'LADDER_BRACKET'; document.getElementById('btnX').click();")
+        ladder_app_state = await evaluate("window.appState")
+        assert ladder_app_state == 'STAGE_INTRO', f"Expected STAGE_INTRO after clicking btnX on LADDER_BRACKET, got {ladder_app_state}"
+        print("  ✓ Ladder Bracket: Pressing X button advances to STAGE_INTRO as prompt indicates [PASS]")
+
+        # 3. Test Particle & Floating Text clearing across matches
+        await evaluate("window.spawnFloatingText('TEST PERSIST', 50, 50, 10); window.startMatch();")
+        active_texts = await evaluate("window.floatingTextPool ? window.floatingTextPool.filter(t => t.active).length : 0")
+        assert active_texts == 0, f"Floating texts must be cleared on startMatch, got {active_texts}"
+        print("  ✓ Match Start: Floating combat banner texts properly cleared from playfield [PASS]")
+
+        # 4. Test Gym Shop Purchase & Progression Flow
         await evaluate("""
             window.appState = 'LADDER_SHOP';
             window.campaignState = {
@@ -614,7 +660,7 @@ async def run_qa_suite():
         assert purse_after == 2000, f"Expected purse 2000, got {purse_after}"
         print(f"  ✓ Gym Shop purchase verified: PWR Lv{pwr_level}, Purse ${purse_after} [PASS]")
 
-        # 2. Test Advance to Next Stage via buyShopItem(5) / Next Bout
+        # 5. Test Advance to Next Stage via buyShopItem(5) / Next Bout
         await evaluate("""
             window.shopSelectedIdx = 5;
             window.buyShopItem(5);
@@ -625,12 +671,12 @@ async def run_qa_suite():
         assert next_stage_idx == 1, f"Expected stageIdx 1, got {next_stage_idx}"
         print(f"  ✓ Gym Shop unblocked advance verified: Stage {next_stage_idx+1}/7 [PASS]")
 
-        # 3. Verify Victory Press Conference & Stage Face-Off Cutscenes (Zero Overlap)
+        # 6. Verify Victory Press Conference & Stage Face-Off Cutscenes (Zero Overlap)
         await evaluate("window.appState = 'STAGE_VICTORY_CUTSCENE'; window.victoryCutscenePhase = 0; window.render();")
         await asyncio.sleep(0.05)
         await snap("module12_press_conference_layout.png", "Press Conference Layout")
 
-        await evaluate("window.appState = 'STAGE_INTRO'; window.render();")
+        await evaluate("window.appState = 'STAGE_INTRO'; window.campaignState.stageIdx = 3; window.p1SelectIdx = 1; window.render();")
         await asyncio.sleep(0.05)
         await snap("module12_stage_faceoff_layout.png", "Stage Face-Off Layout")
 

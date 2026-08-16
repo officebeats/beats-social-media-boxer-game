@@ -58,9 +58,6 @@
   - Character Select renders locked characters as dark silhouettes with `🔒` icons and unlock stage hints, preventing locked selections.
 - 🦶 **Ring Floor Grounding & Contact Plane Fix**:
   - Both fighters stand flat on the ring floor at exact mat coordinate $Y=90$ on the floor plane ($Y=88..113$), with dark elliptical contact shadows eliminating any floating appearance.
-- 🛡️ **Permanent 11-Module Automated E2E Regression Suite (`tests/e2e_regression_suite.py`)**:
-  - Added **Module 11 (Automated Visual Critique, Floor Grounding & Progressive Unlocks)** with CDP automated screenshot capture and pixel analysis.
-  - Full suite passes 11/11 modules with 0 failures, 0 console errors, and locked 60 FPS performance.
 - 🥊 **4-Frame Athletic Boxing Idle Stances**:
   - Replaced static wobbles with authentic $192\times 48\text{px}$ linear 4-frame animation strips playing at 7.5 FPS.
   - **Frame 0**: Neutral High-Guard Athletic Stance (weight centered, chin tucked).
@@ -102,8 +99,6 @@
   7. **[NEW] Dubai Penthouse Helipad (Dubai, UAE)**: Rotating Burj Khalifa aerial beacon spotlight + gold rope tassels.
   8. **[NEW] Underground Fight Cage (Atlanta, GA)**: Steel fight cage chainlink lattice + rising floor steam vents.
   9. **[NEW] Tokyo Neon Dome (Tokyo, JP)**: High-speed scrolling Japanese kanji LED ticker (`TOKYO RUSH`) + magenta laser grid.
-- 🛡️ **Permanent 10-Module Automated E2E Regression Suite (`tests/e2e_regression_suite.py`)**:
-  - Comprehensive CDP automated test harness covering all 10 modules with 0 failures, 0 console errors, and locked 60 FPS performance.
 ## 🌟 New in v3.3.3
 - 🏆 **Strict 7-Stage Tournament Campaign & Anti-Skip Guard**:
   - Implemented strict stage clearance tracking (`clearedStages: [false x 7]`), mathematically preventing players from skipping to Champion without defeating all 7 opponents in sequence.
@@ -130,6 +125,11 @@
 - ⏱️ **Fixed 60 FPS Timestep Accumulator**: Smooth 60 FPS animation across all 60Hz and 120Hz displays.
 - 🥊 **Punch-Out Style 2-Phase Victory Cutscene & Ranking Ladder Climb**: Post-fight press conference followed by tournament ladder climb with red `K.O.` stamp.
 - 🎙️ **Authentic 2026 Kick Warehouse Stream Catchphrases**: Real stream lines across all 7 stages (*"ABOUT BILLIONS!"*, *"LIGHTNING STRAIGHT!"*, *"CRASHING OUT!"*).
+- 🎨 **12-Skin GBA Handheld Console Theme Engine**: Switch between 12 retro GBA console chassis skins:
+  1. **Classic Indigo** (Original GBA Indigo Blue)
+  2. **Gold SP** (Special Edition Gold & Black)
+  3. **Atomic Purple** (Translucent 90s Purple)
+  4. **Kick Stealth** (Kick Neon Green & Matte Black)
   5. **Arctic White** (Clean Snow White & Slate Blue)
   6. **Flame Red** (SP Classic Gloss Red & Gold)
   7. **Cobalt Blue** (Deep Metallic Blue & Yellow)
@@ -189,10 +189,10 @@ Every character on the 14-fighter roster represents a verified host or guest fro
 8. **Rampage Jackson** (MMA Legend Stream Guest, Rampage Slam)
 9. **Adin Ross** (Kick Collaborator, Stream Raid Bomb)
 10. **Charleston White** (Iconic Stream Guest, Microphone Rant)
-11. **Walid Sharks** (Stream Guest & Deen Rival, Shark Attack Combo)
-12. **Antonio Brown** (NFL Star Stream Guest, CT KO Dance)
-13. **Gervonta "Tank" Davis** (Boss, Tank Uppercut KO)
-14. **Floyd "Money" Mayweather** (Final Boss, 50-0 Shoulder Roll)
+11. **Coach Bang** (Warehouse Trainer, Bang Body Combo)
+12. **Antonio Brown (AB)** (NFL Star Stream Guest, CT KO Dance)
+13. **Fousey** (G7 Streamer Guest, G7 Crash Out)
+14. **Sneako** (Creative Stream Guest, Red Pill Counter)
 
 ---
 

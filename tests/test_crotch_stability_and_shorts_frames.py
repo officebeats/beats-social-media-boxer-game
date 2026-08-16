@@ -14,6 +14,7 @@ PORT = 8092
 SERVER_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUTPUT_DIR = os.path.join(SERVER_DIR, "docs", "screenshots", "shorts_frames_critique")
 os.makedirs(OUTPUT_DIR, exist_ok=True)
+PORT = 8000
 
 class QuietHandler(SimpleHTTPRequestHandler):
     def log_message(self, format, *args):
@@ -50,10 +51,10 @@ async def run_frame_critique_test():
         chrome_path,
         "--headless=new",
         f"--remote-debugging-port={remote_port}",
+        f"--user-data-dir=C:/tmp/chrome_critique_prof_{remote_port}",
         "--disable-gpu",
         "--no-sandbox",
-        "--window-size=640,640",
-        f"http://127.0.0.1:{PORT}/index.html"
+        "--window-size=640,640"
     ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
     await asyncio.sleep(2.0)
@@ -78,6 +79,16 @@ async def run_frame_critique_test():
             res = await call("Runtime.evaluate", {"expression": expr, "returnByValue": True})
             return res.get("result", {}).get("value")
 
+        await call("Page.navigate", {"url": f"http://127.0.0.1:{PORT}/index.html"})
+        await asyncio.sleep(2.0)
+
+        # Wait for all canvases to finish loading
+        for _ in range(50):
+            loaded_count = await evaluate("Object.keys(window.ROSTER_IDLE_CANVASES || {}).length")
+            if loaded_count and loaded_count >= 14:
+                break
+            await asyncio.sleep(0.1)
+        print(f"Canvas loaded count: {loaded_count}")
         fighters = [
             'broner', 'deen', 'ryan', 'n3on', 'rayj', 'blueface',
             'chrisean', 'rampage', 'adin', 'charleston', 'bang',
@@ -96,11 +107,11 @@ async def run_frame_critique_test():
                     const f2_data = Array.from(ctx.getImageData(96, 0, 48, 48).data);
                     const f3_data = Array.from(ctx.getImageData(144, 0, 48, 48).data);
                     
-                    // Invariant Central Crotch Region (Y: 28..34, X: 21..27)
-                    const f0_crotch = Array.from(ctx.getImageData(21, 28, 6, 7).data);
-                    const f1_crotch = Array.from(ctx.getImageData(48 + 21, 28, 6, 7).data);
-                    const f2_crotch = Array.from(ctx.getImageData(96 + 21, 28, 6, 7).data);
-                    const f3_crotch = Array.from(ctx.getImageData(144 + 21, 28, 6, 7).data);
+                    // Invariant Central Crotch & Invariant Knees (Y: 28..31 and Y: 35..39)
+                    const f0_crotch = Array.from(ctx.getImageData(21, 28, 6, 4).data);
+                    const f1_crotch = Array.from(ctx.getImageData(48 + 21, 28, 6, 4).data);
+                    const f2_crotch = Array.from(ctx.getImageData(96 + 21, 28, 6, 4).data);
+                    const f3_crotch = Array.from(ctx.getImageData(144 + 21, 28, 6, 4).data);
                     
                     let crotch_stable = true;
                     for (let j = 0; j < f0_crotch.length; j += 4) {
@@ -110,17 +121,30 @@ async def run_frame_critique_test():
                             }
                         }
                     }
+
+                    // Invariant Knees & Legs (Y: 36..40)
+                    const f0_knees = Array.from(ctx.getImageData(16, 36, 16, 4).data);
+                    const f1_knees = Array.from(ctx.getImageData(48 + 16, 36, 16, 4).data);
+                    const f2_knees = Array.from(ctx.getImageData(96 + 16, 36, 16, 4).data);
+                    const f3_knees = Array.from(ctx.getImageData(144 + 16, 36, 16, 4).data);
+                    let knees_stable = true;
+                    for (let j = 0; j < f0_knees.length; j += 4) {
+                        if (f0_knees[j+3] > 0) {
+                            if (f0_knees[j] !== f1_knees[j] || f0_knees[j] !== f2_knees[j] || f0_knees[j] !== f3_knees[j]) {
+                                knees_stable = false;
+                            }
+                        }
+                    }
                     
-                    // Moving Shorts Bottom Lining Edge (Y: 35..38)
-                    const f0_hem = Array.from(ctx.getImageData(16, 35, 16, 3).data);
-                    const f1_hem = Array.from(ctx.getImageData(48 + 16, 35, 16, 3).data);
+                    // Moving Shorts Bottom Fabric Wave (Y: 32..35, strictly above knees)
+                    const f0_hem = Array.from(ctx.getImageData(16, 32, 16, 3).data);
+                    const f1_hem = Array.from(ctx.getImageData(48 + 16, 32, 16, 3).data);
                     let hem_moves = false;
                     for (let j = 0; j < f0_hem.length; j += 4) {
                         if (f0_hem[j] !== f1_hem[j] || f0_hem[j+3] !== f1_hem[j+3]) {
                             hem_moves = true;
                         }
                     }
-
                     // Upper body animation
                     const f0_head = Array.from(ctx.getImageData(18, 10, 12, 8).data);
                     const f1_head = Array.from(ctx.getImageData(48 + 18, 10, 12, 8).data);
@@ -133,9 +157,9 @@ async def run_frame_critique_test():
                     
                     // Return raw PNG data for 192x48 strip
                     const dataUrl = c.toDataURL('image/png');
-
                     return {
                         crotch_stable: crotch_stable,
+                        knees_stable: knees_stable,
                         hem_moves: hem_moves,
                         upper_moves: upper_moves,
                         dataUrl: dataUrl
