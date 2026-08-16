@@ -258,12 +258,9 @@
     // PICO-8 TRANSPARENT SPRITE ENGINE v9.0.0
     // - 100% Transparent Background Keying for Fighter Sprites (ZERO WHITE BOXES!)
     // - Spritesheet Keyframe Animation Slicing (`sspr()`) for JAB, STRAIGHT, HOOK, UPPERCUT, FLINCH!
-    <button class="pico-btn" id="btnMode">MODE: 1P VS CPU</button>
-    <button class="pico-btn" id="btnAudio">AUDIO: OFF</button>
-    <button class="pico-btn" id="btnReset">RESET CART</button>
+    // =========================================================================
 
     const PICO_PALETTE = [
-      '#000000', '#1D2B53', '#7E2553', '#008751',
       '#AB5236', '#5F574F', '#C2C3C7', '#FFF1E8',
       '#FF004D', '#FFA300', '#FFEC27', '#00E436',
       '#29ADFF', '#83769C', '#FF77A8', '#FFCCAA'
@@ -807,7 +804,8 @@
     let flashFrames = 0;
     let roundTimer = 99;
     let timerFrameCounter = 0;
-    let globalFrameCount = 0;
+    var globalFrameCount = 0;
+    window.globalFrameCount = globalFrameCount;
     let gameState = 'PLAYING';
     let koMessage = 'K.O.!';
 
@@ -4073,6 +4071,7 @@
 
     function update() {
       globalFrameCount++;
+      window.globalFrameCount = globalFrameCount;
 
       if (appState === 'CHAR_SELECT' && p1Locked && p2Locked) {
         if (lockCountdown < 0) lockCountdown = 30;
