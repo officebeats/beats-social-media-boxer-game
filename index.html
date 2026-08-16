@@ -1013,13 +1013,9 @@
           this.hp = 0;
           this.pair = null;
           this.state = 'GAMEOVER';
-          gameState = 'KO';
-          appState = 'KO';
-          const winner = (this.id === 1) ? p2 : p1;
-          koMessage = 'K.O.! ' + (winner.name || 'WINNER') + ' WINS!';
-          play808Sfx('ko');
-          play808Sfx('bell');
-          cameraShake = Math.max(cameraShake, 14);
+          const winnerId = (this.id === 1) ? 2 : 1;
+          endRound(winnerId, 'TOP OUT K.O.!');
+          return;
         } else {
           this.state = 'FALLING';
         }
@@ -1791,7 +1787,7 @@
       update() {
         this.tickVisuals();
 
-        if (gameState !== 'PLAYING') return;
+        if (appState !== 'PLAYING' && appState !== 'KNOCKDOWN') return;
 
         if (this.state === 'SPAWN') {
           this.spawnPair();
@@ -2201,6 +2197,18 @@
       p2.squish = Array(ROWS).fill(null).map(() => Array(COLS).fill(0));
       p1.pendingGarbage = 0;
       p2.pendingGarbage = 0;
+      p1.pendingClear = null;
+      p2.pendingClear = null;
+      p1.clearTimer = 0;
+      p2.clearTimer = 0;
+      p1.clearingGems = [];
+      p2.clearingGems = [];
+      p1.comboCount = 0;
+      p2.comboCount = 0;
+      p1.dropTimer = 0;
+      p2.dropTimer = 0;
+      p1.aiTimer = 0;
+      p2.aiTimer = 0;
 
       knockdownsP1 = 0;
       knockdownsP2 = 0;
@@ -2227,14 +2235,14 @@
       if (campaignState.active) {
         if (winnerId === 1) {
           // Player won campaign stage!
-          const st = CAMPAIGN_STAGES[campaignState.stageIdx];
+          const st = CAMPAIGN_STAGES[campaignState.stageIdx] || CAMPAIGN_STAGES[0];
           const sweepBonus = (p2RoundsWon === 0) ? 500 : 0;
-          const hpBonus = Math.floor(p1.hp * 10);
-          const earned = st.purse + sweepBonus + hpBonus;
-          campaignState.purse += earned;
-          campaignState.totalScore += p1.score + earned * 10;
+          const hpBonus = Math.floor((p1 ? p1.hp : 100) * 10);
+          const earned = (st ? st.purse : 1000) + sweepBonus + hpBonus;
+          campaignState.purse = (campaignState.purse || 0) + earned;
+          campaignState.totalScore = (campaignState.totalScore || 0) + (p1 ? p1.score : 0) + earned * 10;
+          window.campaignState = campaignState;
           saveCampaign();
-
           if (campaignState.stageIdx >= CAMPAIGN_STAGES.length - 1) {
             // BEAT FINAL BOSS FLOYD MAYWEATHER!
             appState = 'VICTORY_END';
