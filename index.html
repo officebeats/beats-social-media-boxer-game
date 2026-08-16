@@ -2353,36 +2353,46 @@
         if (progress < 0.40) fp = 0;
         else if (progress < 0.65) fp = smoothstep(0.40, 0.65, progress);
         else fp = 1.0 - smoothstep(0.65, 1.00, progress);
-        horzShift = (isP1 ? -1 : 1) * fp * 6.0;
+        horzShift = (isP1 ? -1 : 1) * fp * 5.0;
         bodyTilt = (isP1 ? -1 : 1) * fp * 0.12;
         if (progress >= 0.42 && progress < 0.58) isHitFlash = true;
 
       } else if (anim === 'DODGE' || anim === 'DUCK') {
+        // Natural bob & weave ducking: athletic knee bend and forward-dip slip under punches
         let dp = 0;
         if (progress < 0.25) dp = smoothstep(0.0, 0.25, progress);
         else if (progress < 0.65) dp = 1.0;
         else dp = 1.0 - smoothstep(0.65, 1.0, progress);
-        vertSquash = 1.0 - dp * 0.35;
-        vertShift = dp * 12;
+        
+        // Zero scaling/squashing distortion: 100% natural pixel art scale
+        vertSquash = 1.0;
+        vertShift = dp * 6.0; // Clean downward dip (head dips below high punch level)
+        bodyTilt = (isP1 ? 1 : -1) * dp * 0.10; // Subtle forward slip angle
+        horzShift = (isP1 ? 1 : -1) * dp * 2.0; // Subtle forward weave step
 
       } else if (anim === 'LEAN') {
+        // Pull counter / lean back away from incoming strike
         let lp = 0;
         if (progress < 0.25) lp = smoothstep(0.0, 0.25, progress);
         else if (progress < 0.65) lp = 1.0;
-        else dp = 1.0 - smoothstep(0.65, 1.0, progress);
-        bodyTilt = (isP1 ? -1 : 1) * lp * 0.15;
-        horzShift = (isP1 ? -1 : 1) * lp * -3;
+        else lp = 1.0 - smoothstep(0.65, 1.0, progress);
+        
+        vertSquash = 1.0;
+        bodyTilt = (isP1 ? -1 : 1) * lp * 0.14; // Arch back at waist
+        horzShift = (isP1 ? -1 : 1) * lp * -4.0; // Step back away from center
 
       } else if (anim === 'BLOCK' || anim === 'SHOULDER_ROLL') {
+        // Solid guard brace and shoulder deflection
         let bp = 0;
         if (progress < 0.20) bp = smoothstep(0.0, 0.20, progress);
         else if (progress < 0.70) bp = 1.0;
         else bp = 1.0 - smoothstep(0.70, 1.0, progress);
-        vertSquash = 1.0 - bp * 0.10;
-        bodyTilt = (isP1 ? -1 : 1) * bp * 0.08;
-        vertShift = bp * 4;
+        
+        vertSquash = 1.0;
+        bodyTilt = (isP1 ? 1 : -1) * bp * 0.10; // Turn shoulder inward to deflect
+        vertShift = bp * 1.5; // Athletic grounded stance drop
+        horzShift = (isP1 ? -1 : 1) * bp * -1.5; // Absorbing blow impact
       }
-
       fx += horzShift;
 
       // Ground shadow placed directly on the floor below the boots
