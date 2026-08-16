@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>CRASH OUT: RING RUSH (v3.3.2) — In-Ring 16-Bit Boxer Sprites Restored</title>
+  <title>CRASH OUT: RING RUSH (v3.3.3) — Strict 7-Stage Tournament Campaign & Anti-Skip Guard</title>
   <style>
     :root {
       --pico-black: #000000;
@@ -2655,6 +2655,11 @@
       if (campaignState.active) {
         if (winnerId === 1) {
           // Player won campaign stage!
+          if (!campaignState.clearedStages) {
+            campaignState.clearedStages = [false, false, false, false, false, false, false];
+          }
+          campaignState.clearedStages[campaignState.stageIdx] = true;
+
           const st = CAMPAIGN_STAGES[campaignState.stageIdx] || CAMPAIGN_STAGES[0];
           const sweepBonus = (p2RoundsWon === 0) ? 500 : 0;
           const hpBonus = Math.floor((p1 ? p1.hp : 100) * 10);
@@ -2666,12 +2671,18 @@
           lastSweepBonus = sweepBonus;
           lastHpBonus = hpBonus;
 
-          if (campaignState.stageIdx >= CAMPAIGN_STAGES.length - 1) {
-            // BEAT FINAL BOSS FLOYD MAYWEATHER!
+          const clearedCount = campaignState.clearedStages.filter(Boolean).length;
+          const isFinalStage = (campaignState.stageIdx === CAMPAIGN_STAGES.length - 1);
+
+          if (isFinalStage && clearedCount >= CAMPAIGN_STAGES.length) {
+            // BEAT FINAL BOSS FLOYD MAYWEATHER AFTER CLEARING ALL 7 STAGES!
             appState = 'VICTORY_END';
+            try { localStorage.removeItem('ringrush_campaign'); } catch(e) {}
           } else {
             // Show Post-Fight Press Conference Cutscene before Gym Shop!
-            victoryCutscenePhase = 0; appState = 'STAGE_VICTORY_CUTSCENE';
+            victoryCutscenePhase = 0;
+            appState = 'STAGE_VICTORY_CUTSCENE';
+            saveCampaign();
           }
           play808Sfx('confirm');
         } else {
@@ -3182,6 +3193,7 @@
         purse: 5000
       }
     ];
+    window.CAMPAIGN_STAGES = CAMPAIGN_STAGES;
 
     // =========================================================================
     // 🎙️ 2026 KICK WAREHOUSE STREAM CATCHPHRASES & DIALOGUE ENGINE
@@ -3287,6 +3299,7 @@
     var campaignState = {
       active: false,
       stageIdx: 0,
+      clearedStages: [false, false, false, false, false, false, false],
       purse: 0,
       upgrades: { pwr: 0, def: 0, spd: 0, diamondSeed: false, superRush: false },
       continues: 3,
@@ -3298,16 +3311,44 @@
 
     function saveCampaign() {
       try {
-        localStorage.setItem('ringrush_campaign', JSON.stringify(window.campaignState || campaignState));
+        window.campaignState = campaignState;
+        localStorage.setItem('ringrush_campaign', JSON.stringify(campaignState));
       } catch(e) {}
     }
 
     function loadCampaign() {
       try {
         const raw = localStorage.getItem('ringrush_campaign');
-        if (raw) return JSON.parse(raw);
+        if (raw) {
+          const data = JSON.parse(raw);
+          // Guard: if campaign was already beaten or invalid stage, treat as fresh
+          if (data && typeof data.stageIdx === 'number') {
+            if (data.stageIdx >= CAMPAIGN_STAGES.length - 1 || (data.clearedStages && data.clearedStages.every(Boolean))) {
+              return null;
+            }
+            if (!data.clearedStages) {
+              data.clearedStages = Array(CAMPAIGN_STAGES.length).fill(false);
+              for (let k = 0; k < data.stageIdx; k++) data.clearedStages[k] = true;
+            }
+            return data;
+          }
+        }
       } catch(e) {}
       return null;
+    }
+
+    function advanceCampaignStage() {
+      if (!campaignState.active) return;
+      if (!campaignState.clearedStages) {
+        campaignState.clearedStages = [false, false, false, false, false, false, false];
+      }
+      // Only advance to the next stage if current stage was actually cleared!
+      if (campaignState.clearedStages[campaignState.stageIdx]) {
+        if (campaignState.stageIdx < CAMPAIGN_STAGES.length - 1) {
+          campaignState.stageIdx++;
+          saveCampaign();
+        }
+      }
     }
 
     // Navigation & State Management
@@ -4791,17 +4832,27 @@
       // Global Start / Back actions
       if (btnStart) {
         if (appState === 'TITLE') { appState = 'MODE_SELECT'; play808Sfx('confirm'); }
-        else if (appState === 'MODE_SELECT') { appState = 'CHAR_SELECT'; p1Locked = false; p2Locked = false; play808Sfx('confirm'); }
+        else if (appState === 'MODE_SELECT') {
+          if (selectedModeIdx === 0) {
+            const saved = loadCampaign();
+            if (saved && typeof saved.stageIdx === 'number' && saved.stageIdx > 0 && saved.stageIdx < CAMPAIGN_STAGES.length - 1) {
+              campaignState = saved;
+            } else {
+              campaignState = { active: true, stageIdx: 0, clearedStages: [false, false, false, false, false, false, false], purse: 0, upgrades: { pwr: 0, def: 0, spd: 0, diamondSeed: false, superRush: false }, continues: 3, totalScore: 0, startTime: Date.now(), totalMatchesPlayed: 0 };
+              saveCampaign();
+            }
+          }
+          appState = 'CHAR_SELECT'; p1Locked = false; p2Locked = false; play808Sfx('confirm');
+        }
         else if (appState === 'CHAR_SELECT') { p1Locked = true; if (selectedModeIdx !== 1) p2Locked = true; play808Sfx('confirm'); }
         else if (appState === 'LADDER_BRACKET') { appState = 'STAGE_INTRO'; play808Sfx('confirm'); }
         else if (appState === 'STAGE_INTRO') { startMatch(); }
         else if (appState === 'STAGE_VICTORY_CUTSCENE') { appState = 'LADDER_SHOP'; play808Sfx('confirm'); }
-        else if (appState === 'LADDER_SHOP') { campaignState.stageIdx++; saveCampaign(); appState = 'LADDER_BRACKET'; play808Sfx('confirm'); }
-        else if (appState === 'VICTORY_END') { campaignState.active = false; appState = 'TITLE'; play808Sfx('confirm'); }
+        else if (appState === 'LADDER_SHOP') { advanceCampaignStage(); appState = 'LADDER_BRACKET'; play808Sfx('confirm'); }
+        else if (appState === 'VICTORY_END') { campaignState.active = false; campaignState.stageIdx = 0; campaignState.clearedStages = [false, false, false, false, false, false, false]; appState = 'TITLE'; play808Sfx('confirm'); }
         else if (appState === 'CONTINUE_SCREEN') { campaignState.continues--; saveCampaign(); startMatch(); }
         else if (appState === 'KO') { rematchToCharSelect(); }
       }
-
       if (btnB || btnSelect || btnL) {
         if (appState !== 'TITLE' && appState !== 'PLAYING' && appState !== 'KNOCKDOWN') {
           goBack();
@@ -4821,12 +4872,20 @@
           if (dpadUp) { selectedModeIdx = (selectedModeIdx + 3) % 4; gpNavDebounce = 12; play808Sfx('nav'); }
           if (dpadDown) { selectedModeIdx = (selectedModeIdx + 1) % 4; gpNavDebounce = 12; play808Sfx('nav'); }
           if (btnA) {
+            if (selectedModeIdx === 0) {
+              const saved = loadCampaign();
+              if (saved && typeof saved.stageIdx === 'number' && saved.stageIdx > 0 && saved.stageIdx < CAMPAIGN_STAGES.length - 1) {
+                campaignState = saved;
+              } else {
+                campaignState = { active: true, stageIdx: 0, clearedStages: [false, false, false, false, false, false, false], purse: 0, upgrades: { pwr: 0, def: 0, spd: 0, diamondSeed: false, superRush: false }, continues: 3, totalScore: 0, startTime: Date.now(), totalMatchesPlayed: 0 };
+                saveCampaign();
+              }
+            }
             appState = 'CHAR_SELECT';
             p1Locked = false; p2Locked = false;
             p1SelectIdx = 0; p2SelectIdx = 1;
             play808Sfx('confirm');
           }
-        } else if (appState === 'CHAR_SELECT' && !p1Locked) {
           if (dpadLeft) { p1SelectIdx = (p1SelectIdx + 13) % 14; gpNavDebounce = 12; play808Sfx('nav'); }
           if (dpadRight) { p1SelectIdx = (p1SelectIdx + 1) % 14; gpNavDebounce = 12; play808Sfx('nav'); }
           if (dpadUp || dpadDown) { p1SelectIdx = (p1SelectIdx + 7) % 14; gpNavDebounce = 12; play808Sfx('nav'); }
@@ -4842,9 +4901,7 @@
           if (dpadDown) { shopSelectedIdx = (shopSelectedIdx + 1) % 6; gpNavDebounce = 12; play808Sfx('nav'); }
           if (btnA) {
             if (shopSelectedIdx === 5) {
-              campaignState.stageIdx++; saveCampaign(); appState = 'LADDER_BRACKET'; play808Sfx('confirm');
-            } else if (shopSelectedIdx === 0 && campaignState.upgrades.pwr < 3) {
-              const cost = CAMPAIGN_UPGRADE_TIERS.pwr[campaignState.upgrades.pwr].cost;
+              advanceCampaignStage(); appState = 'LADDER_BRACKET'; play808Sfx('confirm');
               if (campaignState.purse >= cost) { campaignState.purse -= cost; campaignState.upgrades.pwr++; saveCampaign(); play808Sfx('fuse'); }
             } else if (shopSelectedIdx === 1 && campaignState.upgrades.def < 3) {
               const cost = CAMPAIGN_UPGRADE_TIERS.def[campaignState.upgrades.def].cost;
@@ -5023,10 +5080,11 @@
           if (selectedModeIdx === 0) {
             // Campaign Mode: check if saved game exists
             const saved = loadCampaign();
-            if (saved && saved.stageIdx > 0) {
+            if (saved && typeof saved.stageIdx === 'number' && saved.stageIdx > 0 && saved.stageIdx < CAMPAIGN_STAGES.length - 1) {
               campaignState = saved;
             } else {
-              campaignState = { active: true, stageIdx: 0, purse: 0, upgrades: { pwr: 0, def: 0, spd: 0, diamondSeed: false, superRush: false }, continues: 3, totalScore: 0, startTime: Date.now() };
+              campaignState = { active: true, stageIdx: 0, clearedStages: [false, false, false, false, false, false, false], purse: 0, upgrades: { pwr: 0, def: 0, spd: 0, diamondSeed: false, superRush: false }, continues: 3, totalScore: 0, startTime: Date.now(), totalMatchesPlayed: 0 };
+              saveCampaign();
             }
           }
           appState = 'CHAR_SELECT';
@@ -5073,8 +5131,7 @@
         if (isStartKey(e.key)) {
           if (shopSelectedIdx === 5) {
             // Advance to next stage!
-            campaignState.stageIdx++;
-            saveCampaign();
+            advanceCampaignStage();
             appState = 'LADDER_BRACKET';
             play808Sfx('confirm');
           } else if (shopSelectedIdx === 0 && campaignState.upgrades.pwr < 3) {
@@ -5098,6 +5155,8 @@
       if (appState === 'VICTORY_END') {
         if (isStartKey(e.key)) {
           campaignState.active = false;
+          campaignState.stageIdx = 0;
+          campaignState.clearedStages = [false, false, false, false, false, false, false];
           appState = 'TITLE';
           play808Sfx('confirm');
         }
@@ -5403,13 +5462,24 @@
 
     bindBtn('btnStart', () => {
       if (appState === 'TITLE') { appState = 'MODE_SELECT'; play808Sfx('confirm'); }
-      else if (appState === 'MODE_SELECT') { appState = 'CHAR_SELECT'; p1Locked = false; p2Locked = false; play808Sfx('confirm'); }
+      else if (appState === 'MODE_SELECT') {
+        if (selectedModeIdx === 0) {
+          const saved = loadCampaign();
+          if (saved && typeof saved.stageIdx === 'number' && saved.stageIdx > 0 && saved.stageIdx < CAMPAIGN_STAGES.length - 1) {
+            campaignState = saved;
+          } else {
+            campaignState = { active: true, stageIdx: 0, clearedStages: [false, false, false, false, false, false, false], purse: 0, upgrades: { pwr: 0, def: 0, spd: 0, diamondSeed: false, superRush: false }, continues: 3, totalScore: 0, startTime: Date.now(), totalMatchesPlayed: 0 };
+            saveCampaign();
+          }
+        }
+        appState = 'CHAR_SELECT'; p1Locked = false; p2Locked = false; play808Sfx('confirm');
+      }
       else if (appState === 'CHAR_SELECT') { p1Locked = true; if (selectedModeIdx !== 1) p2Locked = true; play808Sfx('confirm'); }
       else if (appState === 'LADDER_BRACKET') { appState = 'STAGE_INTRO'; play808Sfx('confirm'); }
       else if (appState === 'STAGE_INTRO') { startMatch(); }
       else if (appState === 'STAGE_VICTORY_CUTSCENE') { appState = 'LADDER_SHOP'; play808Sfx('confirm'); }
-      else if (appState === 'LADDER_SHOP') { campaignState.stageIdx++; saveCampaign(); appState = 'LADDER_BRACKET'; play808Sfx('confirm'); }
-      else if (appState === 'VICTORY_END') { campaignState.active = false; appState = 'TITLE'; play808Sfx('confirm'); }
+      else if (appState === 'LADDER_SHOP') { advanceCampaignStage(); appState = 'LADDER_BRACKET'; play808Sfx('confirm'); }
+      else if (appState === 'VICTORY_END') { campaignState.active = false; campaignState.stageIdx = 0; campaignState.clearedStages = [false, false, false, false, false, false, false]; appState = 'TITLE'; play808Sfx('confirm'); }
       else if (appState === 'CONTINUE_SCREEN') { campaignState.continues--; saveCampaign(); startMatch(); }
       else if (appState === 'KO') { rematchToCharSelect(); }
     });
@@ -5462,10 +5532,11 @@
           }
           if (selectedModeIdx === 0) {
             const saved = loadCampaign();
-            if (saved && saved.stageIdx > 0) {
+            if (saved && typeof saved.stageIdx === 'number' && saved.stageIdx > 0 && saved.stageIdx < CAMPAIGN_STAGES.length - 1) {
               campaignState = saved;
             } else {
-              campaignState = { active: true, stageIdx: 0, purse: 0, upgrades: { pwr: 0, def: 0, spd: 0, diamondSeed: false, superRush: false }, continues: 3, totalScore: 0, startTime: Date.now() };
+              campaignState = { active: true, stageIdx: 0, clearedStages: [false, false, false, false, false, false, false], purse: 0, upgrades: { pwr: 0, def: 0, spd: 0, diamondSeed: false, superRush: false }, continues: 3, totalScore: 0, startTime: Date.now(), totalMatchesPlayed: 0 };
+              saveCampaign();
             }
           }
           appState = 'CHAR_SELECT';
@@ -5506,8 +5577,7 @@
               shopSelectedIdx = s;
               if (s === 5) {
                 // Next Bout!
-                campaignState.stageIdx++;
-                saveCampaign();
+                advanceCampaignStage();
                 appState = 'LADDER_BRACKET';
                 play808Sfx('confirm');
               } else if (s === 0 && campaignState.upgrades.pwr < 3) {
@@ -5532,6 +5602,8 @@
 
         if (appState === 'VICTORY_END') {
           campaignState.active = false;
+          campaignState.stageIdx = 0;
+          campaignState.clearedStages = [false, false, false, false, false, false, false];
           appState = 'TITLE';
           play808Sfx('confirm');
           return;
@@ -5619,6 +5691,16 @@
       render();
       requestAnimationFrame(gameLoop);
     }
+    window.CAMPAIGN_STAGES = CAMPAIGN_STAGES;
+    window.campaignState = campaignState;
+    window.advanceCampaignStage = advanceCampaignStage;
+    window.startMatch = startMatch;
+    window.triggerMatchVictory = triggerMatchVictory;
+    window.saveCampaign = saveCampaign;
+    window.loadCampaign = loadCampaign;
+    window.applyGbaSkin = applyGbaSkin;
+    window.ROSTER = ROSTER;
+    window.ARENAS = ARENAS;
     requestAnimationFrame((time) => { lastLoopTime = time; gameLoop(time); });
   </script>
 </body>

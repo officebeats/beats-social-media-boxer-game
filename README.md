@@ -1,6 +1,6 @@
 # CRASH OUT: RING RUSH — PICO-8 PUZZLE BOXING
 
-**Version:** `v3.3.2` (In-Ring Boxer Sprites Restored & 8-Module Automated QA Suite Release)
+**Version:** `v3.3.3` (Strict 7-Stage Tournament Campaign & Anti-Skip Guard Release)
 
 ![Title Screen](assets/pico8_title.jpg)
 
@@ -8,7 +8,7 @@
 
 ---
 
-## 🎮 Play Live (v3.3.2)
+## 🎮 Play Live (v3.3.3)
 
 - ⚡ **Play Live in Browser (GitHub Pages)**: **[officebeats.github.io/beats-social-media-boxer-game](https://officebeats.github.io/beats-social-media-boxer-game/)**
 - 🕹️ **Native PICO-8 Cartridge**: Load [`crash_out.p8`](crash_out.p8) directly inside PICO-8 using `pico8 -run crash_out.p8`.
@@ -23,14 +23,23 @@
 
 ---
 
-## 🌟 New in v3.3.2
+## 🌟 New in v3.3.3
+- 🏆 **Strict 7-Stage Tournament Campaign & Anti-Skip Guard**:
+  - Implemented strict stage clearance tracking (`clearedStages: [false x 7]`), mathematically preventing players from skipping to Champion without defeating all 7 opponents in sequence.
+  - `VICTORY_END` (World Championship 50-0 Belt) is strictly guarded and **CAN ONLY** be awarded after clearing all 7 stages:
+    1. Stage 1: **N3ON** *(The Warmup Brawl)*
+    2. Stage 2: **ADIN ROSS** *(Miami Stream Raid)*
+    3. Stage 3: **BLUEFACE** *(Street Brawl Grudge)*
+    4. Stage 4: **COACH BANG** *(Problem Gym Brawl)*
+    5. Stage 5: **RYAN GARCIA** *(London Contender Bout)*
+    6. Stage 6: **RAMPAGE JACKSON** *(Semi-Final Boss: Tank Power)*
+    7. Stage 7: **FLOYD MAYWEATHER** *(World Championship Final Boss: 50-0 Legend)*
+  - **Post-Championship Auto-Reset**: Automatically clears completed saves from `localStorage` upon winning the belt, ensuring subsequent runs start cleanly at Stage 1.
+  - **Safe Campaign Progression (`advanceCampaignStage`)**: Dedicated stage advancement helper prevents double-incrementing stages or skipping bouts on rapid button taps.
 - 🥊 **In-Ring 16-Bit Boxer Sprites 100% Restored**:
-  - Fixed `drawBoxer` to blit native $48\times 48\text{px}$ pre-scaled sprite canvases (`ROSTER_IDLE_CANVASES` and `ROSTER_PUNCH_CANVASES`) directly on the ring floor at ground plane $Y=90$.
-  - Eliminated legacy $1024\times 1024$ out-of-bounds crop sampling that previously rendered fighters invisible in combat.
-  - Both Player 1 (left, facing right) and Player 2 (right, facing left) render with full 16-bit arcade pixel art and full strike animations (Jab, Straight, Hook, Uppercut).
+  - Direct $48\times 48\text{px}$ pre-scaled sprite blits for both P1 and P2 across all 14 fighters.
 - 🛡️ **Permanent 8-Module Automated E2E Regression Suite (`tests/e2e_regression_suite.py`)**:
-  - Automated test harness validating Tournament Campaign, Knockdowns, Game Modes, Touch Ergonomics, Bluetooth Gamepad, Save Persistence, 60 FPS Stability, and **In-Ring Boxer Sprite Visibility across all 14 Fighters**.
-- 🎨 **Fixed Cutscene Sprites & Zero Text Overlap**:
+  - CI/CD test harness enforcing anti-skip guards, 7-stage tournament ladder, knockdown rules, touch ergonomics, and locked 60 FPS performance.
   - **48px Sprite Direct Blitting**: Fixed `drawBoxerAvatar` to sample the native $48\times 48\text{px}$ sprite canvas directly in cutscenes.
   - **Zero Text Truncation**: Shortened press conference header to **`PRESS CONFERENCE`** (16 chars, 79px), eliminating left/right edge cutoff on 128px viewports.
   - **Zero Dialogue Overlap**: Expanded interview dialogue box to $Y=76..114$ with dynamic `nextY` layout, completely separating the post-fight quote from the stage purse earnings.
