@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>CRASH OUT: RING RUSH (v2.4.0) — PICO-8 Native Transparent Boxing</title>
+  <title>CRASH OUT: RING RUSH (v2.5.0) — PICO-8 Native Transparent Boxing</title>
   <style>
     :root {
       --pico-black: #000000;
@@ -25,64 +25,64 @@
 
       /* Default GBA Theme: Classic Indigo */
       --gba-body: #43348a;
-      --gba-body-shadow: #2a1f5e;
-      --gba-bezel: #23242c;
-      --gba-dpad: #2d2d34;
+      --gba-body-shadow: #22184c;
+      --gba-bezel: #202128;
+      --gba-dpad: #2d2d35;
       --gba-btn: #8c1e50;
-      --gba-btn-shadow: #520e2c;
+      --gba-btn-shadow: #4d0a28;
       --gba-accent: #b4aae6;
       --gba-text: #ffffff;
       --gba-grip: #5b49b5;
     }
 
-    /* 🎨 12 DYNAMIC GBA HANDHELD SKINS */
+    /* 🎨 12 DYNAMIC REALISTIC GBA SKINS */
     body.theme-indigo {
-      --gba-body: #43348a; --gba-body-shadow: #2a1f5e; --gba-bezel: #23242c; --gba-dpad: #2d2d34;
-      --gba-btn: #8c1e50; --gba-btn-shadow: #520e2c; --gba-accent: #b4aae6; --gba-grip: #5b49b5;
+      --gba-body: #43348a; --gba-body-shadow: #22184c; --gba-bezel: #202128; --gba-dpad: #2d2d35;
+      --gba-btn: #8c1e50; --gba-btn-shadow: #4d0a28; --gba-accent: #b4aae6; --gba-grip: #5b49b5;
     }
     body.theme-gold {
-      --gba-body: #d4af37; --gba-body-shadow: #8c7220; --gba-bezel: #141418; --gba-dpad: #1e1e22;
-      --gba-btn: #dc143c; --gba-btn-shadow: #800a20; --gba-accent: #ffec27; --gba-grip: #f3cf58;
+      --gba-body: #d4af37; --gba-body-shadow: #786015; --gba-bezel: #121216; --gba-dpad: #1c1c20;
+      --gba-btn: #dc143c; --gba-btn-shadow: #73061a; --gba-accent: #ffec27; --gba-grip: #f3cf58;
     }
     body.theme-atomic {
-      --gba-body: rgba(90, 75, 170, 0.92); --gba-body-shadow: #372a6b; --gba-bezel: #1e1c30; --gba-dpad: #37344b;
-      --gba-btn: #ff77a8; --gba-btn-shadow: #99335c; --gba-accent: #29adff; --gba-grip: #7b68cc;
+      --gba-body: rgba(90, 75, 170, 0.94); --gba-body-shadow: #2e225e; --gba-bezel: #1c1a2e; --gba-dpad: #322f46;
+      --gba-btn: #ff77a8; --gba-btn-shadow: #8c2652; --gba-accent: #29adff; --gba-grip: #7b68cc;
     }
     body.theme-kick {
-      --gba-body: #18191f; --gba-body-shadow: #0a0b0e; --gba-bezel: #0e0e12; --gba-dpad: #23242a;
-      --gba-btn: #00e436; --gba-btn-shadow: #008722; --gba-accent: #00e436; --gba-grip: #2b2d38;
+      --gba-body: #18191f; --gba-body-shadow: #08080a; --gba-bezel: #0c0c10; --gba-dpad: #202126;
+      --gba-btn: #00e436; --gba-btn-shadow: #006619; --gba-accent: #00e436; --gba-grip: #2b2d38;
     }
     body.theme-white {
-      --gba-body: #ebeef5; --gba-body-shadow: #b0b5c5; --gba-bezel: #2d3037; --gba-dpad: #808595;
-      --gba-btn: #29adff; --gba-btn-shadow: #146299; --gba-accent: #465064; --gba-grip: #d0d5e2;
+      --gba-body: #ebeef5; --gba-body-shadow: #9ea4b5; --gba-bezel: #282a30; --gba-dpad: #727788;
+      --gba-btn: #29adff; --gba-btn-shadow: #105280; --gba-accent: #465064; --gba-grip: #d0d5e2;
     }
     body.theme-red {
-      --gba-body: #c3192d; --gba-body-shadow: #7a0c1a; --gba-bezel: #19191e; --gba-dpad: #232328;
-      --gba-btn: #ffd700; --gba-btn-shadow: #998100; --gba-accent: #ffec27; --gba-grip: #e62c43;
+      --gba-body: #c3192d; --gba-body-shadow: #690a16; --gba-bezel: #16161a; --gba-dpad: #202024;
+      --gba-btn: #ffd700; --gba-btn-shadow: #806c00; --gba-accent: #ffec27; --gba-grip: #e62c43;
     }
     body.theme-cobalt {
-      --gba-body: #1941a5; --gba-body-shadow: #0e2460; --gba-bezel: #141928; --gba-dpad: #23283c;
-      --gba-btn: #ffc800; --gba-btn-shadow: #997800; --gba-accent: #29adff; --gba-grip: #285ad4;
+      --gba-body: #1941a5; --gba-body-shadow: #0b1d4d; --gba-bezel: #111522; --gba-dpad: #1e2233;
+      --gba-btn: #ffc800; --gba-btn-shadow: #806400; --gba-accent: #29adff; --gba-grip: #285ad4;
     }
     body.theme-silver {
-      --gba-body: #afb4be; --gba-body-shadow: #6b707a; --gba-bezel: #1e2026; --gba-dpad: #3c414b;
-      --gba-btn: #dc1e3c; --gba-btn-shadow: #800e20; --gba-accent: #ffffff; --gba-grip: #ccd1dc;
+      --gba-body: #afb4be; --gba-body-shadow: #595e68; --gba-bezel: #1a1c22; --gba-dpad: #343842;
+      --gba-btn: #dc1e3c; --gba-btn-shadow: #730a1a; --gba-accent: #ffffff; --gba-grip: #ccd1dc;
     }
     body.theme-cyber {
-      --gba-body: #8c1478; --gba-body-shadow: #4d0a42; --gba-bezel: #190f2d; --gba-dpad: #281441;
-      --gba-btn: #00f0ff; --gba-btn-shadow: #008c94; --gba-accent: #ff0080; --gba-grip: #b81ea0;
+      --gba-body: #8c1478; --gba-body-shadow: #3d0734; --gba-bezel: #160c28; --gba-dpad: #220f38;
+      --gba-btn: #00f0ff; --gba-btn-shadow: #007078; --gba-accent: #ff0080; --gba-grip: #b81ea0;
     }
     body.theme-dmg {
-      --gba-body: #bebcaf; --gba-body-shadow: #7e7c70; --gba-bezel: #282d5f; --gba-dpad: #2d2d32;
-      --gba-btn: #8c1e50; --gba-btn-shadow: #520e2c; --gba-accent: #646464; --gba-grip: #d2d0c2;
+      --gba-body: #bebcaf; --gba-body-shadow: #6e6c60; --gba-bezel: #242955; --gba-dpad: #28282c;
+      --gba-btn: #8c1e50; --gba-btn-shadow: #4d0a28; --gba-accent: #646464; --gba-grip: #d2d0c2;
     }
     body.theme-tiger {
-      --gba-body: #e65f14; --gba-body-shadow: #8f3608; --gba-bezel: #191414; --gba-dpad: #232323;
-      --gba-btn: #ffec27; --gba-btn-shadow: #998d12; --gba-accent: #ffec27; --gba-grip: #ff7d30;
+      --gba-body: #e65f14; --gba-body-shadow: #7a2c04; --gba-bezel: #161212; --gba-dpad: #1e1e1e;
+      --gba-btn: #ffec27; --gba-btn-shadow: #80750a; --gba-accent: #ffec27; --gba-grip: #ff7d30;
     }
     body.theme-emerald {
-      --gba-body: #146e3c; --gba-body-shadow: #0a3d20; --gba-bezel: #0f2319; --gba-dpad: #193223;
-      --gba-btn: #e6be28; --gba-btn-shadow: #8c7214; --gba-accent: #00e436; --gba-grip: #1e9653;
+      --gba-body: #146e3c; --gba-body-shadow: #082e18; --gba-bezel: #0d1e15; --gba-dpad: #14281c;
+      --gba-btn: #e6be28; --gba-btn-shadow: #735e10; --gba-accent: #00e436; --gba-grip: #1e9653;
     }
 
     * {
@@ -99,7 +99,7 @@
       width: 100vw;
       height: 100vh;
       height: 100dvh;
-      background-color: #08090c;
+      background-color: #06070a;
       color: var(--pico-white);
       font-family: 'Courier New', Courier, monospace;
       display: flex;
@@ -109,57 +109,63 @@
       image-rendering: pixelated;
     }
 
-    /* 🎮 GBA MOBILE HANDHELD CONSOLE CONTAINER */
+    /* 🎮 3D MOLDED GBA HANDHELD SHELL */
     .gba-shell {
       position: relative;
       width: min(100vw, 440px);
-      height: min(100vh, 100dvh, 820px);
-      background: radial-gradient(circle at 50% 30%, var(--gba-body) 0%, var(--gba-body-shadow) 100%);
-      border: 3px solid rgba(255, 255, 255, 0.15);
-      border-radius: 36px;
-      box-shadow: 0px 12px 36px rgba(0, 0, 0, 0.85), inset 0px 3px 6px rgba(255, 255, 255, 0.35);
+      height: min(100vh, 100dvh, 840px);
+      background: radial-gradient(circle at 50% 20%, var(--gba-body) 0%, var(--gba-body-shadow) 100%);
+      border: 3px solid rgba(255, 255, 255, 0.18);
+      border-radius: 38px;
+      box-shadow: 0px 16px 42px rgba(0, 0, 0, 0.92), inset 0px 3px 6px rgba(255, 255, 255, 0.40), inset 0px -4px 8px rgba(0,0,0,0.6);
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: space-between;
-      padding: 10px 14px 14px 14px;
+      padding: 6px 12px 10px 12px;
       overflow: hidden;
     }
 
-    /* GBA Ergonomic Side Grips */
+    /* Side Grip Textures */
     .gba-shell::before, .gba-shell::after {
       content: '';
       position: absolute;
-      top: 55%;
+      top: 52%;
       width: 6px;
-      height: 90px;
+      height: 100px;
       background: repeating-linear-gradient(180deg, var(--gba-grip) 0px, var(--gba-grip) 4px, transparent 4px, transparent 12px);
       border-radius: 3px;
+      box-shadow: inset 1px 1px 2px rgba(0,0,0,0.6);
     }
-    .gba-shell::before { left: 5px; }
-    .gba-shell::after { right: 5px; }
+    .gba-shell::before { left: 4px; }
+    .gba-shell::after { right: 4px; }
 
-    /* Top Shoulder Buttons (L & R) & Quick Bar */
+    /* Top Shoulder Buttons & Quick Bar */
     .gba-top-bar {
       width: 100%;
       display: flex;
       justify-content: space-between;
       align-items: center;
       padding: 0 4px;
-      margin-bottom: 4px;
+      margin-bottom: 3px;
       z-index: 10;
     }
 
     .btn-shoulder {
-      background: linear-gradient(180deg, var(--gba-dpad) 0%, #15161c 100%);
-      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: linear-gradient(180deg, var(--gba-dpad) 0%, #121318 100%);
+      border: 1px solid rgba(255, 255, 255, 0.22);
       color: var(--gba-accent);
       font-weight: 900;
       font-size: 11px;
-      padding: 4px 12px;
+      padding: 4px 14px;
       border-radius: 6px;
       cursor: pointer;
-      box-shadow: inset 0px 1px 1px rgba(255, 255, 255, 0.3), 0px 2px 4px #000000;
+      box-shadow: inset 0px 1px 1px rgba(255, 255, 255, 0.35), 0px 3px 5px rgba(0,0,0,0.8);
+      transition: transform 0.06s, box-shadow 0.06s;
+    }
+    .btn-shoulder:active {
+      transform: translateY(2px);
+      box-shadow: inset 0px 1px 2px rgba(0,0,0,0.8), 0px 1px 2px rgba(0,0,0,0.8);
     }
 
     .btn-skin-toggle {
@@ -168,21 +174,25 @@
       color: var(--pico-yellow);
       font-size: 9px;
       font-weight: 900;
-      padding: 4px 8px;
-      border-radius: 4px;
+      padding: 4px 10px;
+      border-radius: 5px;
       cursor: pointer;
-      box-shadow: 0px 2px 4px #000000;
+      box-shadow: 0px 2px 5px rgba(0,0,0,0.9);
       letter-spacing: 0.5px;
+      transition: transform 0.06s;
+    }
+    .btn-skin-toggle:active {
+      transform: scale(0.95);
     }
 
-    /* 🖥️ GBA GLASS SCREEN BEZEL */
+    /* 🖥️ MAXIMIZED PICO-8 GLASS SCREEN BEZEL */
     .gba-screen-bezel {
       width: 100%;
-      background: radial-gradient(circle at center, var(--gba-bezel) 0%, #101014 100%);
-      border-radius: 18px;
-      padding: 8px 10px 10px 10px;
-      border: 3px solid #08080a;
-      box-shadow: inset 0px 0px 14px rgba(0, 0, 0, 0.95), 0px 4px 10px rgba(0, 0, 0, 0.5);
+      background: radial-gradient(circle at center, var(--gba-bezel) 0%, #0c0d10 100%);
+      border-radius: 16px;
+      padding: 4px 8px 6px 8px;
+      border: 3px solid #060608;
+      box-shadow: inset 0px 0px 16px rgba(0, 0, 0, 0.98), 0px 4px 12px rgba(0, 0, 0, 0.6);
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -194,8 +204,8 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 4px;
-      padding: 0 4px;
+      margin-bottom: 2px;
+      padding: 0 2px;
     }
 
     .power-led-group {
@@ -215,7 +225,7 @@
     .power-text {
       font-size: 7px;
       font-weight: 900;
-      color: #707585;
+      color: #727788;
       letter-spacing: 0.5px;
     }
 
@@ -228,17 +238,18 @@
       background: #000000;
       border: 1px solid var(--gba-accent);
       color: var(--pico-yellow);
-      padding: 2px 6px;
+      padding: 2px 7px;
       border-radius: 3px;
       font-size: 8px;
       font-weight: 900;
       cursor: pointer;
+      box-shadow: 0px 1px 2px #000000;
     }
 
-    /* PICO-8 CANVAS IN SCREEN BEZEL */
+    /* 🖥️ EDGE-MAXIMIZED 1:1 PICO-8 CANVAS */
     canvas#picoCanvas {
       width: 100%;
-      max-width: 270px;
+      max-width: min(88vw, 320px);
       aspect-ratio: 1 / 1;
       image-rendering: pixelated;
       image-rendering: crisp-edges;
@@ -246,12 +257,12 @@
       background-color: var(--pico-black);
       border: 2px solid #000000;
       border-radius: 4px;
-      box-shadow: 0px 0px 16px rgba(0, 0, 0, 0.9);
+      box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.95);
       cursor: pointer;
     }
 
     .bezel-bottom-branding {
-      margin-top: 5px;
+      margin-top: 3px;
       font-size: 9px;
       font-weight: 900;
       letter-spacing: 1.5px;
@@ -265,21 +276,33 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 8px 6px 4px 6px;
+      padding: 6px 4px 2px 4px;
     }
 
-    /* GBA CROSS D-PAD */
+    /* 3D RECESSED D-PAD HOUSING WELL */
+    .dpad-well {
+      width: 124px;
+      height: 124px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 50% 50%, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.25) 100%);
+      box-shadow: inset 0px 4px 8px rgba(0,0,0,0.95), 0px 1px 1px rgba(255,255,255,0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* 3D MOLDED GBA CROSS D-PAD WITH EMBOSSED ARROWS */
     .gba-dpad {
       display: grid;
       grid-template-columns: repeat(3, 38px);
       grid-template-rows: repeat(3, 38px);
       gap: 0px;
-      filter: drop-shadow(0px 5px 6px rgba(0, 0, 0, 0.7));
+      filter: drop-shadow(0px 5px 6px rgba(0, 0, 0, 0.85));
     }
 
     .btn-dir {
-      background: linear-gradient(180deg, var(--gba-dpad) 0%, #1a1a20 100%);
-      border: 1px solid #111115;
+      background: linear-gradient(180deg, var(--gba-dpad) 0%, #15161b 100%);
+      border: 1px solid rgba(255,255,255,0.12);
       color: var(--gba-accent);
       font-size: 14px;
       font-weight: 900;
@@ -287,35 +310,47 @@
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      box-shadow: inset 0px 1px 1px rgba(255, 255, 255, 0.25);
+      box-shadow: 0px 4px 0px #090a0d, inset 0px 1px 1px rgba(255, 255, 255, 0.35);
+      text-shadow: 0px 1px 0px rgba(255,255,255,0.2), 0px -1px 0px #000000;
+      transition: transform 0.05s, box-shadow 0.05s, background 0.05s;
     }
+
     .btn-dir:active, .btn-dir.active {
+      transform: translateY(3px);
+      box-shadow: 0px 1px 0px #090a0d, inset 0px 1px 2px rgba(0,0,0,0.8);
       background: var(--gba-accent);
       color: #000000;
-      transform: scale(0.95);
     }
 
     .dpad-up { grid-column: 2; grid-row: 1; border-top-left-radius: 6px; border-top-right-radius: 6px; }
     .dpad-left { grid-column: 1; grid-row: 2; border-top-left-radius: 6px; border-bottom-left-radius: 6px; }
-    .dpad-center { grid-column: 2; grid-row: 2; background: var(--gba-dpad); pointer-events: none; }
+    .dpad-center { grid-column: 2; grid-row: 2; background: radial-gradient(circle at center, #18181e 0%, var(--gba-dpad) 100%); pointer-events: none; }
     .dpad-right { grid-column: 3; grid-row: 2; border-top-right-radius: 6px; border-bottom-right-radius: 6px; }
     .dpad-down { grid-column: 2; grid-row: 3; border-bottom-left-radius: 6px; border-bottom-right-radius: 6px; }
 
-    /* ANGLED GBA B & A ACTION BUTTONS */
+    /* 3D ACTION BUTTON WELL & ANGLED BUTTONS */
+    .action-buttons-well {
+      padding: 6px 8px;
+      border-radius: 36px;
+      background: rgba(0, 0, 0, 0.40);
+      box-shadow: inset 0px 3px 6px rgba(0,0,0,0.92), 0px 1px 1px rgba(255,255,255,0.25);
+      transform: rotate(-18deg);
+    }
+
     .gba-action-buttons {
       display: flex;
       align-items: center;
-      gap: 12px;
-      transform: rotate(-18deg);
-      filter: drop-shadow(0px 6px 8px rgba(0, 0, 0, 0.75));
+      gap: 14px;
+      filter: drop-shadow(0px 6px 8px rgba(0, 0, 0, 0.85));
     }
 
+    /* 3D CONVEX PHYSICAL ACTION BUTTONS (REAL-LIFE DEPTH) */
     .btn-gba-action {
-      width: 48px;
-      height: 48px;
+      width: 50px;
+      height: 50px;
       border-radius: 50%;
-      background: radial-gradient(circle at 35% 35%, var(--gba-btn) 0%, var(--gba-btn-shadow) 100%);
-      border: 2px solid rgba(255, 255, 255, 0.25);
+      background: radial-gradient(circle at 35% 25%, rgba(255,255,255,0.45) 0%, transparent 45%), radial-gradient(circle at 50% 50%, var(--gba-btn) 0%, var(--gba-btn-shadow) 100%);
+      border: 2px solid rgba(255, 255, 255, 0.28);
       color: var(--gba-text);
       font-size: 15px;
       font-weight: 900;
@@ -324,11 +359,13 @@
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      box-shadow: 0px 4px 0px rgba(0, 0, 0, 0.9), inset 0px 2px 2px rgba(255, 255, 255, 0.4);
+      box-shadow: 0px 6px 0px var(--gba-btn-shadow), 0px 8px 14px rgba(0, 0, 0, 0.75), inset 0px 2px 3px rgba(255, 255, 255, 0.5), inset 0px -2px 3px rgba(0,0,0,0.5);
+      transition: transform 0.05s, box-shadow 0.05s;
     }
+
     .btn-gba-action:active, .btn-gba-action.active {
-      transform: translateY(3px);
-      box-shadow: 0px 1px 0px rgba(0, 0, 0, 0.9), inset 0px 1px 1px rgba(0, 0, 0, 0.6);
+      transform: translateY(5px);
+      box-shadow: 0px 1px 0px var(--gba-btn-shadow), 0px 2px 4px rgba(0, 0, 0, 0.8), inset 0px 1px 3px rgba(0, 0, 0, 0.8);
     }
 
     .btn-gba-action span {
@@ -337,12 +374,12 @@
       margin-top: 1px;
     }
 
-    /* GBA START & SELECT RUBBER PILLS */
+    /* 3D START & SELECT RUBBER PILLS */
     .gba-center-pills {
       display: flex;
       justify-content: center;
       align-items: center;
-      gap: 24px;
+      gap: 26px;
       margin-bottom: 2px;
     }
 
@@ -354,17 +391,19 @@
     }
 
     .btn-pill {
-      width: 38px;
+      width: 40px;
       height: 12px;
-      background: linear-gradient(180deg, var(--gba-dpad) 0%, #141418 100%);
-      border: 1px solid rgba(255, 255, 255, 0.15);
+      background: linear-gradient(180deg, var(--gba-dpad) 0%, #121216 100%);
+      border: 1px solid rgba(255, 255, 255, 0.18);
       border-radius: 6px;
       cursor: pointer;
       transform: rotate(-22deg);
-      box-shadow: 0px 2px 3px rgba(0, 0, 0, 0.8), inset 0px 1px 1px rgba(255, 255, 255, 0.3);
+      box-shadow: 0px 3px 0px #090a0e, 0px 4px 6px rgba(0, 0, 0, 0.8), inset 0px 1px 1px rgba(255, 255, 255, 0.35);
+      transition: transform 0.05s, box-shadow 0.05s;
     }
     .btn-pill:active {
-      transform: rotate(-22deg) scale(0.95);
+      transform: rotate(-22deg) translateY(2px);
+      box-shadow: 0px 1px 0px #090a0e, inset 0px 1px 2px rgba(0,0,0,0.8);
     }
 
     .pill-label {
@@ -374,8 +413,8 @@
       letter-spacing: 0.5px;
       text-shadow: 1px 1px 0px #000000;
     }
-  
-    /* 🌮 POCKET TACO & HORIZONTAL CLAMP CONTROLLER LANDSCAPE RESIZING */
+
+    /* 🌮 POCKET TACO & HORIZONTAL CLAMP CONTROLLER LANDSCAPE MAXIMIZED */
     @media (orientation: landscape), (min-aspect-ratio: 1.2) {
       body {
         background-color: #050608;
@@ -383,7 +422,7 @@
 
       .gba-shell {
         width: 100vw;
-        max-width: 960px;
+        max-width: 980px;
         height: 100vh;
         height: 100dvh;
         max-height: 100%;
@@ -391,40 +430,23 @@
         flex-direction: row;
         justify-content: space-between;
         align-items: center;
-        padding: 8px 18px;
-      }
-
-      /* Side grips in landscape */
-      .gba-shell::before, .gba-shell::after {
-        top: 25px;
-        width: 90px;
-        height: 5px;
-        background: repeating-linear-gradient(90deg, var(--gba-grip) 0px, var(--gba-grip) 4px, transparent 4px, transparent 12px);
-      }
-      .gba-shell::before { left: 40px; top: 8px; }
-      .gba-shell::after { right: 40px; top: 8px; }
-
-      .gba-top-bar {
-        position: absolute;
-        top: 6px;
-        left: 20px;
-        right: 20px;
-        width: auto;
+        padding: 4px 18px;
       }
 
       .gba-screen-bezel {
         order: 2;
         width: auto;
-        height: calc(100vh - 20px);
-        height: calc(100dvh - 20px);
-        max-height: 480px;
+        height: calc(100vh - 12px);
+        height: calc(100dvh - 12px);
+        max-height: 520px;
         aspect-ratio: 1 / 1;
-        padding: 6px 10px 8px 10px;
+        padding: 4px 6px 6px 6px;
       }
 
       canvas#picoCanvas {
-        height: 80%;
-        max-height: 380px;
+        height: 84%;
+        max-height: 420px;
+        max-width: 420px;
         width: auto;
       }
 
@@ -437,26 +459,14 @@
         padding: 0;
       }
 
-      .gba-dpad {
-        grid-template-columns: repeat(3, 44px);
-        grid-template-rows: repeat(3, 44px);
-      }
-
-      .gba-action-buttons {
+      .action-buttons-well {
         order: 3;
         transform: rotate(-14deg);
-        gap: 16px;
-      }
-
-      .btn-gba-action {
-        width: 54px;
-        height: 54px;
-        font-size: 17px;
       }
 
       .gba-center-pills {
         position: absolute;
-        bottom: 8px;
+        bottom: 6px;
         left: 50%;
         transform: translateX(-50%);
         gap: 36px;
@@ -481,7 +491,7 @@
 </head>
 <body>
 
-    <div class="gba-shell">
+      <div class="gba-shell">
     <!-- GBA TOP BAR & SHOULDER TRIGGERS -->
     <div class="gba-top-bar">
       <button class="btn-shoulder" id="btnShoulderL">L</button>
@@ -489,7 +499,7 @@
       <button class="btn-shoulder" id="btnShoulderR">R</button>
     </div>
 
-    <!-- 🖥️ GBA GLASS SCREEN BEZEL & CANVAS -->
+    <!-- 🖥️ MAXIMIZED GBA GLASS SCREEN BEZEL & CANVAS -->
     <div class="gba-screen-bezel">
       <div class="bezel-top-row">
         <div class="power-led-group">
@@ -502,27 +512,31 @@
         </div>
       </div>
 
-      <!-- PICO-8 128x128 GAME ENGINE CANVAS -->
+      <!-- MAXIMIZED PICO-8 128x128 GAME ENGINE CANVAS -->
       <canvas id="picoCanvas" width="256" height="256"></canvas>
 
       <div class="bezel-bottom-branding">PICO-8 ADVANCE</div>
     </div>
 
-    <!-- 🕹️ GBA CONTROLS AREA -->
+    <!-- 🕹️ 3D MOLDED GBA CONTROLS AREA -->
     <div class="gba-controls-area">
-      <!-- LEFT CROSS D-PAD -->
-      <div class="gba-dpad">
-        <button class="btn-dir dpad-up" id="btnUp" aria-label="Drop Hard">▲</button>
-        <button class="btn-dir dpad-left" id="btnLeft" aria-label="Move Left">◀</button>
-        <div class="dpad-center"></div>
-        <button class="btn-dir dpad-right" id="btnRight" aria-label="Move Right">▶</button>
-        <button class="btn-dir dpad-down" id="btnDown" aria-label="Drop Soft">▼</button>
+      <!-- 3D RECESSED D-PAD HOUSING WELL -->
+      <div class="dpad-well">
+        <div class="gba-dpad" id="dpadPad">
+          <button class="btn-dir dpad-up" id="btnUp" aria-label="Drop Hard">▲</button>
+          <button class="btn-dir dpad-left" id="btnLeft" aria-label="Move Left">◀</button>
+          <div class="dpad-center"></div>
+          <button class="btn-dir dpad-right" id="btnRight" aria-label="Move Right">▶</button>
+          <button class="btn-dir dpad-down" id="btnDown" aria-label="Drop Soft">▼</button>
+        </div>
       </div>
 
-      <!-- RIGHT ANGLED B & A BUTTONS -->
-      <div class="gba-action-buttons">
-        <button class="btn-gba-action" id="btnO">B<span>ROTATE</span></button>
-        <button class="btn-gba-action" id="btnX">A<span>DROP/SP</span></button>
+      <!-- 3D CONVEX B & A ACTION BUTTONS IN CYLINDRICAL WELL -->
+      <div class="action-buttons-well">
+        <div class="gba-action-buttons">
+          <button class="btn-gba-action" id="btnO">B<span>ROTATE</span></button>
+          <button class="btn-gba-action" id="btnX">A<span>DROP/SP</span></button>
+        </div>
       </div>
     </div>
 
@@ -576,6 +590,77 @@
       } catch(e) {}
     }
     applyGbaSkin(currentSkinIdx);
+    initTouchHaptics();
+
+    // =========================================================================
+    // 🕹️ PICO-8 FLUID MULTI-TOUCH D-PAD & 3D TACTILE HAPTIC DRIVER
+    // =========================================================================
+    function initTouchHaptics() {
+      const dpadEl = document.getElementById('dpadPad');
+      if (!dpadEl) return;
+
+      let activeDir = null;
+
+      function handleDpadPoint(clientX, clientY) {
+        const rect = dpadEl.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+        const dx = clientX - centerX;
+        const dy = clientY - centerY;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+
+        if (dist < 10) {
+          clearDpadActive();
+          return;
+        }
+
+        let newDir = null;
+        if (Math.abs(dx) > Math.abs(dy)) {
+          newDir = dx < 0 ? 'btnLeft' : 'btnRight';
+        } else {
+          newDir = dy < 0 ? 'btnUp' : 'btnDown';
+        }
+
+        if (newDir !== activeDir) {
+          clearDpadActive();
+          activeDir = newDir;
+          const btn = document.getElementById(activeDir);
+          if (btn) {
+            btn.classList.add('active');
+            triggerHaptic(14);
+            btn.click();
+          }
+        }
+      }
+
+      function clearDpadActive() {
+        if (activeDir) {
+          const btn = document.getElementById(activeDir);
+          if (btn) btn.classList.remove('active');
+          activeDir = null;
+        }
+      }
+
+      dpadEl.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        dpadEl.setPointerCapture(e.pointerId);
+        handleDpadPoint(e.clientX, e.clientY);
+      });
+
+      dpadEl.addEventListener('pointermove', (e) => {
+        if (e.buttons > 0) {
+          handleDpadPoint(e.clientX, e.clientY);
+        }
+      });
+
+      dpadEl.addEventListener('pointerup', (e) => {
+        clearDpadActive();
+        try { dpadEl.releasePointerCapture(e.pointerId); } catch(err) {}
+      });
+
+      dpadEl.addEventListener('pointercancel', clearDpadActive);
+    }
+
 
     // =========================================================================
     // PICO-8 TRANSPARENT SPRITE ENGINE v9.0.0
