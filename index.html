@@ -537,11 +537,11 @@
         </div>
       </div>
 
-      <!-- 3D CONVEX B & A ACTION BUTTONS IN CYLINDRICAL WELL -->
+      <!-- 3D CONVEX Z & X ACTION BUTTONS (MATCHING IN-GAME PICO-8 PROMPTS) -->
       <div class="action-buttons-well">
         <div class="gba-action-buttons">
-          <button class="btn-gba-action" id="btnO">B<span>ROTATE</span></button>
-          <button class="btn-gba-action" id="btnX">A<span>DROP/SP</span></button>
+          <button class="btn-gba-action" id="btnO">Z<span>ROTATE (B)</span></button>
+          <button class="btn-gba-action" id="btnX">X<span>CONFIRM (A)</span></button>
         </div>
       </div>
     </div>
@@ -549,12 +549,12 @@
     <!-- GBA START & SELECT RUBBER PILLS -->
     <div class="gba-center-pills">
       <div class="pill-group">
-        <button class="btn-pill" id="btnMode" aria-label="Select"></button>
-        <span class="pill-label">SELECT</span>
+        <button class="btn-pill" id="btnMode" aria-label="Select / Outfit"></button>
+        <span class="pill-label">SELECT (Y)</span>
       </div>
       <div class="pill-group">
-        <button class="btn-pill" id="btnStart" aria-label="Start"></button>
-        <span class="pill-label">START</span>
+        <button class="btn-pill" id="btnStart" aria-label="Start / Confirm"></button>
+        <span class="pill-label">START (X)</span>
       </div>
     </div>
   </div>
@@ -3287,16 +3287,11 @@
         vertShift = 6;
         horzShift = (isP1 ? -1 : 1) * -8;
       } else if (anim === 'TAUNT') {
-        // Standing boxer raises fists in neutral corner
         vertShift = -2;
         bodyTilt = (isP1 ? 1 : -1) * 0.08;
       }
-      // Ground shadow placed directly on the floor below the boots
-      ctx.fillStyle = 'rgba(0,0,0,0.65)';
-      ctx.beginPath();
-      ctx.ellipse(fx, groundY + 1, 9, 2.5, 0, 0, Math.PI * 2);
-      ctx.fill();
 
+      // Direct ground alignment on ring floor mat (Y=90)
       ctx.save();
 
       const fObj = isP1 ? ROSTER[p1SelectIdx] : ROSTER[p2SelectIdx];
@@ -3900,7 +3895,7 @@
         printPicoCenter('PRESS START / TOUCH', 109, 10, 1, true);
       }
 
-      printPicoCenter('ANTIGRAVITY STUDIOS 2026', 121, 6, 1);
+      printPicoCenter('OBEATS STUDIOS 2026  BUILD 3.5.1', 121, 6, 1);
     }
 
     // === MODE SELECT RENDERER ===
@@ -4317,12 +4312,7 @@
       ctx.save();
       ctx.translate(x, y);
 
-      // Ground shadow
-      ctx.fillStyle = 'rgba(0,0,0,0.65)';
-      ctx.beginPath();
-      ctx.ellipse(0, 0, 11, 3, 0, 0, Math.PI * 2);
-      ctx.fill();
-
+      // Direct ground alignment on ring floor mat
       if (flip) {
         ctx.scale(-1, 1);
       }
