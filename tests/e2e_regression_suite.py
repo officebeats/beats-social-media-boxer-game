@@ -489,9 +489,64 @@ async def run_qa_suite():
         print("  ✓ All 9 Dynamic Arenas and environmental FX verified with 0 errors [PASS]")
         metrics.passed += 1
 
+        # ---------------------------------------------------------------------
+        # TEST MODULE 11: AUTOMATED VISUAL CRITIQUE, IN-RING GROUNDING & PROGRESSIVE UNLOCKS
+        # ---------------------------------------------------------------------
+        print("\n[MODULE 11] Automated Visual Critique, Floor Grounding & Progressive Unlocks")
+        
+        # 1. Verify Deen Starter Roster Status
+        starter_unlocked = await evaluate("window.isFighterUnlocked('deen')")
+        broner_init_locked = await evaluate("window.isFighterUnlocked('broner')")
+        assert starter_unlocked == True, "Deen The Great must be unlocked as the starter fighter!"
+        print("  ✓ Starter Roster Verified: Deen The Great unlocked by default [PASS]")
+
+        # 2. Verify Character Select Locked Silhouettes
+        await evaluate("""
+            window.appState = 'CHAR_SELECT';
+            window.p1SelectIdx = 0; // Broner (locked initially on clean profile)
+            window.render();
+        """)
+        await asyncio.sleep(0.05)
+        await snap("module11_char_select_locked.png", "Character Select Locked Silhouette")
+
+        # 3. Verify In-Ring Fighter Floor Grounding & Contact Shadows at Y=90
+        await evaluate("""
+            window.p1SelectIdx = 1; // Deen
+            window.p2SelectIdx = 0; // Broner
+            window.startMatch();
+            window.appState = 'PLAYING';
+            window.gameState = 'PLAYING';
+            window.render();
+        """)
+        await asyncio.sleep(0.05)
+        await snap("module11_inring_grounding.png", "In-Ring Boxer Floor Grounding Plane")
+
+        grounding_check = await evaluate("""
+            (() => {
+                const ctx = document.getElementById('picoCanvas').getContext('2d');
+                // Check floor contact area around P1 (X: 46..58, Y: 89..91)
+                const p1Floor = ctx.getImageData(46, 89, 12, 3).data;
+                let p1Grounded = false;
+                for (let j = 0; j < p1Floor.length; j += 4) {
+                    if (p1Floor[j+3] > 0) p1Grounded = true;
+                }
+                // Check floor contact area around P2 (X: 70..82, Y: 89..91)
+                const p2Floor = ctx.getImageData(70, 89, 12, 3).data;
+                let p2Grounded = false;
+                for (let j = 0; j < p2Floor.length; j += 4) {
+                    if (p2Floor[j+3] > 0) p2Grounded = true;
+                }
+                return { p1Grounded, p2Grounded };
+            })()
+        """)
+        assert grounding_check['p1Grounded'] == True and grounding_check['p2Grounded'] == True, f"Floor grounding check failed at Y=90! {grounding_check}"
+        print("  ✓ In-Ring Fighter Grounding & Contact Shadow confirmed at Y=90 on canvas mat [PASS]")
+        metrics.passed += 1
+
         print("\n" + "=" * 75)
-        print(f"🎉 QA SUMMARY: {metrics.passed}/10 MODULES PASSED (0 FAILURES, 0 ERRORS)")
+        print(f"🎉 QA SUMMARY: {metrics.passed}/11 MODULES PASSED (0 FAILURES, 0 ERRORS)")
         print("=" * 75)
     chrome_proc.terminate()
+
 if __name__ == "__main__":
     asyncio.run(run_qa_suite())

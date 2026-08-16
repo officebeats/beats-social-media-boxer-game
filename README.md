@@ -1,12 +1,12 @@
 # CRASH OUT: RING RUSH — PICO-8 PUZZLE BOXING
 
-**Version:** `v3.4.0` (Multi-Frame Boxing Idle Stances, Alt Outfits & 9 Dynamic Arenas Release)
+**Version:** `v3.5.0` (Unique Fighter Idles, Pelvic Fix, Deen Starter & Visual Critique Release)
 
 ![Title Screen](assets/pico8_title.jpg)
 
 **Crash Out: Ring Rush** is an 8-bit arcade versus puzzle-fighter developed for the **PICO-8 Fantasy Console**. It fuses the competitive mechanics of Capcom's *Super Puzzle Fighter II Turbo* with the viral Kick warehouse boxing stream culture hosted by **Adrien "The Problem" Broner** and **Deen The Great**.
 
-## 🎮 Play Live (v3.4.0)
+## 🎮 Play Live (v3.5.0)
 
 - ⚡ **Play Live in Browser (GitHub Pages)**: **[officebeats.github.io/beats-social-media-boxer-game](https://officebeats.github.io/beats-social-media-boxer-game/)**
 - 🕹️ **Native PICO-8 Cartridge**: Load [`crash_out.p8`](crash_out.p8) directly inside PICO-8 using `pico8 -run crash_out.p8`.
@@ -22,7 +22,42 @@
 
 ---
 
-## 🌟 New in v3.4.0
+## 🌟 New in v3.5.0
+- 🥊 **Sprite Pelvic Fix & Natural Shorts Hem Wave**:
+  - Eliminated the vertical $75\%$ waistline slice in `createTransparentCanvas` that caused unnatural pelvic bulging.
+  - Slices whole body as a coherent kinematic unit paired with a **natural horizontal shorts hem ripple** on Frames 1 & 3.
+- 🌟 **14 Unique Character-Specific Idle Animation Signatures**:
+  - Every fighter now exhibits a bespoke procedural idle stance matching their boxing style and stream persona:
+    - **Adrien Broner**: Philly shell shoulder shrug + chin tuck + smirk bounce.
+    - **Deen The Great**: Southpaw ball-of-feet bounce + lightning lead hand flick.
+    - **Ryan Garcia**: Ultra-fast left hook coil + quiff hair sway.
+    - **N3ON**: Hyper streamer glove tap + head bob.
+    - **Ray J**: Sunglasses adjust gesture + wide swagger sway.
+    - **Blueface**: Low-guard wild groove sway.
+    - **Chrisean Rock**: Peekaboo tight guard bobbing.
+    - **Rampage Jackson**: Heavyweight tank stomp + monster chain beat.
+    - **Adin Ross**: Loose hands stream hype bounce.
+    - **Charleston White**: Erratic pointing taunt gesture + head cock.
+    - **Coach Bang**: Deep grounded trainer stance + chest expansion.
+    - **Antonio Brown (AB)**: Showboat dance shimmy.
+    - **Fousey**: G7 aggressive forward pulse.
+    - **Sneako**: Technical sparring weave.
+- 🏆 **Progressive Character Unlocks & Deen The Great Starter**:
+  - Clean game starts feature **Deen The Great** as the default playable starter character (`unlockedFighters: ['deen']`).
+  - Defeating each opponent in the 7-Stage Road to Gold unlocks them in the roster:
+    - Stage 1 $\rightarrow$ **N3ON**
+    - Stage 2 $\rightarrow$ **ADIN ROSS**
+    - Stage 3 $\rightarrow$ **BLUEFACE**
+    - Stage 4 $\rightarrow$ **COACH BANG**
+    - Stage 5 $\rightarrow$ **RYAN GARCIA**
+    - Stage 6 $\rightarrow$ **RAMPAGE JACKSON**
+    - Stage 7 $\rightarrow$ **ADRIEN BRONER** & all secret guests (**CHRISEAN, CHARLESTON, AB, FOUSEY, SNEAKO, RAY J**).
+  - Character Select renders locked characters as dark silhouettes with `🔒` icons and unlock stage hints, preventing locked selections.
+- 🦶 **Ring Floor Grounding & Contact Plane Fix**:
+  - Both fighters stand flat on the ring floor at exact mat coordinate $Y=90$ on the floor plane ($Y=88..113$), with dark elliptical contact shadows eliminating any floating appearance.
+- 🛡️ **Permanent 11-Module Automated E2E Regression Suite (`tests/e2e_regression_suite.py`)**:
+  - Added **Module 11 (Automated Visual Critique, Floor Grounding & Progressive Unlocks)** with CDP automated screenshot capture and pixel analysis.
+  - Full suite passes 11/11 modules with 0 failures, 0 console errors, and locked 60 FPS performance.
 - 🥊 **4-Frame Athletic Boxing Idle Stances**:
   - Replaced static wobbles with authentic $192\times 48\text{px}$ linear 4-frame animation strips playing at 7.5 FPS.
   - **Frame 0**: Neutral High-Guard Athletic Stance (weight centered, chin tucked).

@@ -2682,6 +2682,9 @@
           campaignState.clearedStages[campaignState.stageIdx] = true;
 
           const st = CAMPAIGN_STAGES[campaignState.stageIdx] || CAMPAIGN_STAGES[0];
+          if (st && st.fighterId) {
+            unlockFighter(st.fighterId);
+          }
           const sweepBonus = (p2RoundsWon === 0) ? 500 : 0;
           const hpBonus = Math.floor((p1 ? p1.hp : 100) * 10);
           const earned = (st ? st.purse : 1000) + sweepBonus + hpBonus;
@@ -2696,7 +2699,8 @@
           const isFinalStage = (campaignState.stageIdx === CAMPAIGN_STAGES.length - 1);
 
           if (isFinalStage && clearedCount >= CAMPAIGN_STAGES.length) {
-            // BEAT FINAL BOSS FLOYD MAYWEATHER AFTER CLEARING ALL 7 STAGES!
+            // BEAT FINAL BOSS FLOYD MAYWEATHER -> Unlock Adrien Broner and all secret guests!
+            ['broner', 'chrisean', 'charleston', 'abrown', 'fousey', 'sneako', 'rayj'].forEach(unlockFighter);
             appState = 'VICTORY_END';
             try { localStorage.removeItem('ringrush_campaign'); } catch(e) {}
           } else {
@@ -2933,21 +2937,70 @@
       // Frame 0 (x=0..47): Neutral Athletic High-Guard Stance
       sCtx.drawImage(rawCanvas, bounds.xmin, bounds.ymin, bounds.w, bounds.h, dx, dy, dw, dh);
 
-      // Frame 1 (x=48..95): Elastic Dip & Knee Flexion (upper body dips 1px, boots anchored)
-      const upperH = Math.round(bounds.h * 0.75);
-      const lowerH = bounds.h - upperH;
-      const upperDh = Math.round(dh * 0.75);
-      const lowerDh = dh - upperDh;
-      sCtx.drawImage(rawCanvas, bounds.xmin, bounds.ymin, bounds.w, upperH, 48 + dx, dy + 1, dw, upperDh);
-      sCtx.drawImage(rawCanvas, bounds.xmin, bounds.ymin + upperH, bounds.w, lowerH, 48 + dx, dy + upperDh, dw, lowerDh);
+      // Frame 1 (x=48..95): Coherent Athletic Dip + Shorts Hem Wave + Unique Fighter Signatures
+      // 1. Natural whole-body dip (dy + 1) without pelvic stretching
+      sCtx.drawImage(rawCanvas, bounds.xmin, bounds.ymin, bounds.w, bounds.h, 48 + dx, dy + 1, dw, dh);
+      // 2. Trunks Hem Horizontal Wave (lower 3px of trunks shift horizontally by +1px)
+      const hemY = dy + 1 + Math.round(dh * 0.62);
+      const hemH = Math.max(2, Math.round(dh * 0.08));
+      const hemSrcY = bounds.ymin + Math.round(bounds.h * 0.62);
+      const hemSrcH = Math.max(2, Math.round(bounds.h * 0.08));
+      sCtx.drawImage(rawCanvas, bounds.xmin, hemSrcY, bounds.w, hemSrcH, 48 + dx + 1, hemY, dw, hemH);
 
-      // Frame 2 (x=96..143): Spring Extension & Head Bob (upper body extends 1px, boots grounded)
-      sCtx.drawImage(rawCanvas, bounds.xmin, bounds.ymin, bounds.w, upperH, 96 + dx, dy - 1, dw, upperDh);
-      sCtx.drawImage(rawCanvas, bounds.xmin, bounds.ymin + upperH, bounds.w, lowerH, 96 + dx, dy - 1 + upperDh, dw, lowerDh + 1);
+      // 3. Unique Character-Specific Signature Gestures on Frame 1:
+      if (id === 'broner') {
+        // Philly Shell shoulder roll shrug (left shoulder elevated)
+        sCtx.drawImage(rawCanvas, bounds.xmin, bounds.ymin + Math.round(bounds.h * 0.25), Math.round(bounds.w * 0.35), Math.round(bounds.h * 0.25), 48 + dx - 1, dy + Math.round(dh * 0.24), Math.round(dw * 0.35), Math.round(dh * 0.25));
+      } else if (id === 'deen') {
+        // Southpaw explosive lead right hand flick
+        sCtx.drawImage(rawCanvas, bounds.xmin + Math.round(bounds.w * 0.45), bounds.ymin + Math.round(bounds.h * 0.32), Math.round(bounds.w * 0.3), Math.round(bounds.h * 0.25), 48 + dx + Math.round(dw * 0.45) + 1, dy + 1 + Math.round(dh * 0.32), Math.round(dw * 0.3), Math.round(dh * 0.25));
+      } else if (id === 'ryan') {
+        // Flash left hook coil
+        sCtx.drawImage(rawCanvas, bounds.xmin + Math.round(bounds.w * 0.1), bounds.ymin + Math.round(bounds.h * 0.35), Math.round(bounds.w * 0.35), Math.round(bounds.h * 0.25), 48 + dx + Math.round(dw * 0.1) - 1, dy + 1 + Math.round(dh * 0.34), Math.round(dw * 0.35), Math.round(dh * 0.25));
+      } else if (id === 'n3on') {
+        // Hyper streamer glove tap (gloves shifted inwards)
+        sCtx.drawImage(rawCanvas, bounds.xmin + Math.round(bounds.w * 0.35), bounds.ymin + Math.round(bounds.h * 0.35), Math.round(bounds.w * 0.35), Math.round(bounds.h * 0.25), 48 + dx + Math.round(dw * 0.35) - 1, dy + 1 + Math.round(dh * 0.35), Math.round(dw * 0.35), Math.round(dh * 0.25));
+      } else if (id === 'rayj') {
+        // Slick sunglasses adjust gesture
+        sCtx.drawImage(rawCanvas, bounds.xmin + Math.round(bounds.w * 0.35), bounds.ymin + Math.round(bounds.h * 0.12), Math.round(bounds.w * 0.3), Math.round(bounds.h * 0.15), 48 + dx + Math.round(dw * 0.35) + 1, dy + Math.round(dh * 0.12), Math.round(dw * 0.3), Math.round(dh * 0.15));
+      } else if (id === 'blueface') {
+        // Low hands groove sway
+        sCtx.drawImage(rawCanvas, bounds.xmin, bounds.ymin + Math.round(bounds.h * 0.4), bounds.w, Math.round(bounds.h * 0.25), 48 + dx + 1, dy + 1 + Math.round(dh * 0.42), dw, Math.round(dh * 0.25));
+      } else if (id === 'chrisean') {
+        // Tight peekaboo guard bob
+        sCtx.drawImage(rawCanvas, bounds.xmin + Math.round(bounds.w * 0.25), bounds.ymin + Math.round(bounds.h * 0.25), Math.round(bounds.w * 0.5), Math.round(bounds.h * 0.3), 48 + dx + Math.round(dw * 0.25), dy + 1 + Math.round(dh * 0.23), Math.round(dw * 0.5), Math.round(dh * 0.3));
+      } else if (id === 'rampage') {
+        // Heavy tank wide stance stomp
+        sCtx.drawImage(rawCanvas, bounds.xmin, bounds.ymin + Math.round(bounds.h * 0.75), bounds.w, Math.round(bounds.h * 0.25), 48 + dx, dy + Math.round(dh * 0.75), dw, Math.round(dh * 0.25));
+      } else if (id === 'charleston') {
+        // Pointing taunt gesture
+        sCtx.drawImage(rawCanvas, bounds.xmin + Math.round(bounds.w * 0.5), bounds.ymin + Math.round(bounds.h * 0.3), Math.round(bounds.w * 0.3), Math.round(bounds.h * 0.25), 48 + dx + Math.round(dw * 0.5) + 1, dy + 1 + Math.round(dh * 0.28), Math.round(dw * 0.3), Math.round(dh * 0.25));
+      } else if (id === 'bang') {
+        // Pad-trainer deep chest expansion
+        sCtx.drawImage(rawCanvas, bounds.xmin, bounds.ymin + Math.round(bounds.h * 0.2), bounds.w, Math.round(bounds.h * 0.3), 48 + dx, dy + 1 + Math.round(dh * 0.18), dw, Math.round(dh * 0.3));
+      } else if (id === 'abrown') {
+        // Showboat dance shimmy
+        sCtx.drawImage(rawCanvas, bounds.xmin, bounds.ymin, bounds.w, Math.round(bounds.h * 0.5), 48 + dx + 1, dy + 1, dw, Math.round(dh * 0.5));
+      } else if (id === 'fousey') {
+        // G7 forward pulse lunge
+        sCtx.drawImage(rawCanvas, bounds.xmin, bounds.ymin, bounds.w, bounds.h, 48 + dx + 1, dy + 1, dw, dh);
+      } else if (id === 'sneako') {
+        // Sparring weave
+        sCtx.drawImage(rawCanvas, bounds.xmin, bounds.ymin + Math.round(bounds.h * 0.1), bounds.w, Math.round(bounds.h * 0.3), 48 + dx - 1, dy + 1 + Math.round(dh * 0.1), dw, Math.round(dh * 0.3));
+      }
 
-      // Frame 3 (x=144..191): Guard Reset & Lead Glove Twitch
+      // Frame 2 (x=96..143): Coherent Spring Extension & Head Bob (boots anchored on mat)
+      sCtx.drawImage(rawCanvas, bounds.xmin, bounds.ymin, bounds.w, bounds.h, 96 + dx, dy - 1, dw, dh);
+      // Keep boot soles grounded flat at Y=48
+      const bootH = Math.max(2, Math.round(dh * 0.08));
+      const bootSrcY = bounds.ymin + bounds.h - Math.max(2, Math.round(bounds.h * 0.08));
+      sCtx.drawImage(rawCanvas, bounds.xmin, bootSrcY, bounds.w, Math.max(2, Math.round(bounds.h * 0.08)), 96 + dx, dy + dh - bootH, dw, bootH);
+
+      // Frame 3 (x=144..191): Guard Reset + Reverse Shorts Hem Wave
       sCtx.drawImage(rawCanvas, bounds.xmin, bounds.ymin, bounds.w, bounds.h, 144 + dx, dy, dw, dh);
-      // Lead glove 1px micro-shift
+      // Reverse hem wave (-1px shift)
+      sCtx.drawImage(rawCanvas, bounds.xmin, hemSrcY, bounds.w, hemSrcH, 144 + dx - 1, hemY - 1, dw, hemH);
+      // Lead glove 1px rhythm twitch
       sCtx.drawImage(rawCanvas, bounds.xmin + Math.round(bounds.w * 0.4), bounds.ymin + Math.round(bounds.h * 0.35), Math.round(bounds.w * 0.25), Math.round(bounds.h * 0.25), 144 + dx + Math.round(dw * 0.4) + 1, dy + Math.round(dh * 0.35), Math.round(dw * 0.25), Math.round(dh * 0.25));
 
       spriteCanvas.bounds = bounds;
@@ -3532,20 +3585,71 @@
       }
     }
 
+    const FIGHTER_UNLOCK_STAGE = {
+      deen: 0, // Starter unlocked by default
+      n3on: 1, // Beat Stage 1
+      adin: 2, // Beat Stage 2
+      blueface: 3, // Beat Stage 3
+      bang: 4, // Beat Stage 4
+      ryan: 5, // Beat Stage 5
+      rampage: 6, // Beat Stage 6
+      broner: 7, // Beat Stage 7 (Champion)
+      chrisean: 7,
+      charleston: 7,
+      abrown: 7,
+      fousey: 7,
+      sneako: 7,
+      rayj: 7
+    };
+
+    function loadUnlockedFighters() {
+      try {
+        const raw = localStorage.getItem('ringrush_unlocked_roster');
+        if (raw) {
+          const list = JSON.parse(raw);
+          if (Array.isArray(list) && list.length > 0) return list;
+        }
+      } catch (e) {}
+      return ['deen']; // Default starter: Deen The Great
+    }
+
+    var unlockedFighters = loadUnlockedFighters();
+    window.unlockedFighters = unlockedFighters;
+
+    function saveUnlockedFighters() {
+      try {
+        window.unlockedFighters = unlockedFighters;
+        localStorage.setItem('ringrush_unlocked_roster', JSON.stringify(unlockedFighters));
+      } catch (e) {}
+    }
+
+    function unlockFighter(fId) {
+      if (!unlockedFighters.includes(fId)) {
+        unlockedFighters.push(fId);
+        saveUnlockedFighters();
+        const fObj = ROSTER.find(r => r.id === fId);
+        const name = fObj ? fObj.name : fId.toUpperCase();
+        globalFloatingTexts.push(new FloatingText(`${name} UNLOCKED!`, 32, 40, 10));
+      }
+    }
+
+    function isFighterUnlocked(fId) {
+      return unlockedFighters.includes(fId);
+    }
+
     // Navigation & State Management
     var appState = 'TITLE'; // 'TITLE', 'MODE_SELECT', 'CHAR_SELECT', 'LADDER_BRACKET', 'STAGE_INTRO', 'LADDER_SHOP', 'VICTORY_END', 'CONTINUE_SCREEN', 'PLAYING', 'KNOCKDOWN', 'KO'
     window.appState = appState;
     var selectedModeIdx = 0; // 0: CAMPAIGN (30 MIN), 1: QUICK 1P VS CPU, 2: 2P LOCAL, 3: CPU DEMO
-    var p1SelectIdx = 0;
-    var p2SelectIdx = 1;
+    var p1SelectIdx = 1; // Default starter: Deen The Great
+    var p2SelectIdx = 0;
     var p1SkinIdx = 0; // 0: Default Outfit, 1: Viral Alt Outfit
     var p2SkinIdx = 0;
     var p1Locked = false;
     var p2Locked = false;
     var lockCountdown = -1;
     var selectedArenaIdx = 0;
-    var bioFighterIdx = 0;
-    // Multi-Round & Knockdown State
+    var bioFighterIdx = 1;
     var p1RoundsWon = 0;
     var p2RoundsWon = 0;
     var currentRound = 1;
@@ -4280,26 +4384,41 @@
 
         // Base cell
         ctx.fillStyle = getPalColor(0);
+        const isUnlocked = isFighterUnlocked(f.id);
+
+        // Base cell
+        ctx.fillStyle = getPalColor(0);
         ctx.fillRect(cx, cy, cellW, cellH);
-        ctx.strokeStyle = getPalColor(f.color);
+        ctx.strokeStyle = getPalColor(isUnlocked ? f.color : 5);
         ctx.strokeRect(cx, cy, cellW, cellH);
 
-        // Mini avatar
+        // Mini avatar (render portrait if unlocked, silhouette if locked)
         const thumbCanvas = ROSTER_IDLE_CANVASES[f.id] || (idx === 0 ? bronerIdleCanvas : deenIdleCanvas);
         if (thumbCanvas) {
           const srcW = thumbCanvas.width === 192 ? 48 : thumbCanvas.width;
-          ctx.drawImage(thumbCanvas, 0, 0, srcW, 48, cx + 1, cy + 1, cellW - 2, cellH - 6);
-        } else {
-          drawBoxerAvatar(ctx, f, cx - 1, cy - 2, false);
+          if (isUnlocked) {
+            ctx.drawImage(thumbCanvas, 0, 0, srcW, 48, cx + 1, cy + 1, cellW - 2, cellH - 6);
+          } else {
+            ctx.fillStyle = getPalColor(1);
+            ctx.fillRect(cx + 1, cy + 1, cellW - 2, cellH - 6);
+            printPicoCenter('?', cx + Math.floor(cellW / 2), cy + 2, 5, 1, true);
+          }
+        }
+        if (!isUnlocked) {
+          // Red lock badge
+          ctx.fillStyle = getPalColor(8);
+          ctx.fillRect(cx + cellW - 5, cy + 1, 4, 4);
+          ctx.fillStyle = getPalColor(7);
+          ctx.fillRect(cx + cellW - 4, cy + 2, 2, 2);
         }
 
         // Name banner at cell bottom
         ctx.fillStyle = getPalColor(0);
         ctx.fillRect(cx + 1, cy + cellH - 5, cellW - 2, 5);
-        const shortName = f.name.length > 3 ? f.name.slice(0, 3) : f.name;
+        const shortName = isUnlocked ? (f.name.length > 3 ? f.name.slice(0, 3) : f.name) : '???';
         const nameW = shortName.length * 5 - 1;
         const nameX = cx + Math.floor((cellW - nameW) / 2);
-        printPico(shortName, nameX, cy + cellH - 6, (isP1 || isP2) ? 10 : 7, 1);
+        printPico(shortName, nameX, cy + cellH - 6, isUnlocked ? ((isP1 || isP2) ? 10 : 7) : 5, 1);
 
         // P1 & P2 Selection Cursors
         if (isP1) {
@@ -4322,51 +4441,66 @@
 
       // Selected Fighter Card (bottom half: Y = 54..114)
       const selectedFighter = ROSTER[p1SelectIdx];
+      const isSelectedUnlocked = isFighterUnlocked(selectedFighter.id);
+
       ctx.fillStyle = getPalColor(0);
       ctx.fillRect(4, 53, 120, 62);
-      ctx.strokeStyle = getPalColor(selectedFighter.color);
+      ctx.strokeStyle = getPalColor(isSelectedUnlocked ? selectedFighter.color : 5);
       ctx.strokeRect(4, 53, 120, 62);
 
       // Large Portrait Panel
       ctx.fillStyle = getPalColor(1);
       ctx.fillRect(7, 56, 32, 56);
-      ctx.strokeStyle = getPalColor(selectedFighter.color);
+      ctx.strokeStyle = getPalColor(isSelectedUnlocked ? selectedFighter.color : 5);
       ctx.strokeRect(7, 56, 32, 56);
 
-      const outfitList = ROSTER_OUTFITS[selectedFighter.id] || ['DEFAULT', 'ALT'];
-      const outfitName = outfitList[p1SkinIdx] || (p1SkinIdx === 1 ? 'VIRAL STREAM' : 'CLASSIC');
-      const bigCanvas = ROSTER_IDLE_CANVASES[selectedFighter.id + '_' + p1SkinIdx] || ROSTER_IDLE_CANVASES[selectedFighter.id] || bronerIdleCanvas;
-      if (bigCanvas) {
-        const srcW = bigCanvas.width === 192 ? 48 : bigCanvas.width;
-        ctx.drawImage(bigCanvas, 0, 0, srcW, 48, 9, 58, 28, 52);
+      if (!isSelectedUnlocked) {
+        // Locked Portrait Display
+        printPicoCenter('?', 23, 68, 5, 2, true);
+        printPicoCenter('LOCKED', 23, 94, 8, 1, true);
+
+        const reqSt = FIGHTER_UNLOCK_STAGE[selectedFighter.id] || 1;
+        printPico(selectedFighter.fullName, 42, 56, 5, 1, true);
+        printPico('LOCKED FIGHTER', 42, 66, 8, 1, true);
+        printPico('BEAT STAGE ' + reqSt + ' IN', 42, 78, 7, 1);
+        printPico('ROAD TO GOLD TO UNLOCK', 42, 88, 10, 1);
+        printPicoCenter('ARROWS: MOVE  [LOCKED]', 121, 8, 1, true);
       } else {
-        drawBoxerAvatar(ctx, selectedFighter, 8, 60, true, false, false, p1SkinIdx);
-      }
+        const outfitList = ROSTER_OUTFITS[selectedFighter.id] || ['DEFAULT', 'ALT'];
+        const outfitName = outfitList[p1SkinIdx] || (p1SkinIdx === 1 ? 'VIRAL STREAM' : 'CLASSIC');
+        const bigCanvas = ROSTER_IDLE_CANVASES[selectedFighter.id + '_' + p1SkinIdx] || ROSTER_IDLE_CANVASES[selectedFighter.id] || bronerIdleCanvas;
+        if (bigCanvas) {
+          const srcW = bigCanvas.width === 192 ? 48 : bigCanvas.width;
+          ctx.drawImage(bigCanvas, 0, 0, srcW, 48, 9, 58, 28, 52);
+        } else {
+          drawBoxerAvatar(ctx, selectedFighter, 8, 60, true, false, false, p1SkinIdx);
+        }
 
-      // Fighter Stats & Bio Text
-      printPico(selectedFighter.fullName, 42, 56, 10, 1, true);
-      const stanceStr = selectedFighter.stance.length > 15 ? selectedFighter.stance.slice(0, 15) : selectedFighter.stance;
-      printPico(stanceStr, 42, 64, 6, 1);
-      const moveStr = 'SP ' + (selectedFighter.move.length > 13 ? selectedFighter.move.slice(0, 13) : selectedFighter.move);
-      printPico(moveStr, 42, 72, 9, 1);
-      drawStatBar('PWR', selectedFighter.pwr, 42, 79, 56, 8);
-      drawStatBar('SPD', selectedFighter.spd, 42, 87, 56, 10);
-      drawStatBar('DEF', selectedFighter.def, 42, 95, 56, 12);
+        // Fighter Stats & Bio Text
+        printPico(selectedFighter.fullName, 42, 56, 10, 1, true);
+        const stanceStr = selectedFighter.stance.length > 15 ? selectedFighter.stance.slice(0, 15) : selectedFighter.stance;
+        printPico(stanceStr, 42, 64, 6, 1);
+        const moveStr = 'SP ' + (selectedFighter.move.length > 13 ? selectedFighter.move.slice(0, 13) : selectedFighter.move);
+        printPico(moveStr, 42, 72, 9, 1);
+        drawStatBar('PWR', selectedFighter.pwr, 42, 79, 56, 8);
+        drawStatBar('SPD', selectedFighter.spd, 42, 87, 56, 10);
+        drawStatBar('DEF', selectedFighter.def, 42, 95, 56, 12);
 
-      // Outfit Switcher Badge
-      ctx.fillStyle = getPalColor(p1SkinIdx === 1 ? 11 : 5);
-      ctx.fillRect(42, 103, 76, 8);
-      const outfitLabel = (p1SkinIdx === 1 ? 'ALT: ' : 'DRIP: ') + outfitName;
-      const shortOutfit = outfitLabel.length > 15 ? outfitLabel.slice(0, 15) : outfitLabel;
-      printPico(shortOutfit, 44, 104, p1SkinIdx === 1 ? 0 : 7, 1);
+        // Outfit Switcher Badge
+        ctx.fillStyle = getPalColor(p1SkinIdx === 1 ? 11 : 5);
+        ctx.fillRect(42, 103, 76, 8);
+        const outfitLabel = (p1SkinIdx === 1 ? 'ALT: ' : 'DRIP: ') + outfitName;
+        const shortOutfit = outfitLabel.length > 15 ? outfitLabel.slice(0, 15) : outfitLabel;
+        printPico(shortOutfit, 44, 104, p1SkinIdx === 1 ? 0 : 7, 1);
 
-      // Selection instructions
-      if (p1Locked && p2Locked) {
-        printPicoCenter('MATCH STARTING...', 122, 10, 1, true);
-      } else if (p1Locked && !p2Locked) {
-        printPicoCenter('P1 READY! P2 PRESS S TO LOCK', 122, 11, 1);
-      } else {
-        printPicoCenter('ARROWS: MOVE  Y: OUTFIT  X: LOCK', 121, 7, 1);
+        // Selection instructions
+        if (p1Locked && p2Locked) {
+          printPicoCenter('MATCH STARTING...', 122, 10, 1, true);
+        } else if (p1Locked && !p2Locked) {
+          printPicoCenter('P1 READY! P2 PRESS S TO LOCK', 122, 11, 1);
+        } else {
+          printPicoCenter('ARROWS: MOVE  Y: OUTFIT  X: LOCK', 121, 7, 1);
+        }
       }
     }
 
@@ -5173,9 +5307,13 @@
           }
           appState = 'CHAR_SELECT'; p1Locked = false; p2Locked = false; play808Sfx('confirm');
         }
-        else if (appState === 'CHAR_SELECT') { p1Locked = true; if (selectedModeIdx !== 1) p2Locked = true; play808Sfx('confirm'); }
-        else if (appState === 'LADDER_BRACKET') { appState = 'STAGE_INTRO'; play808Sfx('confirm'); }
-        else if (appState === 'STAGE_INTRO') { startMatch(); }
+        else if (appState === 'CHAR_SELECT') {
+          if (isFighterUnlocked(ROSTER[p1SelectIdx].id)) {
+            p1Locked = true; if (selectedModeIdx !== 1) p2Locked = true; play808Sfx('confirm');
+          } else {
+            play808Sfx('nav');
+          }
+        }
         else if (appState === 'STAGE_VICTORY_CUTSCENE') { appState = 'LADDER_SHOP'; play808Sfx('confirm'); }
         else if (appState === 'LADDER_SHOP') { advanceCampaignStage(); appState = 'LADDER_BRACKET'; play808Sfx('confirm'); }
         else if (appState === 'VICTORY_END') { campaignState.active = false; campaignState.stageIdx = 0; campaignState.clearedStages = [false, false, false, false, false, false, false]; appState = 'TITLE'; play808Sfx('confirm'); }
@@ -5215,12 +5353,13 @@
             p1SelectIdx = 0; p2SelectIdx = 1;
             play808Sfx('confirm');
           }
-          if (dpadLeft) { p1SelectIdx = (p1SelectIdx + 13) % 14; gpNavDebounce = 12; play808Sfx('nav'); }
-          if (dpadRight) { p1SelectIdx = (p1SelectIdx + 1) % 14; gpNavDebounce = 12; play808Sfx('nav'); }
-          if (dpadUp || dpadDown) { p1SelectIdx = (p1SelectIdx + 7) % 14; gpNavDebounce = 12; play808Sfx('nav'); }
-          if (btnY) { p1SkinIdx = (p1SkinIdx === 0 ? 1 : 0); gpNavDebounce = 12; play808Sfx('nav'); }
-          if (btnA) { p1Locked = true; if (selectedModeIdx !== 1) p2Locked = true; play808Sfx('confirm'); }
-          if (btnX) { bioFighterIdx = p1SelectIdx; appState = 'FIGHTER_BIO'; play808Sfx('nav'); }
+          if (btnA) {
+            if (isFighterUnlocked(ROSTER[p1SelectIdx].id)) {
+              p1Locked = true; if (selectedModeIdx !== 1) p2Locked = true; play808Sfx('confirm');
+            } else {
+              play808Sfx('nav');
+            }
+          }
         } else if (appState === 'ARENA_SELECT') {
           if (dpadLeft) { selectedArenaIdx = (selectedArenaIdx + 8) % 9; gpNavDebounce = 12; play808Sfx('nav'); }
           if (dpadRight) { selectedArenaIdx = (selectedArenaIdx + 1) % 9; gpNavDebounce = 12; play808Sfx('nav'); }
@@ -5541,13 +5680,16 @@
         }
 
         if (isStartKey(e.key)) {
-          p1Locked = true;
-          play808Sfx('confirm');
-          if (selectedModeIdx !== 1) {
-            p2Locked = true;
+          if (isFighterUnlocked(ROSTER[p1SelectIdx].id)) {
+            p1Locked = true;
+            play808Sfx('confirm');
+            if (selectedModeIdx !== 1) {
+              p2Locked = true;
+            }
+          } else {
+            play808Sfx('nav');
           }
         }
-        return;
       }
 
       if (appState === 'FIGHTER_BIO') {
@@ -5688,10 +5830,13 @@
         p1Locked = false; p2Locked = false;
         play808Sfx('confirm');
       } else if (appState === 'CHAR_SELECT') {
-        p1Locked = true;
-        if (selectedModeIdx !== 1) p2Locked = true;
-        play808Sfx('confirm');
-      } else if (appState === 'LADDER_BRACKET') {
+        if (isFighterUnlocked(ROSTER[p1SelectIdx].id)) {
+          p1Locked = true;
+          if (selectedModeIdx !== 1) p2Locked = true;
+          play808Sfx('confirm');
+        } else {
+          play808Sfx('nav');
+        }
         appState = 'STAGE_INTRO';
         play808Sfx('confirm');
       } else if (appState === 'STAGE_VICTORY_CUTSCENE') {
@@ -5736,9 +5881,13 @@
         p1Locked = false; p2Locked = false;
         play808Sfx('confirm');
       } else if (appState === 'CHAR_SELECT') {
-        p1Locked = true;
-        if (selectedModeIdx !== 1) p2Locked = true;
-        play808Sfx('confirm');
+        if (isFighterUnlocked(ROSTER[p1SelectIdx].id)) {
+          p1Locked = true;
+          if (selectedModeIdx !== 1) p2Locked = true;
+          play808Sfx('confirm');
+        } else {
+          play808Sfx('nav');
+        }
       } else if (appState === 'LADDER_BRACKET') {
         appState = 'STAGE_INTRO';
         play808Sfx('confirm');
@@ -5809,7 +5958,13 @@
         }
         appState = 'CHAR_SELECT'; p1Locked = false; p2Locked = false; play808Sfx('confirm');
       }
-      else if (appState === 'CHAR_SELECT') { p1Locked = true; if (selectedModeIdx !== 1) p2Locked = true; play808Sfx('confirm'); }
+      else if (appState === 'CHAR_SELECT') {
+        if (isFighterUnlocked(ROSTER[p1SelectIdx].id)) {
+          p1Locked = true; if (selectedModeIdx !== 1) p2Locked = true; play808Sfx('confirm');
+        } else {
+          play808Sfx('nav');
+        }
+      }
       else if (appState === 'LADDER_BRACKET') { appState = 'STAGE_INTRO'; play808Sfx('confirm'); }
       else if (appState === 'STAGE_INTRO') { startMatch(); }
       else if (appState === 'STAGE_VICTORY_CUTSCENE') { appState = 'LADDER_SHOP'; play808Sfx('confirm'); }
@@ -6000,6 +6155,7 @@
           }
 
           // Check grid click (X: 6..122, Y: 17..52) — selects, then locks
+          // Check grid click (X: 6..122, Y: 17..52) — selects, then locks if unlocked
           if (clickY >= 17 && clickY <= 52 && clickX >= 6 && clickX <= 122) {
             const col = Math.floor((clickX - 6) / 16);
             const row = Math.floor((clickY - 17) / 17);
@@ -6008,9 +6164,13 @@
               p1SelectIdx = idx;
             }
           }
-          p1Locked = true;
-          if (selectedModeIdx !== 1) p2Locked = true;
-          play808Sfx('confirm');
+          if (isFighterUnlocked(ROSTER[p1SelectIdx].id)) {
+            p1Locked = true;
+            if (selectedModeIdx !== 1) p2Locked = true;
+            play808Sfx('confirm');
+          } else {
+            play808Sfx('nav');
+          }
         }
       });
     }
@@ -6052,6 +6212,9 @@
     window.drawGame = render;
     window.endRound = endRound;
     window.spawnParticle = spawnParticle;
+    window.unlockedFighters = unlockedFighters;
+    window.unlockFighter = unlockFighter;
+    window.isFighterUnlocked = isFighterUnlocked;
 
     requestAnimationFrame((time) => { lastLoopTime = time; gameLoop(time); });
   </script>
