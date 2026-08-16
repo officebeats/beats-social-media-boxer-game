@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>CRASH OUT: RING RUSH (v2.1.0) — PICO-8 Native Transparent Boxing</title>
+  <title>CRASH OUT: RING RUSH (v2.2.0) — PICO-8 Native Transparent Boxing</title>
   <style>
     :root {
       --pico-black: #000000;
@@ -2242,14 +2242,18 @@
           campaignState.purse = (campaignState.purse || 0) + earned;
           campaignState.totalScore = (campaignState.totalScore || 0) + (p1 ? p1.score : 0) + earned * 10;
           window.campaignState = campaignState;
-          saveCampaign();
+          lastPurseEarned = earned;
+          lastSweepBonus = sweepBonus;
+          lastHpBonus = hpBonus;
+
           if (campaignState.stageIdx >= CAMPAIGN_STAGES.length - 1) {
             // BEAT FINAL BOSS FLOYD MAYWEATHER!
             appState = 'VICTORY_END';
           } else {
-            // Advance to Upgrade Shop
-            appState = 'LADDER_SHOP';
+            // Show Post-Fight Press Conference Cutscene before Gym Shop!
+            appState = 'STAGE_VICTORY_CUTSCENE';
           }
+          play808Sfx('confirm');
         } else {
           // Player lost campaign bout
           if (campaignState.continues > 0) {
@@ -2261,7 +2265,6 @@
           }
         }
       } else {
-        gameState = 'KO';
         appState = 'KO';
       }
     }
@@ -3055,6 +3058,78 @@
 
       printPicoCenter('PRESS X / START: ENTER BOUT', 118, 10, 1, true);
     }
+    // === POST-FIGHT PRESS CONFERENCE & VICTORY CUTSCENE ===
+    let lastPurseEarned = 0;
+    let lastSweepBonus = 0;
+    let lastHpBonus = 0;
+
+    const POST_FIGHT_QUOTES = {
+      broner: "AND THAT'S ABOUT BILLIONS! EASY WORK IN THE RING!",
+      deen: "LIGHTNING STRIKES AGAIN! WHO'S NEXT IN LINE?",
+      ryan: "FLASH HOOK PUT HIM DOWN COLD! ON TO THE NEXT!",
+      n3on: "WE CRASHED OUT AND WON THE WHOLE STREAM!",
+      rayj: "STILL FAMOUS, STILL UNDEFEATED. CASH THE CHECK!",
+      blueface: "FAMOUS HOOK HANDLED BUSINESS. THAT'S ON ME!",
+      chrisean: "TOLD YOU I'M NOT BACKING DOWN! BRING THE SMOKE!",
+      rampage: "YOU CAN'T STOP THE SLAM! NEXT FIGHTER UP!",
+      adin: "WE RAIDED THE RING AND TOOK OVER! W CHAT!",
+      charleston: "I TOLD YOU WHAT WOULD HAPPEN! EASY WORK!",
+      bang: "WORK THE BODY, TAKE THE W! STAY DISCIPLINED!",
+      abrown: "CT KO DANCE TIME! PUT RESPECT ON THE NAME!",
+      fousey: "G7 NEVER DIE! WE TOOK THE WHOLE RING!",
+      sneako: "LEAF IN THE WIND! DODGED THE STORM AND WON!"
+    };
+
+    function drawStageVictoryCutsceneScreen() {
+      const st = CAMPAIGN_STAGES[campaignState.stageIdx] || CAMPAIGN_STAGES[0];
+      const arena = ARENAS.find(a => a.id === st.arenaId) || ARENAS[0];
+
+      ctx.fillStyle = getPalColor(arena.colors.backdrop);
+      ctx.fillRect(0, 0, 128, 128);
+
+      drawPicoDitheredCrowd(arena.colors.crowdBg, arena.colors.crowdDit);
+
+      // Flashing Camera Lights
+      if (Math.random() < 0.35) {
+        const fx = 10 + Math.floor(Math.random() * 108);
+        const fy = 10 + Math.floor(Math.random() * 35);
+        ctx.fillStyle = getPalColor(7);
+        ctx.fillRect(fx, fy, 3, 3);
+      }
+
+      // Top Stage Header
+      ctx.fillStyle = getPalColor(0);
+      ctx.fillRect(0, 0, 128, 18);
+      printPicoCenter(`STAGE ${st.stageNum} VICTORY!`, 3, 10, 1, true);
+      printPicoCenter('POST-FIGHT PRESS CONFERENCE', 10, 7, 1);
+
+      // Fighter Cutscene Models: Winner Standing (Left), Loser Down (Right)
+      const p1Obj = ROSTER[p1SelectIdx];
+      const p2Obj = ROSTER.find(r => r.id === st.fighterId) || ROSTER[1];
+      drawBoxerAvatar(ctx, p1Obj, 36, 68, true, false, false);
+      drawBoxerAvatar(ctx, p2Obj, 92, 68, true, true, true); // Defeated opponent flat on canvas
+
+      // Winner Banner
+      ctx.fillStyle = getPalColor(10);
+      ctx.fillRect(20, 68, 88, 11);
+      ctx.strokeStyle = getPalColor(0);
+      ctx.strokeRect(20, 68, 88, 11);
+      printPicoCenter(`${p1Obj.name} WINS BOUT!`, 71, 0, 1, true);
+
+      // Post-Fight Interview Box
+      ctx.fillStyle = 'rgba(0,0,0,0.92)';
+      ctx.fillRect(6, 81, 116, 34);
+      ctx.strokeStyle = getPalColor(arena.colors.accent);
+      ctx.strokeRect(6, 81, 116, 34);
+
+      const quote = POST_FIGHT_QUOTES[p1Obj.id] || "WE PUT HIM DOWN! ON TO THE NEXT!";
+      printPicoWrap(`"${quote}"`, 10, 84, 108, 10, 1);
+      printPico(`STAGE PURSE: +$${lastPurseEarned}`, 10, 104, 11, 1);
+
+      if (Math.floor(globalFrameCount / 20) % 2 === 0) {
+        printPicoCenter('PRESS X: ENTER TRAINER GYM SHOP', 118, 10, 1, true);
+      }
+    }
 
     // === PRE-FIGHT TRASH TALK INTRO SCREEN ===
     function drawStageIntroScreen() {
@@ -3072,17 +3147,17 @@
       printPicoCenter(`STAGE ${st.stageNum}: ${st.name}`, 3, 10, 1, true);
       printPicoCenter(st.location, 11, 7, 1);
 
-      // Face-Off Avatars
+      // Authentic Capcom Boxer Cutscene Sprites (P1 facing right, P2 facing left)
       const p1Obj = ROSTER[p1SelectIdx];
       const p2Obj = ROSTER.find(r => r.id === st.fighterId) || ROSTER[1];
-      drawBoxerAvatar(ctx, p1Obj, 22, 48, true);
-      drawBoxerAvatar(ctx, p2Obj, 106, 48, true);
+      drawBoxerAvatar(ctx, p1Obj, 32, 64, true, false, false);
+      drawBoxerAvatar(ctx, p2Obj, 96, 64, true, true, false);
 
       // VS Banner
       ctx.fillStyle = getPalColor(8);
-      ctx.fillRect(52, 40, 24, 14);
+      ctx.fillRect(54, 40, 20, 13);
       ctx.strokeStyle = getPalColor(10);
-      ctx.strokeRect(52, 40, 24, 14);
+      ctx.strokeRect(54, 40, 20, 13);
       printPicoCenter('VS', 43, 10, 1, true);
 
       // Dialogue Box
@@ -3287,91 +3362,36 @@
       { id: 'gymBroner', name: 'BRONER', tag: 'DETROIT', location: 'CINCINNATI, OH', colors: { crowdBg: 0, crowdDit: 8, backdrop: 2, ropes: 8, floor: 4, accent: 8, turnbuckle: 8 } }
     ];
 
-    function drawBoxerAvatar(ctx, f, x, y, isBig = false) {
-      const details = FIGHTER_DETAILS[f.id] || { skin: 4, hair: 0, trunks: f.color, gloves: f.color };
-      const s = isBig ? 1.4 : 0.6;
+    function drawBoxerAvatar(ctx, f, x, y, isBig = false, flip = false, isDown = false) {
+      if (!f) return;
+      const fId = f.id || 'broner';
+      const idleCanvas = ROSTER_IDLE_CANVASES[fId] || (fId === 'deen' ? deenPunchCanvas : bronerIdleCanvas);
+      if (!idleCanvas) return;
+
+      const b = idleCanvas.bounds || { xmin: 0, ymin: 0, w: idleCanvas.width, h: idleCanvas.height };
+      const aspect = b.w / b.h;
+      const dh = isBig ? 42 : 24;
+      const dw = dh * aspect;
 
       ctx.save();
       ctx.translate(x, y);
 
-      // Head & Face Base
-      ctx.fillStyle = getPalColor(details.skin);
-      ctx.fillRect(4 * s, 2 * s, 9 * s, 8 * s);
-      ctx.strokeStyle = getPalColor(0);
-      ctx.lineWidth = 1;
-      ctx.strokeRect(4 * s, 2 * s, 9 * s, 8 * s);
+      // Ground shadow
+      ctx.fillStyle = 'rgba(0,0,0,0.60)';
+      ctx.beginPath();
+      ctx.ellipse(0, 0, Math.max(8, dw * 0.45), 2.5, 0, 0, Math.PI * 2);
+      ctx.fill();
 
-      // Eyes & Accessories
-      ctx.fillStyle = getPalColor(0);
-      if (details.feature === 'glasses' || details.feature === 'sunglasses') {
-        ctx.fillRect(3 * s, 4 * s, 11 * s, 3 * s);
-        ctx.fillStyle = details.feature === 'glasses' ? getPalColor(7) : getPalColor(5);
-        ctx.fillRect(4 * s, 4.5 * s, 3.5 * s, 2 * s);
-        ctx.fillRect(9.5 * s, 4.5 * s, 3.5 * s, 2 * s);
+      if (flip) {
+        ctx.scale(-1, 1);
+      }
+
+      if (isDown) {
+        ctx.rotate(flip ? 1.45 : -1.45);
+        ctx.drawImage(idleCanvas, b.xmin, b.ymin, b.w, b.h, -dw / 2, -dh * 0.4, dw, dh);
       } else {
-        ctx.fillRect(5.5 * s, 4.5 * s, 1.5 * s, 1.5 * s);
-        ctx.fillRect(9.5 * s, 4.5 * s, 1.5 * s, 1.5 * s);
+        ctx.drawImage(idleCanvas, b.xmin, b.ymin, b.w, b.h, -dw / 2, -dh, dw, dh);
       }
-
-      // Tattoos / Face details
-      if (details.feature === 'tattoos') {
-        ctx.fillStyle = getPalColor(12);
-        ctx.fillRect(4 * s, 6.5 * s, 2 * s, 2 * s);
-      }
-
-      // Hair / Headwear
-      ctx.fillStyle = getPalColor(details.hair || 0);
-      if (details.feature === 'hat') {
-        ctx.fillStyle = getPalColor(4);
-        ctx.fillRect(1 * s, 0 * s, 15 * s, 2.5 * s);
-        ctx.fillRect(3.5 * s, -2.5 * s, 10 * s, 3 * s);
-        ctx.fillStyle = getPalColor(10);
-        ctx.fillRect(3.5 * s, 0 * s, 10 * s, 1 * s);
-      } else if (details.feature === 'tmt') {
-        ctx.fillStyle = getPalColor(10);
-      } else if (details.feature === 'headgear') {
-        ctx.fillStyle = getPalColor(0);
-        ctx.fillRect(2 * s, -1 * s, 13 * s, 4 * s);
-        ctx.fillRect(2 * s, 2 * s, 2.5 * s, 8 * s);
-        ctx.fillRect(12.5 * s, 2 * s, 2.5 * s, 8 * s);
-        ctx.fillStyle = getPalColor(8);
-        ctx.fillRect(4.5 * s, 0 * s, 8 * s, 1.5 * s);
-      } else if (details.feature === 'ponytail') {
-        ctx.fillRect(3 * s, 0 * s, 11 * s, 2.5 * s);
-        ctx.fillRect(13 * s, 1.5 * s, 3 * s, 6 * s);
-      } else if (details.feature === 'braids') {
-        ctx.fillRect(3 * s, 0 * s, 11 * s, 2.5 * s);
-        ctx.fillRect(3 * s, 2.5 * s, 1.5 * s, 5 * s);
-        ctx.fillRect(12.5 * s, 2.5 * s, 1.5 * s, 5 * s);
-      } else {
-        ctx.fillRect(3 * s, 0 * s, 11 * s, 2.5 * s);
-      }
-
-      // Beard & Chain
-      if (f.id === 'broner' || f.id === 'rampage' || f.id === 'fousey' || f.id === 'bang') {
-        ctx.fillStyle = getPalColor(0);
-        ctx.fillRect(4 * s, 6.5 * s, 9 * s, 3.5 * s);
-      }
-      if (details.chain) {
-        ctx.fillStyle = getPalColor(details.chain);
-        ctx.fillRect(4.5 * s, 10 * s, 8 * s, 1.5 * s);
-      }
-
-      // Torso & Musculature
-      ctx.fillStyle = getPalColor(details.skin);
-      ctx.fillRect(4.5 * s, 10 * s, 8 * s, 9 * s);
-      ctx.strokeRect(4.5 * s, 10 * s, 8 * s, 9 * s);
-
-      // Trunks & Waistband
-      ctx.fillStyle = getPalColor(details.trunks);
-      ctx.fillRect(4 * s, 17 * s, 9 * s, 6 * s);
-      ctx.fillStyle = getPalColor(7);
-      ctx.fillRect(4 * s, 17 * s, 9 * s, 1.5 * s);
-
-      // Gloves
-      ctx.fillStyle = getPalColor(details.gloves);
-      ctx.fillRect(1 * s, 11 * s, 3.5 * s, 4.5 * s);
-      ctx.fillRect(12.5 * s, 11 * s, 3.5 * s, 4.5 * s);
 
       ctx.restore();
     }
@@ -3963,9 +3983,10 @@
         drawLadderBracketScreen();
       } else if (appState === 'STAGE_INTRO') {
         drawStageIntroScreen();
+      } else if (appState === 'STAGE_VICTORY_CUTSCENE') {
+        drawStageVictoryCutsceneScreen();
       } else if (appState === 'LADDER_SHOP') {
         drawLadderShopScreen();
-      } else if (appState === 'VICTORY_END') {
         drawVictoryEndScreen();
       } else if (appState === 'CONTINUE_SCREEN') {
         drawContinueScreen();
@@ -4012,8 +4033,10 @@
       } else if (appState === 'STAGE_INTRO') {
         appState = (selectedModeIdx === 0 ? 'LADDER_BRACKET' : 'CHAR_SELECT');
         play808Sfx('nav');
+      } else if (appState === 'STAGE_VICTORY_CUTSCENE') {
+        appState = 'LADDER_SHOP';
+        play808Sfx('nav');
       } else if (appState === 'ARENA_SELECT') {
-        p1Locked = false;
         p2Locked = false;
         lockCountdown = -1;
         appState = 'CHAR_SELECT';
@@ -4289,13 +4312,20 @@
         return;
       }
 
+      if (appState === 'STAGE_VICTORY_CUTSCENE') {
+        if (isStartKey(e.key)) {
+          appState = 'LADDER_SHOP';
+          play808Sfx('confirm');
+        }
+        return;
+      }
+
       if (appState === 'STAGE_INTRO') {
         if (isStartKey(e.key)) {
           startMatch();
         }
         return;
       }
-
       if (appState === 'LADDER_SHOP') {
         if (e.key === 'ArrowUp') shopSelectedIdx = (shopSelectedIdx + 5) % 6;
         if (e.key === 'ArrowDown') shopSelectedIdx = (shopSelectedIdx + 1) % 6;
@@ -4529,9 +4559,11 @@
       } else if (appState === 'LADDER_BRACKET') {
         appState = 'STAGE_INTRO';
         play808Sfx('confirm');
+      } else if (appState === 'STAGE_VICTORY_CUTSCENE') {
+        appState = 'LADDER_SHOP';
+        play808Sfx('confirm');
       } else if (appState === 'STAGE_INTRO') {
         startMatch();
-      } else if (appState === 'LADDER_SHOP') {
         campaignState.stageIdx++;
         saveCampaign();
         appState = 'LADDER_BRACKET';
@@ -4573,9 +4605,11 @@
       } else if (appState === 'LADDER_BRACKET') {
         appState = 'STAGE_INTRO';
         play808Sfx('confirm');
+      } else if (appState === 'STAGE_VICTORY_CUTSCENE') {
+        appState = 'LADDER_SHOP';
+        play808Sfx('confirm');
       } else if (appState === 'STAGE_INTRO') {
         startMatch();
-      } else if (appState === 'LADDER_SHOP') {
         campaignState.stageIdx++;
         saveCampaign();
         appState = 'LADDER_BRACKET';
@@ -4673,12 +4707,16 @@
           play808Sfx('confirm');
           return;
         }
+        if (appState === 'STAGE_VICTORY_CUTSCENE') {
+          appState = 'LADDER_SHOP';
+          play808Sfx('confirm');
+          return;
+        }
 
         if (appState === 'STAGE_INTRO') {
           startMatch();
           return;
         }
-
         if (appState === 'LADDER_SHOP') {
           // Check if an upgrade item was clicked (6 rows at Y=22 + idx*15)
           for (let s = 0; s < 6; s++) {

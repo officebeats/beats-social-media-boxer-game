@@ -1,6 +1,6 @@
 # CRASH OUT: RING RUSH — PICO-8 PUZZLE BOXING
 
-**Version:** `v2.1.0` (30-Minute Arcade Campaign & 10-Count Knockdown Survival Release)
+**Version:** `v2.2.0` (Unified Authentic Cutscene Sprites & Post-Fight Victory Cutscenes)
 
 ![Title Screen](assets/pico8_title.jpg)
 
@@ -8,7 +8,7 @@
 
 ---
 
-## 🎮 Play Live (v2.1.0)
+## 🎮 Play Live (v2.2.0)
 
 - ⚡ **Play Live in Browser (GitHub Pages)**: **[officebeats.github.io/beats-social-media-boxer-game](https://officebeats.github.io/beats-social-media-boxer-game/)**
 - 🕹️ **Native PICO-8 Cartridge**: Load [`crash_out.p8`](crash_out.p8) directly inside PICO-8 using `pico8 -run crash_out.p8`.
@@ -23,18 +23,16 @@
 
 ---
 
-## 🌟 New in v2.1.0
-- 🏆 **7-Stage "Road to Gold" Arcade Campaign (28–35 Min)**: Full tournament ladder progressing through N3ON, Adin Ross, Blueface, Walid Sharks, Ryan Garcia, Semi-Final Boss **Gervonta "Tank" Davis**, and Final Boss **Floyd "Money" Mayweather** (Phase 1 50-0 Philly Shell & Phase 2 TMT Gold Rush).
-- 🥊 **Knockdown 10-Count Puzzle Survival**: Dropping to 0 HP triggers an authentic referee 10-count. Fallen fighters actively drop and clear gems to fill the **Get-Up Stamina Meter** to score a dramatic second-wind recovery (+28 HP) before the count of 10!
+## 🌟 New in v2.2.0
+- 🎬 **Unified Authentic Capcom Boxer Sprites in All Cutscenes**: Replaced primitive block avatars with the exact 16-bit Capcom arcade fighter sprites used in combat across all cutscenes (`STAGE_INTRO`, `STAGE_VICTORY_CUTSCENE`, `LADDER_SHOP`, and `VICTORY_END`).
+- 🏆 **Post-Fight Press Conference Cutscenes (`STAGE_VICTORY_CUTSCENE`)**: Upon winning each Road to Gold bout, view the post-fight press conference cutscene with the standing winner flexing, defeated opponent down on canvas, viral stream quotes, and stage purse breakdown before entering the Trainer Gym Shop.
+- 🥊 **7-Stage 'Road to Gold' Tournament Campaign (28–35 Min)**: Full tournament ladder progressing through N3ON, Adin Ross, Blueface, Walid Sharks, Ryan Garcia, Semi-Final Boss **Gervonta 'Tank' Davis**, and Final Boss **Floyd 'Money' Mayweather**.
+- 🥊 **Knockdown 10-Count Puzzle Survival**: Dropping to 0 HP triggers an authentic referee 10-count. Mash **\`Z\` / \`X\` / \`Space\` / \`Enter\` or tap screen** to fill the **Get-Up Stamina Meter** and score a second-wind recovery (+28 HP) before count 10!
 - 🥊 **Three-Knockdown TKO Rule**: Authentic boxing rules where a 3rd knockdown in the same round triggers an immediate technical knockout.
-- 🏅 **Multi-Round Best 2-of-3 Engine**: Matches require 2 round victories, tracked via golden glove win indicators (⭐ ⭐) on the HUD with round-over transitions.
+- 🏅 **Multi-Round Best 2-of-3 Engine**: Matches require 2 round victories, tracked via golden glove win indicators (⭐ ⭐) on the HUD.
 - 🏪 **Trainer Gym Upgrade Shop (`LADDER_SHOP`)**: Spend stage fight purses on persistent upgrades: **Heavy Hands (PWR Lv 1-3)**, **Iron Chin (DEF Lv 1-3)**, **Fast Hands (SPD Lv 1-3)**, **Diamond Seed Perk**, and **Super Rush Perk**.
-- 💬 **Pre-Fight Trash Talk Dialogues (`STAGE_INTRO`)**: Authentic character face-off cutscenes with viral Kick stream dialogue lines before each bout.
-- 💾 **Persistent Save & Resume System**: Auto-saves campaign stage, purse, and purchased upgrades to `localStorage` so 30-minute runs can be resumed anytime from the Mode Select menu.
-- 🥊 **Street Fighter Authentic Punch Animation Engine**: Full-body 4-quadrant sprite swaps with 3-phase strike kinematics (windup coil, extension hold with hit sparks/haptics, smoothstep recovery).
-- 🧭 **100% Direction-Normalized 56-Punch Matrix**: Quadrant normalization ensures all 14 fighters strike forward toward the opponent.
-- 🔴 **Zero Floating Sprites**: Tight auto-crop bounding boxes anchor every boxer's boots directly on the ring floor at $Y=90$ with grounded shadows.
-- ⚡ **Natural Ducking & Defense Kinematics**: Eliminated sprite squashing in favor of authentic boxing slips, dips, and waist leans at full 100% resolution.
+- 💾 **Persistent Save & Resume System**: Auto-saves campaign state, purse, and purchased upgrades to `localStorage` so 30-minute runs can be resumed anytime from Mode Select.
+- 🔄 **Universal Back & Home Navigation**: Pressing `Escape` or clicking top-left `<` returns smoothly all the way back to the Title/Home screen from any menu.
 ### Title Screen
 ![Title Screen](assets/pico8_title.jpg)
 
