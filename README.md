@@ -1,6 +1,6 @@
 # CRASH OUT: RING RUSH — PICO-8 PUZZLE BOXING
 
-**Version:** `v2.2.0` (Unified Authentic Cutscene Sprites & Post-Fight Victory Cutscenes)
+**Version:** `v2.3.0` (Game Boy Advance Mobile Handheld Shell & 12-Skin Theme Switcher Release)
 
 ![Title Screen](assets/pico8_title.jpg)
 
@@ -8,7 +8,7 @@
 
 ---
 
-## 🎮 Play Live (v2.2.0)
+## 🎮 Play Live (v2.3.0)
 
 - ⚡ **Play Live in Browser (GitHub Pages)**: **[officebeats.github.io/beats-social-media-boxer-game](https://officebeats.github.io/beats-social-media-boxer-game/)**
 - 🕹️ **Native PICO-8 Cartridge**: Load [`crash_out.p8`](crash_out.p8) directly inside PICO-8 using `pico8 -run crash_out.p8`.
@@ -23,7 +23,21 @@
 
 ---
 
-## 🌟 New in v2.2.0
+## 🌟 New in v2.3.0
+- 🎮 **Game Boy Advance (GBA) Mobile Handheld Console Shell**: Mobile viewports now transform into an authentic GBA handheld device featuring an ergonomic curved body, glass screen bezel with green power LED, molded cross D-Pad, angled A/B action buttons, L/R shoulder triggers, and rubber Start/Select pills.
+- 🎨 **12 Dynamic GBA Handheld Console Skins**: Tap the top-bar **\`🎨 SKIN\`** button at any time to instantly cycle through 12 authentic hardware themes:
+  1. **Classic Indigo** (2001 Original GBA Violet & Burgundy)
+  2. **Championship Gold** (TMT / About Billions Luxury SP)
+  3. **Atomic Purple** (Glacier Translucent Clear-Tech)
+  4. **Kick Stealth** (Matte Black & Cyberpunk Green)
+  5. **Arctic White** (Clean Snow White & Slate Blue)
+  6. **Flame Red** (SP Classic Gloss Red & Gold)
+  7. **Cobalt Blue** (Deep Metallic Blue & Yellow)
+  8. **Platinum Silver** (Brushed Metal & Crimson)
+  9. **Cyber Neon** (Miami 80s Synthwave Magenta & Cyan)
+  10. **Retro DMG 1989** (Original Game Boy Gray & Maroon)
+  11. **Tiger Orange** (Cincinnati Problem Edition)
+  12. **Emerald Jade** (Pokemon Rayquaza Jade & Gold)
 - 🎬 **Unified Authentic Capcom Boxer Sprites in All Cutscenes**: Replaced primitive block avatars with the exact 16-bit Capcom arcade fighter sprites used in combat across all cutscenes (`STAGE_INTRO`, `STAGE_VICTORY_CUTSCENE`, `LADDER_SHOP`, and `VICTORY_END`).
 - 🏆 **Post-Fight Press Conference Cutscenes (`STAGE_VICTORY_CUTSCENE`)**: Upon winning each Road to Gold bout, view the post-fight press conference cutscene with the standing winner flexing, defeated opponent down on canvas, viral stream quotes, and stage purse breakdown before entering the Trainer Gym Shop.
 - 🥊 **7-Stage 'Road to Gold' Tournament Campaign (28–35 Min)**: Full tournament ladder progressing through N3ON, Adin Ross, Blueface, Walid Sharks, Ryan Garcia, Semi-Final Boss **Gervonta 'Tank' Davis**, and Final Boss **Floyd 'Money' Mayweather**.
@@ -33,7 +47,6 @@
 - 🏪 **Trainer Gym Upgrade Shop (`LADDER_SHOP`)**: Spend stage fight purses on persistent upgrades: **Heavy Hands (PWR Lv 1-3)**, **Iron Chin (DEF Lv 1-3)**, **Fast Hands (SPD Lv 1-3)**, **Diamond Seed Perk**, and **Super Rush Perk**.
 - 💾 **Persistent Save & Resume System**: Auto-saves campaign state, purse, and purchased upgrades to `localStorage` so 30-minute runs can be resumed anytime from Mode Select.
 - 🔄 **Universal Back & Home Navigation**: Pressing `Escape` or clicking top-left `<` returns smoothly all the way back to the Title/Home screen from any menu.
-### Title Screen
 ![Title Screen](assets/pico8_title.jpg)
 
 ### Character Select (14 Verified Stream Guests)

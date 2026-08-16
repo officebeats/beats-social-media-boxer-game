@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>CRASH OUT: RING RUSH (v2.2.0) — PICO-8 Native Transparent Boxing</title>
+  <title>CRASH OUT: RING RUSH (v2.3.0) — PICO-8 Native Transparent Boxing</title>
   <style>
     :root {
       --pico-black: #000000;
@@ -22,6 +22,67 @@
       --pico-lavender: #83769C;
       --pico-pink: #FF77A8;
       --pico-peach: #FFCCAA;
+
+      /* Default GBA Theme: Classic Indigo */
+      --gba-body: #43348a;
+      --gba-body-shadow: #2a1f5e;
+      --gba-bezel: #23242c;
+      --gba-dpad: #2d2d34;
+      --gba-btn: #8c1e50;
+      --gba-btn-shadow: #520e2c;
+      --gba-accent: #b4aae6;
+      --gba-text: #ffffff;
+      --gba-grip: #5b49b5;
+    }
+
+    /* 🎨 12 DYNAMIC GBA HANDHELD SKINS */
+    body.theme-indigo {
+      --gba-body: #43348a; --gba-body-shadow: #2a1f5e; --gba-bezel: #23242c; --gba-dpad: #2d2d34;
+      --gba-btn: #8c1e50; --gba-btn-shadow: #520e2c; --gba-accent: #b4aae6; --gba-grip: #5b49b5;
+    }
+    body.theme-gold {
+      --gba-body: #d4af37; --gba-body-shadow: #8c7220; --gba-bezel: #141418; --gba-dpad: #1e1e22;
+      --gba-btn: #dc143c; --gba-btn-shadow: #800a20; --gba-accent: #ffec27; --gba-grip: #f3cf58;
+    }
+    body.theme-atomic {
+      --gba-body: rgba(90, 75, 170, 0.92); --gba-body-shadow: #372a6b; --gba-bezel: #1e1c30; --gba-dpad: #37344b;
+      --gba-btn: #ff77a8; --gba-btn-shadow: #99335c; --gba-accent: #29adff; --gba-grip: #7b68cc;
+    }
+    body.theme-kick {
+      --gba-body: #18191f; --gba-body-shadow: #0a0b0e; --gba-bezel: #0e0e12; --gba-dpad: #23242a;
+      --gba-btn: #00e436; --gba-btn-shadow: #008722; --gba-accent: #00e436; --gba-grip: #2b2d38;
+    }
+    body.theme-white {
+      --gba-body: #ebeef5; --gba-body-shadow: #b0b5c5; --gba-bezel: #2d3037; --gba-dpad: #808595;
+      --gba-btn: #29adff; --gba-btn-shadow: #146299; --gba-accent: #465064; --gba-grip: #d0d5e2;
+    }
+    body.theme-red {
+      --gba-body: #c3192d; --gba-body-shadow: #7a0c1a; --gba-bezel: #19191e; --gba-dpad: #232328;
+      --gba-btn: #ffd700; --gba-btn-shadow: #998100; --gba-accent: #ffec27; --gba-grip: #e62c43;
+    }
+    body.theme-cobalt {
+      --gba-body: #1941a5; --gba-body-shadow: #0e2460; --gba-bezel: #141928; --gba-dpad: #23283c;
+      --gba-btn: #ffc800; --gba-btn-shadow: #997800; --gba-accent: #29adff; --gba-grip: #285ad4;
+    }
+    body.theme-silver {
+      --gba-body: #afb4be; --gba-body-shadow: #6b707a; --gba-bezel: #1e2026; --gba-dpad: #3c414b;
+      --gba-btn: #dc1e3c; --gba-btn-shadow: #800e20; --gba-accent: #ffffff; --gba-grip: #ccd1dc;
+    }
+    body.theme-cyber {
+      --gba-body: #8c1478; --gba-body-shadow: #4d0a42; --gba-bezel: #190f2d; --gba-dpad: #281441;
+      --gba-btn: #00f0ff; --gba-btn-shadow: #008c94; --gba-accent: #ff0080; --gba-grip: #b81ea0;
+    }
+    body.theme-dmg {
+      --gba-body: #bebcaf; --gba-body-shadow: #7e7c70; --gba-bezel: #282d5f; --gba-dpad: #2d2d32;
+      --gba-btn: #8c1e50; --gba-btn-shadow: #520e2c; --gba-accent: #646464; --gba-grip: #d2d0c2;
+    }
+    body.theme-tiger {
+      --gba-body: #e65f14; --gba-body-shadow: #8f3608; --gba-bezel: #191414; --gba-dpad: #232323;
+      --gba-btn: #ffec27; --gba-btn-shadow: #998d12; --gba-accent: #ffec27; --gba-grip: #ff7d30;
+    }
+    body.theme-emerald {
+      --gba-body: #146e3c; --gba-body-shadow: #0a3d20; --gba-bezel: #0f2319; --gba-dpad: #193223;
+      --gba-btn: #e6be28; --gba-btn-shadow: #8c7214; --gba-accent: #00e436; --gba-grip: #1e9653;
     }
 
     * {
@@ -38,7 +99,7 @@
       width: 100vw;
       height: 100vh;
       height: 100dvh;
-      background-color: var(--pico-black);
+      background-color: #08090c;
       color: var(--pico-white);
       font-family: 'Courier New', Courier, monospace;
       display: flex;
@@ -48,212 +109,371 @@
       image-rendering: pixelated;
     }
 
-    /* AUTHENTIC RETRO ARCADE CABINET BEZEL VIEWPORT */
-    .pico8-viewport {
+    /* 🎮 GBA MOBILE HANDHELD CONSOLE CONTAINER */
+    .gba-shell {
       position: relative;
-      width: 100vw;
-      height: 100vh;
-      height: 100dvh;
+      width: min(100vw, 440px);
+      height: min(100vh, 100dvh, 820px);
+      background: radial-gradient(circle at 50% 30%, var(--gba-body) 0%, var(--gba-body-shadow) 100%);
+      border: 3px solid rgba(255, 255, 255, 0.15);
+      border-radius: 36px;
+      box-shadow: 0px 12px 36px rgba(0, 0, 0, 0.85), inset 0px 3px 6px rgba(255, 255, 255, 0.35);
       display: flex;
+      flex-direction: column;
       align-items: center;
-      justify-content: center;
-      background: radial-gradient(circle at center, #1D2B53 0%, #000000 100%);
+      justify-content: space-between;
+      padding: 10px 14px 14px 14px;
       overflow: hidden;
     }
 
-    /* EDGE-TO-EDGE PICO-8 CANVAS (WITH CRT CABINET CASING) */
+    /* GBA Ergonomic Side Grips */
+    .gba-shell::before, .gba-shell::after {
+      content: '';
+      position: absolute;
+      top: 55%;
+      width: 6px;
+      height: 90px;
+      background: repeating-linear-gradient(180deg, var(--gba-grip) 0px, var(--gba-grip) 4px, transparent 4px, transparent 12px);
+      border-radius: 3px;
+    }
+    .gba-shell::before { left: 5px; }
+    .gba-shell::after { right: 5px; }
+
+    /* Top Shoulder Buttons (L & R) & Quick Bar */
+    .gba-top-bar {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 4px;
+      margin-bottom: 4px;
+      z-index: 10;
+    }
+
+    .btn-shoulder {
+      background: linear-gradient(180deg, var(--gba-dpad) 0%, #15161c 100%);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: var(--gba-accent);
+      font-weight: 900;
+      font-size: 11px;
+      padding: 4px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      box-shadow: inset 0px 1px 1px rgba(255, 255, 255, 0.3), 0px 2px 4px #000000;
+    }
+
+    .btn-skin-toggle {
+      background: linear-gradient(180deg, #1D2B53 0%, #000000 100%);
+      border: 1px solid var(--gba-accent);
+      color: var(--pico-yellow);
+      font-size: 9px;
+      font-weight: 900;
+      padding: 4px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      box-shadow: 0px 2px 4px #000000;
+      letter-spacing: 0.5px;
+    }
+
+    /* 🖥️ GBA GLASS SCREEN BEZEL */
+    .gba-screen-bezel {
+      width: 100%;
+      background: radial-gradient(circle at center, var(--gba-bezel) 0%, #101014 100%);
+      border-radius: 18px;
+      padding: 8px 10px 10px 10px;
+      border: 3px solid #08080a;
+      box-shadow: inset 0px 0px 14px rgba(0, 0, 0, 0.95), 0px 4px 10px rgba(0, 0, 0, 0.5);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .bezel-top-row {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+      padding: 0 4px;
+    }
+
+    .power-led-group {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .power-led {
+      width: 7px;
+      height: 7px;
+      background-color: var(--pico-green);
+      border-radius: 50%;
+      box-shadow: 0px 0px 8px var(--pico-green);
+    }
+
+    .power-text {
+      font-size: 7px;
+      font-weight: 900;
+      color: #707585;
+      letter-spacing: 0.5px;
+    }
+
+    .bezel-opt-buttons {
+      display: flex;
+      gap: 4px;
+    }
+
+    .btn-opt {
+      background: #000000;
+      border: 1px solid var(--gba-accent);
+      color: var(--pico-yellow);
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 8px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    /* PICO-8 CANVAS IN SCREEN BEZEL */
     canvas#picoCanvas {
-      width: min(100vw, 100vh);
-      height: min(100vw, 100vh);
+      width: 100%;
+      max-width: 270px;
       aspect-ratio: 1 / 1;
-      object-fit: contain;
       image-rendering: pixelated;
       image-rendering: crisp-edges;
       display: block;
       background-color: var(--pico-black);
-      box-shadow: 0px 0px 24px rgba(0, 0, 0, 0.9), inset 0px 0px 6px rgba(0, 0, 0, 0.8);
-      border: 2px solid var(--pico-dark-purple);
+      border: 2px solid #000000;
+      border-radius: 4px;
+      box-shadow: 0px 0px 16px rgba(0, 0, 0, 0.9);
+      cursor: pointer;
     }
 
-    /* PICO-8 NATIVE ARCADE TOUCH CONTROLS OVERLAY */
-    .pico8-touch-controls {
-      position: absolute;
-      bottom: max(8px, env(safe-area-inset-bottom));
-      left: 12px;
-      right: 12px;
+    .bezel-bottom-branding {
+      margin-top: 5px;
+      font-size: 9px;
+      font-weight: 900;
+      letter-spacing: 1.5px;
+      color: var(--gba-accent);
+      text-shadow: 1px 1px 0px #000000;
+    }
+
+    /* 🕹️ GBA LOWER CONTROLS AREA */
+    .gba-controls-area {
+      width: 100%;
       display: flex;
       justify-content: space-between;
-      align-items: flex-end;
-      z-index: 20;
-      pointer-events: none;
+      align-items: center;
+      padding: 8px 6px 4px 6px;
     }
 
-    /* AUTHENTIC JAPANESE ARCADE D-PAD (MICROSWITCH BEZELS) */
-    .dpad-container {
+    /* GBA CROSS D-PAD */
+    .gba-dpad {
       display: grid;
-      grid-template-columns: repeat(3, min(44px, 12vw));
-      grid-template-rows: repeat(3, min(44px, 12vw));
-      gap: 3px;
-      pointer-events: auto;
+      grid-template-columns: repeat(3, 38px);
+      grid-template-rows: repeat(3, 38px);
+      gap: 0px;
+      filter: drop-shadow(0px 5px 6px rgba(0, 0, 0, 0.7));
     }
 
-    .btn-ctrl {
-      background: linear-gradient(180deg, #5F574F 0%, #1D2B53 100%);
-      border: 2px solid var(--pico-light-gray);
-      color: var(--pico-yellow);
-      border-radius: 4px;
-      font-family: monospace;
+    .btn-dir {
+      background: linear-gradient(180deg, var(--gba-dpad) 0%, #1a1a20 100%);
+      border: 1px solid #111115;
+      color: var(--gba-accent);
+      font-size: 14px;
       font-weight: 900;
-      font-size: 16px;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      box-shadow: inset 1px 1px 0px rgba(255,255,255,0.4), 2px 2px 0px #000000;
-      text-shadow: 1px 1px 0px #000000;
-      user-select: none;
+      box-shadow: inset 0px 1px 1px rgba(255, 255, 255, 0.25);
+    }
+    .btn-dir:active, .btn-dir.active {
+      background: var(--gba-accent);
+      color: #000000;
+      transform: scale(0.95);
     }
 
-    .btn-ctrl:active, .btn-ctrl.active {
-      transform: translate(1px, 1px);
-      box-shadow: inset 1px 1px 0px #000000, 1px 1px 0px #000000;
-      background: var(--pico-orange);
-      color: var(--pico-black);
-    }
+    .dpad-up { grid-column: 2; grid-row: 1; border-top-left-radius: 6px; border-top-right-radius: 6px; }
+    .dpad-left { grid-column: 1; grid-row: 2; border-top-left-radius: 6px; border-bottom-left-radius: 6px; }
+    .dpad-center { grid-column: 2; grid-row: 2; background: var(--gba-dpad); pointer-events: none; }
+    .dpad-right { grid-column: 3; grid-row: 2; border-top-right-radius: 6px; border-bottom-right-radius: 6px; }
+    .dpad-down { grid-column: 2; grid-row: 3; border-bottom-left-radius: 6px; border-bottom-right-radius: 6px; }
 
-    .dpad-up { grid-column: 2; grid-row: 1; }
-    .dpad-left { grid-column: 1; grid-row: 2; }
-    .dpad-down { grid-column: 2; grid-row: 2; }
-    .dpad-right { grid-column: 3; grid-row: 2; }
-
-    /* ARCADE SANWA-STYLE PUSH BUTTONS */
-    .action-buttons {
+    /* ANGLED GBA B & A ACTION BUTTONS */
+    .gba-action-buttons {
       display: flex;
       align-items: center;
-      gap: 10px;
-      pointer-events: auto;
+      gap: 12px;
+      transform: rotate(-18deg);
+      filter: drop-shadow(0px 6px 8px rgba(0, 0, 0, 0.75));
     }
 
-    .btn-action {
-      width: min(54px, 15vw);
-      height: min(54px, 15vw);
+    .btn-gba-action {
+      width: 48px;
+      height: 48px;
       border-radius: 50%;
-      font-family: monospace;
-      font-size: 14px;
+      background: radial-gradient(circle at 35% 35%, var(--gba-btn) 0%, var(--gba-btn-shadow) 100%);
+      border: 2px solid rgba(255, 255, 255, 0.25);
+      color: var(--gba-text);
+      font-size: 15px;
       font-weight: 900;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      box-shadow: 0px 4px 0px #000000, inset 0px 2px 0px rgba(255,255,255,0.5);
-      border: 3px solid var(--pico-black);
       cursor: pointer;
-      user-select: none;
+      box-shadow: 0px 4px 0px rgba(0, 0, 0, 0.9), inset 0px 2px 2px rgba(255, 255, 255, 0.4);
     }
-
-    .btn-action:active, .btn-action.active {
+    .btn-gba-action:active, .btn-gba-action.active {
       transform: translateY(3px);
-      box-shadow: 0px 1px 0px #000000, inset 0px 1px 0px rgba(0,0,0,0.5);
+      box-shadow: 0px 1px 0px rgba(0, 0, 0, 0.9), inset 0px 1px 1px rgba(0, 0, 0, 0.6);
     }
 
-    .btn-o {
-      background: radial-gradient(circle at 35% 35%, #FFEC27 0%, #FFA300 70%, #AB5236 100%);
-      color: var(--pico-black);
+    .btn-gba-action span {
+      font-size: 7px;
+      letter-spacing: 0.5px;
+      margin-top: 1px;
     }
 
-    .btn-x {
-      background: radial-gradient(circle at 35% 35%, #FF77A8 0%, #FF004D 70%, #7E2553 100%);
-      color: var(--pico-white);
-      text-shadow: 1px 1px 0px var(--pico-black);
+    /* GBA START & SELECT RUBBER PILLS */
+    .gba-center-pills {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 24px;
+      margin-bottom: 2px;
     }
 
-    .btn-x.super-ready {
-      animation: arcadeSuperFlash 0.3s steps(2, end) infinite;
-      box-shadow: 0px 0px 12px var(--pico-yellow), 0px 4px 0px #000000;
+    .pill-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
     }
 
-    @keyframes arcadeSuperFlash {
-      0% { background: radial-gradient(circle at 35% 35%, #FFF1E8 0%, #FFEC27 70%, #FFA300 100%); }
-      50% { background: radial-gradient(circle at 35% 35%, #FF77A8 0%, #FF004D 70%, #7E2553 100%); }
-      100% { background: radial-gradient(circle at 35% 35%, #FFF1E8 0%, #FFEC27 70%, #FFA300 100%); }
+    .btn-pill {
+      width: 38px;
+      height: 12px;
+      background: linear-gradient(180deg, var(--gba-dpad) 0%, #141418 100%);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 6px;
+      cursor: pointer;
+      transform: rotate(-22deg);
+      box-shadow: 0px 2px 3px rgba(0, 0, 0, 0.8), inset 0px 1px 1px rgba(255, 255, 255, 0.3);
+    }
+    .btn-pill:active {
+      transform: rotate(-22deg) scale(0.95);
     }
 
-    .btn-action span {
+    .pill-label {
       font-size: 7px;
       font-weight: 900;
-      margin-top: 1px;
+      color: var(--gba-accent);
       letter-spacing: 0.5px;
-      text-transform: uppercase;
-    }
-
-    /* TOP ARCADE MARQUEE OPTIONS BAR */
-    .pico8-top-bar {
-      position: absolute;
-      top: max(6px, env(safe-area-inset-top));
-      left: 12px;
-      right: 12px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      z-index: 20;
-      pointer-events: none;
-    }
-
-    .btn-opt {
-      pointer-events: auto;
-      background: linear-gradient(180deg, #1D2B53 0%, #000000 100%);
-      border: 1px solid var(--pico-blue);
-      color: var(--pico-yellow);
-      padding: 4px 8px;
-      border-radius: 3px;
-      font-family: monospace;
-      font-size: 9px;
-      font-weight: 900;
-      cursor: pointer;
-      text-align: center;
-      box-shadow: 1px 1px 0px #000000;
-      letter-spacing: 0.5px;
-    }
-
-    .btn-opt:active {
-      transform: translate(1px, 1px);
-      background: var(--pico-blue);
-      color: var(--pico-black);
+      text-shadow: 1px 1px 0px #000000;
     }
   </style>
 </head>
 <body>
 
-  <div class="pico8-viewport">
-    <!-- TOP OPTIONS OVERLAY -->
-    <div class="pico8-top-bar">
-      <button class="btn-opt" id="btnMode">MODE: AI VS AI</button>
-      <button class="btn-opt" id="btnReset">RESET</button>
-      <button class="btn-opt" id="btnAudio">AUDIO: TRAP ON</button>
+    <div class="gba-shell">
+    <!-- GBA TOP BAR & SHOULDER TRIGGERS -->
+    <div class="gba-top-bar">
+      <button class="btn-shoulder" id="btnShoulderL">L</button>
+      <button class="btn-skin-toggle" id="btnSkin">🎨 SKIN: INDIGO</button>
+      <button class="btn-shoulder" id="btnShoulderR">R</button>
     </div>
 
-    <!-- 100% EDGE-TO-EDGE PICO-8 ENGINE CANVAS -->
-    <canvas id="picoCanvas" width="256" height="256"></canvas>
-
-    <!-- NATIVE PICO-8 TOUCH CONTROLS OVERLAY -->
-    <div class="pico8-touch-controls">
-      <!-- LEFT THUMB D-PAD -->
-      <div class="dpad-container">
-        <button class="btn-ctrl dpad-up" id="btnUp" aria-label="Drop Hard">▲</button>
-        <button class="btn-ctrl dpad-left" id="btnLeft" aria-label="Move Left">◄</button>
-        <button class="btn-ctrl dpad-down" id="btnDown" aria-label="Move Down">▼</button>
-        <button class="btn-ctrl dpad-right" id="btnRight" aria-label="Move Right">►</button>
+    <!-- 🖥️ GBA GLASS SCREEN BEZEL & CANVAS -->
+    <div class="gba-screen-bezel">
+      <div class="bezel-top-row">
+        <div class="power-led-group">
+          <div class="power-led"></div>
+          <span class="power-text">POWER</span>
+        </div>
+        <div class="bezel-opt-buttons">
+          <button class="btn-opt" id="btnAudio">AUDIO: OFF</button>
+          <button class="btn-opt" id="btnReset">HOME</button>
+        </div>
       </div>
 
-      <!-- RIGHT THUMB ACTION BUTTONS -->
-      <div class="action-buttons">
-        <button class="btn-action btn-o" id="btnO">🅾️<span>ROTATE</span></button>
-        <button class="btn-action btn-x" id="btnX">❎<span>SUPER</span></button>
+      <!-- PICO-8 128x128 GAME ENGINE CANVAS -->
+      <canvas id="picoCanvas" width="256" height="256"></canvas>
+
+      <div class="bezel-bottom-branding">PICO-8 ADVANCE</div>
+    </div>
+
+    <!-- 🕹️ GBA CONTROLS AREA -->
+    <div class="gba-controls-area">
+      <!-- LEFT CROSS D-PAD -->
+      <div class="gba-dpad">
+        <button class="btn-dir dpad-up" id="btnUp" aria-label="Drop Hard">▲</button>
+        <button class="btn-dir dpad-left" id="btnLeft" aria-label="Move Left">◀</button>
+        <div class="dpad-center"></div>
+        <button class="btn-dir dpad-right" id="btnRight" aria-label="Move Right">▶</button>
+        <button class="btn-dir dpad-down" id="btnDown" aria-label="Drop Soft">▼</button>
+      </div>
+
+      <!-- RIGHT ANGLED B & A BUTTONS -->
+      <div class="gba-action-buttons">
+        <button class="btn-gba-action" id="btnO">B<span>ROTATE</span></button>
+        <button class="btn-gba-action" id="btnX">A<span>DROP/SP</span></button>
+      </div>
+    </div>
+
+    <!-- GBA START & SELECT RUBBER PILLS -->
+    <div class="gba-center-pills">
+      <div class="pill-group">
+        <button class="btn-pill" id="btnMode" aria-label="Select"></button>
+        <span class="pill-label">SELECT</span>
+      </div>
+      <div class="pill-group">
+        <button class="btn-pill" id="btnStart" aria-label="Start"></button>
+        <span class="pill-label">START</span>
       </div>
     </div>
   </div>
 
   <script>
+
+    // =========================================================================
+    // 🎨 12-SKIN GBA THEME SWITCHER ENGINE
+    // =========================================================================
+    const GBA_SKIN_LIST = [
+      { id: 'theme-indigo', label: 'INDIGO' },
+      { id: 'theme-gold', label: 'GOLD SP' },
+      { id: 'theme-atomic', label: 'ATOMIC' },
+      { id: 'theme-kick', label: 'STEALTH' },
+      { id: 'theme-white', label: 'ARCTIC' },
+      { id: 'theme-red', label: 'FLAME RED' },
+      { id: 'theme-cobalt', label: 'COBALT' },
+      { id: 'theme-silver', label: 'PLATINUM' },
+      { id: 'theme-cyber', label: 'CYBER 80S' },
+      { id: 'theme-dmg', label: 'DMG 1989' },
+      { id: 'theme-tiger', label: 'TIGER ORG' },
+      { id: 'theme-emerald', label: 'EMERALD' }
+    ];
+
+    let currentSkinIdx = 0;
+    try {
+      const savedSkin = localStorage.getItem('gba_skin_idx');
+      if (savedSkin !== null) currentSkinIdx = parseInt(savedSkin, 10) % GBA_SKIN_LIST.length;
+    } catch(e) {}
+
+    function applyGbaSkin(idx) {
+      currentSkinIdx = idx % GBA_SKIN_LIST.length;
+      const skin = GBA_SKIN_LIST[currentSkinIdx];
+      document.body.className = skin.id;
+      const btn = document.getElementById('btnSkin');
+      if (btn) btn.innerText = '🎨 ' + skin.label;
+      try {
+        localStorage.setItem('gba_skin_idx', currentSkinIdx);
+      } catch(e) {}
+    }
+    applyGbaSkin(currentSkinIdx);
+
     // =========================================================================
     // PICO-8 TRANSPARENT SPRITE ENGINE v9.0.0
     // - 100% Transparent Background Keying for Fighter Sprites (ZERO WHITE BOXES!)
@@ -4648,6 +4868,36 @@
       appState = 'TITLE';
       gameState = 'PLAYING';
       lockCountdown = -1;
+    });
+
+    
+    bindBtn('btnSkin', () => {
+      applyGbaSkin(currentSkinIdx + 1);
+      play808Sfx('rotate');
+    });
+
+    bindBtn('btnStart', () => {
+      if (appState === 'TITLE') { appState = 'MODE_SELECT'; play808Sfx('confirm'); }
+      else if (appState === 'MODE_SELECT') { appState = 'CHAR_SELECT'; p1Locked = false; p2Locked = false; play808Sfx('confirm'); }
+      else if (appState === 'CHAR_SELECT') { p1Locked = true; if (selectedModeIdx !== 1) p2Locked = true; play808Sfx('confirm'); }
+      else if (appState === 'LADDER_BRACKET') { appState = 'STAGE_INTRO'; play808Sfx('confirm'); }
+      else if (appState === 'STAGE_INTRO') { startMatch(); }
+      else if (appState === 'STAGE_VICTORY_CUTSCENE') { appState = 'LADDER_SHOP'; play808Sfx('confirm'); }
+      else if (appState === 'LADDER_SHOP') { campaignState.stageIdx++; saveCampaign(); appState = 'LADDER_BRACKET'; play808Sfx('confirm'); }
+      else if (appState === 'VICTORY_END') { campaignState.active = false; appState = 'TITLE'; play808Sfx('confirm'); }
+      else if (appState === 'CONTINUE_SCREEN') { campaignState.continues--; saveCampaign(); startMatch(); }
+      else if (appState === 'KO') { rematchToCharSelect(); }
+    });
+
+    bindBtn('btnShoulderL', () => {
+      goBack();
+    });
+
+    bindBtn('btnShoulderR', () => {
+      if (appState === 'PLAYING') {
+        if (p1.superMeter >= 100) p1.triggerSuper();
+        else p1.dropHard();
+      }
     });
 
     bindBtn('btnAudio', () => {
