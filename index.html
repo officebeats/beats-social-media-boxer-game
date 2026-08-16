@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>CRASH OUT: RING RUSH (v1.9.0) — PICO-8 Native Transparent Boxing</title>
+  <title>CRASH OUT: RING RUSH (v2.0.0) — PICO-8 Native Transparent Boxing</title>
   <style>
     :root {
       --pico-black: #000000;
@@ -2135,15 +2135,61 @@
     let deenIdleCanvas = null;
     deenIdleRaw.onload = () => { deenIdleCanvas = createTransparentCanvas(deenIdleRaw); };
 
+    const PUNCH_FLIPS = {
+      'broner': [0, 3],      // JAB, UPPERCUT
+      'deen': [2, 3],        // HOOK, UPPERCUT
+      'ryan': [2, 3],        // HOOK, UPPERCUT
+      'n3on': [0, 1, 3],     // JAB, STRAIGHT, UPPERCUT
+      'rayj': [2],           // HOOK
+      'charleston': [3],     // UPPERCUT
+      'bang': [3],           // UPPERCUT
+      'abrown': [3],         // UPPERCUT
+      'sneako': [3]          // UPPERCUT
+    };
+
+    function createNormalizedPunchCanvas(img, id) {
+      const rawCanvas = createTransparentCanvas(img);
+      const w = rawCanvas.width;
+      const h = rawCanvas.height;
+      const normCanvas = document.createElement('canvas');
+      normCanvas.width = w;
+      normCanvas.height = h;
+      const nCtx = normCanvas.getContext('2d');
+      nCtx.imageSmoothingEnabled = false;
+
+      const qw = w / 2;
+      const qh = h / 2;
+      const flips = PUNCH_FLIPS[id] || [];
+
+      for (let q = 0; q < 4; q++) {
+        const col = q % 2;
+        const row = Math.floor(q / 2);
+        const sx = col * qw;
+        const sy = row * qh;
+
+        nCtx.save();
+        if (flips.includes(q)) {
+          // Flip this quadrant horizontally within its cell so it faces RIGHT (toward opponent)
+          nCtx.translate(sx + qw, sy);
+          nCtx.scale(-1, 1);
+          nCtx.drawImage(rawCanvas, sx, sy, qw, qh, 0, 0, qw, qh);
+        } else {
+          nCtx.drawImage(rawCanvas, sx, sy, qw, qh, sx, sy, qw, qh);
+        }
+        nCtx.restore();
+      }
+      return normCanvas;
+    }
+
     const bronerPunchRaw = new Image();
     bronerPunchRaw.src = 'assets/broner_punches.jpg?v=1200';
     let bronerPunchCanvas = null;
-    bronerPunchRaw.onload = () => { bronerPunchCanvas = createTransparentCanvas(bronerPunchRaw); };
+    bronerPunchRaw.onload = () => { bronerPunchCanvas = createNormalizedPunchCanvas(bronerPunchRaw, 'broner'); };
 
     const deenPunchRaw = new Image();
     deenPunchRaw.src = 'assets/deen_punches.jpg?v=1200';
     let deenPunchCanvas = null;
-    deenPunchRaw.onload = () => { deenPunchCanvas = createTransparentCanvas(deenPunchRaw); };
+    deenPunchRaw.onload = () => { deenPunchCanvas = createNormalizedPunchCanvas(deenPunchRaw, 'deen'); };
 
     // 16-bit Capcom Arcade Sprites & Punch Grids Map for ALL 14 Roster Fighters
     const ROSTER_IDLE_CANVASES = {};
@@ -2159,7 +2205,7 @@
       const imgPunch = new Image();
       imgPunch.src = 'assets/' + id + '_punches.jpg?v=1200';
       imgPunch.onload = () => {
-        ROSTER_PUNCH_CANVASES[id] = createTransparentCanvas(imgPunch);
+        ROSTER_PUNCH_CANVASES[id] = createNormalizedPunchCanvas(imgPunch, id);
       };
     });
 
@@ -2202,48 +2248,57 @@
 
       let isHitFlash = false;
       let extProgress = 0;
+      let horzShift = 0;
+      let vertShift = 0;
+      let bodyTilt = 0;
+      let vertSquash = 1.0;
 
       const timerVal = animTimer || 0;
       const progress = 1.0 - (timerVal / 72.0);
-
-      // === DETERMINE WHAT TO DRAW ===
-      let usePunch = false;      // true = draw from punch grid
-      let punchQuad = 0;         // which quadrant of punch grid
-      let bodyTilt = 0;          // rotation in radians
-      let vertSquash = 1.0;      // vertical scale (< 1 = duck)
-      let horzShift = 0;         // horizontal position offset
-      let vertShift = 0;         // vertical position offset
+      let usePunch = false;
+      let punchQuad = 0;
 
       if (anim === 'JAB' || anim === 'STRAIGHT' || anim === 'HOOK' || anim === 'UPPERCUT') {
         punchQuad = PUNCH_QUAD[anim] || 0;
 
-        // Smooth lunge without rotational warping or morphing
-        if (progress < 0.15) {
-          // Windup: lean back slightly (no bodyTilt, pure horizontal step)
-          extProgress = -0.15 * Math.sin((progress / 0.15) * Math.PI);
+        // Authentic Capcom Street Fighter 3-phase Strike Kinematics:
+        // Phase 1: Windup / Anticipation (progress < 0.12) -> Idle stance with subtle backstep
+        // Phase 2: Active Strike & Impact Hold (0.12 <= progress < 0.72) -> Punch Frame with forward lunge
+        // Phase 3: Recovery (progress >= 0.72) -> Smooth return to Idle stance
+        if (progress < 0.12) {
+          extProgress = -0.15 * Math.sin((progress / 0.12) * Math.PI);
           usePunch = false;
-        } else if (progress < 0.65) {
-          // Extension & Hold: punch frame with forward step
-          usePunch = true;
+        } else if (progress < 0.72) {
           extProgress = 1.0;
+          usePunch = true;
         } else {
-          // Smooth recovery back to idle
           usePunch = (progress < 0.82);
-          const ret = (progress - 0.65) / 0.35;
-          extProgress = 1.0 - ret;
+          const ret = (progress - 0.72) / 0.28;
+          extProgress = 1.0 - smoothstep(0.0, 1.0, ret);
         }
 
-        const lungeDist = extProgress * 7.5;
-        horzShift = isP1 ? lungeDist : -lungeDist;
+        // Move-specific forward lunge distance into center ring
+        let baseLunge = 6.0;
+        if (anim === 'STRAIGHT') baseLunge = 8.5;
+        if (anim === 'HOOK') baseLunge = 7.0;
+        if (anim === 'UPPERCUT') {
+          baseLunge = 5.5;
+          if (usePunch) {
+            vertShift = -3.5; // Upward leap on uppercut
+          }
+        }
+
+        horzShift = (isP1 ? 1 : -1) * (extProgress * baseLunge);
 
         const impactFlag = isP1 ? impactTriggeredP1 : impactTriggeredP2;
-        if (progress >= 0.38 && progress < 0.62 && !impactFlag) {
+        if (progress >= 0.28 && progress < 0.60 && !impactFlag) {
           if (isP1) impactTriggeredP1 = true; else impactTriggeredP2 = true;
-          triggerImpactBurst(isP1 ? 62 : 66, anim === 'UPPERCUT' ? 56 : anim === 'HOOK' ? 58 : 62);
+          triggerImpactBurst(isP1 ? 62 : 66, anim === 'UPPERCUT' ? 54 : anim === 'HOOK' ? 58 : 60);
           triggerHaptic(30);
-        } else if (progress >= 0.90) {
+        } else if (progress >= 0.88) {
           if (isP1) impactTriggeredP1 = false; else impactTriggeredP2 = false;
         }
+
       } else if (anim === 'FLINCH') {
         let fp = 0;
         if (progress < 0.40) fp = 0;
@@ -2291,6 +2346,7 @@
 
       const fObj = isP1 ? ROSTER[p1SelectIdx] : ROSTER[p2SelectIdx];
       const fId = fObj ? fObj.id : (isP1 ? 'broner' : 'deen');
+      const details = FIGHTER_DETAILS[fId] || { skin: 4, hair: 0, trunks: 8, gloves: 8 };
 
       // P1 on left side always faces RIGHT (scale 1); P2 on right side always faces LEFT (scale -1)
       const needsFlip = !isP1;
@@ -2328,7 +2384,6 @@
         ctx.fillStyle = isP1 ? '#8C4A27' : '#C58C5D';
         ctx.fillRect(-6, -34, 12, 34);
       }
-
       ctx.filter = 'none';
       ctx.restore();
     }

@@ -1,6 +1,6 @@
 # CRASH OUT: RING RUSH — PICO-8 PUZZLE BOXING
 
-**Version:** `v1.9.0` (Rematch Flow & Fluid Combat Animation Release)
+**Version:** `v2.0.0` (Street Fighter Punch Animation & Roster UI Polish Release)
 
 ![Title Screen](assets/pico8_title.jpg)
 
@@ -8,7 +8,7 @@
 
 ---
 
-## 🎮 Play Live (v1.9.0)
+## 🎮 Play Live (v2.0.0)
 
 - ⚡ **Play Live in Browser (GitHub Pages)**: **[officebeats.github.io/beats-social-media-boxer-game](https://officebeats.github.io/beats-social-media-boxer-game/)**
 - 🕹️ **Native PICO-8 Cartridge**: Load [`crash_out.p8`](crash_out.p8) directly inside PICO-8 using `pico8 -run crash_out.p8`.
@@ -23,20 +23,19 @@
 
 ---
 
-## 🌟 New in v1.9.0
+## 🌟 New in v2.0.0
+- 🥊 **Authentic Street Fighter Punch Animation Engine**: Restored full-body 4-quadrant sprite frame swaps during `JAB`, `STRAIGHT`, `HOOK`, and `UPPERCUT` with Capcom 3-phase strike kinematics (windup coil, extension hold with hit sparks/haptics, and smoothstep recovery).
+- 🧭 **100% Direction-Normalized 56-Punch Matrix**: Dynamic quadrant-level orientation normalization ensures all 56 punch frames across all 14 fighters natively extend forward toward the opponent.
+- 📋 **Fighter Profile & Bio Screen (`FIGHTER_BIO`)**: 32×32 large portrait, nickname, PWR/SPD/DEF stat bars, special moves, quotes, and records accessible via `B` or touch portrait tap.
+- 🏟️ **Arena Stage Selection (`ARENA_SELECT`)**: 2×2 arena select screen featuring Kick Warehouse, Mayweather Gym, Broner Gym, and Vegas Arena with dynamic crowd dither, ropes, floor, and backdrop theming in combat.
+- 🎮 **Polished Character Select & 2P Local Controls**: Full name banners, cursor pulse, locked P1/P2 indicators, and full WASD / Arrow key 2-player local battle flow.
 - 🔄 **Restored Instant Rematch Loop**: Defined `rematchToCharSelect()`, allowing players to hit `Enter`, `Space`, or action buttons on the K.O. screen to instantly reset and rematch without reload.
-- 🥊 **Fluid, Un-Warped Punch Animations**: Removed rotational body tilting on punch frames, ensuring pure horizontal lunge steps that preserve character anatomy without morphing or stretching.
-- 💥 **Universal Uppercut Direction Audit**: Flipped and normalized remaining leftward uppercuts (Blueface, Sneako, etc.) so 100% of all 56 punches across all 14 fighters extend toward the opponent.
-- 🥊 **Stream Regular Added**: **BANG WILLIAMS** (`bang` / Coach Bang), longtime Kick warehouse boxing trainer, added with custom 16-bit Capcom pixel art idle sprite and 4-quadrant punch grid.
-- 🥊 **Proportional Fousey G7 Overhaul**: Completely re-proportioned Fousey's idle sprite and punch sheet to match the authentic 16-bit Capcom arcade boxer build (eliminating the oversized chibi head mismatch).
-- 🏟️ **6 Dynamic Arenas**: Kick Warehouse (pulsing neon), Vegas Strip (moving searchlights), London Misfits 00X (stadium floodlights), Miami Stream Mansion (pool & dusk), Mayweather TMT Gym, and Detroit Problem Gym.
-- 🎨 **Authentic Deen the Great Likeness**: Golden-caramel light-skinned Black complexion with sharp buzz cut.
-- 👁️ **100% Direction-Normalized Sprites**: All 14 fighters natively face right, ensuring Player 1 and Player 2 always face each other eye-to-eye.
+- 🥊 **Stream Regular Added**: **BANG WILLIAMS** (`bang` / Coach Bang), longtime Kick warehouse boxing trainer, with custom 16-bit Capcom pixel art idle sprite and 4-quadrant punch grid.
+- 🥊 **Proportional Fousey G7 Overhaul**: Completely re-proportioned Fousey's idle sprite and punch sheet to match the authentic 16-bit Capcom arcade boxer build.
 - 💎 **Pure Puzzle Fighter Core Engine**: 3D beveled gems, power gem multi-cell fusion, pulsating circular crash breaker orbs, stone countdown timers, and real-time garbage offsetting.
 - 🔤 **100% Native 4x5 Pixel Font Engine**: Direct bitmap font matrix delivering razor-sharp retro typography across all screens with zero blur.
 - 🔴 **Zero Foot Artifacts**: Clean alpha transparency with grounded boots on the ring canvas floor at $Y=90$ and elliptical drop shadows.
 - 📺 **Live Broadcast Stream HUD**: Real-time Kick chat ticker with viewer counters and donation alerts.
-
 ### Title Screen
 ![Title Screen](assets/pico8_title.jpg)
 
