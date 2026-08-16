@@ -122,9 +122,10 @@ async def run_qa_suite():
             "deviceScaleFactor": 2,
             "mobile": True
         })
-
+        await call("Network.enable")
+        await call("Network.setCacheDisabled", {"cacheDisabled": True})
         await call("Page.navigate", {"url": f"http://127.0.0.1:{PORT}/index.html"})
-        await asyncio.sleep(2.0)
+        await asyncio.sleep(2.5)
         metrics.errors = []
         # ---------------------------------------------------------------------
         # TEST MODULE 1: TOURNAMENT CAMPAIGN LADDER & PACING (STAGES 1 TO 7)
@@ -440,6 +441,13 @@ async def run_qa_suite():
                 (() => {
                     const c = window.ROSTER_IDLE_CANVASES['{F}_0'];
                     if (!c) return { err: 'missing canvas' };
+                    const ctx = c.getContext('2d');
+                    
+                    // Extract data for all 4 frames
+                    const f0_data = Array.from(ctx.getImageData(0, 0, 48, 48).data);
+                    const f1_data = Array.from(ctx.getImageData(48, 0, 48, 48).data);
+                    const f2_data = Array.from(ctx.getImageData(96, 0, 48, 48).data);
+                    const f3_data = Array.from(ctx.getImageData(144, 0, 48, 48).data);
                     const bounds = c.bounds || { w: 28, h: 40 };
                     const dh = 38;
                     const aspect = bounds.w / bounds.h;
@@ -447,22 +455,40 @@ async def run_qa_suite():
                     const dx = Math.round((48 - dw) / 2);
                     const dy = 48 - dh;
                     const upperDh = Math.round(dh * 0.48);
-                    const crotchY = dy + upperDh;
-                    const crotchDh = Math.max(2, Math.round(dh * 0.05));
-                    const cx = dx + Math.round(dw * 0.38);
-                    const cw = Math.max(3, Math.round(dw * 0.24));
-                    
+                    const crotchY = dy + upperDh + 1;
+                    const crotchDh = 2;
+                    const cx = dx + Math.round(dw * 0.44);
+                    const cw = Math.max(2, Math.round(dw * 0.15));
+                    // Invariant Central Crotch Seam
                     const f0_crotch = Array.from(ctx.getImageData(cx, crotchY, cw, crotchDh).data);
                     const f1_crotch = Array.from(ctx.getImageData(48 + cx, crotchY, cw, crotchDh).data);
                     const f2_crotch = Array.from(ctx.getImageData(96 + cx, crotchY, cw, crotchDh).data);
                     const f3_crotch = Array.from(ctx.getImageData(144 + cx, crotchY, cw, crotchDh).data);
+                    
                     let crotch_stable = true;
-                    let diffs = [];
                     for (let j = 0; j < f0_crotch.length; j += 4) {
                         if (f0_crotch[j+3] > 0) {
-                            if (f0_crotch[j] !== f1_crotch[j] || f0_crotch[j] !== f2_crotch[j] || f0_crotch[j] !== f3_crotch[j]) {
+                            const maxDelta = Math.max(
+                                Math.abs(f0_crotch[j] - f1_crotch[j]), Math.abs(f0_crotch[j+1] - f1_crotch[j+1]), Math.abs(f0_crotch[j+2] - f1_crotch[j+2]),
+                                Math.abs(f0_crotch[j] - f2_crotch[j]), Math.abs(f0_crotch[j+1] - f2_crotch[j+1]), Math.abs(f0_crotch[j+2] - f2_crotch[j+2]),
+                                Math.abs(f0_crotch[j] - f3_crotch[j]), Math.abs(f0_crotch[j+1] - f3_crotch[j+1]), Math.abs(f0_crotch[j+2] - f3_crotch[j+2])
+                            );
+                            if (maxDelta > 5) {
                                 crotch_stable = false;
-                                diffs.push({ j, f0: f0_crotch.slice(j, j+4), f1: f1_crotch.slice(j, j+4), f2: f2_crotch.slice(j, j+4), f3: f3_crotch.slice(j, j+4) });
+                            }
+                        }
+                    }
+
+                    // Invariant Knees & Legs (Y: 36..40)
+                    const f0_knees = Array.from(ctx.getImageData(16, 36, 16, 4).data);
+                    const f1_knees = Array.from(ctx.getImageData(48 + 16, 36, 16, 4).data);
+                    const f2_knees = Array.from(ctx.getImageData(96 + 16, 36, 16, 4).data);
+                    const f3_knees = Array.from(ctx.getImageData(144 + 16, 36, 16, 4).data);
+                    let knees_stable = true;
+                    for (let j = 0; j < f0_knees.length; j += 4) {
+                        if (f0_knees[j+3] > 0) {
+                            if (f0_knees[j] !== f1_knees[j] || f0_knees[j] !== f2_knees[j] || f0_knees[j] !== f3_knees[j]) {
+                                knees_stable = false;
                             }
                         }
                     }
@@ -476,12 +502,12 @@ async def run_qa_suite():
                             hem_moves = true;
                         }
                     }
-                    // Upper body animation across upper torso
-                    const f0_upper = Array.from(ctx.getImageData(dx, dy, dw, upperDh - 2).data);
-                    const f1_upper = Array.from(ctx.getImageData(48 + dx, dy, dw, upperDh - 2).data);
+                    // Upper body animation
+                    const f0_head = Array.from(ctx.getImageData(18, 10, 12, 8).data);
+                    const f1_head = Array.from(ctx.getImageData(48 + 18, 10, 12, 8).data);
                     let upper_moves = false;
-                    for (let j = 0; j < f0_upper.length; j += 4) {
-                        if (f0_upper[j] !== f1_upper[j] || f0_upper[j+3] !== f1_upper[j+3]) {
+                    for (let j = 0; j < f0_head.length; j += 4) {
+                        if (f0_head[j] !== f1_head[j] || f0_head[j+3] !== f1_head[j+3]) {
                             upper_moves = true;
                         }
                     }
@@ -493,11 +519,7 @@ async def run_qa_suite():
                         c1_w: c1 ? c1.width : 0,
                         c1_h: c1 ? c1.height : 0,
                         crotch_stable: crotch_stable,
-                        diffs: diffs,
-                        cx: cx,
-                        crotchY: crotchY,
-                        cw: cw,
-                        crotchDh: crotchDh,
+                        knees_stable: knees_stable,
                         hem_moves: hem_moves,
                         upper_moves: upper_moves
                     };

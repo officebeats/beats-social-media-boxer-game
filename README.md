@@ -1,12 +1,12 @@
 # CRASH OUT: RING RUSH — PICO-8 PUZZLE BOXING
 
-**Version:** `v3.5.2` (100% Invariant Crotch Stability, Active Shorts Movement & 12-Module E2E Suite)
+**Version:** `v3.5.3` (Knee Invariance & UI Text Polish Release)
 
 ![Title Screen](assets/pico8_title.jpg)
 
 **Crash Out: Ring Rush** is an 8-bit arcade versus puzzle-fighter developed for the **PICO-8 Fantasy Console**. It fuses the competitive mechanics of Capcom's *Super Puzzle Fighter II Turbo* with the viral Kick warehouse boxing stream culture hosted by **Adrien "The Problem" Broner** and **Deen The Great**.
 
-## 🎮 Play Live (v3.5.2)
+## 🎮 Play Live (v3.5.3)
 
 - ⚡ **Play Live in Browser (GitHub Pages)**: **[officebeats.github.io/beats-social-media-boxer-game](https://officebeats.github.io/beats-social-media-boxer-game/)**
 - 🕹️ **Native PICO-8 Cartridge**: Load [`crash_out.p8`](crash_out.p8) directly inside PICO-8 using `pico8 -run crash_out.p8`.
@@ -22,13 +22,21 @@
 
 ---
 
-## 🌟 New in v3.5.2
-- 🛡️ **100% Invariant Crotch Stability & Active Shorts Hem Wave**:
-  - Completely decoupled the central pelvic region ($Y: 28..34, X: \text{center}$) from upper body sway, ensuring zero pelvic motion across all 4 frames ($F_0, F_1, F_2, F_3$) for all 14 fighters.
-  - Kept natural horizontal shorts lining wave ($Y: 35..38$) on outer edges for fluid athletic fabric dynamics.
-- 🧪 **Comprehensive 12-Module E2E Test Suite & Critique Tooling**:
-  - Added `test_crotch_stability_and_shorts_frames.py` automated pixel critique harness for automated verification of individual frame stability.
-  - Upgraded `tests/e2e_regression_suite.py` to 12 automated verification modules passing with 0 failures, 0 console errors, and locked 60 FPS performance.
+## 🌟 New in v3.5.3
+- 🦵 **Knee Invariance & Shorts Hem Repositioning**:
+  - Nudged the shorts fabric wave slice upward to $56\%..65\%$ of sprite height (strictly above the knees).
+  - Knees and lower legs ($Y \ge 65\%$) are now 100% stationary and grounded, eliminating knee waving artifacts during idle bouncing.
+- 🕹️ **Universal Game Mode Menu & Controller Navigation**:
+  - Fixed `isStartKey` definition so desktop keyboard (Arrow keys, Enter, Space, X, Z, C, V, 1-4) and Bluetooth controllers (Pocket Taco D-Pad & A/X/Start) can smoothly select and launch all modes, including **CPU Watch Demo**.
+- 🥊 **Ladder Bracket & Universal Action Button Confirmation**:
+  - Bound on-screen `X`, `O`, and `Start` buttons across all menu states, allowing players to advance from the Tournament Bracket screen (`LADDER_BRACKET`) to the Stage Intro immediately.
+- 📝 **Zero-Overlap Cutscene & Shop Text Layouts**:
+  - **Wins By K.O.**: Removed double-struck black drop-shadow on yellow banner for crisp high-contrast text.
+  - **Tournament Ranking Climb**: Removed giant flashing K.O. box and overlapping fighter avatar sprite, creating clean right-aligned purse and stage columns.
+  - **Trainer Gym Upgrade Shop**: Repositioned item labels and costs into separate non-overlapping columns and centered bottom navigation prompts.
+  - **Stage Face-Off Dialogue**: Constrained intro dialogue lines to 2-line maximums so quotes fit comfortably within dialogue boxes with generous margins.
+- 🧹 **Combat Text State Reset**:
+  - Fixed `floatingTextPool` and `particlePool` lifecycle so combat banners (`COMBO X2!`, `DIAMOND BLAST!`, etc.) float upward and expire properly, and clear cleanly on new match starts.
 - 🌟 **14 Unique Character-Specific Idle Animation Signatures**:
   - Every fighter now exhibits a bespoke procedural idle stance matching their boxing style and stream persona:
     - **Adrien Broner**: Philly shell shoulder shrug + chin tuck + smirk bounce.

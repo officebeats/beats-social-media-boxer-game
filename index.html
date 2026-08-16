@@ -2925,6 +2925,7 @@
       // Pre-render into native 192x48 PICO-8 4-frame animation strip (ZERO RUNTIME DOWNSCALE)
       const spriteCanvas = document.createElement('canvas');
       spriteCanvas.width = 192;
+      spriteCanvas.height = 48;
       const sCtx = spriteCanvas.getContext('2d');
       sCtx.imageSmoothingEnabled = false;
       sCtx.clearRect(0, 0, 192, 48);
@@ -2999,7 +3000,7 @@
       }
 
       // FRAME 2 (x=96..143): Spring Extension & Head Bob
-      sCtx.drawImage(rawCanvas, bounds.xmin, bounds.ymin, bounds.w, upperH, 96 + dx, dy - 1, dw, upperDh + 1);
+      sCtx.drawImage(rawCanvas, bounds.xmin, bounds.ymin, bounds.w, upperH, 96 + dx, dy - 1, dw, upperDh);
       sCtx.drawImage(rawCanvas, bounds.xmin, crotchSrcY, bounds.w, crotchH, 96 + dx, crotchY, dw, crotchDh);
       sCtx.drawImage(rawCanvas, bounds.xmin, hemSrcY, bounds.w, hemH, 96 + dx, hemY, dw, hemDh);
       sCtx.drawImage(rawCanvas, bounds.xmin, lowerSrcY, bounds.w, lowerH, 96 + dx, lowerY, dw, lowerDh);

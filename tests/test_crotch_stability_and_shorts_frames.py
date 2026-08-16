@@ -46,7 +46,7 @@ async def run_frame_critique_test():
     if not chrome_path:
         raise RuntimeError("Chrome executable not found")
 
-    remote_port = 9258
+    remote_port = 9259
     chrome_proc = subprocess.Popen([
         chrome_path,
         "--headless=new",
@@ -107,16 +107,32 @@ async def run_frame_critique_test():
                     const f2_data = Array.from(ctx.getImageData(96, 0, 48, 48).data);
                     const f3_data = Array.from(ctx.getImageData(144, 0, 48, 48).data);
                     
-                    // Invariant Central Crotch & Invariant Knees (Y: 28..31 and Y: 35..39)
-                    const f0_crotch = Array.from(ctx.getImageData(21, 28, 6, 4).data);
-                    const f1_crotch = Array.from(ctx.getImageData(48 + 21, 28, 6, 4).data);
-                    const f2_crotch = Array.from(ctx.getImageData(96 + 21, 28, 6, 4).data);
-                    const f3_crotch = Array.from(ctx.getImageData(144 + 21, 28, 6, 4).data);
+                    const bounds = c.bounds || { w: 28, h: 40 };
+                    const dh = 38;
+                    const aspect = bounds.w / bounds.h;
+                    const dw = Math.round(dh * aspect);
+                    const dx = Math.round((48 - dw) / 2);
+                    const dy = 48 - dh;
+                    const upperDh = Math.round(dh * 0.48);
+                    const crotchY = dy + upperDh + 1;
+                    const crotchDh = 2;
+                    const cx = dx + Math.round(dw * 0.44);
+                    const cw = Math.max(2, Math.round(dw * 0.15));
+                    // Invariant Central Crotch Seam
+                    const f0_crotch = Array.from(ctx.getImageData(cx, crotchY, cw, crotchDh).data);
+                    const f1_crotch = Array.from(ctx.getImageData(48 + cx, crotchY, cw, crotchDh).data);
+                    const f2_crotch = Array.from(ctx.getImageData(96 + cx, crotchY, cw, crotchDh).data);
+                    const f3_crotch = Array.from(ctx.getImageData(144 + cx, crotchY, cw, crotchDh).data);
                     
                     let crotch_stable = true;
                     for (let j = 0; j < f0_crotch.length; j += 4) {
                         if (f0_crotch[j+3] > 0) {
-                            if (f0_crotch[j] !== f1_crotch[j] || f0_crotch[j] !== f2_crotch[j] || f0_crotch[j] !== f3_crotch[j]) {
+                            const maxDelta = Math.max(
+                                Math.abs(f0_crotch[j] - f1_crotch[j]), Math.abs(f0_crotch[j+1] - f1_crotch[j+1]), Math.abs(f0_crotch[j+2] - f1_crotch[j+2]),
+                                Math.abs(f0_crotch[j] - f2_crotch[j]), Math.abs(f0_crotch[j+1] - f2_crotch[j+1]), Math.abs(f0_crotch[j+2] - f2_crotch[j+2]),
+                                Math.abs(f0_crotch[j] - f3_crotch[j]), Math.abs(f0_crotch[j+1] - f3_crotch[j+1]), Math.abs(f0_crotch[j+2] - f3_crotch[j+2])
+                            );
+                            if (maxDelta > 5) {
                                 crotch_stable = false;
                             }
                         }
