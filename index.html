@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>CRASH OUT: RING RUSH (v2.0.0) — PICO-8 Native Transparent Boxing</title>
+  <title>CRASH OUT: RING RUSH (v2.1.0) — PICO-8 Native Transparent Boxing</title>
   <style>
     :root {
       --pico-black: #000000;
@@ -937,6 +937,14 @@
         this.state = 'SPAWN';
         this.clearTimer = 0;
         this.pendingClear = null;
+        // Check knockdown stamina recovery
+        if (appState === 'KNOCKDOWN' && knockdownData && knockdownData.fallenId === this.id) {
+          knockdownData.stamina += clearCount * 18 + (powerGemCount > 0 ? 40 : 0);
+          globalFloatingTexts.push(new FloatingText('+STAMINA!', this.offsetX + 4, this.offsetY + 30, 11));
+          if (knockdownData.stamina >= 100) {
+            heGetsUp();
+          }
+        }
       }
 
       spawnPair() {
@@ -1442,6 +1450,9 @@
           const opponent = (this.id === 1) ? p2 : p1;
           const dmg = Math.floor(totalCleared * 3 * 1.6);
           opponent.hp = Math.max(0, opponent.hp - dmg);
+        if (opponent.hp <= 0 && appState === 'PLAYING') {
+          startKnockdown(opponent.id);
+        }
           this.superMeter = Math.min(100, this.superMeter + totalCleared * 6);
           this.score += Math.floor(dmg * 10);
           if (this.score > highScore) { highScore = this.score; dset(0, highScore); }
@@ -1612,6 +1623,9 @@
         const opponent = (this.id === 1) ? p2 : p1;
 
         opponent.hp = Math.max(0, opponent.hp - dmg);
+        if (opponent.hp <= 0 && appState === 'PLAYING') {
+          startKnockdown(opponent.id);
+        }
         this.superMeter = Math.min(100, this.superMeter + clearCount * 7);
         this.score += Math.floor(dmg * 10);
 
@@ -1663,6 +1677,14 @@
         opponent.animTimer = 72;
 
         this.pendingClear = null;
+        // Check knockdown stamina recovery
+        if (appState === 'KNOCKDOWN' && knockdownData && knockdownData.fallenId === this.id) {
+          knockdownData.stamina += clearCount * 18 + (powerGemCount > 0 ? 40 : 0);
+          globalFloatingTexts.push(new FloatingText('+STAMINA!', this.offsetX + 4, this.offsetY + 30, 11));
+          if (knockdownData.stamina >= 100) {
+            heGetsUp();
+          }
+        }
       }
 
       sendGarbageWithOffset(count, opponent) {
@@ -2063,14 +2085,156 @@
     p1 = new Board(1, 4, true);  // AI P1
     p2 = new Board(2, 88, true); // AI P2
 
-    function triggerKO(winnerId) {
-      gameState = 'KO';
-      appState = 'KO';
-      const winnerName = (winnerId === 1 ? (p1 ? p1.name : 'P1') : (winnerId === 2 ? (p2 ? p2.name : 'P2') : 'DRAW'));
-      koMessage = winnerId === 0 ? 'DRAW MATCH!' : 'K.O.! ' + winnerName + ' WINS!';
+    function startKnockdown(fallenId) {
+      const kCount = (fallenId === 1 ? knockdownsP1 : knockdownsP2);
+      if (kCount >= 2) {
+        // 3rd knockdown in the round is an automatic TKO!
+        endRound(fallenId === 1 ? 2 : 1, 'T.K.O. 3-KNOCKDOWN RULE!');
+        return;
+      }
+
+      appState = 'KNOCKDOWN';
+      const fallen = (fallenId === 1 ? p1 : p2);
+      const standing = (fallenId === 1 ? p2 : p1);
+      
+      knockdownData = {
+        fallenId: fallenId,
+        count: 1,
+        timer: 0,
+        stamina: 0,
+        refSpeed: (kCount === 0 ? 52 : 38)
+      };
+
+      fallen.anim = 'KNOCKDOWN';
+      standing.anim = 'TAUNT';
+      cameraShake = 22;
+      flashFrames = 8;
+      play808Sfx('uppercut');
+      play808Sfx('bell');
+      globalFloatingTexts.push(new FloatingText('KNOCKDOWN! 10-COUNT!', 38, 40, 10));
+    }
+
+    function heGetsUp() {
+      if (!knockdownData) return;
+      const fallenId = knockdownData.fallenId;
+      const fallen = (fallenId === 1 ? p1 : p2);
+      const standing = (fallenId === 1 ? p2 : p1);
+
+      if (fallenId === 1) knockdownsP1++; else knockdownsP2++;
+
+      // Second wind health boost
+      const pwrBonus = (campaignState.active && campaignState.upgrades.pwr) ? (campaignState.upgrades.pwr * 6) : 0;
+      fallen.hp = Math.min(100, 28 + pwrBonus);
+      fallen.anim = 'IDLE';
+      standing.anim = 'IDLE';
+      
+      appState = 'PLAYING';
+      knockdownData = null;
+
+      flashFrames = 6;
+      cameraShake = 12;
+      play808Sfx('confirm');
+      play808Sfx('bell');
+      globalFloatingTexts.push(new FloatingText("HE GETS UP!", 46, 36, 11));
+      globalFloatingTexts.push(new FloatingText("+28 HP SECOND WIND!", 40, 46, 10));
+    }
+
+    function endRound(winnerId, customMsg = null) {
+      if (winnerId === 1) p1RoundsWon++;
+      else if (winnerId === 2) p2RoundsWon++;
+
+      cameraShake = 20;
       play808Sfx('ko');
       play808Sfx('bell');
-      cameraShake = Math.max(cameraShake, 16);
+
+      // Check if match is decided (best 2 of 3)
+      if (p1RoundsWon >= 2 || p2RoundsWon >= 2) {
+        triggerMatchVictory(winnerId, customMsg);
+      } else {
+        // Start next round transition
+        roundTransitionTimer = 110;
+        currentRound++;
+        roundTransitionText = 'ROUND ' + (currentRound - 1) + ' OVER!';
+        appState = 'ROUND_TRANSITION';
+      }
+    }
+
+    function resetForNextRound() {
+      p1.hp = 100;
+      p2.hp = 100;
+      p1.superMeter = Math.floor(p1.superMeter * 0.5);
+      p2.superMeter = Math.floor(p2.superMeter * 0.5);
+      p1.grid = Array(ROWS).fill(null).map(() => Array(COLS).fill(0));
+      p2.grid = Array(ROWS).fill(null).map(() => Array(COLS).fill(0));
+      p1.powerGems = Array(ROWS).fill(null).map(() => Array(COLS).fill(false));
+      p2.powerGems = Array(ROWS).fill(null).map(() => Array(COLS).fill(false));
+      p1.counterTimers = Array(ROWS).fill(null).map(() => Array(COLS).fill(3));
+      p2.counterTimers = Array(ROWS).fill(null).map(() => Array(COLS).fill(3));
+      p1.counterColors = Array(ROWS).fill(null).map(() => Array(COLS).fill(0));
+      p2.counterColors = Array(ROWS).fill(null).map(() => Array(COLS).fill(0));
+      p1.squish = Array(ROWS).fill(null).map(() => Array(COLS).fill(0));
+      p2.squish = Array(ROWS).fill(null).map(() => Array(COLS).fill(0));
+      p1.pendingGarbage = 0;
+      p2.pendingGarbage = 0;
+
+      knockdownsP1 = 0;
+      knockdownsP2 = 0;
+      knockdownData = null;
+      roundTimer = 99;
+      timerFrameCounter = 0;
+
+      p1.state = 'SPAWN';
+      p2.state = 'SPAWN';
+      p1.pair = null;
+      p2.pair = null;
+      p1.anim = 'IDLE';
+      p2.anim = 'IDLE';
+
+      appState = 'PLAYING';
+      gameState = 'PLAYING';
+      play808Sfx('bell');
+    }
+
+    function triggerMatchVictory(winnerId, customMsg = null) {
+      const winnerName = (winnerId === 1 ? (p1 ? p1.name : 'P1') : (winnerId === 2 ? (p2 ? p2.name : 'P2') : 'DRAW'));
+      koMessage = customMsg || (winnerId === 0 ? 'DRAW MATCH!' : 'K.O.! ' + winnerName + ' WINS MATCH!');
+      
+      if (campaignState.active) {
+        if (winnerId === 1) {
+          // Player won campaign stage!
+          const st = CAMPAIGN_STAGES[campaignState.stageIdx];
+          const sweepBonus = (p2RoundsWon === 0) ? 500 : 0;
+          const hpBonus = Math.floor(p1.hp * 10);
+          const earned = st.purse + sweepBonus + hpBonus;
+          campaignState.purse += earned;
+          campaignState.totalScore += p1.score + earned * 10;
+          saveCampaign();
+
+          if (campaignState.stageIdx >= CAMPAIGN_STAGES.length - 1) {
+            // BEAT FINAL BOSS FLOYD MAYWEATHER!
+            appState = 'VICTORY_END';
+          } else {
+            // Advance to Upgrade Shop
+            appState = 'LADDER_SHOP';
+          }
+        } else {
+          // Player lost campaign bout
+          if (campaignState.continues > 0) {
+            continueCountdown = 9;
+            continueFrameTimer = 0;
+            appState = 'CONTINUE_SCREEN';
+          } else {
+            appState = 'KO';
+          }
+        }
+      } else {
+        gameState = 'KO';
+        appState = 'KO';
+      }
+    }
+
+    function triggerKO(winnerId) {
+      endRound(winnerId);
     }
     let impactFxTimer = 0;
     let impactFxX = 58;
@@ -2475,16 +2639,138 @@
       { id: 'sneako', name: 'SNEAKO', fullName: 'SNEAKO STREAMER', stance: 'HEADGEAR SPARRER', move: 'RED PILL COUNTER', pwr: 78, spd: 88, def: 76, color: 8 }
     ];
 
+    // =========================================================================
+    // 🏆 7-STAGE ARCADE TOURNAMENT CAMPAIGN & KNOCKDOWN SYSTEM
+    // =========================================================================
+    const CAMPAIGN_STAGES = [
+      {
+        stageNum: 1,
+        fighterId: 'n3on',
+        arenaId: 'warehouse',
+        name: 'THE WARMUP BRAWL',
+        location: 'AUSTIN, TX (KICK WAREHOUSE)',
+        dialogue: { opp: "I'M CRASHING OUT ON STREAM!", player: "LOCK IN OR GET KNOCKED OUT." },
+        aiConfig: { dropInterval: 48, aiTimerInterval: 24, mistakeRate: 0.35, powerGemFocus: 0.2 },
+        purse: 1000
+      },
+      {
+        stageNum: 2,
+        fighterId: 'adin',
+        arenaId: 'miamiHouse',
+        name: 'MIAMI STREAM RAID',
+        location: 'MIAMI, FL (STREAM MANSION)',
+        dialogue: { opp: "WE RAIDING THE WHOLE GYM!", player: "ALL HYPE. LET'S SEE THE HANDS." },
+        aiConfig: { dropInterval: 42, aiTimerInterval: 20, mistakeRate: 0.28, powerGemFocus: 0.35 },
+        purse: 1500
+      },
+      {
+        stageNum: 3,
+        fighterId: 'blueface',
+        arenaId: 'warehouse',
+        name: 'STREET BRAWL GRUDGE',
+        location: 'AUSTIN, TX (KICK WAREHOUSE)',
+        dialogue: { opp: "FAMOUS HOOK COMING FOR YOU!", player: "KEEP TALKING, WE IN THE RING." },
+        aiConfig: { dropInterval: 36, aiTimerInterval: 16, mistakeRate: 0.20, powerGemFocus: 0.50 },
+        purse: 2000
+      },
+      {
+        stageNum: 4,
+        fighterId: 'walid',
+        arenaId: 'gymBroner',
+        name: 'CO-HOST RIVALRY',
+        location: 'CINCINNATI, OH (PROBLEM GYM)',
+        dialogue: { opp: "DEEN AIN'T HERE TO SAVE YOU!", player: "ABOUT BILLIONS. TIME TO WORK." },
+        aiConfig: { dropInterval: 30, aiTimerInterval: 12, mistakeRate: 0.15, powerGemFocus: 0.65 },
+        purse: 2500
+      },
+      {
+        stageNum: 5,
+        fighterId: 'ryan',
+        arenaId: 'misfits',
+        name: 'LONDON CONTENDER BOUT',
+        location: 'LONDON, UK (MISFITS ARENA)',
+        dialogue: { opp: "FLASH LEFT HOOK IS UNDEFEATED!", player: "YOU CAN SEE IT COMING A MILE AWAY." },
+        aiConfig: { dropInterval: 24, aiTimerInterval: 10, mistakeRate: 0.10, powerGemFocus: 0.75 },
+        purse: 3000
+      },
+      {
+        stageNum: 6,
+        fighterId: 'rampage',
+        arenaId: 'gymTmt',
+        name: 'SEMI-FINAL BOSS: TANK POWER',
+        location: 'LAS VEGAS, NV (TMT GYM)',
+        dialogue: { opp: "WRONG GYM. TIME TO PUT YOU TO SLEEP.", player: "YOU CAN'T HIT WHAT YOU CAN'T TOUCH!" },
+        aiConfig: { dropInterval: 20, aiTimerInterval: 8, mistakeRate: 0.05, powerGemFocus: 0.85, bossDmgMult: 1.35 },
+        purse: 4000
+      },
+      {
+        stageNum: 7,
+        fighterId: 'broner',
+        arenaId: 'vegas',
+        name: 'CHAMPIONSHIP FINAL: 50-0 LEGEND',
+        location: 'LAS VEGAS, NV (VEGAS ARENA)',
+        dialogue: { opp: "HARD WORK! 50-0 AND EASY MONEY.", player: "ABOUT BILLIONS! TONIGHT WE TAKE THE BELT!" },
+        aiConfig: { dropInterval: 16, aiTimerInterval: 6, mistakeRate: 0.02, powerGemFocus: 0.95, bossDefense: 0.25, goldRush: true },
+        purse: 5000
+      }
+    ];
+
+    const CAMPAIGN_UPGRADE_TIERS = {
+      pwr: [ { level: 1, cost: 500, label: '+10% DMG', bonus: 0.10 }, { level: 2, cost: 1000, label: '+22% DMG', bonus: 0.22 }, { level: 3, cost: 2000, label: '+35% DMG', bonus: 0.35 } ],
+      def: [ { level: 1, cost: 500, label: '-15% COUNTER', bonus: 0.15 }, { level: 2, cost: 1000, label: '-30% COUNTER', bonus: 0.30 }, { level: 3, cost: 2000, label: '-45% COUNTER', bonus: 0.45 } ],
+      spd: [ { level: 1, cost: 500, label: '+15% SPD', bonus: 0.15 }, { level: 2, cost: 1000, label: '+30% SPD', bonus: 0.30 }, { level: 3, cost: 2000, label: '+45% SPD', bonus: 0.45 } ],
+      diamondSeed: { cost: 1500, label: 'DIAMOND SEED', desc: 'FREE DIAMOND DROP PER ROUND' },
+      superRush: { cost: 1200, label: 'SUPER RUSH', desc: '+30% FASTER SUPER CHARGE' }
+    };
+
+    let campaignState = {
+      active: false,
+      stageIdx: 0,
+      purse: 0,
+      upgrades: { pwr: 0, def: 0, spd: 0, diamondSeed: false, superRush: false },
+      continues: 3,
+      totalScore: 0,
+      startTime: 0,
+      totalMatchesPlayed: 0
+    };
+
+    function saveCampaign() {
+      try {
+        localStorage.setItem('ringrush_campaign', JSON.stringify(campaignState));
+      } catch(e) {}
+    }
+
+    function loadCampaign() {
+      try {
+        const raw = localStorage.getItem('ringrush_campaign');
+        if (raw) return JSON.parse(raw);
+      } catch(e) {}
+      return null;
+    }
+
     // Navigation & State Management
-    let appState = 'TITLE'; // 'TITLE', 'MODE_SELECT', 'CHAR_SELECT', 'PLAYING', 'KO'
-    let selectedModeIdx = 0; // 0: 1P VS CPU, 1: 2P LOCAL, 2: CPU VS CPU
+    let appState = 'TITLE'; // 'TITLE', 'MODE_SELECT', 'CHAR_SELECT', 'LADDER_BRACKET', 'STAGE_INTRO', 'LADDER_SHOP', 'VICTORY_END', 'CONTINUE_SCREEN', 'PLAYING', 'KNOCKDOWN', 'KO'
+    let selectedModeIdx = 0; // 0: CAMPAIGN (30 MIN), 1: QUICK 1P VS CPU, 2: 2P LOCAL, 3: CPU DEMO
     let p1SelectIdx = 0;
     let p2SelectIdx = 1;
     let p1Locked = false;
     let p2Locked = false;
     let lockCountdown = -1;
-    let selectedArenaIdx = 0; // 0: KICK WAREHOUSE, 1: MAYWEATHER GYM, 2: BRONER GYM, 3: VEGAS ARENA
-    let bioFighterIdx = 0;    // fighter being viewed on the bio screen
+    let selectedArenaIdx = 0;
+    let bioFighterIdx = 0;
+
+    // Multi-Round & Knockdown State
+    let p1RoundsWon = 0;
+    let p2RoundsWon = 0;
+    let currentRound = 1;
+    let knockdownsP1 = 0;
+    let knockdownsP2 = 0;
+    let knockdownData = null; // { fallenId: 1|2, count: 1..10, timer: 0, stamina: 0, refSpeed: 52 }
+    let roundTransitionTimer = 0;
+    let roundTransitionText = '';
+    let shopSelectedIdx = 0;
+    let continueCountdown = 9;
+    let continueFrameTimer = 0;
 
     function drawPicoDitheredCrowd(crowdBg = 1, crowdDit = 2) {
       ctx.fillStyle = getPalColor(crowdBg);
@@ -2674,29 +2960,234 @@
       ctx.fillRect(0, 0, 128, 128);
 
       ctx.fillStyle = getPalColor(0);
-      ctx.fillRect(0, 0, 128, 18);
-      printPicoCenter('SELECT GAME MODE', 6, 10, 1, true);
+      ctx.fillRect(0, 0, 128, 16);
+      printPicoCenter('SELECT GAME MODE', 5, 10, 1, true);
 
+      const saved = loadCampaign();
       const modes = [
-        { label: '1P VS CPU (ARCADE)', desc: 'PLAYER 1 VS AI OPPONENT' },
-        { label: '2P VERSUS (LOCAL)', desc: 'HEAD TO HEAD LOCAL PLAY' },
-        { label: 'CPU VS CPU (WATCH)', desc: 'AI VS AI DEMO MATCH' }
+        { label: 'ROAD TO GOLD (30M)', desc: saved && saved.stageIdx > 0 ? `RESUME STAGE ${saved.stageIdx+1}/7` : '7-STAGE TOURNAMENT' },
+        { label: 'QUICK EXHIBITION', desc: '1P VS CPU SINGLE BOUT' },
+        { label: '2P LOCAL BATTLE', desc: 'HEAD TO HEAD LOCAL PLAY' },
+        { label: 'CPU WATCH DEMO', desc: 'AI VS AI EXHIBITION' }
       ];
 
       modes.forEach((m, idx) => {
-        const y = 28 + idx * 28;
+        const y = 20 + idx * 24;
         const isSelected = (selectedModeIdx === idx);
 
         ctx.fillStyle = isSelected ? getPalColor(10) : getPalColor(0);
-        ctx.fillRect(10, y, 108, 22);
+        ctx.fillRect(8, y, 112, 20);
         ctx.strokeStyle = isSelected ? getPalColor(7) : getPalColor(5);
-        ctx.strokeRect(10, y, 108, 22);
+        ctx.strokeRect(8, y, 112, 20);
 
-        printPico((isSelected ? '> ' : '  ') + m.label, 14, y + 4, isSelected ? 0 : 7, 1);
-        printPico(m.desc, 18, y + 13, isSelected ? 2 : 6, 1);
+        printPico((isSelected ? '> ' : '  ') + m.label, 12, y + 3, isSelected ? 0 : 7, 1);
+        printPico(m.desc, 16, y + 11, isSelected ? 2 : 6, 1);
       });
 
       printPicoCenter('UP/DOWN: NAVIGATE  X: SELECT', 120, 7, 1);
+    }
+
+    // === 7-STAGE TOURNAMENT LADDER SCREEN ===
+    function drawLadderBracketScreen() {
+      ctx.fillStyle = getPalColor(0);
+      ctx.fillRect(0, 0, 128, 128);
+
+      ctx.fillStyle = getPalColor(1);
+      ctx.fillRect(0, 0, 128, 16);
+      printPicoCenter('ROAD TO GOLD TOURNAMENT', 5, 10, 1, true);
+
+      const curSt = campaignState.stageIdx;
+      for (let i = 0; i < CAMPAIGN_STAGES.length; i++) {
+        const st = CAMPAIGN_STAGES[i];
+        const y = 20 + i * 13;
+        const isCurrent = (i === curSt);
+        const isCleared = (i < curSt);
+
+        ctx.fillStyle = isCurrent ? getPalColor(10) : (isCleared ? getPalColor(3) : getPalColor(1));
+        ctx.fillRect(6, y, 116, 11);
+        ctx.strokeStyle = isCurrent ? getPalColor(7) : getPalColor(0);
+        ctx.strokeRect(6, y, 116, 11);
+
+        const prefix = isCleared ? '[V] ' : (isCurrent ? '>>> ' : '    ');
+        const stLabel = `STG ${st.stageNum}: ${st.fighterId.toUpperCase()}`;
+        printPico(prefix + stLabel, 10, y + 2, isCurrent ? 0 : (isCleared ? 7 : 6), 1);
+        printPico(`$${st.purse}`, 90, y + 2, isCurrent ? 8 : (isCleared ? 11 : 5), 1);
+      }
+
+      printPicoCenter('PRESS X / START: ENTER BOUT', 118, 10, 1, true);
+    }
+
+    // === PRE-FIGHT TRASH TALK INTRO SCREEN ===
+    function drawStageIntroScreen() {
+      const st = CAMPAIGN_STAGES[campaignState.stageIdx] || CAMPAIGN_STAGES[0];
+      const arena = ARENAS.find(a => a.id === st.arenaId) || ARENAS[0];
+
+      ctx.fillStyle = getPalColor(arena.colors.backdrop);
+      ctx.fillRect(0, 0, 128, 128);
+
+      drawPicoDitheredCrowd(arena.colors.crowdBg, arena.colors.crowdDit);
+
+      // Top Stage Header
+      ctx.fillStyle = getPalColor(0);
+      ctx.fillRect(0, 0, 128, 20);
+      printPicoCenter(`STAGE ${st.stageNum}: ${st.name}`, 3, 10, 1, true);
+      printPicoCenter(st.location, 11, 7, 1);
+
+      // Face-Off Avatars
+      const p1Obj = ROSTER[p1SelectIdx];
+      const p2Obj = ROSTER.find(r => r.id === st.fighterId) || ROSTER[1];
+      drawBoxerAvatar(ctx, p1Obj, 22, 48, true);
+      drawBoxerAvatar(ctx, p2Obj, 106, 48, true);
+
+      // VS Banner
+      ctx.fillStyle = getPalColor(8);
+      ctx.fillRect(52, 40, 24, 14);
+      ctx.strokeStyle = getPalColor(10);
+      ctx.strokeRect(52, 40, 24, 14);
+      printPicoCenter('VS', 43, 10, 1, true);
+
+      // Dialogue Box
+      ctx.fillStyle = 'rgba(0,0,0,0.92)';
+      ctx.fillRect(6, 68, 116, 44);
+      ctx.strokeStyle = getPalColor(arena.colors.accent);
+      ctx.strokeRect(6, 68, 116, 44);
+
+      printPicoWrap(`${p2Obj.name}: "${st.dialogue.opp}"`, 10, 72, 108, 10, 1);
+      printPicoWrap(`${p1Obj.name}: "${st.dialogue.player}"`, 10, 90, 108, 11, 1);
+
+      if (Math.floor(globalFrameCount / 20) % 2 === 0) {
+        printPicoCenter('PRESS X: RING THE BELL!', 118, 10, 1, true);
+      }
+    }
+
+    // === TRAINER GYM UPGRADE SHOP ===
+    function drawLadderShopScreen() {
+      ctx.fillStyle = getPalColor(1);
+      ctx.fillRect(0, 0, 128, 128);
+
+      ctx.fillStyle = getPalColor(0);
+      ctx.fillRect(0, 0, 128, 18);
+      printPicoCenter('TRAINER GYM UPGRADE SHOP', 3, 10, 1, true);
+      printPicoCenter(`PURSE: $${campaignState.purse}`, 10, 11, 1);
+
+      const items = [
+        { key: 'pwr', label: '1. HEAVY HANDS (PWR)', lv: campaignState.upgrades.pwr, tiers: CAMPAIGN_UPGRADE_TIERS.pwr },
+        { key: 'def', label: '2. IRON CHIN (DEF)', lv: campaignState.upgrades.def, tiers: CAMPAIGN_UPGRADE_TIERS.def },
+        { key: 'spd', label: '3. FAST HANDS (SPD)', lv: campaignState.upgrades.spd, tiers: CAMPAIGN_UPGRADE_TIERS.spd },
+        { key: 'diamondSeed', label: '4. DIAMOND SEED', owned: campaignState.upgrades.diamondSeed, cost: 1500, desc: 'FREE DIAMOND DROP' },
+        { key: 'superRush', label: '5. SUPER RUSH', owned: campaignState.upgrades.superRush, cost: 1200, desc: '+30% METER CHARGE' },
+        { key: 'next', label: `>> NEXT BOUT: STAGE ${campaignState.stageIdx+2}/7 <<`, isAction: true }
+      ];
+
+      items.forEach((item, idx) => {
+        const y = 22 + idx * 15;
+        const isSel = (shopSelectedIdx === idx);
+
+        ctx.fillStyle = isSel ? getPalColor(10) : getPalColor(0);
+        ctx.fillRect(6, y, 116, 13);
+        ctx.strokeStyle = isSel ? getPalColor(7) : getPalColor(5);
+        ctx.strokeRect(6, y, 116, 13);
+
+        const col = isSel ? 0 : 7;
+        if (item.isAction) {
+          printPicoCenter(item.label, y + 3, isSel ? 0 : 10, 1, true);
+        } else if (item.tiers) {
+          const curLv = item.lv;
+          const nextTier = item.tiers[curLv];
+          const costStr = nextTier ? `$${nextTier.cost}` : 'MAX';
+          const effectStr = nextTier ? nextTier.label : 'MAXED';
+          printPico(`${item.label} Lv${curLv}`, 10, y + 3, col, 1);
+          printPico(`${effectStr} ${costStr}`, 70, y + 3, isSel ? 2 : 11, 1);
+        } else {
+          const costStr = item.owned ? 'OWNED' : `$${item.cost}`;
+          printPico(item.label, 10, y + 3, col, 1);
+          printPico(costStr, 86, y + 3, isSel ? 2 : (item.owned ? 6 : 11), 1);
+        }
+      });
+
+      printPicoCenter('UP/DOWN: SELECT   X/TOUCH: BUY/ADVANCE', 118, 7, 1);
+    }
+
+    // === KNOCKDOWN REFEREE COUNTDOWN OVERLAY ===
+    function drawKnockdownOverlay() {
+      if (!knockdownData) return;
+
+      // Pulsing Red Vignette Border
+      if (Math.floor(globalFrameCount / 8) % 2 === 0) {
+        ctx.strokeStyle = 'rgba(255, 0, 77, 0.45)';
+        ctx.lineWidth = 3;
+        ctx.strokeRect(1, 1, 126, 126);
+      }
+
+      // Referee Center Count Box
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.90)';
+      ctx.fillRect(32, 34, 64, 54);
+      ctx.strokeStyle = getPalColor(10);
+      ctx.lineWidth = 1;
+      ctx.strokeRect(32, 34, 64, 54);
+
+      printPicoCenter('REFEREE COUNT!', 37, 8, 1, true);
+
+      // Huge Countdown Number
+      const countNum = String(Math.min(10, knockdownData.count));
+      printPicoCenter(countNum, 47, 10, 2, true);
+
+      // Get-Up Stamina Progress Bar
+      const isPlayerFallen = (knockdownData.fallenId === 1);
+      const hint = isPlayerFallen ? 'GET UP! CLEAR GEMS!' : 'OPPONENT DOWN!';
+      printPicoCenter(hint, 67, isPlayerFallen ? 11 : 6, 1);
+
+      // Bar
+      ctx.fillStyle = getPalColor(0);
+      ctx.fillRect(38, 75, 52, 6);
+      ctx.strokeStyle = getPalColor(7);
+      ctx.strokeRect(38, 75, 52, 6);
+
+      const fillW = Math.max(0, Math.min(50, Math.floor(50 * (knockdownData.stamina / 100))));
+      ctx.fillStyle = getPalColor(11);
+      ctx.fillRect(39, 76, fillW, 4);
+    }
+
+    // === VICTORY CHAMPIONSHIP END SCREEN ===
+    function drawVictoryEndScreen() {
+      ctx.fillStyle = getPalColor(0);
+      ctx.fillRect(0, 0, 128, 128);
+
+      ctx.fillStyle = getPalColor(10);
+      ctx.fillRect(0, 0, 128, 18);
+      printPicoCenter('WORLD CHAMPION! 50-0 BELT', 5, 0, 1, true);
+
+      // Championship Belt Icon / Graphic
+      ctx.fillStyle = getPalColor(10);
+      ctx.fillRect(44, 26, 40, 16);
+      ctx.strokeStyle = getPalColor(7);
+      ctx.strokeRect(44, 26, 40, 16);
+      printPicoCenter('GOLD BELT', 31, 8, 1, true);
+
+      const p1Obj = ROSTER[p1SelectIdx];
+      drawBoxerAvatar(ctx, p1Obj, 64, 58, true);
+
+      printPicoCenter(`${p1Obj.fullName} IS CHAMPION!`, 76, 11, 1, true);
+      printPicoCenter(`TOTAL PURSE: $${campaignState.purse}`, 88, 10, 1);
+      printPicoCenter(`TOTAL SCORE: ${campaignState.totalScore}`, 98, 7, 1);
+
+      printPicoCenter('PRESS X: MAIN MENU', 118, 10, 1, true);
+    }
+
+    // === CONTINUE SCREEN ===
+    function drawContinueScreen() {
+      ctx.fillStyle = getPalColor(0);
+      ctx.fillRect(0, 0, 128, 128);
+
+      ctx.fillStyle = getPalColor(8);
+      ctx.fillRect(0, 0, 128, 18);
+      printPicoCenter('KNOCKED OUT! CONTINUE?', 5, 7, 1, true);
+
+      printPicoCenter(String(continueCountdown), 36, 10, 3, true);
+      printPicoCenter(`CONTINUES LEFT: ${campaignState.continues}`, 72, 7, 1);
+
+      printPicoCenter('PRESS X: GET BACK IN RING', 98, 11, 1, true);
+      printPicoCenter('PRESS ESC: GIVE UP', 112, 6, 1);
     }
 
     const FIGHTER_DETAILS = {
@@ -3200,9 +3691,18 @@
       ctx.strokeStyle = getPalColor(5);
       ctx.strokeRect(81, 2, 44, 6);
 
-      // Fighter Names
+      // Fighter Names & Round Win Gloves ⭐ ⭐
       printPico(p1.name || 'BRONER', 4, 9, 10, 1);
+      for (let w = 0; w < 2; w++) {
+        ctx.fillStyle = (w < p1RoundsWon) ? getPalColor(10) : getPalColor(5);
+        ctx.fillRect(36 + w * 5, 9, 4, 4);
+      }
+
       const p2Name = p2.name || 'DEEN';
+      for (let w = 0; w < 2; w++) {
+        ctx.fillStyle = (w < p2RoundsWon) ? getPalColor(10) : getPalColor(5);
+        ctx.fillRect(82 + w * 5, 9, 4, 4);
+      }
       printPico(p2Name, 128 - p2Name.length * 5 - 4, 9, 10, 1);
 
       // Round Timer
@@ -3410,10 +3910,31 @@
         drawCharSelectScreen();
       } else if (appState === 'FIGHTER_BIO') {
         drawFighterBioScreen();
+      } else if (appState === 'LADDER_BRACKET') {
+        drawLadderBracketScreen();
+      } else if (appState === 'STAGE_INTRO') {
+        drawStageIntroScreen();
+      } else if (appState === 'LADDER_SHOP') {
+        drawLadderShopScreen();
+      } else if (appState === 'VICTORY_END') {
+        drawVictoryEndScreen();
+      } else if (appState === 'CONTINUE_SCREEN') {
+        drawContinueScreen();
       } else if (appState === 'ARENA_SELECT') {
         drawArenaSelectScreen();
       } else {
         drawBattleScreen();
+        if (appState === 'KNOCKDOWN') {
+          drawKnockdownOverlay();
+        }
+        if (appState === 'ROUND_TRANSITION') {
+          ctx.fillStyle = 'rgba(0,0,0,0.85)';
+          ctx.fillRect(10, 48, 108, 30);
+          ctx.strokeStyle = getPalColor(10);
+          ctx.strokeRect(10, 48, 108, 30);
+          printPicoCenter(roundTransitionText, 54, 10, 1, true);
+          printPicoCenter('ROUND ' + currentRound + ' FIGHT!', 64, 7, 1);
+        }
       }
 
       ctx.restore();
@@ -3422,12 +3943,29 @@
     function startMatch() {
       switchMusicTrack();
 
-      // In 1P vs CPU the AI opponent picks a random fighter different from P1
-      // so arcade runs vary across the 14-fighter roster instead of always Deen.
       if (selectedModeIdx === 0) {
+        // Campaign Mode (30 Min Road to Gold)
+        campaignState.active = true;
+        const st = CAMPAIGN_STAGES[campaignState.stageIdx] || CAMPAIGN_STAGES[0];
+        const f2Idx = ROSTER.findIndex(r => r.id === st.fighterId);
+        p2SelectIdx = (f2Idx >= 0) ? f2Idx : 1;
+        const arenaIdx = ARENAS.findIndex(a => a.id === st.arenaId);
+        selectedArenaIdx = (arenaIdx >= 0) ? arenaIdx : 0;
+      } else if (selectedModeIdx === 1) {
+        // Quick 1P vs CPU
+        campaignState.active = false;
         do { p2SelectIdx = Math.floor(Math.random() * ROSTER.length); }
         while (p2SelectIdx === p1SelectIdx);
+      } else {
+        campaignState.active = false;
       }
+
+      p1RoundsWon = 0;
+      p2RoundsWon = 0;
+      currentRound = 1;
+      knockdownsP1 = 0;
+      knockdownsP2 = 0;
+      knockdownData = null;
 
       const f1 = ROSTER[p1SelectIdx];
       const f2 = ROSTER[p2SelectIdx];
@@ -3511,22 +4049,61 @@
         lockCountdown--;
         if (lockCountdown <= 0) {
           lockCountdown = -1;
-          appState = 'ARENA_SELECT';
+          appState = (selectedModeIdx === 0 ? 'LADDER_BRACKET' : 'ARENA_SELECT');
         }
       }
 
-      if (appState !== 'PLAYING' && appState !== 'KO') return;
+      if (appState === 'ROUND_TRANSITION') {
+        roundTransitionTimer--;
+        if (roundTransitionTimer <= 0) {
+          resetForNextRound();
+        }
+        return;
+      }
+
+      if (appState === 'CONTINUE_SCREEN') {
+        continueFrameTimer++;
+        if (continueFrameTimer >= 60) {
+          continueFrameTimer = 0;
+          continueCountdown--;
+          if (continueCountdown <= 0) {
+            campaignState.active = false;
+            appState = 'TITLE';
+          }
+        }
+        return;
+      }
+
+      if (appState === 'KNOCKDOWN') {
+        if (knockdownData) {
+          knockdownData.timer++;
+          if (knockdownData.timer >= knockdownData.refSpeed) {
+            knockdownData.timer = 0;
+            knockdownData.count++;
+            play808Sfx('land');
+            if (knockdownData.count > 10) {
+              // 10-count knockout!
+              endRound(knockdownData.fallenId === 1 ? 2 : 1, '10-COUNT K.O.!');
+              return;
+            }
+          }
+        }
+      }
+
+      if (appState !== 'PLAYING' && appState !== 'KNOCKDOWN' && appState !== 'KO') return;
       if (!p1 || !p2) return;
 
-      timerFrameCounter++;
-      if (timerFrameCounter >= 60) {
-        timerFrameCounter = 0;
-        if (roundTimer > 0) {
-          roundTimer--;
-          if (roundTimer === 0) {
-            if (p1.hp > p2.hp) triggerKO(1);
-            else if (p2.hp > p1.hp) triggerKO(2);
-            else triggerKO(0);
+      if (appState === 'PLAYING') {
+        timerFrameCounter++;
+        if (timerFrameCounter >= 60) {
+          timerFrameCounter = 0;
+          if (roundTimer > 0) {
+            roundTimer--;
+            if (roundTimer === 0) {
+              if (p1.hp > p2.hp) endRound(1);
+              else if (p2.hp > p1.hp) endRound(2);
+              else endRound(0);
+            }
           }
         }
       }
@@ -3564,14 +4141,88 @@
       }
 
       if (appState === 'MODE_SELECT') {
-        if (e.key === 'ArrowUp') selectedModeIdx = (selectedModeIdx + 2) % 3;
-        if (e.key === 'ArrowDown') selectedModeIdx = (selectedModeIdx + 1) % 3;
+        if (e.key === 'ArrowUp') selectedModeIdx = (selectedModeIdx + 3) % 4;
+        if (e.key === 'ArrowDown') selectedModeIdx = (selectedModeIdx + 1) % 4;
         if (isStartKey(e.key)) {
+          if (selectedModeIdx === 0) {
+            // Campaign Mode: check if saved game exists
+            const saved = loadCampaign();
+            if (saved && saved.stageIdx > 0) {
+              campaignState = saved;
+            } else {
+              campaignState = { active: true, stageIdx: 0, purse: 0, upgrades: { pwr: 0, def: 0, spd: 0, diamondSeed: false, superRush: false }, continues: 3, totalScore: 0, startTime: Date.now() };
+            }
+          }
           appState = 'CHAR_SELECT';
           p1Locked = false;
           p2Locked = false;
           p1SelectIdx = 0;
           p2SelectIdx = 1;
+          play808Sfx('confirm');
+        }
+        return;
+      }
+
+      if (appState === 'LADDER_BRACKET') {
+        if (isStartKey(e.key)) {
+          appState = 'STAGE_INTRO';
+          play808Sfx('confirm');
+        }
+        return;
+      }
+
+      if (appState === 'STAGE_INTRO') {
+        if (isStartKey(e.key)) {
+          startMatch();
+        }
+        return;
+      }
+
+      if (appState === 'LADDER_SHOP') {
+        if (e.key === 'ArrowUp') shopSelectedIdx = (shopSelectedIdx + 5) % 6;
+        if (e.key === 'ArrowDown') shopSelectedIdx = (shopSelectedIdx + 1) % 6;
+        if (isStartKey(e.key)) {
+          if (shopSelectedIdx === 5) {
+            // Advance to next stage!
+            campaignState.stageIdx++;
+            saveCampaign();
+            appState = 'LADDER_BRACKET';
+            play808Sfx('confirm');
+          } else if (shopSelectedIdx === 0 && campaignState.upgrades.pwr < 3) {
+            const cost = CAMPAIGN_UPGRADE_TIERS.pwr[campaignState.upgrades.pwr].cost;
+            if (campaignState.purse >= cost) { campaignState.purse -= cost; campaignState.upgrades.pwr++; saveCampaign(); play808Sfx('fuse'); }
+          } else if (shopSelectedIdx === 1 && campaignState.upgrades.def < 3) {
+            const cost = CAMPAIGN_UPGRADE_TIERS.def[campaignState.upgrades.def].cost;
+            if (campaignState.purse >= cost) { campaignState.purse -= cost; campaignState.upgrades.def++; saveCampaign(); play808Sfx('fuse'); }
+          } else if (shopSelectedIdx === 2 && campaignState.upgrades.spd < 3) {
+            const cost = CAMPAIGN_UPGRADE_TIERS.spd[campaignState.upgrades.spd].cost;
+            if (campaignState.purse >= cost) { campaignState.purse -= cost; campaignState.upgrades.spd++; saveCampaign(); play808Sfx('fuse'); }
+          } else if (shopSelectedIdx === 3 && !campaignState.upgrades.diamondSeed) {
+            if (campaignState.purse >= 1500) { campaignState.purse -= 1500; campaignState.upgrades.diamondSeed = true; saveCampaign(); play808Sfx('fuse'); }
+          } else if (shopSelectedIdx === 4 && !campaignState.upgrades.superRush) {
+            if (campaignState.purse >= 1200) { campaignState.purse -= 1200; campaignState.upgrades.superRush = true; saveCampaign(); play808Sfx('fuse'); }
+          }
+        }
+        return;
+      }
+
+      if (appState === 'VICTORY_END') {
+        if (isStartKey(e.key)) {
+          campaignState.active = false;
+          appState = 'TITLE';
+          play808Sfx('confirm');
+        }
+        return;
+      }
+
+      if (appState === 'CONTINUE_SCREEN') {
+        if (isStartKey(e.key)) {
+          campaignState.continues--;
+          saveCampaign();
+          startMatch();
+        } else if (e.key === 'Escape') {
+          campaignState.active = false;
+          appState = 'TITLE';
         }
         return;
       }

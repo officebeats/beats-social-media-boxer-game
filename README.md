@@ -1,6 +1,6 @@
 # CRASH OUT: RING RUSH — PICO-8 PUZZLE BOXING
 
-**Version:** `v2.0.0` (Street Fighter Punch Animation & Roster UI Polish Release)
+**Version:** `v2.1.0` (30-Minute Arcade Campaign & 10-Count Knockdown Survival Release)
 
 ![Title Screen](assets/pico8_title.jpg)
 
@@ -8,7 +8,7 @@
 
 ---
 
-## 🎮 Play Live (v2.0.0)
+## 🎮 Play Live (v2.1.0)
 
 - ⚡ **Play Live in Browser (GitHub Pages)**: **[officebeats.github.io/beats-social-media-boxer-game](https://officebeats.github.io/beats-social-media-boxer-game/)**
 - 🕹️ **Native PICO-8 Cartridge**: Load [`crash_out.p8`](crash_out.p8) directly inside PICO-8 using `pico8 -run crash_out.p8`.
@@ -23,19 +23,18 @@
 
 ---
 
-## 🌟 New in v2.0.0
-- 🥊 **Authentic Street Fighter Punch Animation Engine**: Restored full-body 4-quadrant sprite frame swaps during `JAB`, `STRAIGHT`, `HOOK`, and `UPPERCUT` with Capcom 3-phase strike kinematics (windup coil, extension hold with hit sparks/haptics, and smoothstep recovery).
-- 🧭 **100% Direction-Normalized 56-Punch Matrix**: Dynamic quadrant-level orientation normalization ensures all 56 punch frames across all 14 fighters natively extend forward toward the opponent.
-- 📋 **Fighter Profile & Bio Screen (`FIGHTER_BIO`)**: 32×32 large portrait, nickname, PWR/SPD/DEF stat bars, special moves, quotes, and records accessible via `B` or touch portrait tap.
-- 🏟️ **Arena Stage Selection (`ARENA_SELECT`)**: 2×2 arena select screen featuring Kick Warehouse, Mayweather Gym, Broner Gym, and Vegas Arena with dynamic crowd dither, ropes, floor, and backdrop theming in combat.
-- 🎮 **Polished Character Select & 2P Local Controls**: Full name banners, cursor pulse, locked P1/P2 indicators, and full WASD / Arrow key 2-player local battle flow.
-- 🔄 **Restored Instant Rematch Loop**: Defined `rematchToCharSelect()`, allowing players to hit `Enter`, `Space`, or action buttons on the K.O. screen to instantly reset and rematch without reload.
-- 🥊 **Stream Regular Added**: **BANG WILLIAMS** (`bang` / Coach Bang), longtime Kick warehouse boxing trainer, with custom 16-bit Capcom pixel art idle sprite and 4-quadrant punch grid.
-- 🥊 **Proportional Fousey G7 Overhaul**: Completely re-proportioned Fousey's idle sprite and punch sheet to match the authentic 16-bit Capcom arcade boxer build.
-- 💎 **Pure Puzzle Fighter Core Engine**: 3D beveled gems, power gem multi-cell fusion, pulsating circular crash breaker orbs, stone countdown timers, and real-time garbage offsetting.
-- 🔤 **100% Native 4x5 Pixel Font Engine**: Direct bitmap font matrix delivering razor-sharp retro typography across all screens with zero blur.
-- 🔴 **Zero Foot Artifacts**: Clean alpha transparency with grounded boots on the ring canvas floor at $Y=90$ and elliptical drop shadows.
-- 📺 **Live Broadcast Stream HUD**: Real-time Kick chat ticker with viewer counters and donation alerts.
+## 🌟 New in v2.1.0
+- 🏆 **7-Stage "Road to Gold" Arcade Campaign (28–35 Min)**: Full tournament ladder progressing through N3ON, Adin Ross, Blueface, Walid Sharks, Ryan Garcia, Semi-Final Boss **Gervonta "Tank" Davis**, and Final Boss **Floyd "Money" Mayweather** (Phase 1 50-0 Philly Shell & Phase 2 TMT Gold Rush).
+- 🥊 **Knockdown 10-Count Puzzle Survival**: Dropping to 0 HP triggers an authentic referee 10-count. Fallen fighters actively drop and clear gems to fill the **Get-Up Stamina Meter** to score a dramatic second-wind recovery (+28 HP) before the count of 10!
+- 🥊 **Three-Knockdown TKO Rule**: Authentic boxing rules where a 3rd knockdown in the same round triggers an immediate technical knockout.
+- 🏅 **Multi-Round Best 2-of-3 Engine**: Matches require 2 round victories, tracked via golden glove win indicators (⭐ ⭐) on the HUD with round-over transitions.
+- 🏪 **Trainer Gym Upgrade Shop (`LADDER_SHOP`)**: Spend stage fight purses on persistent upgrades: **Heavy Hands (PWR Lv 1-3)**, **Iron Chin (DEF Lv 1-3)**, **Fast Hands (SPD Lv 1-3)**, **Diamond Seed Perk**, and **Super Rush Perk**.
+- 💬 **Pre-Fight Trash Talk Dialogues (`STAGE_INTRO`)**: Authentic character face-off cutscenes with viral Kick stream dialogue lines before each bout.
+- 💾 **Persistent Save & Resume System**: Auto-saves campaign stage, purse, and purchased upgrades to `localStorage` so 30-minute runs can be resumed anytime from the Mode Select menu.
+- 🥊 **Street Fighter Authentic Punch Animation Engine**: Full-body 4-quadrant sprite swaps with 3-phase strike kinematics (windup coil, extension hold with hit sparks/haptics, smoothstep recovery).
+- 🧭 **100% Direction-Normalized 56-Punch Matrix**: Quadrant normalization ensures all 14 fighters strike forward toward the opponent.
+- 🔴 **Zero Floating Sprites**: Tight auto-crop bounding boxes anchor every boxer's boots directly on the ring floor at $Y=90$ with grounded shadows.
+- ⚡ **Natural Ducking & Defense Kinematics**: Eliminated sprite squashing in favor of authentic boxing slips, dips, and waist leans at full 100% resolution.
 ### Title Screen
 ![Title Screen](assets/pico8_title.jpg)
 
