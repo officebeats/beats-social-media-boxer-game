@@ -368,6 +368,23 @@
       box-shadow: 0px 1px 0px var(--gba-btn-shadow), 0px 2px 4px rgba(0, 0, 0, 0.8), inset 0px 1px 3px rgba(0, 0, 0, 0.8);
     }
 
+    .btn-gba-action.super-ready {
+      animation: superGlowPulse 0.45s infinite alternate !important;
+      border-color: #ffec27 !important;
+    }
+
+    @keyframes superGlowPulse {
+      0% {
+        transform: scale(1.0);
+        box-shadow: 0px 7px 0px var(--gba-btn-shadow), 0px 0px 18px #ff004d, inset 0px 2px 3px rgba(255, 255, 255, 0.8);
+        filter: brightness(1.15);
+      }
+      100% {
+        transform: scale(1.08);
+        box-shadow: 0px 7px 0px var(--gba-btn-shadow), 0px 0px 32px #ffec27, 0px 0px 16px #ff004d, inset 0px 2px 4px #ffffff;
+        filter: brightness(1.55);
+      }
+    }
     .btn-gba-action span {
       font-size: 8px;
       font-weight: 900;
@@ -3973,8 +3990,8 @@
       const modes = [
         { label: 'ROAD TO GOLD (30M)', desc: saved && saved.stageIdx > 0 ? `RESUME STAGE ${saved.stageIdx+1}/7` : '7-STAGE TOURNAMENT' },
         { label: 'QUICK EXHIBITION', desc: '1P VS CPU SINGLE BOUT' },
-        { label: '2P LOCAL BATTLE', desc: 'HEAD TO HEAD LOCAL PLAY' },
-        { label: 'CPU WATCH DEMO', desc: 'AI VS AI EXHIBITION' }
+        { label: 'CPU WATCH DEMO', desc: 'AI VS AI EXHIBITION' },
+        { label: 'HOW TO PLAY', desc: '5-LESSON TRAINING CAMP' }
       ];
 
       modes.forEach((m, idx) => {
@@ -3991,6 +4008,237 @@
       });
 
       printPicoCenter('UP/DOWN: NAVIGATE  X: SELECT', 120, 7, 1);
+    }
+
+    // === INTERACTIVE 5-LESSON VISUAL TRAINING CAMP (HOW TO PLAY) ===
+    var tutorialPage = 0; // 0: Match & Crush, 1: Power Gems, 2: Super Finisher, 3: Knockdown Survival, 4: Controls & Practice
+    window.tutorialPage = tutorialPage;
+
+    function advanceTutorial() {
+      if (tutorialPage < 4) {
+        tutorialPage++;
+        play808Sfx('confirm');
+      } else {
+        // Lesson 5 complete: Launch Road to Gold tournament!
+        tutorialPage = 0;
+        selectGameMode(0);
+      }
+    }
+
+    function prevTutorial() {
+      if (tutorialPage > 0) {
+        tutorialPage--;
+        play808Sfx('nav');
+      } else {
+        goBack();
+      }
+    }
+
+    function drawTutorialScreen() {
+      ctx.fillStyle = getPalColor(0);
+      ctx.fillRect(0, 0, 128, 128);
+
+      // Header Bar
+      ctx.fillStyle = getPalColor(1);
+      ctx.fillRect(0, 0, 128, 15);
+      printPico('<', 4, 4, 6, 1);
+      printPicoCenter(`TRAINING CAMP (${tutorialPage + 1}/5)`, 4, 10, 1, true);
+
+      // ── Visual Pixel-Art Animated Diorama Box (X: 6..122, Y: 18..62, H: 44) ──
+      ctx.fillStyle = getPalColor(0);
+      ctx.fillRect(6, 18, 116, 44);
+      ctx.strokeStyle = getPalColor(10);
+      ctx.strokeRect(6, 18, 116, 44);
+
+      const animT = Math.floor(globalFrameCount * 0.1) % 60;
+
+      if (tutorialPage === 0) {
+        // ── Lesson 1: Match & Crush (Puzzles -> Boxing Punches) ──
+        // Left: Falling Gem Pair
+        const gemDropY = 22 + (animT % 14);
+        ctx.fillStyle = getPalColor(12); ctx.fillRect(14, gemDropY, 7, 7); // Blue gem
+        ctx.fillStyle = getPalColor(10); ctx.fillRect(14, gemDropY + 7, 7, 7); // Yellow gem
+        // Down arrow
+        ctx.fillStyle = getPalColor(7);
+        ctx.fillRect(17, 39, 1, 4); ctx.fillRect(16, 42, 3, 1);
+
+        // Center: Stacked gems with glowing round Crash Orb
+        ctx.fillStyle = getPalColor(8); ctx.fillRect(44, 42, 7, 7);
+        ctx.fillStyle = getPalColor(8); ctx.fillRect(44, 49, 7, 7);
+        // Pulsing red crash orb
+        const orbGlow = Math.floor(globalFrameCount / 6) % 2 === 0;
+        ctx.fillStyle = orbGlow ? getPalColor(7) : getPalColor(8);
+        ctx.beginPath(); ctx.arc(47, 35, 4, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = getPalColor(10); ctx.stroke();
+
+        // Right: Explosion spark particles & Boxer punching!
+        const isDet = (animT > 30);
+        if (isDet) {
+          ctx.fillStyle = getPalColor(10);
+          ctx.fillRect(72, 38, 3, 3); ctx.fillRect(78, 32, 2, 2); ctx.fillRect(70, 46, 2, 2);
+        }
+        // Mini Boxer Avatar punching
+        drawBoxerAvatar(ctx, ROSTER[0], 92, 42, false, false, false);
+        printPicoCenter('CRUSH GEMS = THROW PUNCHES!', 56, 11, 1);
+
+      } else if (tutorialPage === 1) {
+        // ── Lesson 2: Power Gems (Fusion & Heavy Hits) ──
+        const isFused = (animT > 20);
+        if (!isFused) {
+          // 4 individual green gems
+          ctx.fillStyle = getPalColor(11);
+          ctx.fillRect(18, 26, 7, 7); ctx.fillRect(25, 26, 7, 7);
+          ctx.fillRect(18, 33, 7, 7); ctx.fillRect(25, 33, 7, 7);
+          ctx.strokeStyle = getPalColor(3);
+          ctx.strokeRect(18, 26, 7, 7); ctx.strokeRect(25, 26, 7, 7);
+        } else {
+          // Giant merged 2x2 Power Gem with pulsing gold border
+          ctx.fillStyle = getPalColor(11);
+          ctx.fillRect(18, 26, 14, 14);
+          ctx.strokeStyle = (Math.floor(globalFrameCount / 6) % 2 === 0) ? getPalColor(10) : getPalColor(7);
+          ctx.lineWidth = 1;
+          ctx.strokeRect(18, 26, 14, 14);
+          printPico('2X2', 20, 31, 0, 1, true);
+        }
+
+        // Arrow & Uppercut shockwave
+        ctx.fillStyle = getPalColor(10);
+        printPico('->', 42, 32, 10, 1, true);
+
+        // Giant Uppercut Boxer Animation
+        drawBoxerAvatar(ctx, ROSTER[1], 78, 40, true, false, false);
+        // Heavy counter blocks falling on rival
+        ctx.fillStyle = getPalColor(0); ctx.fillRect(98, 24, 14, 14);
+        ctx.strokeStyle = getPalColor(8); ctx.strokeRect(98, 24, 14, 14);
+        printPico('3', 103, 28, 8, 1, true);
+
+        printPicoCenter('2X2 FUSION = HEAVY UPPERCUT!', 56, 10, 1);
+
+      } else if (tutorialPage === 2) {
+        // ── Lesson 3: Super Meter & 100% Finisher ──
+        // Full Super Meter Bar
+        ctx.fillStyle = getPalColor(1);
+        ctx.fillRect(12, 26, 42, 8);
+        ctx.fillStyle = (Math.floor(globalFrameCount / 6) % 2 === 0) ? getPalColor(10) : getPalColor(7);
+        ctx.fillRect(12, 26, 42, 8);
+        ctx.strokeStyle = getPalColor(7);
+        ctx.strokeRect(12, 26, 42, 8);
+        printPico('100% READY', 16, 28, 0, 1, true);
+
+        // Pulsing Red [X / SUPER] Action Button
+        ctx.fillStyle = getPalColor(8);
+        ctx.fillRect(64, 24, 18, 18);
+        ctx.strokeStyle = (Math.floor(globalFrameCount / 5) % 2 === 0) ? getPalColor(10) : getPalColor(7);
+        ctx.lineWidth = 2;
+        ctx.strokeRect(64, 24, 18, 18);
+        ctx.lineWidth = 1;
+        printPicoCenter('X', 29, 7, 2, true);
+
+        // Special move particle blast
+        ctx.fillStyle = getPalColor(10);
+        ctx.fillRect(94, 22, 24, 20);
+        drawBoxerAvatar(ctx, ROSTER[2], 102, 38, true, false, false);
+        printPicoCenter('TAP RED [X] FOR 100% SUPER!', 56, 10, 1);
+
+      } else if (tutorialPage === 3) {
+        // ── Lesson 4: Knockdown 10-Count Survival ──
+        // Referee Count Box
+        ctx.fillStyle = 'rgba(0,0,0,0.9)';
+        ctx.fillRect(12, 22, 32, 28);
+        ctx.strokeStyle = getPalColor(8);
+        ctx.strokeRect(12, 22, 32, 28);
+        printPico('COUNT', 16, 25, 8, 1);
+        printPico('7', 24, 33, 10, 2, true);
+
+        // Boxer on Canvas flat
+        drawBoxerAvatar(ctx, ROSTER[0], 66, 42, true, false, true);
+
+        // Animated Tap Finger & Expanding Ripples
+        const tapRip = (Math.floor(globalFrameCount * 0.8) % 14) + 2;
+        ctx.strokeStyle = `rgba(255, 236, 39, ${Math.max(0, 1 - tapRip / 16)})`;
+        ctx.beginPath(); ctx.arc(98, 34, tapRip, 0, Math.PI * 2); ctx.stroke();
+        ctx.fillStyle = getPalColor(10);
+        ctx.fillRect(96, 32, 4, 6); ctx.fillRect(97, 28, 2, 5);
+
+        printPicoCenter('RAPIDLY TAP SCREEN TO GET UP!', 56, 11, 1);
+
+      } else {
+        // ── Lesson 5: Mobile Touch Controls & Ready to Fight ──
+        // Virtual D-Pad Icon
+        ctx.fillStyle = getPalColor(5);
+        ctx.fillRect(16, 24, 18, 6);
+        ctx.fillRect(22, 18, 6, 18);
+        printPico('MOVE', 14, 40, 7, 1);
+
+        // Action Buttons A/B & X
+        ctx.fillStyle = getPalColor(8);
+        ctx.beginPath(); ctx.arc(62, 26, 6, 0, Math.PI * 2); ctx.fill();
+        printPico('A', 60, 24, 7, 1);
+        ctx.fillStyle = getPalColor(2);
+        ctx.beginPath(); ctx.arc(76, 26, 6, 0, Math.PI * 2); ctx.fill();
+        printPico('B', 74, 24, 7, 1);
+        printPico('ROTATE', 58, 40, 7, 1);
+
+        // Trophy Cup Icon
+        ctx.fillStyle = getPalColor(10);
+        ctx.fillRect(100, 22, 12, 10);
+        ctx.fillRect(104, 32, 4, 4);
+        ctx.fillRect(101, 36, 10, 2);
+        printPico('READY!', 96, 40, 10, 1, true);
+
+        printPicoCenter('YOU ARE READY FOR THE RING!', 56, 10, 1);
+      }
+
+      // ── Text Explanation Box (X: 6..122, Y: 65..110, H: 45) ──
+      ctx.fillStyle = getPalColor(1);
+      ctx.fillRect(6, 64, 116, 46);
+      ctx.strokeStyle = getPalColor(5);
+      ctx.strokeRect(6, 64, 116, 46);
+
+      if (tutorialPage === 0) {
+        printPico('1. GEMS DROP IN 2-COLOR PAIRS', 10, 68, 7, 1);
+        printPico('2. MATCH WITH GLOWING CRASH ORBS', 10, 78, 11, 1);
+        printPico('3. CRUSHING GEMS THROWS PUNCHES!', 10, 88, 10, 1);
+        printPico('D-PAD: MOVE  A/B: ROTATE GEMS', 10, 98, 6, 1);
+      } else if (tutorialPage === 1) {
+        printPico('1. MERGE 4 GEMS IN A 2X2 SQUARE', 10, 68, 7, 1);
+        printPico('2. THEY AUTO-FUSE TO A POWER GEM!', 10, 78, 11, 1);
+        printPico('3. CRUSH POWER GEMS FOR UPPERCUTS!', 10, 88, 10, 1);
+        printPico('DROPS STONE BLOCKS ON RIVAL!', 10, 98, 6, 1);
+      } else if (tutorialPage === 2) {
+        printPico('1. CLEARING GEMS CHARGES SUPER BAR', 10, 68, 7, 1);
+        printPico('2. AT 100%: TAP RED [X] BUTTON!', 10, 78, 10, 1, true);
+        printPico('3. UNLEASHES SIGNATURE FINISHER!', 10, 88, 11, 1);
+        printPico('FLOODS RIVAL WITH HEAVY BLOCKS!', 10, 98, 6, 1);
+      } else if (tutorialPage === 3) {
+        printPico('1. 0 HP IS A KNOCKDOWN, NOT KO!', 10, 68, 7, 1);
+        printPico('2. RAPIDLY TAP SCREEN FOR STAMINA!', 10, 78, 10, 1, true);
+        printPico('3. BEAT COUNT 10 FOR +28 HP HEAL!', 10, 88, 11, 1);
+        printPico('NOTE: 3 KNOCKDOWNS = T.K.O.!', 10, 98, 8, 1);
+      } else {
+        printPico('1. LEFT/RIGHT/DOWN: SLIDE & DROP', 10, 68, 7, 1);
+        printPico('2. A / B: ROTATE GEMS (CCW / CW)', 10, 78, 11, 1);
+        printPico('3. X BUTTON: 100% SUPER MOVE!', 10, 88, 10, 1);
+        printPico('TAP [X] TO START 7-STAGE TOURNAMENT!', 10, 98, 10, 1, true);
+      }
+
+      // ── Bottom Navigation Bar (Y: 114..126) ──
+      ctx.fillStyle = getPalColor(0);
+      ctx.fillRect(0, 113, 128, 15);
+
+      if (tutorialPage > 0) {
+        printPico('< PREV', 6, 118, 6, 1);
+      } else {
+        printPico('< MENU', 6, 118, 6, 1);
+      }
+
+      printPicoCenter(`[${tutorialPage + 1}/5]`, 118, 10, 1, true);
+
+      if (tutorialPage < 4) {
+        printPico('NEXT >', 92, 118, 11, 1, true);
+      } else {
+        printPico('FIGHT! >', 86, 118, 10, 1, true);
+      }
     }
 
     // === 7-STAGE TOURNAMENT LADDER SCREEN ===
@@ -4346,12 +4594,22 @@
       const countNum = String(Math.min(10, knockdownData.count));
       printPicoCenter(countNum, 41, 10, 2, true);
 
-      // High-Visibility Recovery Prompt
+      // High-Visibility Recovery Prompt & Mobile Tap Ripple
       const isPlayerFallen = (knockdownData.fallenId === 1);
       if (isPlayerFallen) {
         const pulseCol = Math.floor(globalFrameCount / 10) % 2 === 0 ? 10 : 7;
-        printPicoCenter('MASH Z/X / TAP!', 59, pulseCol, 1, true);
+        printPicoCenter('TAP / MASH SCREEN!', 59, pulseCol, 1, true);
         printPicoCenter('STAMINA ' + Math.min(100, Math.floor(knockdownData.stamina)) + '%', 67, 11, 1);
+
+        // Animated expanding tap ripple circles on screen
+        const ripR = (Math.floor(globalFrameCount * 0.8) % 18) + 4;
+        ctx.strokeStyle = `rgba(255, 236, 39, ${Math.max(0, 1 - ripR / 22)})`;
+        ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.arc(64, 102, ripR, 0, Math.PI * 2); ctx.stroke();
+        // Mini animated finger tap icon
+        ctx.fillStyle = getPalColor(10);
+        ctx.fillRect(62, 100, 4, 6);
+        ctx.fillRect(63, 96, 2, 5);
       } else {
         printPicoCenter('OPPONENT DOWN!', 59, 6, 1);
         printPicoCenter('COUNT ' + knockdownData.count + '/10', 67, 10, 1);
@@ -5619,6 +5877,8 @@
         drawContinueScreen();
       } else if (appState === 'ARENA_SELECT') {
         drawArenaSelectScreen();
+      } else if (appState === 'TUTORIAL') {
+        drawTutorialScreen();
       } else {
         drawBattleScreen();
         if (appState === 'KNOCKDOWN') {
@@ -5640,6 +5900,9 @@
     function goBack() {
       if (appState === 'MODE_SELECT') {
         appState = 'TITLE';
+        play808Sfx('nav');
+      } else if (appState === 'TUTORIAL') {
+        appState = 'MODE_SELECT';
         play808Sfx('nav');
       } else if (appState === 'CHAR_SELECT') {
         p1Locked = false;
@@ -5690,6 +5953,13 @@
 
     function selectGameMode(idx = selectedModeIdx) {
       selectedModeIdx = (idx >= 0 && idx < 4) ? idx : 0;
+      if (selectedModeIdx === 3) {
+        // Mode 3: 5-Lesson Training Camp & Visual Guide
+        tutorialPage = 0;
+        appState = 'TUTORIAL';
+        play808Sfx('confirm');
+        return;
+      }
       if (selectedModeIdx === 0) {
         const saved = loadCampaign();
         if (saved && typeof saved.stageIdx === 'number' && saved.stageIdx > 0 && saved.stageIdx < CAMPAIGN_STAGES.length - 1) {
@@ -5713,7 +5983,7 @@
       }
       appState = 'CHAR_SELECT';
       p1Locked = false;
-      p2Locked = false;
+      p2Locked = true; // Auto-lock P2 CPU opponent
       lockCountdown = -1;
       p1SelectIdx = isFighterUnlocked('deen') ? 1 : 0;
       p2SelectIdx = (p1SelectIdx === 0 ? 1 : 0);
@@ -5727,12 +5997,12 @@
         play808Sfx('confirm');
       } else if (appState === 'MODE_SELECT') {
         selectGameMode(selectedModeIdx);
+      } else if (appState === 'TUTORIAL') {
+        advanceTutorial();
       } else if (appState === 'CHAR_SELECT') {
         if (isFighterUnlocked(ROSTER[p1SelectIdx].id)) {
           p1Locked = true;
-          if (selectedModeIdx !== 2) {
-            p2Locked = true;
-          }
+          p2Locked = true;
           play808Sfx('confirm');
         } else {
           play808Sfx('nav');
@@ -5820,11 +6090,8 @@
         p1.isAi = false;
         p2.isAi = true;
         gameMode = 'VS_AI';
-      } else if (selectedModeIdx === 2) {
-        p1.isAi = false;
-        p2.isAi = false;
-        gameMode = 'VS_LOCAL';
       } else {
+        // CPU Watch Demo (mode 2)
         p1.isAi = true;
         p2.isAi = true;
         gameMode = 'AI_VS_AI';
@@ -5973,7 +6240,10 @@
             handleConfirmAction();
             gpNavDebounce = 15;
           }
-          if (btnX) { bioFighterIdx = p1SelectIdx; appState = 'FIGHTER_BIO'; play808Sfx('nav'); gpNavDebounce = 15; }
+        } else if (appState === 'TUTORIAL') {
+          if (dpadLeft) { prevTutorial(); gpNavDebounce = 12; }
+          if (dpadRight) { advanceTutorial(); gpNavDebounce = 12; }
+          if (btnA || btnX) { advanceTutorial(); gpNavDebounce = 15; }
         } else if (appState === 'FIGHTER_BIO') {
           if (dpadLeft) { bioFighterIdx = (bioFighterIdx + 13) % 14; gpNavDebounce = 12; play808Sfx('nav'); }
           if (dpadRight) { bioFighterIdx = (bioFighterIdx + 1) % 14; gpNavDebounce = 12; play808Sfx('nav'); }
@@ -6170,6 +6440,16 @@
         }
         return;
       }
+      if (appState === 'TUTORIAL') {
+        if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
+          prevTutorial();
+        } else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
+          advanceTutorial();
+        } else if (isStartKey(e.key)) {
+          advanceTutorial();
+        }
+        return;
+      }
 
       if (appState === 'LADDER_BRACKET') {
         if (isStartKey(e.key)) {
@@ -6233,19 +6513,6 @@
           if (p1SelectIdx !== prev) play808Sfx('nav');
         }
 
-        // P2 cursor controls — only in 2P Local mode
-        if (selectedModeIdx === 2 && !p2Locked) {
-          const prev = p2SelectIdx;
-          if (e.key === 'a' || e.key === 'A') p2SelectIdx = (p2SelectIdx + 13) % 14;
-          if (e.key === 'd' || e.key === 'D') p2SelectIdx = (p2SelectIdx + 1) % 14;
-          if (e.key === 'w' || e.key === 'W') p2SelectIdx = (p2SelectIdx + 7) % 14;
-          if (e.key === 's' || e.key === 'S') p2SelectIdx = (p2SelectIdx + 7) % 14;
-          if (p2SelectIdx !== prev) play808Sfx('nav');
-        }
-        if (selectedModeIdx === 2 && !p2Locked && (e.key === 'f' || e.key === 'F')) {
-          p2Locked = true;
-          play808Sfx('confirm');
-        }
         if ((e.key === 'y' || e.key === 'Y' || e.key === 'c' || e.key === 'C') && !(p1Locked && p2Locked)) {
           p1SkinIdx = (p1SkinIdx === 0 ? 1 : 0);
           play808Sfx('nav');
@@ -6260,15 +6527,14 @@
         if (isStartKey(e.key)) {
           if (isFighterUnlocked(ROSTER[p1SelectIdx].id)) {
             p1Locked = true;
+            p2Locked = true;
             play808Sfx('confirm');
-            if (selectedModeIdx !== 2) {
-              p2Locked = true;
-            }
           } else {
             play808Sfx('nav');
           }
         }
       }
+
 
       if (appState === 'FIGHTER_BIO') {
         const prev = bioFighterIdx;
@@ -6371,6 +6637,7 @@
 
     bindBtn('btnLeft', () => { triggerHaptic(18);
       if (appState === 'MODE_SELECT') selectedModeIdx = (selectedModeIdx + 3) % 4;
+      else if (appState === 'TUTORIAL') prevTutorial();
       else if (appState === 'CHAR_SELECT' && !p1Locked) { p1SelectIdx = (p1SelectIdx + 13) % 14; play808Sfx('nav'); }
       else if (appState === 'FIGHTER_BIO') { bioFighterIdx = (bioFighterIdx + 13) % 14; play808Sfx('nav'); }
       else if (appState === 'ARENA_SELECT') { selectedArenaIdx = (selectedArenaIdx + 8) % 9; play808Sfx('nav'); }
@@ -6379,6 +6646,7 @@
 
     bindBtn('btnRight', () => { triggerHaptic(18);
       if (appState === 'MODE_SELECT') selectedModeIdx = (selectedModeIdx + 1) % 4;
+      else if (appState === 'TUTORIAL') advanceTutorial();
       else if (appState === 'CHAR_SELECT' && !p1Locked) { p1SelectIdx = (p1SelectIdx + 1) % 14; play808Sfx('nav'); }
       else if (appState === 'FIGHTER_BIO') { bioFighterIdx = (bioFighterIdx + 1) % 14; play808Sfx('nav'); }
       else if (appState === 'ARENA_SELECT') { selectedArenaIdx = (selectedArenaIdx + 1) % 9; play808Sfx('nav'); }
@@ -6476,6 +6744,15 @@
         if (appState === 'TITLE') {
           appState = 'MODE_SELECT';
           play808Sfx('confirm');
+          return;
+        }
+
+        if (appState === 'TUTORIAL') {
+          if (clickX <= 38 && clickY >= 110) {
+            prevTutorial();
+          } else {
+            advanceTutorial();
+          }
           return;
         }
 
@@ -6588,28 +6865,36 @@
             return;
           }
 
-          // Check grid click (X: 6..122, Y: 17..52) — selects, then locks
           // Check grid click (X: 6..122, Y: 17..52) — selects, then locks if unlocked
           if (clickY >= 17 && clickY <= 52 && clickX >= 6 && clickX <= 122) {
             const col = Math.floor((clickX - 6) / 16);
             const row = Math.floor((clickY - 17) / 17);
             const idx = row * 7 + col;
-            if (idx >= 0 && idx < 14) {
-              p1SelectIdx = idx;
+            if (idx >= 0 && idx < ROSTER.length && !p1Locked) {
+              if (p1SelectIdx === idx) {
+                if (isFighterUnlocked(ROSTER[p1SelectIdx].id)) {
+                  p1Locked = true;
+                  p2Locked = true;
+                  play808Sfx('confirm');
+                }
+              } else {
+                p1SelectIdx = idx;
+                play808Sfx('nav');
+              }
+              return;
             }
           }
           if (isFighterUnlocked(ROSTER[p1SelectIdx].id)) {
             p1Locked = true;
-            if (selectedModeIdx !== 2) p2Locked = true;
+            p2Locked = true;
             play808Sfx('confirm');
           } else {
             play808Sfx('nav');
           }
+          return;
         }
       });
     }
-
-    // ⚡ FIXED 60 FPS TIMESTEP ACCUMULATOR (FLUID FLUID 60 FPS ON 60HZ & 120HZ PROMOTION)
     let lastLoopTime = performance.now();
     let loopAccumulator = 0;
     const TIME_PER_FRAME = 1000 / 60; // Exactly 16.666ms per update

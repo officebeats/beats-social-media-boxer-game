@@ -40,7 +40,7 @@ Experience the retro arcade presentation with authentic 16-bit boxer sprites, an
 ---
 
 ### 2. 🕹️ Game Mode Selection
-*Choose between the deep 30-minute 7-Stage Road to Gold Tournament Campaign, single Quick Exhibition, 2P Local Head-to-Head, or CPU Watch Demo mode.*
+*Choose between the deep 30-minute 7-Stage Road to Gold Tournament Campaign, single Quick Exhibition (1P vs CPU), CPU Watch Demo, or the 5-Lesson Interactive Training Camp.*
 
 | Mode Selection Screen | GBA Mode Navigation |
 | :---: | :---: |
@@ -48,7 +48,19 @@ Experience the retro arcade presentation with authentic 16-bit boxer sprites, an
 
 ---
 
-### 3. 🥊 Boxer Selection (14-Fighter COB Roster)
+### 3. 📚 Interactive 5-Lesson Training Camp (How to Play)
+*Visual-first, casual-friendly tutorial with animated pixel dioramas designed specifically for non-gamers and mobile touchscreen players.*
+
+![All 5 Tutorial Lessons Contact Sheet](docs/screenshots/tutorial/all_5_tutorial_lessons_contact_sheet.png)
+
+1. **Lesson 1: Match & Crush (Puzzles $\rightarrow$ Punches)**: Learn how dropping 2-gem pairs and hitting them with glowing round Crash Orbs detonates gems into boxing strikes!
+2. **Lesson 2: Power Gems (Fusion & Heavy Hits)**: Connect 4 matching gems into a $2\times 2$ square to auto-fuse giant Power Gems for heavy uppercuts and counter blocks!
+3. **Lesson 3: 100% Super Finisher**: Fill the bottom Super Gauge to 100%, tap the pulsing red `[X / SUPER]` button, and unleash your fighter's cinematic finisher!
+4. **Lesson 4: Knockdown 10-Count Survival**: 0 HP is a knockdown, not game over! Rapidly tap/mash anywhere on the mobile screen to fill your stamina bar and rise with a **+28 HP Second Wind**!
+5. **Lesson 5: Mobile Touch Controls & Ready to Fight**: Complete cheat-sheet for virtual D-Pad, rotation buttons, and tournament entry.
+---
+
+### 4. 🥊 Boxer Selection (14-Fighter COB Roster)
 *2x7 character grid showcasing 14 viral stream stars with animated idle portraits, Power/Speed/Defense stat bars, special moves, unlock status, and Drip/Alt Outfit toggle.*
 
 | Fighter Select (Adrien Broner & Deen The Great) | Fighter Select (Alt Viral Stream Outfit) |
@@ -57,7 +69,7 @@ Experience the retro arcade presentation with authentic 16-bit boxer sprites, an
 
 ---
 
-### 4. 🏟️ Stage Selection (9 Dynamic Venues & Tournament Bracket)
+### 5. 🏟️ Stage Selection (9 Dynamic Venues & Tournament Bracket)
 *Fight across 9 global stream locations ranging from the Austin Kick Warehouse to the Tokyo Cyber Dome, or navigate the 7-Stage Tournament Ladder.*
 
 | 9 Dynamic Stream Arenas | 7-Stage Tournament Bracket |
@@ -66,7 +78,7 @@ Experience the retro arcade presentation with authentic 16-bit boxer sprites, an
 
 ---
 
-### 5. 💥 Live Boxing Match Gameplay in Action
+### 6. 💥 Live Boxing Match Gameplay in Action
 *Fast-paced dual-board puzzle combat with falling gem pairs, power gem fusions, floating combo banners (`COMBO X3!`), super meter bursts, grounded in-ring boxers, live chat ticker, and animated crowd.*
 
 | In-Ring Combat & Puzzle Playfields | GBA Battle View |
@@ -75,7 +87,7 @@ Experience the retro arcade presentation with authentic 16-bit boxer sprites, an
 
 ---
 
-### 6. ⏱️ Knockdown 10-Count Puzzle Survival
+### 7. ⏱️ Knockdown 10-Count Puzzle Survival
 *Authentic boxing knockdown system: Dropping to 0 HP triggers the referee 10-count overlay with pulsing red vignette, fallen boxer on canvas, and rapid button mashing / gem clearing for a +28 HP second-wind recovery.*
 
 | Referee 10-Count Survival Overlay | Knockdown Scene in GBA View |
@@ -84,7 +96,7 @@ Experience the retro arcade presentation with authentic 16-bit boxer sprites, an
 
 ---
 
-### 7. 🏪 Trainer Gym Upgrade Shop & Press Conference Cutscenes
+### 8. 🏪 Trainer Gym Upgrade Shop & Press Conference Cutscenes
 *Earn purse money from each bout, attend post-fight press conferences, and upgrade Power, Defense, Speed, and Perks at the Gym Shop.*
 
 | Trainer Gym Upgrade Shop | Post-Fight Press Conference Cutscene |
@@ -150,12 +162,11 @@ Start with **Deen The Great** as your default contender and embark on a 7-stage 
 ### 2. 🥊 Quick Exhibition (1P vs CPU)
 Jump straight into a single bout against any unlocked fighter in any of the 9 venues with custom AI difficulty.
 
-### 3. 👥 2P Local Battle (Head-to-Head)
-Play against a friend on the same device using shared keyboard controls or two connected Bluetooth gamepads.
-
-### 4. 📺 CPU Watch Demo (AI vs AI)
+### 3. 📺 CPU Watch Demo (AI vs AI)
 Sit back and watch high-level CPU AI bots battle it out in real-time with full gem matching and super meter execution.
 
+### 4. 📚 How to Play / 5-Lesson Training Camp
+A visual-first interactive tutorial engineered for casual players, non-gamers, and mobile touchscreens. Features animated pixel-art demonstrations explaining gem matching, power gem fusion, 100% super moves, and the referee 10-count knockdown mashing recovery.
 ---
 
 ## 🕹️ Controls & Navigation
