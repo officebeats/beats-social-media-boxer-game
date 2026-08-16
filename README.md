@@ -116,20 +116,21 @@ Every character in **Crash Out: Ring Rush** represents a real-life host, streame
 
 ---
 
-## 🏟️ 9 Dynamic Animated Arenas
+## 🏟️ 9 Dynamic Animated Arenas (Full Pixel-Art Showcase)
 
-Battle across 9 unique venues featuring custom animated backgrounds, dynamic crowd dithering, flashing camera effects, and live stream chat tickers:
+Battle across 9 unique animated venues inspired directly by real-life Kick streams and viral boxing events. Every arena features custom multi-layer pixel art, dynamic lighting, ambient beam sweeps, flashing paparazzi cameras, and live stream chat tickers:
 
-1. 🏭 **Kick Warehouse (Austin, TX)**: The home of the Crash Out Boys with pulsing green Kick neon signs, forklift strobe lights, and active stream chat.
-2. 🎰 **Vegas Casino Arena (Las Vegas, NV)**: Dual sweeping golden searchlights cutting through the skyline with shimmering coin effects on knockdowns.
-3. 🇬🇧 **Misfits London Arena (London, UK)**: Intense cyan floodlight laser beams and flashing ringside paparazzi bulbs.
-4. 🌴 **Miami Stream Mansion (Miami, FL)**: Tropical sunset gradient sky, swaying neon palm trees, and pool water ripple reflections.
-5. 💰 **TMT Vegas Gym (Las Vegas, NV)**: Floyd Mayweather's personal gym featuring a solid gold heavy bag, cash stack accents, and overhead spotlights.
-6. 🚨 **Cincinnati Problem Gym (Cincinnati, OH)**: Adrien Broner's home gym with exposed red brick walls, flashing red warning sirens, and swinging heavy chains.
-7. 🏙️ **Dubai Penthouse Helipad (Dubai, UAE)**: Rotating Burj Khalifa aerial beacon, gold rope tassels, and sunset skyline.
-8. ⛓️ **Underground Fight Cage (Atlanta, GA)**: Steel chainlink cage lattice, dark alley atmosphere, and rising floor steam vents.
-9. 🗼 **Tokyo Neon Dome (Tokyo, JP)**: High-speed scrolling Japanese kanji LED ticker (`TOKYO RUSH`) and cyber magenta laser grids.
+![All 9 Dynamic Arenas Showcase](docs/screenshots/arenas/all_9_arenas_contact_sheet.png)
 
+1. 🏭 **Kick Warehouse (Austin, TX)**: The home base of the Crash Out Boys featuring dark industrial corrugated steel walls, glowing neon **KICK** sign with electric green aura, yellow/black forklift with a rotating amber strobe beacon, overhead halogen studio lighting cones, and ringside VIP tripod camera with blinking red `REC` LED.
+2. 🎰 **Vegas Casino Arena (Las Vegas, NV)**: Midnight purple skyline with glowing casino skyscraper towers, sweeping golden Luxor searchlight beam, glowing **777 VIP** marquee with chasing gold perimeter bulbs, green cash bundles, and drifting gold coin sparkles.
+3. 🇬🇧 **Misfits London Arena (London, UK)**: Massive London stadium rigging with Big Ben clock tower glowing golden in the distance, dual intersecting cyan & magenta stadium laser beams, animated Jumbotron display with live sound visualizer waveform bars, and ringside paparazzi flashbulbs.
+4. 🌴 **Miami Stream Mansion (Miami, FL)**: 4-layer tropical sunset gradient (purple $\rightarrow$ hot pink $\rightarrow$ orange $\rightarrow$ gold), two swaying neon green palm trees, turquoise swimming pool with animated moving water ripples, luxury white yacht silhouette in the bay, and bobbing neon pink inflatable flamingo.
+5. 💰 **TMT Vegas Gym (Las Vegas, NV)**: Floyd Mayweather's luxury black & 24K gold training gym with massive illuminated **THE MONEY TEAM 50-0** championship banner, hanging solid gold heavy bag with chain sway, vibrating wall-mounted speed bag, and stacks of $100 banknotes.
+6. 🚨 **Cincinnati Problem Gym (Cincinnati, OH)**: Adrien Broner's authentic weathered red brick gym with realistic mortar seams, bold spray-painted **A.B. ABOUT BILLIONS** graffiti street mural, dual spinning red emergency beacon sirens with dynamic red wall light wash, heavy truck tire stacks, and gritty canvas mat.
+7. 🏙️ **Dubai Penthouse Helipad (Dubai, UAE)**: Ultra-luxury rooftop helipad overlooking the Dubai skyline with detailed Burj Khalifa spire, rotating summit aerial beacon light, animated fireworks bursts in the night sky, twinkling highway traffic lights, and circular **H** helipad floor with sequential LED runway lights.
+8. ⛓️ **Underground Fight Cage (Atlanta, GA)**: High-density diamond steel chainlink fence, flickering yellow sodium vapor street lamp with electrical hum, rising sewer steam plumes, and fiery 55-gallon oil drum burn barrel with animated flickering orange flames.
+9. 🗼 **Tokyo Neon Dome (Tokyo, JP)**: Cyber coliseum dome with pulsing magenta perspective wireframe gridlines, dual high-speed scrolling LED tickers (`TOKYO RUSH // 東京ラッシュ // CRASH OUT`), vertical matrix digital rain streaks, and high-voltage neon cyan ropes with glowing LED floor borders.
 ---
 
 ## 🎮 Game Modes

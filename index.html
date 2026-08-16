@@ -1209,20 +1209,26 @@
       ]
     };
 
-    // Viral Kick warehouse stream live ticker comments
+    // Viral Kick warehouse stream live ticker comments (Authentic streamer handles & memes)
     const KICK_STREAM_CHAT = [
-      'W IN THE CHAT',
-      'BRONER: "YOU CAN SEE IT COMING!"',
-      'DEEN: "LIGHTNING SOUTHPAW OUT THE GATES!"',
-      'CLIP THAT RIGHT NOW!',
-      'BAND CANNOT LOSE!',
-      '50-0 MONEY TEAM FOREVER',
-      'HE CAUGHT HIM SLIPPING!',
-      'KICK WAREHOUSE IS LIVE!',
-      'CT KO DANCE TIME!',
-      'SHARK COMBO ON DECK!',
-      'LOCK IN OR GET KNOCKED OUT!',
-      'W STREAM CHAT SPAM 777'
+      'adin: "AB CRASHING OUT ON LIVE!"',
+      'deen: "LIGHTNING SOUTHPAW OUT THE GATES!"',
+      'kai: "W STREAM CHAT SPAM 777!"',
+      'neon: "HE CAUGHT HIM SLIPPING!"',
+      'ab: "CT BOUT TO DROP A BOMB!"',
+      'kick_mod: "CLIP THAT RIGHT NOW!"',
+      'tmt_fan: "50-0 MONEY TEAM FOREVER!"',
+      'charleston: "DON\'T RUN NOW BOY!"',
+      'speed: "SUIII KNOCKDOWN IN 3!"',
+      'rayj: "GLASSES ON, MONEY UP!"',
+      'blueface: "FAMOUS OVERHAND ON SIGHT!"',
+      'chrisean: "BADDIE POWER PUNCH!"',
+      'fousey: "G7 ENERGY LOCKED IN!"',
+      'sneako: "LEAF IN THE WIND WEAVE!"',
+      'coach_bang: "WORK THE BODY COMBO!"',
+      'stream_viewer: "150K VIEWERS IN THE WHOUSE!"',
+      'boxing_guru: "PERFECT PHILLY SHELL DEFENSE!"',
+      'kick_vip: "SUPER RUSH METER 100% READY!"'
     ];
     let streamChatIdx = 0;
     let streamChatTimer = 0;
@@ -4703,107 +4709,200 @@
         ctx.strokeStyle = getPalColor(isSelected ? 10 : 5);
         ctx.strokeRect(cx, cy, cardW, cardH);
 
-        // ── Custom Pixel-Art Arena Preview Thumbnail (32x14) ──
+        // ── Custom High-Detail Animated Pixel-Art Arena Thumbnail (32x14) ──
         const px = cx + 2;
         const py = cy + 2;
         const pw = cardW - 4;
         const ph = 14;
 
         if (a.id === 'warehouse') {
-          // Kick Warehouse: dark wall, pulsing green neon sign, crates
+          // 1. Kick Warehouse: Corrugated wall, pulsing neon KICK sign, forklift & camera
           ctx.fillStyle = getPalColor(1);
           ctx.fillRect(px, py, pw, ph);
-          const pulse = Math.floor(globalFrameCount / 10) % 2 === 0;
-          ctx.fillStyle = pulse ? getPalColor(11) : getPalColor(3);
-          ctx.fillRect(px + 4, py + 2, 10, 4);
-          ctx.fillStyle = getPalColor(7);
-          ctx.fillRect(px + 5, py + 3, 8, 2);
-          ctx.fillStyle = getPalColor(4);
-          ctx.fillRect(px + pw - 9, py + 6, 7, 7);
+          // Corrugated wall ribs
+          ctx.fillStyle = getPalColor(0);
+          for (let rx = px + 3; rx < px + pw; rx += 4) ctx.fillRect(rx, py, 1, ph);
+          // Overhead steel truss
+          ctx.fillStyle = getPalColor(5);
+          ctx.fillRect(px, py, pw, 2);
+          // Pulsing KICK neon
+          const neonPulse = Math.floor(globalFrameCount / 8) % 2 === 0;
+          ctx.fillStyle = neonPulse ? getPalColor(11) : getPalColor(3);
+          ctx.fillRect(px + 4, py + 3, 14, 5);
+          ctx.fillStyle = getPalColor(0);
+          printPico('KICK', px + 5, py + 4, neonPulse ? 7 : 11, 1);
+          // Forklift & amber beacon
+          ctx.fillStyle = getPalColor(9);
+          ctx.fillRect(px + pw - 9, py + 7, 8, 6);
+          const beacon = Math.floor(globalFrameCount / 6) % 2 === 0;
+          ctx.fillStyle = beacon ? getPalColor(10) : getPalColor(8);
+          ctx.fillRect(px + pw - 7, py + 5, 3, 2);
 
         } else if (a.id === 'vegas') {
-          // Vegas Strip: skyline towers, moving gold searchlight beam
+          // 2. Vegas Casino: Night sky, casino skyline towers, sweeping gold beam, 777 marquee
           ctx.fillStyle = getPalColor(1);
           ctx.fillRect(px, py, pw, ph);
+          // Skyscraper silhouettes with window lights
           ctx.fillStyle = getPalColor(0);
-          ctx.fillRect(px + 2, py + 4, 6, 10);
-          ctx.fillRect(px + 10, py + 2, 8, 12);
+          ctx.fillRect(px + 2, py + 3, 7, 11);
+          ctx.fillRect(px + 10, py + 1, 9, 13);
+          ctx.fillRect(px + 20, py + 4, 8, 10);
+          ctx.fillStyle = getPalColor(10);
+          ctx.fillRect(px + 4, py + 5, 2, 2);
+          ctx.fillRect(px + 13, py + 3, 2, 2);
+          ctx.fillRect(px + 15, py + 7, 2, 2);
+          // Sweeping gold searchlight beam
           const beamX = px + 14 + Math.round(Math.sin(globalFrameCount * 0.08) * 8);
           ctx.fillStyle = 'rgba(255, 236, 39, 0.45)';
           ctx.beginPath();
           ctx.moveTo(px + 14, py + ph);
-          ctx.lineTo(beamX - 3, py);
-          ctx.lineTo(beamX + 3, py);
+          ctx.lineTo(beamX - 4, py);
+          ctx.lineTo(beamX + 4, py);
           ctx.fill();
+          // 777 marquee
+          ctx.fillStyle = getPalColor(8);
+          ctx.fillRect(px + 3, py + 7, 10, 5);
+          printPico('777', px + 4, py + 8, 10, 1);
 
         } else if (a.id === 'misfits') {
-          // London Misfits: floodlights, cyan beam
+          // 3. Misfits London: Stadium truss, Big Ben, dual crossing cyan/magenta lasers
           ctx.fillStyle = getPalColor(0);
           ctx.fillRect(px, py, pw, ph);
-          ctx.fillStyle = getPalColor(7);
-          ctx.fillRect(px + 2, py + 2, 5, 2);
-          ctx.fillRect(px + pw - 7, py + 2, 5, 2);
-          ctx.fillStyle = 'rgba(41, 173, 255, 0.35)';
-          ctx.fillRect(px, py + 4, pw, 5);
+          // Big ben spire
+          ctx.fillStyle = getPalColor(5);
+          ctx.fillRect(px + 4, py + 2, 4, 12);
+          ctx.fillStyle = getPalColor(10);
+          ctx.fillRect(px + 5, py + 4, 2, 2);
+          // Dual stadium laser beams
+          const l1 = px + 16 + Math.round(Math.sin(globalFrameCount * 0.07) * 9);
+          const l2 = px + 16 - Math.round(Math.sin(globalFrameCount * 0.07) * 9);
+          ctx.strokeStyle = 'rgba(41, 173, 255, 0.7)';
+          ctx.beginPath(); ctx.moveTo(px + 2, py + ph); ctx.lineTo(l1, py); ctx.stroke();
+          ctx.strokeStyle = 'rgba(255, 119, 168, 0.7)';
+          ctx.beginPath(); ctx.moveTo(px + pw - 2, py + ph); ctx.lineTo(l2, py); ctx.stroke();
+          // Paparazzi flash
+          if (Math.floor(globalFrameCount / 4) % 2 === 0) {
+            ctx.fillStyle = getPalColor(7);
+            ctx.fillRect(px + 12, py + 8, 2, 2);
+          }
 
         } else if (a.id === 'miamiHouse') {
-          // Miami Mansion: sunset purple/pink, palm tree
-          ctx.fillStyle = getPalColor(2);
-          ctx.fillRect(px, py, pw, ph);
-          ctx.fillStyle = getPalColor(14);
-          ctx.fillRect(px, py + 4, pw, 3);
-          ctx.fillStyle = getPalColor(12);
+          // 4. Miami Mansion: 4-tier sunset gradient, swaying palm tree, pool ripples
+          ctx.fillStyle = getPalColor(2); // Purple top
+          ctx.fillRect(px, py, pw, 3);
+          ctx.fillStyle = getPalColor(14); // Pink
+          ctx.fillRect(px, py + 3, pw, 3);
+          ctx.fillStyle = getPalColor(9); // Orange
+          ctx.fillRect(px, py + 6, pw, 3);
+          ctx.fillStyle = getPalColor(12); // Turquoise Pool
           ctx.fillRect(px, py + 9, pw, 5);
-          ctx.fillStyle = getPalColor(0);
-          ctx.fillRect(px + 3, py + 3, 2, 7);
-          ctx.fillRect(px + 1, py + 2, 6, 2);
+          // Water ripple
+          const rip = Math.floor(globalFrameCount * 0.1) % 4;
+          ctx.fillStyle = getPalColor(7);
+          ctx.fillRect(px + 14 + rip, py + 11, 5, 1);
+          // Palm tree
+          ctx.fillStyle = getPalColor(4);
+          ctx.fillRect(px + 4, py + 4, 2, 6);
+          ctx.fillStyle = getPalColor(11);
+          ctx.fillRect(px + 2, py + 2, 6, 2);
+          ctx.fillRect(px + 1, py + 3, 2, 2);
 
         } else if (a.id === 'gymTmt') {
-          // TMT Gym: gold banner
+          // 5. TMT Gym: Luxury black/gold wall, TMT 50-0 banner, gold heavy bag
           ctx.fillStyle = getPalColor(0);
           ctx.fillRect(px, py, pw, ph);
           ctx.fillStyle = getPalColor(10);
-          ctx.fillRect(px + 3, py + 2, 12, 4);
-          printPico('TMT', px + 4, py + 2, 0, 1);
+          ctx.fillRect(px + 3, py + 2, 18, 5);
+          printPico('TMT 50-0', px + 4, py + 3, 0, 1);
+          // Gold heavy bag & chain
+          ctx.fillStyle = getPalColor(6);
+          ctx.fillRect(px + pw - 6, py + 2, 1, 3);
+          ctx.fillStyle = getPalColor(10);
+          ctx.fillRect(px + pw - 8, py + 5, 5, 7);
+          // Cash stack
+          ctx.fillStyle = getPalColor(11);
+          ctx.fillRect(px + 3, py + 9, 6, 3);
 
         } else if (a.id === 'gymBroner') {
-          // Broner Gym: red brick wall
+          // 6. Broner Gym: Weathered red brick, A.B. graffiti, spinning red siren
           ctx.fillStyle = getPalColor(2);
           ctx.fillRect(px, py, pw, ph);
           ctx.fillStyle = getPalColor(8);
           ctx.fillRect(px, py + 3, pw, 1);
           ctx.fillRect(px, py + 7, pw, 1);
           ctx.fillRect(px, py + 11, pw, 1);
+          // A.B. Graffiti
+          ctx.fillStyle = getPalColor(10);
+          ctx.fillRect(px + 4, py + 4, 12, 5);
+          printPico('A.B.', px + 6, py + 5, 8, 1);
+          // Spinning red siren beacon
+          const sOn = Math.floor(globalFrameCount / 6) % 2 === 0;
+          ctx.fillStyle = sOn ? getPalColor(8) : getPalColor(2);
+          ctx.fillRect(px + pw - 6, py + 3, 4, 3);
+          ctx.fillStyle = getPalColor(7);
+          if (sOn) ctx.fillRect(px + pw - 5, py + 4, 2, 1);
 
         } else if (a.id === 'dubai') {
-          // Dubai Helipad: gold spire, beacon
+          // 7. Dubai Helipad: Burj Khalifa spire, rotating summit beacon, sky fireworks
           ctx.fillStyle = getPalColor(1);
           ctx.fillRect(px, py, pw, ph);
-          ctx.fillStyle = getPalColor(10);
-          ctx.fillRect(px + 14, py + 2, 4, 12);
-          ctx.fillRect(px + 15, py + 1, 2, 4);
+          // Burj Khalifa spire
+          ctx.fillStyle = getPalColor(0);
+          ctx.fillRect(px + 14, py + 3, 5, 11);
+          ctx.fillRect(px + 15, py + 1, 3, 5);
+          ctx.fillRect(px + 16, py, 1, 3);
+          // Rotating summit beacon
           const bX = px + 16 + Math.round(Math.sin(globalFrameCount * 0.1) * 6);
-          ctx.fillStyle = 'rgba(255, 236, 39, 0.4)';
+          ctx.fillStyle = 'rgba(255, 236, 39, 0.6)';
           ctx.fillRect(bX - 2, py + 1, 4, 3);
+          // Fireworks burst
+          if (Math.floor(globalFrameCount / 8) % 2 === 0) {
+            ctx.fillStyle = getPalColor(14);
+            ctx.fillRect(px + 4, py + 3, 3, 3);
+            ctx.fillStyle = getPalColor(10);
+            ctx.fillRect(px + pw - 6, py + 4, 3, 3);
+          }
 
         } else if (a.id === 'cage') {
-          // Underground Cage: chainlink grid, steam
+          // 8. Underground Cage: Steel chainlink mesh, street lamp, steam & fire barrel
           ctx.fillStyle = getPalColor(0);
           ctx.fillRect(px, py, pw, ph);
+          // Chainlink diamond grid
           ctx.fillStyle = getPalColor(5);
-          for (let gx = px + 2; gx < px + pw; gx += 4) {
-            ctx.fillRect(gx, py, 1, ph);
+          for (let gx = px + 1; gx < px + pw; gx += 3) {
+            for (let gy = py + 1; gy < py + ph; gy += 3) {
+              ctx.fillRect(gx, gy, 1, 1);
+            }
           }
-          ctx.fillStyle = getPalColor(6);
-          ctx.fillRect(px + 4, py + 8, 3, 2);
+          // Street lamp glow
+          ctx.fillStyle = getPalColor(10);
+          ctx.fillRect(px + 2, py + 2, 3, 2);
+          // Burning oil drum
+          ctx.fillStyle = getPalColor(9);
+          ctx.fillRect(px + pw - 7, py + 7, 5, 6);
+          const fFlicker = Math.floor(globalFrameCount / 4) % 2 === 0;
+          ctx.fillStyle = fFlicker ? getPalColor(8) : getPalColor(10);
+          ctx.fillRect(px + pw - 6, py + 5, 3, 3);
 
         } else {
-          // Tokyo Cyber: magenta wall, kanji neon
+          // 9. Tokyo Cyber: Cyber dome grid, matrix digital rain, kanji LED ticker
           ctx.fillStyle = getPalColor(1);
           ctx.fillRect(px, py, pw, ph);
+          // Perspective cyber grid
+          ctx.strokeStyle = 'rgba(255, 119, 168, 0.45)';
+          ctx.beginPath();
+          ctx.moveTo(px, py + 4); ctx.lineTo(px + pw, py + 4);
+          ctx.moveTo(px, py + 8); ctx.lineTo(px + pw, py + 8);
+          ctx.stroke();
+          // Matrix digital rain
+          ctx.fillStyle = getPalColor(11);
+          const dropY = (Math.floor(globalFrameCount * 0.4) % 10);
+          ctx.fillRect(px + 5, py + dropY, 1, 2);
+          ctx.fillRect(px + pw - 6, py + ((dropY + 4) % 10), 1, 2);
+          // Kanji ticker
           ctx.fillStyle = getPalColor(14);
-          ctx.fillRect(px + 3, py + 3, 14, 4);
-          printPico('TYO', px + 4, py + 3, 7, 1);
+          ctx.fillRect(px + 8, py + 4, 15, 5);
+          printPico('TOKYO', px + 9, py + 5, 7, 1);
         }
 
         // Stage ropes overlay on thumbnail
@@ -4908,101 +5007,392 @@
       ctx.fillRect(41, 17, 46, 96);
 
       // Arena-Specific Dynamic Lighting & Effects
-      if (arena.id === 'vegas' || arena.id === 'misfits') {
-        // Moving searchlight / laser beams across roof
-        const beam1X = 64 + Math.round(Math.sin(globalFrameCount * 0.04) * 18);
-        const beam2X = 64 + Math.round(Math.cos(globalFrameCount * 0.03) * 18);
-        ctx.fillStyle = arena.id === 'vegas' ? 'rgba(255, 236, 39, 0.25)' : 'rgba(41, 173, 255, 0.25)';
-        ctx.beginPath();
-        ctx.moveTo(64, 17);
-        ctx.lineTo(beam1X - 6, 46);
-        ctx.lineTo(beam1X + 6, 46);
-        ctx.fill();
-
-        ctx.beginPath();
-        ctx.moveTo(64, 17);
-        ctx.lineTo(beam2X - 6, 46);
-        ctx.lineTo(beam2X + 6, 46);
-        ctx.fill();
-
-      } else if (arena.id === 'warehouse') {
-        // Pulsing Kick Neon Logo in background + warning beacon
-        const neonPulse = Math.floor(globalFrameCount / 12) % 2 === 0;
-        ctx.fillStyle = neonPulse ? getPalColor(11) : getPalColor(3);
-        ctx.fillRect(56, 24, 16, 6);
+      // Arena-Specific Dynamic Lighting, Scenery & Animated Pixel Art
+      if (arena.id === 'warehouse') {
+        // 1. Kick Warehouse (Austin, TX): Corrugated metal, steel truss, KICK neon, forklift, camera & light cones
+        // Corrugated metal wall panels
         ctx.fillStyle = getPalColor(0);
-        printPico('KICK', 57, 25, neonPulse ? 7 : 11, 1);
-        if (Math.floor(globalFrameCount / 8) % 2 === 0) {
-          ctx.fillStyle = getPalColor(10);
-          ctx.fillRect(44, 26, 3, 3);
+        for (let wx = 43; wx < 87; wx += 4) {
+          ctx.fillRect(wx, 17, 1, 30);
         }
-
-      } else if (arena.id === 'miamiHouse') {
-        // Sunset pink glow band + palm tree + pool ripple
-        ctx.fillStyle = getPalColor(14);
-        ctx.fillRect(41, 32, 46, 6);
+        // Overhead industrial steel truss
+        ctx.fillStyle = getPalColor(5);
+        ctx.fillRect(41, 17, 46, 3);
+        for (let tx = 43; tx < 87; tx += 6) {
+          ctx.fillRect(tx, 20, 1, 3);
+          ctx.fillRect(tx + 2, 21, 2, 1);
+        }
+        // Hanging Halogen Spotlights with Ambient Light Cones
+        ctx.fillStyle = 'rgba(255, 236, 39, 0.18)';
+        ctx.beginPath(); ctx.moveTo(48, 20); ctx.lineTo(41, 88); ctx.lineTo(62, 88); ctx.fill();
+        ctx.beginPath(); ctx.moveTo(80, 20); ctx.lineTo(66, 88); ctx.lineTo(87, 88); ctx.fill();
+        // Large Multi-Layer Glowing KICK Neon Logo
+        const neonPulse = Math.floor(globalFrameCount / 8) % 2 === 0;
+        ctx.fillStyle = neonPulse ? 'rgba(0, 228, 54, 0.35)' : 'rgba(0, 135, 81, 0.2)';
+        ctx.fillRect(52, 22, 24, 9);
         ctx.fillStyle = getPalColor(0);
-        ctx.fillRect(45, 24, 2, 14);
-        ctx.fillRect(43, 22, 6, 3);
-        const ripOff = Math.floor(globalFrameCount * 0.1) % 4;
-        ctx.fillStyle = getPalColor(12);
-        ctx.fillRect(72 + ripOff, 36, 6, 2);
+        ctx.fillRect(54, 23, 20, 7);
+        ctx.strokeStyle = getPalColor(neonPulse ? 11 : 3);
+        ctx.strokeRect(54, 23, 20, 7);
+        printPico('KICK', 56, 24, neonPulse ? 7 : 11, 1, true);
+        // Yellow/Black Forklift in background
+        ctx.fillStyle = getPalColor(9);
+        ctx.fillRect(75, 36, 11, 8);
+        ctx.fillStyle = getPalColor(0);
+        ctx.fillRect(77, 40, 2, 4);
+        ctx.fillRect(82, 40, 2, 4);
+        ctx.fillRect(73, 34, 2, 10); // Mast
+        // Rotating Amber Hazard Strobe Beacon
+        const beacon = Math.floor(globalFrameCount / 5) % 2 === 0;
+        ctx.fillStyle = beacon ? getPalColor(10) : getPalColor(8);
+        ctx.fillRect(79, 34, 3, 2);
+        if (beacon) {
+          ctx.fillStyle = getPalColor(7);
+          ctx.fillRect(80, 34, 1, 1);
+        }
+        // VIP Streaming Tripod Camera with Blinking Red REC LED
+        ctx.fillStyle = getPalColor(5);
+        ctx.fillRect(43, 38, 5, 3);
+        ctx.fillRect(45, 41, 1, 5); // Stand
+        const recOn = Math.floor(globalFrameCount / 12) % 2 === 0;
+        ctx.fillStyle = recOn ? getPalColor(8) : getPalColor(0);
+        ctx.fillRect(43, 38, 2, 2);
 
-      } else if (arena.id === 'gymTmt') {
-        // Floyd's Gold TMT banner & cash stacks
+      } else if (arena.id === 'vegas') {
+        // 2. Vegas Casino Arena: Casino towers, Luxor searchlight, 777 marquee, cash stacks & coin sparkles
+        // Skyscraper silhouettes with sparkling window lights
+        ctx.fillStyle = getPalColor(0);
+        ctx.fillRect(43, 20, 9, 26);
+        ctx.fillRect(54, 18, 12, 28);
+        ctx.fillRect(68, 22, 10, 24);
+        ctx.fillRect(80, 19, 7, 27);
+        // Random twinkling window lights
         ctx.fillStyle = getPalColor(10);
-        ctx.fillRect(54, 24, 20, 6);
-        ctx.fillStyle = getPalColor(0);
-        printPico('TMT $', 56, 25, 0, 1);
-        ctx.fillStyle = getPalColor(11);
-        ctx.fillRect(43, 40, 4, 3);
-        ctx.fillRect(81, 40, 4, 3);
-
-      } else if (arena.id === 'gymBroner') {
-        // Red brick wall & flashing siren
-        ctx.fillStyle = getPalColor(8);
-        for (let by = 20; by < 44; by += 4) {
-          ctx.fillRect(41, by, 46, 1);
-        }
-        const sirenOn = Math.floor(globalFrameCount / 10) % 2 === 0;
-        ctx.fillStyle = sirenOn ? getPalColor(8) : getPalColor(2);
-        ctx.fillRect(62, 20, 4, 3);
-
-      } else if (arena.id === 'dubai') {
-        // Rotating Burj Khalifa Beacon Spire & gold skyline
-        ctx.fillStyle = getPalColor(0);
-        ctx.fillRect(61, 18, 6, 28);
-        ctx.fillRect(63, 17, 2, 8);
-        const beaconX = 64 + Math.round(Math.sin(globalFrameCount * 0.05) * 22);
+        ctx.fillRect(45, 23, 2, 2);
+        ctx.fillRect(47, 28, 2, 2);
+        ctx.fillRect(57, 21, 2, 2);
+        ctx.fillRect(61, 25, 2, 2);
+        ctx.fillRect(71, 25, 2, 2);
+        ctx.fillRect(74, 31, 2, 2);
+        ctx.fillStyle = getPalColor(12);
+        ctx.fillRect(57, 29, 2, 2);
+        ctx.fillRect(82, 24, 2, 2);
+        // Sweeping Luxor Gold Searchlight Beam
+        const beam1X = 64 + Math.round(Math.sin(globalFrameCount * 0.04) * 20);
         ctx.fillStyle = 'rgba(255, 236, 39, 0.35)';
         ctx.beginPath();
-        ctx.moveTo(64, 18);
-        ctx.lineTo(beaconX - 5, 46);
-        ctx.lineTo(beaconX + 5, 46);
+        ctx.moveTo(64, 17);
+        ctx.lineTo(beam1X - 7, 46);
+        ctx.lineTo(beam1X + 7, 46);
         ctx.fill();
+        // Glowing 777 Casino Marquee Box with chasing lights
+        ctx.fillStyle = getPalColor(0);
+        ctx.fillRect(50, 24, 28, 9);
+        ctx.strokeStyle = getPalColor(8);
+        ctx.strokeRect(50, 24, 28, 9);
+        const chase = Math.floor(globalFrameCount / 6) % 2 === 0;
+        ctx.fillStyle = chase ? getPalColor(10) : getPalColor(7);
+        ctx.fillRect(51, 25, 2, 2);
+        ctx.fillRect(75, 25, 2, 2);
+        ctx.fillRect(51, 30, 2, 2);
+        ctx.fillRect(75, 30, 2, 2);
+        printPico('777 VIP', 55, 26, 10, 1, true);
+        // Stacks of Green Cash Bundles at ringside
+        ctx.fillStyle = getPalColor(11);
+        ctx.fillRect(42, 42, 5, 4);
+        ctx.fillRect(81, 42, 5, 4);
+        ctx.fillStyle = getPalColor(7);
+        ctx.fillRect(43, 43, 3, 1);
+        ctx.fillRect(82, 43, 3, 1);
+        // Drifting Gold Coin Sparkles
+        const coinY = (Math.floor(globalFrameCount * 0.5) % 30) + 17;
+        ctx.fillStyle = getPalColor(10);
+        ctx.fillRect(48, coinY, 2, 2);
+        ctx.fillRect(79, ((coinY + 12) % 30) + 17, 2, 2);
+
+      } else if (arena.id === 'misfits') {
+        // 3. Misfits London Arena: Big Ben skyline, crossing stadium lasers, live Jumbotron waveform
+        // Big Ben spire silhouette
+        ctx.fillStyle = getPalColor(0);
+        ctx.fillRect(43, 20, 6, 26);
+        ctx.fillRect(44, 18, 4, 3);
+        ctx.fillRect(45, 17, 2, 2);
+        ctx.fillStyle = getPalColor(10);
+        ctx.fillRect(44, 22, 4, 4); // Clock face
+        // Dual Crossing Stadium Laser Beams (Cyan & Magenta)
+        const l1 = 64 + Math.round(Math.sin(globalFrameCount * 0.05) * 22);
+        const l2 = 64 - Math.round(Math.sin(globalFrameCount * 0.05) * 22);
+        ctx.strokeStyle = 'rgba(41, 173, 255, 0.75)';
+        ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(42, 46); ctx.lineTo(l1, 17); ctx.stroke();
+        ctx.strokeStyle = 'rgba(255, 119, 168, 0.75)';
+        ctx.beginPath(); ctx.moveTo(86, 46); ctx.lineTo(l2, 17); ctx.stroke();
+        ctx.lineWidth = 1;
+        // Animated Jumbotron Screen with Live Audio Equalizer Bars
+        ctx.fillStyle = getPalColor(0);
+        ctx.fillRect(52, 23, 24, 9);
+        ctx.strokeStyle = getPalColor(12);
+        ctx.strokeRect(52, 23, 24, 9);
+        for (let eq = 0; eq < 6; eq++) {
+          const barH = 2 + (Math.floor(globalFrameCount * 0.2 + eq) % 5);
+          ctx.fillStyle = eq % 2 === 0 ? getPalColor(11) : getPalColor(14);
+          ctx.fillRect(54 + eq * 3, 30 - barH, 2, barH);
+        }
+        printPico('UK', 72, 25, 7, 1);
+
+      } else if (arena.id === 'miamiHouse') {
+        // 4. Miami Stream Mansion: 4-layer sunset gradient, swaying palm trees, pool ripples & yacht
+        ctx.fillStyle = getPalColor(2); // Deep purple top
+        ctx.fillRect(41, 17, 46, 5);
+        ctx.fillStyle = getPalColor(14); // Hot pink
+        ctx.fillRect(41, 22, 46, 5);
+        ctx.fillStyle = getPalColor(9); // Coral orange
+        ctx.fillRect(41, 27, 46, 5);
+        ctx.fillStyle = getPalColor(10); // Sunset gold
+        ctx.fillRect(41, 32, 46, 4);
+        // Distant luxury yacht silhouette
+        ctx.fillStyle = getPalColor(0);
+        ctx.fillRect(68, 33, 8, 3);
+        ctx.fillRect(71, 31, 2, 2);
+        ctx.fillStyle = getPalColor(7);
+        ctx.fillRect(72, 31, 1, 1);
+        // Turquoise Swimming Pool with Water Ripples
+        ctx.fillStyle = getPalColor(12);
+        ctx.fillRect(41, 36, 46, 10);
+        const rip = Math.floor(globalFrameCount * 0.1) % 6;
+        ctx.fillStyle = getPalColor(7);
+        ctx.fillRect(48 + rip, 39, 8, 1);
+        ctx.fillRect(68 - rip, 43, 9, 1);
+        // Neon Pink Inflatable Flamingo in pool
+        ctx.fillStyle = getPalColor(14);
+        ctx.fillRect(62, 40, 4, 3);
+        ctx.fillRect(64, 38, 2, 3);
+        // Two Swaying Green Palm Trees
+        const palmSway = Math.round(Math.sin(globalFrameCount * 0.06) * 1);
+        ctx.fillStyle = getPalColor(4); // Trunk
+        ctx.fillRect(43, 24, 2, 12);
+        ctx.fillRect(83, 24, 2, 12);
+        ctx.fillStyle = getPalColor(11); // Fronds
+        ctx.fillRect(40 + palmSway, 22, 8, 3);
+        ctx.fillRect(39 + palmSway, 24, 3, 2);
+        ctx.fillRect(46 + palmSway, 24, 3, 2);
+        ctx.fillRect(80 - palmSway, 22, 8, 3);
+        ctx.fillRect(79 - palmSway, 24, 3, 2);
+        ctx.fillRect(86 - palmSway, 24, 3, 2);
+
+      } else if (arena.id === 'gymTmt') {
+        // 5. TMT Vegas Gym: Black/gold luxury wall, TMT 50-0 championship banner, gold heavy bag & cash
+        ctx.fillStyle = getPalColor(0);
+        ctx.fillRect(41, 17, 46, 30);
+        // Gold trim molding
+        ctx.fillStyle = getPalColor(10);
+        ctx.fillRect(41, 17, 46, 2);
+        ctx.fillRect(41, 45, 46, 1);
+        // Large Illuminated TMT 50-0 Championship Banner
+        ctx.fillStyle = getPalColor(10);
+        ctx.fillRect(48, 22, 32, 9);
+        ctx.fillStyle = getPalColor(0);
+        ctx.fillRect(49, 23, 30, 7);
+        printPico('TMT 50-0', 51, 24, 10, 1, true);
+        // Hanging 24K Solid Gold Heavy Bag with Chain Sway
+        const bagSway = Math.round(Math.sin(globalFrameCount * 0.05) * 1);
+        ctx.fillStyle = getPalColor(6); // Chain
+        ctx.fillRect(45 + bagSway, 20, 1, 6);
+        ctx.fillStyle = getPalColor(10); // Gold bag
+        ctx.fillRect(43 + bagSway, 26, 6, 14);
+        ctx.fillStyle = getPalColor(7);
+        ctx.fillRect(44 + bagSway, 27, 4, 1);
+        // Wall Speed Bag with impact vibration
+        const vib = (Math.floor(globalFrameCount / 3) % 2 === 0) ? 1 : 0;
+        ctx.fillStyle = getPalColor(4); // Platform
+        ctx.fillRect(80, 24, 6, 2);
+        ctx.fillStyle = getPalColor(8); // Speed bag
+        ctx.fillRect(81 + vib, 26, 4, 5);
+        // Stacks of $100 Banknotes on ringside table
+        ctx.fillStyle = getPalColor(11);
+        ctx.fillRect(42, 42, 6, 4);
+        ctx.fillRect(80, 42, 6, 4);
+        ctx.fillStyle = getPalColor(10);
+        ctx.fillRect(44, 43, 2, 2);
+        ctx.fillRect(82, 43, 2, 2);
+
+      } else if (arena.id === 'gymBroner') {
+        // 6. Cincinnati Problem Gym: Weathered red brick, A.B. graffiti, spinning red sirens & tire stacks
+        ctx.fillStyle = getPalColor(2);
+        ctx.fillRect(41, 17, 46, 30);
+        // Red Brick Wall Texture with Mortar Seams
+        ctx.fillStyle = getPalColor(8);
+        for (let by = 19; by < 46; by += 4) {
+          ctx.fillRect(41, by, 46, 1);
+        }
+        ctx.fillStyle = getPalColor(0);
+        for (let by = 17; by < 46; by += 4) {
+          for (let bx = 43 + (by % 8 === 0 ? 0 : 4); bx < 87; bx += 8) {
+            ctx.fillRect(bx, by, 1, 3);
+          }
+        }
+        // Bold Spray-Painted Street Art Graffiti: A.B. ABOUT BILLIONS
+        ctx.fillStyle = getPalColor(0);
+        ctx.fillRect(47, 23, 34, 9);
+        ctx.strokeStyle = getPalColor(10);
+        ctx.strokeRect(47, 23, 34, 9);
+        printPico('A.B. BILLIONS', 49, 25, 10, 1, true);
+        // Dual Spinning Red Emergency Siren Beacons with Dynamic Red Light Wash
+        const sirenOn = Math.floor(globalFrameCount / 6) % 2 === 0;
+        ctx.fillStyle = sirenOn ? getPalColor(8) : getPalColor(2);
+        ctx.fillRect(42, 22, 4, 4);
+        ctx.fillRect(82, 22, 4, 4);
+        if (sirenOn) {
+          ctx.fillStyle = getPalColor(7);
+          ctx.fillRect(43, 23, 2, 2);
+          ctx.fillRect(83, 23, 2, 2);
+          ctx.fillStyle = 'rgba(255, 0, 77, 0.25)';
+          ctx.fillRect(41, 17, 46, 30);
+        }
+        // Stacked Truck Tires in corner
+        ctx.fillStyle = getPalColor(0);
+        ctx.fillRect(78, 38, 8, 3);
+        ctx.fillRect(79, 41, 7, 3);
+        ctx.fillRect(78, 44, 8, 3);
+
+      } else if (arena.id === 'dubai') {
+        // 7. Dubai Penthouse Helipad: Burj Khalifa spire, rotating summit beacon, fireworks & skyline
+        ctx.fillStyle = getPalColor(1);
+        ctx.fillRect(41, 17, 46, 30);
+        // Detailed Burj Khalifa Spire Silhouette
+        ctx.fillStyle = getPalColor(0);
+        ctx.fillRect(61, 22, 6, 24);
+        ctx.fillRect(62, 19, 4, 5);
+        ctx.fillRect(63, 17, 2, 3);
+        // Rotating Summit Aerial Beacon Beam
+        const beaconX = 64 + Math.round(Math.sin(globalFrameCount * 0.06) * 22);
+        ctx.fillStyle = 'rgba(255, 236, 39, 0.45)';
+        ctx.beginPath();
+        ctx.moveTo(64, 17);
+        ctx.lineTo(beaconX - 6, 46);
+        ctx.lineTo(beaconX + 6, 46);
+        ctx.fill();
+        // Animated Fireworks Burst in Night Sky
+        const fwPhase = Math.floor(globalFrameCount / 6) % 3;
+        if (fwPhase === 1) {
+          ctx.fillStyle = getPalColor(14); // Pink burst
+          ctx.fillRect(47, 22, 3, 3);
+          ctx.fillRect(46, 21, 1, 1); ctx.fillRect(50, 21, 1, 1);
+          ctx.fillRect(46, 25, 1, 1); ctx.fillRect(50, 25, 1, 1);
+        } else if (fwPhase === 2) {
+          ctx.fillStyle = getPalColor(10); // Gold burst
+          ctx.fillRect(77, 24, 3, 3);
+          ctx.fillRect(76, 23, 1, 1); ctx.fillRect(80, 23, 1, 1);
+        }
+        // Twinkling city highway traffic lights
+        ctx.fillStyle = getPalColor(10);
+        ctx.fillRect(44, 43, 2, 1);
+        ctx.fillRect(48, 44, 2, 1);
+        ctx.fillStyle = getPalColor(8);
+        ctx.fillRect(80, 43, 2, 1);
+        ctx.fillRect(84, 44, 2, 1);
 
       } else if (arena.id === 'cage') {
-        // Underground fight cage chainlink & rising steam vents
+        // 8. Underground Fight Cage: Steel diamond chainlink mesh, flickering lamp, sewer steam & fire barrel
+        ctx.fillStyle = getPalColor(0);
+        ctx.fillRect(41, 17, 46, 30);
+        // High-Density Diamond Steel Chainlink Lattice
         ctx.strokeStyle = getPalColor(5);
         ctx.lineWidth = 1;
-        for (let lx = 43; lx < 87; lx += 6) {
+        for (let lx = 42; lx < 87; lx += 5) {
           ctx.beginPath(); ctx.moveTo(lx, 17); ctx.lineTo(lx, 46); ctx.stroke();
         }
+        for (let ly = 19; ly < 46; ly += 5) {
+          ctx.beginPath(); ctx.moveTo(41, ly); ctx.lineTo(87, ly); ctx.stroke();
+        }
+        // Flickering Sodium Vapor Street Lamp
+        const lFlicker = (Math.floor(globalFrameCount / 4) % 3 === 0) ? 0.3 : 0.65;
+        ctx.fillStyle = `rgba(255, 236, 39, ${lFlicker})`;
+        ctx.fillRect(43, 18, 5, 4);
+        ctx.fillStyle = getPalColor(10);
+        ctx.fillRect(44, 19, 3, 2);
+        // Rising Steam Plumes from sewer grate
+        const steamY = 44 - (Math.floor(globalFrameCount * 0.3) % 12);
+        ctx.fillStyle = 'rgba(194, 195, 199, 0.4)';
+        ctx.fillRect(52, steamY, 4, 3);
+        ctx.fillRect(53, steamY - 3, 3, 2);
+        // Burning 55-Gallon Steel Oil Drum with Animated Flames
+        ctx.fillStyle = getPalColor(5);
+        ctx.fillRect(78, 36, 7, 10);
+        const fireFlicker = Math.floor(globalFrameCount / 4) % 2 === 0;
+        ctx.fillStyle = fireFlicker ? getPalColor(8) : getPalColor(9);
+        ctx.fillRect(79, 32, 5, 5);
+        ctx.fillStyle = getPalColor(10);
+        ctx.fillRect(80, 31, 3, 4);
 
       } else if (arena.id === 'tokyo') {
-        // Tokyo Neon Cyber Dome: Scrolling kanji/LED ticker
+        // 9. Tokyo Neon Cyber Dome: Perspective ceiling grid, dual scrolling LED tickers & digital rain
         ctx.fillStyle = getPalColor(0);
-        ctx.fillRect(41, 22, 46, 8);
+        ctx.fillRect(41, 17, 46, 30);
+        // Pulsing Magenta Cyber Perspective Gridlines
+        ctx.strokeStyle = 'rgba(255, 119, 168, 0.45)';
+        ctx.beginPath();
+        ctx.moveTo(41, 19); ctx.lineTo(87, 19);
+        ctx.moveTo(41, 23); ctx.lineTo(87, 23);
+        ctx.moveTo(48, 17); ctx.lineTo(44, 30);
+        ctx.moveTo(80, 17); ctx.lineTo(84, 30);
+        ctx.stroke();
+        // Matrix Digital Green Rain Streaks
+        ctx.fillStyle = getPalColor(11);
+        const rain1 = (Math.floor(globalFrameCount * 0.6) % 18) + 17;
+        ctx.fillRect(44, rain1, 1, 3);
+        ctx.fillRect(84, ((rain1 + 8) % 18) + 17, 1, 3);
+        // Dual Scrolling LED Tickers
+        ctx.fillStyle = getPalColor(0);
+        ctx.fillRect(41, 24, 46, 8);
         ctx.strokeStyle = getPalColor(14);
-        ctx.strokeRect(41, 22, 46, 8);
+        ctx.strokeRect(41, 24, 46, 8);
         const tokyoScroll = Math.floor(globalFrameCount * 0.5) % 28;
-        printPico('TOKYO RUSH', 43 - tokyoScroll, 24, 14, 1);
-        printPico('TOKYO RUSH', 71 - tokyoScroll, 24, 12, 1);
+        printPico('TOKYO RUSH', 43 - tokyoScroll, 26, 14, 1);
+        printPico('TOKYO RUSH', 71 - tokyoScroll, 26, 12, 1);
       }
 
-      // Ring Canvas Floor
+      // ── High-Detail Ring Floor Mat Canvas (Y = 88..113) ──
       ctx.fillStyle = getPalColor(arena.colors.floor);
       ctx.fillRect(41, 88, 46, 25);
+
+      if (arena.id === 'warehouse') {
+        // Wooden plank floor slats with woodgrain lines
+        ctx.fillStyle = getPalColor(0);
+        ctx.fillRect(41, 94, 46, 1);
+        ctx.fillRect(41, 100, 46, 1);
+        ctx.fillRect(41, 106, 46, 1);
+        ctx.fillStyle = getPalColor(4);
+        ctx.fillRect(52, 91, 1, 3);
+        ctx.fillRect(74, 97, 1, 3);
+      } else if (arena.id === 'dubai') {
+        // Rooftop Helipad Yellow "H" Circle with Sequential Runway LEDs
+        ctx.fillStyle = getPalColor(10);
+        ctx.fillRect(58, 91, 12, 8);
+        ctx.fillStyle = getPalColor(0);
+        ctx.fillRect(60, 92, 8, 6);
+        printPico('H', 63, 93, 10, 1, true);
+        // Sequential LED runway border lights
+        const ledIdx = Math.floor(globalFrameCount / 4) % 6;
+        ctx.fillStyle = getPalColor(7);
+        ctx.fillRect(43 + ledIdx * 7, 89, 2, 1);
+      } else if (arena.id === 'gymTmt') {
+        // Polished Onyx/Mahogany Gym Mat with Gold Corner Badges
+        ctx.fillStyle = getPalColor(10);
+        ctx.fillRect(41, 88, 3, 3);
+        ctx.fillRect(84, 88, 3, 3);
+      } else if (arena.id === 'gymBroner') {
+        // Gritty gym sweat & wear patches
+        ctx.fillStyle = getPalColor(2);
+        ctx.fillRect(56, 92, 6, 2);
+        ctx.fillRect(68, 95, 8, 2);
+      } else if (arena.id === 'tokyo') {
+        // Cyber neon LED floor perimeter line
+        ctx.fillStyle = getPalColor(12);
+        ctx.fillRect(41, 88, 46, 1);
+        ctx.fillStyle = getPalColor(14);
+        ctx.fillRect(41, 100, 46, 1);
+      }
 
       // Ring Ropes & Turnbuckles
       ctx.strokeStyle = getPalColor(arena.colors.ropes);
@@ -5018,28 +5408,42 @@
       ctx.fillRect(41, 44, 2, 40);
       ctx.fillRect(85, 44, 2, 40);
 
-      // Live Stream Chat Broadcast Ticker
+      // Ringside VIP Cameraman with Shoulder Camera on Apron
+      ctx.fillStyle = getPalColor(0); // Body
+      ctx.fillRect(83, 83, 3, 6);
+      ctx.fillStyle = getPalColor(5); // Camera
+      ctx.fillRect(82, 82, 4, 2);
+      const camTally = Math.floor(globalFrameCount / 10) % 2 === 0;
+      ctx.fillStyle = camTally ? getPalColor(8) : getPalColor(7);
+      ctx.fillRect(82, 82, 1, 1);
+
+      // Live Stream Chat Broadcast Ticker (Sleek Horizontal Scrolling Ticker)
       streamChatTimer++;
-      if (streamChatTimer > 140) {
+      if (streamChatTimer > 180) {
         streamChatTimer = 0;
         streamChatIdx = (streamChatIdx + 1) % KICK_STREAM_CHAT.length;
       }
 
-      ctx.fillStyle = 'rgba(0,0,0,0.92)';
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.94)';
       ctx.fillRect(41, 101, 46, 12);
       ctx.strokeStyle = getPalColor(arena.colors.accent);
       ctx.strokeRect(41, 101, 46, 12);
 
-      // Stream badge and chat message
-      printPico('LIVE 142K', 43, 102, arena.colors.accent, 1);
-      const chatMsg = KICK_STREAM_CHAT[streamChatIdx] || 'RING RUSH LIVE';
-      const shortChat = chatMsg.length > 11 ? chatMsg.slice(0, 11) : chatMsg;
-      printPico(shortChat, 43, 107, 7, 1);
+      // Live stream badge with flashing red broadcast dot
+      const isRecBlink = Math.floor(globalFrameCount / 10) % 2 === 0;
+      ctx.fillStyle = isRecBlink ? getPalColor(8) : getPalColor(2);
+      ctx.fillRect(43, 103, 2, 2);
+      printPico('LIVE 152K', 46, 102, arena.colors.accent, 1);
+
+      // Scrolling streamer comment
+      const chatMsg = KICK_STREAM_CHAT[streamChatIdx] || 'RING RUSH LIVE!';
+      const maxScroll = Math.max(0, chatMsg.length * 5 - 40);
+      const chatScroll = maxScroll > 0 ? (Math.floor(streamChatTimer * 0.4) % (maxScroll + 20)) : 0;
+      printPico(chatMsg, 43 - Math.min(maxScroll, chatScroll), 107, 7, 1);
 
       // Animated Boxers (Grounded on floor Y=90, facing each other)
       drawBoxer(52, 90, true, p1.anim, p1.animTimer);
       drawBoxer(76, 90, false, p2.anim, p2.animTimer);
-
       // Hit Impact Spark FX
       if (impactFxTimer > 0) {
         impactFxTimer--;
