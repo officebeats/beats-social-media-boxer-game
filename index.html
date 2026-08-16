@@ -2577,7 +2577,6 @@
         vertSquash = 1.0;
         bodyTilt = (isP1 ? -1 : 1) * lp * 0.14; // Arch back at waist
         horzShift = (isP1 ? -1 : 1) * lp * -4.0; // Step back away from center
-
       } else if (anim === 'BLOCK' || anim === 'SHOULDER_ROLL') {
         // Solid guard brace and shoulder deflection
         let bp = 0;
@@ -2589,9 +2588,16 @@
         bodyTilt = (isP1 ? 1 : -1) * bp * 0.10; // Turn shoulder inward to deflect
         vertShift = bp * 1.5; // Athletic grounded stance drop
         horzShift = (isP1 ? -1 : 1) * bp * -1.5; // Absorbing blow impact
+      } else if (anim === 'KNOCKDOWN') {
+        // Fighter flat on the canvas mat
+        bodyTilt = (isP1 ? -1 : 1) * 1.45;
+        vertShift = 6;
+        horzShift = (isP1 ? -1 : 1) * -8;
+      } else if (anim === 'TAUNT') {
+        // Standing boxer raises fists in neutral corner
+        vertShift = -2;
+        bodyTilt = (isP1 ? 1 : -1) * 0.08;
       }
-      fx += horzShift;
-
       // Ground shadow placed directly on the floor below the boots
       ctx.fillStyle = 'rgba(0,0,0,0.65)';
       ctx.beginPath();
@@ -3896,7 +3902,7 @@
       printPico('SP', 78, 117, p2.superMeter >= 100 ? 10 : 7, 1);
 
       // Knockout Banner Overlay
-      if (gameState === 'KO') {
+      if (appState === 'KO') {
         ctx.fillStyle = 'rgba(0,0,0,0.92)';
         ctx.fillRect(0, 40, 128, 48);
         ctx.strokeStyle = getPalColor(10);
@@ -3906,6 +3912,13 @@
         if (Math.floor(globalFrameCount / 15) % 2 === 0) {
           printPicoCenter('PRESS START TO REMATCH', 74, 7, 1);
         }
+      }
+
+      // Flash Impact Overlay
+      if (flashFrames > 0) {
+        flashFrames--;
+        ctx.fillStyle = 'rgba(255, 241, 232, 0.40)';
+        ctx.fillRect(0, 0, 128, 128);
       }
     }
 
@@ -3928,13 +3941,6 @@
         superBtn.classList.remove('super-ready');
       }
 
-      if (flashFrames > 0) {
-        flashFrames--;
-        pal(0, 7); pal(1, 7); pal(2, 7); pal(3, 7);
-      } else {
-        pal();
-      }
-
       ctx.save();
       ctx.scale(2, 2); // 2x high-DPI scaling for ultra-sharp typography & pixel art
 
@@ -3945,12 +3951,6 @@
         cameraShake *= 0.85;
         if (cameraShake < 0.5) cameraShake = 0;
       }
-
-      if (appState === 'KNOCKDOWN') {
-          playerMashStamina();
-          return;
-        }
-
         if (appState === 'TITLE') {
         drawTitleScreen();
       } else if (appState === 'MODE_SELECT') {
