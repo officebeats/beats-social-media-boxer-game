@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>CRASH OUT: RING RUSH (v3.7.3) — Clean 2-Tier Training Camp & Visual Polish</title>
+  <title>CRASH OUT: RING RUSH (v3.7.4) — Knockdown Recovery Fix & Unique Super Finishers</title>
   <style>
     :root {
       --pico-black: #000000;
@@ -1521,7 +1521,7 @@
         const opponent = (this.id === 1) ? p2 : p1;
         const fId = this.fighterId || (this.id === 1 ? 'broner' : 'deen');
 
-        cameraShake = 20;
+        cameraShake = 26;
         flashFrames = 8;
         play808Sfx('super');
         triggerHaptic(50);
@@ -1529,9 +1529,12 @@
         opponent.anim = 'FLINCH';
         this.animTimer = 72;
         opponent.animTimer = 72;
+
         switch (fId) {
           case 'broner': {
+            // 1. Adrien Broner: Philly Shell Counter (Converts all stone counter blocks on board to Gold Power Gems!)
             this.anim = 'HOOK';
+            cameraShake = 28;
             let converted = 0;
             for (let r = 0; r < ROWS; r++) {
               for (let c = 0; c < COLS; c++) {
@@ -1543,26 +1546,30 @@
               }
             }
             this.detectPowerGems();
-            opponent.hp = Math.max(0, opponent.hp - 32);
+            opponent.hp = Math.max(0, opponent.hp - 35);
             opponent.receiveGarbage(14);
             globalFloatingTexts.push(new FloatingText('ABOUT BILLIONS!', 46, 30, 10));
-            globalFloatingTexts.push(new FloatingText('-32 HP!', 58, 42, 8));
+            globalFloatingTexts.push(new FloatingText('-35 HP!', 58, 42, 8));
             break;
           }
           case 'deen': {
+            // 2. Deen The Great: Lightning Southpaw Straight (Cleaves center columns with blue/gold Crash Orbs)
             this.anim = 'STRAIGHT';
+            cameraShake = 26;
             for (let r = 0; r < ROWS; r++) {
               if (this.grid[r][2] >= 1 && this.grid[r][2] <= 4) this.grid[r][2] += 4;
               if (this.grid[r][3] >= 1 && this.grid[r][3] <= 4) this.grid[r][3] += 4;
             }
-            opponent.hp = Math.max(0, opponent.hp - 35);
-            opponent.receiveGarbage(12);
+            opponent.hp = Math.max(0, opponent.hp - 36);
+            opponent.receiveGarbage(13);
             globalFloatingTexts.push(new FloatingText('LIGHTNING STRAIGHT!', 40, 30, 12));
-            globalFloatingTexts.push(new FloatingText('-35 HP!', 58, 42, 8));
+            globalFloatingTexts.push(new FloatingText('-36 HP!', 58, 42, 8));
             break;
           }
           case 'ryan': {
+            // 3. Ryan Garcia: Flash Left Hook (Cleaves bottom 4 rows of board with lightning hook)
             this.anim = 'HOOK';
+            cameraShake = 30;
             for (let r = ROWS - 4; r < ROWS; r++) {
               for (let c = 0; c < COLS; c++) {
                 this.grid[r][c] = 0;
@@ -1570,13 +1577,16 @@
               }
             }
             this.applyGravity();
-            opponent.hp = Math.max(0, opponent.hp - 34);
+            opponent.hp = Math.max(0, opponent.hp - 38);
             opponent.receiveGarbage(15);
             globalFloatingTexts.push(new FloatingText('FLASH LEFT HOOK!', 44, 30, 7));
+            globalFloatingTexts.push(new FloatingText('-38 HP!', 58, 42, 8));
             break;
           }
           case 'n3on': {
+            // 4. N3ON: Crashout Spam (Detonates 8 random gems into Crash Orbs + rapid light garbage)
             this.anim = 'JAB';
+            cameraShake = 22;
             let count = 0;
             for (let r = ROWS - 1; r >= 0 && count < 8; r--) {
               for (let c = 0; c < COLS && count < 8; c++) {
@@ -1586,40 +1596,43 @@
                 }
               }
             }
-            opponent.hp = Math.max(0, opponent.hp - 25);
-            opponent.receiveGarbage(10);
+            opponent.hp = Math.max(0, opponent.hp - 28);
+            opponent.receiveGarbage(16);
             globalFloatingTexts.push(new FloatingText('CRASH OUT SPAM!', 46, 30, 11));
+            globalFloatingTexts.push(new FloatingText('-28 HP!', 58, 42, 8));
             break;
           }
           case 'rayj': {
+            // 5. Ray J: Glasses Flash Counter (Spawns a Rainbow Diamond on player board + color shatter)
             this.anim = 'STRAIGHT';
-            for (let r = 0; r < ROWS; r++) {
-              for (let c = 0; c < COLS; c++) {
-                if (this.grid[r][c] === 10) {
-                  this.grid[r][c] = Math.floor(Math.random() * 4) + 1;
-                  this.counterTimers[r][c] = 0;
-                }
-              }
-            }
-            opponent.hp = Math.max(0, opponent.hp - 28);
+            cameraShake = 24;
+            this.pair = { x: 2, y: 0, rot: 0, g1: 9, g2: 9, vy: 0 };
+            this.state = 'FALLING';
+            opponent.hp = Math.max(0, opponent.hp - 30);
             opponent.receiveGarbage(12);
             globalFloatingTexts.push(new FloatingText('GLASSES FLASH!', 48, 30, 14));
+            globalFloatingTexts.push(new FloatingText('DIAMOND DROP!', 48, 42, 10));
             break;
           }
           case 'blueface': {
+            // 6. Blueface: Famous Overhand Hook (Cleaves columns 0 & 5 + massive wall slam)
             this.anim = 'HOOK';
+            cameraShake = 32;
             for (let r = 0; r < ROWS; r++) {
               this.grid[r][0] = 0; this.powerGems[r][0] = false;
               this.grid[r][5] = 0; this.powerGems[r][5] = false;
             }
             this.applyGravity();
-            opponent.hp = Math.max(0, opponent.hp - 30);
+            opponent.hp = Math.max(0, opponent.hp - 35);
             opponent.receiveGarbage(14);
             globalFloatingTexts.push(new FloatingText('FAMOUS HOOK!', 50, 30, 12));
+            globalFloatingTexts.push(new FloatingText('-35 HP!', 58, 42, 8));
             break;
           }
           case 'chrisean': {
+            // 7. Chrisean Rock: Baddie Power Overhand (Converts all Yellow/Green gems to Red/Pink Power Gems!)
             this.anim = 'HOOK';
+            cameraShake = 28;
             for (let r = 0; r < ROWS; r++) {
               for (let c = 0; c < COLS; c++) {
                 if (this.grid[r][c] === 3 || this.grid[r][c] === 4) this.grid[r][c] = 1;
@@ -1627,14 +1640,16 @@
               }
             }
             this.detectPowerGems();
-            opponent.hp = Math.max(0, opponent.hp - 32);
-            opponent.receiveGarbage(12);
+            opponent.hp = Math.max(0, opponent.hp - 34);
+            opponent.receiveGarbage(13);
             globalFloatingTexts.push(new FloatingText('BADDIE OVERHAND!', 44, 30, 14));
+            globalFloatingTexts.push(new FloatingText('-34 HP!', 58, 42, 8));
             break;
           }
           case 'rampage': {
+            // 8. Rampage Jackson: Heavyweight Monster Slam (Earthquake shake + 42 Massive Damage!)
             this.anim = 'UPPERCUT';
-            cameraShake = 24;
+            cameraShake = 36;
             opponent.hp = Math.max(0, opponent.hp - 42);
             opponent.receiveGarbage(16);
             globalFloatingTexts.push(new FloatingText('RAMPAGE SLAM!', 48, 30, 8));
@@ -1642,23 +1657,35 @@
             break;
           }
           case 'adin': {
+            // 9. Adin Ross: Stream Raid Nuke (Drops dual Rainbow Diamonds + chat raid bomb)
             this.anim = 'UPPERCUT';
+            cameraShake = 26;
             this.pair = { x: 2, y: 0, rot: 0, g1: 9, g2: 9, vy: 0 };
             this.state = 'FALLING';
-            opponent.hp = Math.max(0, opponent.hp - 22);
-            globalFloatingTexts.push(new FloatingText('STREAM RAID BOMB!', 42, 30, 10));
+            opponent.hp = Math.max(0, opponent.hp - 28);
+            opponent.receiveGarbage(12);
+            globalFloatingTexts.push(new FloatingText('STREAM RAID NUKE!', 42, 30, 10));
+            globalFloatingTexts.push(new FloatingText('-28 HP!', 58, 42, 8));
             break;
           }
           case 'charleston': {
+            // 10. Charleston White: Pepper Spray Rant (Converts bottom row to Stone + speech bomb)
             this.anim = 'STRAIGHT';
-            opponent.hp = Math.max(0, opponent.hp - 26);
+            cameraShake = 24;
+            for (let c = 0; c < COLS; c++) {
+              opponent.grid[ROWS - 1][c] = 10;
+              opponent.counterTimers[ROWS - 1][c] = 4;
+            }
+            opponent.hp = Math.max(0, opponent.hp - 30);
             opponent.receiveGarbage(14);
-            globalFloatingTexts.push(new FloatingText('MICROPHONE RANT!', 44, 30, 10));
+            globalFloatingTexts.push(new FloatingText('PEPPER SPRAY RANT!', 42, 30, 10));
+            globalFloatingTexts.push(new FloatingText('-30 HP!', 58, 42, 8));
             break;
           }
           case 'bang': {
+            // 11. Coach Bang: Bang Body Combo (Cleaves middle rows + 36 Heavy Body Damage)
             this.anim = 'HOOK';
-            cameraShake = 22;
+            cameraShake = 28;
             for (let r = ROWS - 3; r < ROWS; r++) {
               for (let c = 0; c < COLS; c++) {
                 opponent.grid[r][c] = 10;
@@ -1672,15 +1699,25 @@
             break;
           }
           case 'abrown': {
+            // 12. Antonio Brown: CT KO Touchdown Dance (Showboat touchdown that converts all Blue gems to Gold!)
             this.anim = 'STRAIGHT';
-            opponent.hp = Math.max(0, opponent.hp - 30);
+            cameraShake = 26;
+            for (let r = 0; r < ROWS; r++) {
+              for (let c = 0; c < COLS; c++) {
+                if (this.grid[r][c] === 2) this.grid[r][c] = 4;
+              }
+            }
+            this.detectPowerGems();
+            opponent.hp = Math.max(0, opponent.hp - 33);
             opponent.receiveGarbage(15);
-            globalFloatingTexts.push(new FloatingText('CT KO DANCE!', 50, 30, 10));
+            globalFloatingTexts.push(new FloatingText('CT KO TOUCHDOWN!', 44, 30, 10));
+            globalFloatingTexts.push(new FloatingText('-33 HP!', 58, 42, 8));
             break;
           }
           case 'fousey': {
+            // 13. Fousey: G7 Spiritual Crashout (Rage shockwave that infects opponent's top rows with stone blocks)
             this.anim = 'UPPERCUT';
-            cameraShake = 24;
+            cameraShake = 30;
             let fCount = 0;
             for (let r = 0; r < ROWS && fCount < 6; r++) {
               for (let c = 0; c < COLS && fCount < 6; c++) {
@@ -1698,11 +1735,13 @@
             break;
           }
           case 'sneako': {
+            // 14. Sneako: Red Pill Matrix Counter (Absorbs pending garbage, heals HP + counters with 34 DMG!)
             this.anim = 'STRAIGHT';
+            cameraShake = 26;
             const absorbed = this.pendingGarbage;
             this.pendingGarbage = 0;
             this.hp = Math.min(100, this.hp + 20 + Math.floor(absorbed * 1.2));
-            opponent.hp = Math.max(0, opponent.hp - 32);
+            opponent.hp = Math.max(0, opponent.hp - 34);
             opponent.receiveGarbage(14);
             globalFloatingTexts.push(new FloatingText('RED PILL COUNTER!', 42, 30, 8));
             globalFloatingTexts.push(new FloatingText('+20 HP HEAL!', 50, 42, 11));
@@ -1710,8 +1749,9 @@
           }
           default: {
             this.anim = 'UPPERCUT';
+            cameraShake = 26;
             opponent.hp = Math.max(0, opponent.hp - 35);
-            opponent.receiveGarbage(12);
+            opponent.receiveGarbage(14);
             globalFloatingTexts.push(new FloatingText('SUPER FINISHER!', 48, 30, 10));
             break;
           }
@@ -2625,10 +2665,10 @@
     function playerMashStamina() {
       if (appState !== 'KNOCKDOWN' || !knockdownData) return;
       if (knockdownData.fallenId === 1) {
-        knockdownData.stamina = Math.min(100, knockdownData.stamina + 11.5);
+        knockdownData.stamina = Math.min(100, knockdownData.stamina + 14.0);
         play808Sfx('step');
-        triggerHaptic(25);
-        cameraShake = Math.max(cameraShake, 3);
+        triggerHaptic(30);
+        cameraShake = Math.max(cameraShake, 4);
         globalFloatingTexts.push(new FloatingText('+MASH!', 56, 36, 11));
         if (knockdownData.stamina >= 100) {
           heGetsUp();
@@ -3973,7 +4013,7 @@
       if (Math.floor(globalFrameCount / 22) % 2 === 0) {
         printPicoCenter('PRESS START / TOUCH', 109, 10, 1, true);
       }
-      printPicoCenter('OBEATS STUDIOS 2026  BUILD 3.7.3', 121, 6, 1);
+      printPicoCenter('OBEATS STUDIOS 2026  BUILD 3.7.4', 121, 6, 1);
     }
 
     // === MODE SELECT RENDERER ===
@@ -4219,44 +4259,41 @@
         // ── Lesson 2: Power Gems (Fusion & Authentic Uppercut Strike) ──
         const loopFrame = globalFrameCount % 100;
         // 1. Left: 4 Individual Green Crystal Gems in 2x2 Grid
-        drawTutorialGem(ctx, 11, 22, 3, false, 3, 6, 7);
-        drawTutorialGem(ctx, 18, 22, 3, false, 3, 6, 7);
-        drawTutorialGem(ctx, 11, 30, 3, false, 3, 6, 7);
-        drawTutorialGem(ctx, 18, 30, 3, false, 3, 6, 7);
-        printPico('4 GEMS', 10, 42, 7, 1);
+        drawTutorialGem(ctx, 12, 22, 3, false, 3, 6, 7);
+        drawTutorialGem(ctx, 19, 22, 3, false, 3, 6, 7);
+        drawTutorialGem(ctx, 12, 30, 3, false, 3, 6, 7);
+        drawTutorialGem(ctx, 19, 30, 3, false, 3, 6, 7);
 
         // 2. Fusion Arrow
         ctx.fillStyle = getPalColor(10);
-        printPico('->', 28, 28, 10, 1, true);
+        printPico('->', 30, 27, 10, 1, true);
 
         // 3. Center: Giant Fused 2x2 Power Gem with Pulsing Gold Outline
-        drawTutorialGem(ctx, 40, 21, 3, true, 3, 14, 15, true);
-        printPico('2X2 GEM', 36, 42, 10, 1, true);
+        drawTutorialGem(ctx, 44, 21, 3, true, 3, 15, 16, true);
 
-        // 4. Right: Authentic Uppercut Punch Animation (Quad 3) & Counter Blocks
+        // 4. Fusion Arrow -> Uppercut Punch!
+        ctx.fillStyle = getPalColor(10);
+        printPico('->', 68, 27, 10, 1, true);
+
+        // 5. Right: Authentic Uppercut Punch Animation (Quad 3) with Speedlines
         if (loopFrame > 35 && loopFrame < 88) {
-          // Real UPPERCUT Punch Sprite (Quad 3)!
-          drawTutorialBoxerPunch(ctx, ROSTER[1], 74, 52, 3, false);
+          drawTutorialBoxerPunch(ctx, ROSTER[1], 92, 52, 3, false);
+          // Uppercut impact sparks
           ctx.fillStyle = getPalColor(10);
-          ctx.fillRect(64, 26, 6, 6);
+          ctx.fillRect(80, 24, 6, 6);
           ctx.fillStyle = getPalColor(7);
-          ctx.fillRect(66, 28, 2, 2);
-          drawTutorialGem(ctx, 104, 22, 10, false, 3, 11, 13);
-          printPico('UPPERCUT!', 68, 42, 11, 1, true);
+          ctx.fillRect(82, 26, 2, 2);
         } else {
-          drawBoxerAvatar(ctx, ROSTER[1], 84, 52, true, false, false);
-          drawTutorialGem(ctx, 104, 22, 10, false, 3, 11, 13);
-          printPico('BLOCKS', 98, 42, 8, 1);
+          drawBoxerAvatar(ctx, ROSTER[1], 96, 52, true, false, false);
         }
-        printPicoCenter('2X2 FUSE = HEAVY HITS!', 53, 10, 1, true);
+        printPicoCenter('2X2 FUSE = HEAVY UPPERCUT!', 53, 10, 1, true);
 
       } else if (tutorialPage === 2) {
-        // ── Lesson 3: Counter Blocks & Garbage Mechanics ──
+        // ── Lesson 3: Counter Blocks & Garbage Mechanics (Dedicated Stone 3-2-1 Lesson) ──
         ctx.fillStyle = getPalColor(8);
         ctx.fillRect(12, 21, 12, 3);
         printPico('!6', 26, 20, 10, 1);
         drawTutorialGem(ctx, 15, 26, 10, false, 3, 10, 12);
-        printPico('DROP', 14, 42, 8, 1);
 
         ctx.fillStyle = getPalColor(10);
         printPico('->', 36, 29, 10, 1, true);
@@ -4264,8 +4301,6 @@
         const stepTimer = (Math.floor(globalFrameCount / 18) % 3) + 1;
         const displayTimer = (4 - stepTimer);
         drawTutorialGem(ctx, 50, 24, 10, false, displayTimer, 10, 12);
-        printPico('COUNT', 46, 36, 10, 1);
-        printPico('3-2-1', 46, 42, 10, 1);
 
         ctx.fillStyle = getPalColor(10);
         printPico('->', 68, 29, 10, 1, true);
@@ -4276,61 +4311,53 @@
           ctx.fillRect(84, 22, 2, 2); ctx.fillRect(98, 22, 2, 2);
           ctx.fillRect(84, 38, 2, 2); ctx.fillRect(98, 38, 2, 2);
         }
-        printPico('TURNS GEM', 78, 42, 11, 1, true);
         printPicoCenter('3-2-1 BLOCKS -> GEMS!', 53, 10, 1, true);
 
       } else if (tutorialPage === 3) {
-        // ── Lesson 4: Super Finisher & Cinematic KO Attack ──
+        // ── Lesson 4: Super Finisher & Cinematic Special KO Attack ──
         const loopFrame = globalFrameCount % 100;
 
-        // 1. Left: Full Super Meter Bar
-        ctx.fillStyle = getPalColor(1);
-        ctx.fillRect(10, 25, 34, 8);
-        ctx.fillStyle = (Math.floor(globalFrameCount / 6) % 2 === 0) ? getPalColor(10) : getPalColor(7);
-        ctx.fillRect(10, 25, 34, 8);
+        // 1. Left: Sleek Horizontal Super Gauge (Fills 0% -> 100%)
+        ctx.fillStyle = getPalColor(0);
+        ctx.fillRect(10, 24, 34, 8);
+        const superW = Math.min(32, Math.floor(32 * (Math.min(1.0, loopFrame / 35.0))));
+        ctx.fillStyle = (loopFrame >= 35 && Math.floor(globalFrameCount / 6) % 2 === 0) ? getPalColor(10) : getPalColor(11);
+        ctx.fillRect(11, 25, superW, 6);
         ctx.strokeStyle = getPalColor(7);
-        ctx.strokeRect(10, 25, 34, 8);
-        printPico('100% READY', 11, 27, 0, 1, true);
+        ctx.strokeRect(10, 24, 34, 8);
+        printPico('SUPER', 14, 17, 10, 1);
 
-        // 2. Center: Pulsing Red [X / SUPER] Action Button
+        // 2. Center: 3D Beveled Red [X / SUPER] Action Button
         ctx.fillStyle = getPalColor(8);
-        ctx.fillRect(52, 20, 18, 18);
-        ctx.strokeStyle = (Math.floor(globalFrameCount / 5) % 2 === 0) ? getPalColor(10) : getPalColor(7);
-        ctx.lineWidth = 2;
-        ctx.strokeRect(52, 20, 18, 18);
+        ctx.fillRect(52, 19, 18, 18);
+        ctx.strokeStyle = (loopFrame >= 35 && Math.floor(globalFrameCount / 5) % 2 === 0) ? getPalColor(10) : getPalColor(7);
+        ctx.lineWidth = (loopFrame >= 35) ? 2 : 1;
+        ctx.strokeRect(52, 19, 18, 18);
         ctx.lineWidth = 1;
         printPicoCenter('X', 24, 7, 2, true);
-        printPico('TAP [X]', 46, 42, 10, 1, true);
 
-        // 3. Right: Live Cinematic Special Strike Animation (Quad 3 Uppercut / Special Finisher)
-        if (loopFrame > 35 && loopFrame < 88) {
-          // 360 Radial Super Burst Shockwave
-          const burstR = (loopFrame - 35) * 1.5;
-          ctx.strokeStyle = `rgba(255, 236, 39, ${Math.max(0, 1 - burstR / 30)})`;
+        // 3. Right: Live Cinematic Special Finisher Attack
+        if (loopFrame >= 35 && loopFrame < 88) {
+          // 360 Radial Super Burst Shockwave Ring
+          const burstR = (loopFrame - 35) * 1.6;
+          ctx.strokeStyle = `rgba(255, 236, 39, ${Math.max(0, 1 - burstR / 32)})`;
           ctx.lineWidth = 2;
-          ctx.beginPath(); ctx.arc(58, 29, burstR, 0, Math.PI * 2); ctx.stroke();
+          ctx.beginPath(); ctx.arc(61, 28, burstR, 0, Math.PI * 2); ctx.stroke();
           ctx.lineWidth = 1;
 
-          // Real SPECIAL UPPERCUT FINISHER SPRITE (Quad 3)!
-          drawTutorialBoxerPunch(ctx, ROSTER[2], 74, 52, 3, false);
+          // Boxer launches forward into SPECIAL UPPERCUT FINISHER SPRITE (Quad 3)!
+          drawTutorialBoxerPunch(ctx, ROSTER[2], 84, 52, 3, false);
 
           // Golden shockwave particle trail
           ctx.fillStyle = getPalColor(10);
-          ctx.fillRect(66, 26, 6, 6);
-          ctx.fillRect(80, 22, 4, 4);
+          ctx.fillRect(72, 26, 6, 6);
+          ctx.fillRect(86, 22, 4, 4);
           ctx.fillStyle = getPalColor(7);
-          ctx.fillRect(68, 28, 2, 2);
-
-          // Storm of stone blocks crashing down on rival
-          drawTutorialGem(ctx, 104, 20, 10, false, 3, 10, 11);
-          drawTutorialGem(ctx, 104, 32, 10, false, 3, 10, 11);
-          printPico('SUPER KO!', 76, 42, 11, 1, true);
+          ctx.fillRect(74, 28, 2, 2);
         } else {
-          drawBoxerAvatar(ctx, ROSTER[2], 94, 52, true, false, false);
-          printPico('READY', 88, 42, 10, 1);
+          drawBoxerAvatar(ctx, ROSTER[2], 96, 52, true, false, false);
         }
         printPicoCenter('AT 100%: TAP RED [X]!', 53, 10, 1, true);
-
       } else if (tutorialPage === 4) {
         // ── Lesson 5: Knockdown 10-Count Survival ──
         ctx.fillStyle = 'rgba(0,0,0,0.92)';
@@ -6864,7 +6891,10 @@
       else if (appState === 'PLAYING') p1.dropHard();
     });
     bindBtn('btnO', () => { triggerHaptic(18);
-      if (appState === 'PLAYING' || appState === 'KNOCKDOWN') {
+      if (appState === 'PLAYING') {
+        p1.rotate(-1);
+      } else if (appState === 'KNOCKDOWN') {
+        playerMashStamina();
         p1.rotate(-1);
       } else {
         handleConfirmAction();
@@ -6872,14 +6902,17 @@
     });
 
     bindBtn('btnX', () => { triggerHaptic(18);
-      if (appState === 'PLAYING' || appState === 'KNOCKDOWN') {
+      if (appState === 'PLAYING') {
         if (p1.superMeter >= 100) p1.triggerSuper();
         else p1.rotate(1);
+      } else if (appState === 'KNOCKDOWN') {
+        // Strictly lock out Super Move so it is never accidentally wasted while down!
+        playerMashStamina();
+        p1.rotate(1);
       } else {
         handleConfirmAction();
       }
     });
-
     bindBtn('btnMode', () => {
       appState = 'CHAR_SELECT';
       gameState = 'PLAYING';
@@ -6906,7 +6939,6 @@
         handleConfirmAction();
       }
     });
-
     bindBtn('btnShoulderL', () => { triggerHaptic(18);
       goBack();
     });
@@ -6915,6 +6947,8 @@
       if (appState === 'PLAYING') {
         if (p1.superMeter >= 100) p1.triggerSuper();
         else p1.dropHard();
+      } else if (appState === 'KNOCKDOWN') {
+        playerMashStamina();
       }
     });
 
@@ -6926,11 +6960,18 @@
     // Direct Canvas Click Navigation for Desktop / Mobile
     const canvasEl = document.getElementById('picoCanvas');
     if (canvasEl) {
-      canvasEl.addEventListener('click', (e) => {
+      const handleCanvasTap = (e) => {
         initAudio();
+        if (appState === 'KNOCKDOWN') {
+          playerMashStamina();
+          return;
+        }
         const rect = canvasEl.getBoundingClientRect();
-        const clickX = ((e.clientX - rect.left) / rect.width) * 128;
-        const clickY = ((e.clientY - rect.top) / rect.height) * 128;
+        const clientX = e.touches && e.touches[0] ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches && e.touches[0] ? e.touches[0].clientY : e.clientY;
+        if (clientX === undefined || clientY === undefined) return;
+        const clickX = ((clientX - rect.left) / rect.width) * 128;
+        const clickY = ((clientY - rect.top) / rect.height) * 128;
 
         // Top-Left Back Button (< BACK)
         if (clickX <= 28 && clickY <= 16 && appState !== 'TITLE' && appState !== 'PLAYING') {
@@ -7090,7 +7131,14 @@
           }
           return;
         }
-      });
+      };
+      canvasEl.addEventListener('click', handleCanvasTap);
+      canvasEl.addEventListener('touchstart', (e) => {
+        if (appState === 'KNOCKDOWN') {
+          e.preventDefault();
+          handleCanvasTap(e);
+        }
+      }, { passive: false });
     }
     let lastLoopTime = performance.now();
     let loopAccumulator = 0;
