@@ -1,6 +1,6 @@
 # 🥊 CRASH OUT: RING RUSH — The Ultimate Adrien Broner, Deen The Great & COB (Crash Out Boys) Retro Puzzle Boxing Game
 
-[![Game Version](https://img.shields.io/badge/Version-v3.6.1-FF004D?style=for-the-badge&logo=retro-arch&logoColor=white)](https://officebeats.github.io/beats-social-media-boxer-game/)
+[![Game Version](https://img.shields.io/badge/Version-v3.6.2-FF004D?style=for-the-badge&logo=retro-arch&logoColor=white)](https://officebeats.github.io/beats-social-media-boxer-game/)
 [![Engine](https://img.shields.io/badge/Engine-PICO--8%20%2F%20HTML5%20Canvas-00E436?style=for-the-badge&logo=html5&logoColor=white)](https://officebeats.github.io/beats-social-media-boxer-game/)
 [![Frame Rate](https://img.shields.io/badge/Performance-Locked%2060%20FPS-29ADFF?style=for-the-badge&logo=speedtest&logoColor=white)](https://officebeats.github.io/beats-social-media-boxer-game/)
 [![Play Live Online](https://img.shields.io/badge/Play%20Live-GitHub%20Pages-FFEC27?style=for-the-badge&logo=github&logoColor=black)](https://officebeats.github.io/beats-social-media-boxer-game/)

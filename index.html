@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>CRASH OUT: RING RUSH (v3.6.1) — 5-Lesson Training Camp & Visual Touch Controls</title>
+  <title>CRASH OUT: RING RUSH (v3.6.2) — Authentic In-Game Gems & Training Camp</title>
   <style>
     :root {
       --pico-black: #000000;
@@ -3798,6 +3798,8 @@
       '9': ['0110','1001','0111','0001','1110'],
       ' ': ['0000','0000','0000','0000','0000'],
       'W': ['1001','1001','1001','1101','0110'],
+      ':': ['0000','0110','0000','0110','0000'],
+      '=': ['0000','1111','0000','1111','0000'],
       '.': ['0000','0000','0000','0000','0110'],
       ',': ['0000','0000','0000','0110','0100'],
       '-': ['0000','0000','1111','0000','0000'],
@@ -3973,7 +3975,7 @@
       if (Math.floor(globalFrameCount / 22) % 2 === 0) {
         printPicoCenter('PRESS START / TOUCH', 109, 10, 1, true);
       }
-      printPicoCenter('OBEATS STUDIOS 2026  BUILD 3.6.1', 121, 6, 1);
+      printPicoCenter('OBEATS STUDIOS 2026  BUILD 3.6.2', 121, 6, 1);
     }
 
     // === MODE SELECT RENDERER ===
@@ -4032,6 +4034,94 @@
         goBack();
       }
     }
+    // ── Authentic In-Game Gem Renderer for Training Camp Dioramas ──
+    function drawTutorialGem(ctx, x, y, type, isPower = false, timerVal = 3, w = 7, h = 9, pulse = false) {
+      const dx = Math.floor(x);
+      const dy = Math.floor(y);
+      const isCrash = (type >= 5 && type <= 8);
+      const isCounter = (type === 10);
+      const cIdx = isCrash ? (type - 4) : type;
+
+      const PAL = {
+        1: [8, 14, 2],  // Red: red / pink / dark maroon
+        2: [12, 13, 1], // Blue: blue / lavender / dark navy
+        3: [11, 10, 3], // Green: green / yellow / dark green
+        4: [10, 7, 9],  // Yellow: yellow / white / orange
+      };
+      const c = PAL[cIdx] || PAL[1];
+      const base = getPalColor(c[0]);
+      const lite = getPalColor(c[1]);
+      const dark = getPalColor(c[2]);
+      const white = getPalColor(7);
+
+      if (isCrash) {
+        // Authentic In-Game Crash Orb (Circular silhouette with glowing core & center glint)
+        ctx.fillStyle = getPalColor(0);
+        ctx.fillRect(dx, dy, w, h);
+
+        ctx.fillStyle = base;
+        ctx.fillRect(dx + 1, dy, w - 2, h);
+        ctx.fillRect(dx, dy + 1, w, h - 2);
+
+        ctx.fillStyle = lite;
+        ctx.fillRect(dx + 1, dy + 1, w - 2, 2);
+        ctx.fillRect(dx + 2, dy + 2, Math.max(1, w - 4), 2);
+
+        ctx.fillStyle = white;
+        if (pulse || Math.floor(globalFrameCount / 6) % 2 === 0) {
+          ctx.fillRect(dx + Math.floor(w / 2) - 1, dy + 2, 2, 2);
+        } else {
+          ctx.fillRect(dx + Math.floor(w / 2) - 1, dy + 1, 1, 1);
+        }
+
+        ctx.fillStyle = dark;
+        ctx.fillRect(dx + 1, dy + h - 2, w - 2, 1);
+        ctx.fillRect(dx + w - 2, dy + 2, 1, h - 3);
+
+      } else if (isCounter) {
+        // Authentic Stone Counter Block with Countdown Number
+        ctx.fillStyle = getPalColor(5);
+        ctx.fillRect(dx, dy, w, h);
+        ctx.strokeStyle = (timerVal === 1 && Math.floor(globalFrameCount / 6) % 2 === 0) ? getPalColor(8) : getPalColor(6);
+        ctx.strokeRect(dx + 0.5, dy + 0.5, w - 1, h - 1);
+        ctx.fillStyle = getPalColor(0);
+        ctx.fillRect(dx + 1, dy + 1, w - 2, h - 2);
+        const numCol = (timerVal === 1) ? 8 : (timerVal === 2 ? 9 : 7);
+        printPico(String(timerVal || 3), dx + Math.floor(w / 2) - 2, dy + Math.floor(h / 2) - 2, numCol, 1);
+
+      } else if (isPower) {
+        // Authentic Fused Power Gem Block with Pulsing Gold Border
+        ctx.fillStyle = base;
+        ctx.fillRect(dx, dy, w, h);
+        const pGlow = Math.floor(globalFrameCount / 6) % 2 === 0;
+        ctx.fillStyle = pGlow ? getPalColor(10) : getPalColor(9);
+        ctx.fillRect(dx, dy, w, 1);
+        ctx.fillRect(dx, dy + h - 1, w, 1);
+        ctx.fillRect(dx, dy, 1, h);
+        ctx.fillRect(dx + w - 1, dy, 1, h);
+        ctx.fillStyle = white;
+        ctx.fillRect(dx + 1, dy + 1, 2, 2);
+
+      } else {
+        // Authentic In-Game 3D Beveled Crystal Gem
+        ctx.fillStyle = base;
+        ctx.fillRect(dx, dy, w, h);
+
+        // Light facet bevel (top and left)
+        ctx.fillStyle = lite;
+        ctx.fillRect(dx, dy, w, 1);
+        ctx.fillRect(dx, dy + 1, 1, h - 2);
+
+        // Dark facet shadow (bottom and right)
+        ctx.fillStyle = dark;
+        ctx.fillRect(dx, dy + h - 1, w, 1);
+        ctx.fillRect(dx + w - 1, dy + 1, 1, h - 2);
+
+        // Specular diamond glint pixel
+        ctx.fillStyle = white;
+        ctx.fillRect(dx + 1, dy + 1, 1, 1);
+      }
+    }
 
     function drawTutorialScreen() {
       ctx.fillStyle = getPalColor(0);
@@ -4049,67 +4139,64 @@
       ctx.strokeStyle = getPalColor(10);
       ctx.strokeRect(6, 18, 116, 44);
 
+      // Strict clipping region so NO sprite or particle ever bleeds outside the diorama
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(7, 19, 114, 42);
+      ctx.clip();
+
       const animT = Math.floor(globalFrameCount * 0.1) % 60;
 
       if (tutorialPage === 0) {
         // ── Lesson 1: Match & Crush (Puzzles -> Boxing Punches) ──
-        // Left: Falling Gem Pair
-        const gemDropY = 22 + (animT % 14);
-        ctx.fillStyle = getPalColor(12); ctx.fillRect(14, gemDropY, 7, 7); // Blue gem
-        ctx.fillStyle = getPalColor(10); ctx.fillRect(14, gemDropY + 7, 7, 7); // Yellow gem
+        // Left: Falling Gem Pair (Type 2 Blue + Type 4 Yellow)
+        const gemDropY = 22 + (animT % 12);
+        drawTutorialGem(ctx, 15, gemDropY, 2, false, 3, 7, 8);
+        drawTutorialGem(ctx, 15, gemDropY + 8, 4, false, 3, 7, 8);
         // Down arrow
         ctx.fillStyle = getPalColor(7);
-        ctx.fillRect(17, 39, 1, 4); ctx.fillRect(16, 42, 3, 1);
+        ctx.fillRect(18, 38, 1, 4); ctx.fillRect(17, 41, 3, 1);
 
-        // Center: Stacked gems with glowing round Crash Orb
-        ctx.fillStyle = getPalColor(8); ctx.fillRect(44, 42, 7, 7);
-        ctx.fillStyle = getPalColor(8); ctx.fillRect(44, 49, 7, 7);
-        // Pulsing red crash orb
-        const orbGlow = Math.floor(globalFrameCount / 6) % 2 === 0;
-        ctx.fillStyle = orbGlow ? getPalColor(7) : getPalColor(8);
-        ctx.beginPath(); ctx.arc(47, 35, 4, 0, Math.PI * 2); ctx.fill();
-        ctx.strokeStyle = getPalColor(10); ctx.stroke();
+        // Center: Stacked Red Gems (Type 1) + Glowing Red Crash Orb (Type 5)
+        drawTutorialGem(ctx, 44, 42, 1, false, 3, 7, 8);
+        drawTutorialGem(ctx, 44, 50, 1, false, 3, 7, 8);
+        drawTutorialGem(ctx, 44, 32, 5, false, 3, 7, 8, true); // Glowing crash orb!
 
         // Right: Explosion spark particles & Boxer punching!
         const isDet = (animT > 30);
         if (isDet) {
           ctx.fillStyle = getPalColor(10);
-          ctx.fillRect(72, 38, 3, 3); ctx.fillRect(78, 32, 2, 2); ctx.fillRect(70, 46, 2, 2);
+          ctx.fillRect(68, 38, 3, 3); ctx.fillRect(74, 32, 2, 2); ctx.fillRect(66, 46, 2, 2);
+          ctx.fillStyle = getPalColor(7);
+          ctx.fillRect(70, 36, 2, 2); ctx.fillRect(72, 44, 2, 2);
         }
-        // Mini Boxer Avatar punching
-        drawBoxerAvatar(ctx, ROSTER[0], 92, 42, false, false, false);
+        // Grounded Boxer Avatar punching inside box bounds
+        drawBoxerAvatar(ctx, ROSTER[0], 96, 58, false, false, false);
         printPicoCenter('CRUSH GEMS TO PUNCH!', 56, 11, 1);
 
       } else if (tutorialPage === 1) {
         // ── Lesson 2: Power Gems (Fusion & Heavy Hits) ──
         const isFused = (animT > 20);
         if (!isFused) {
-          // 4 individual green gems
-          ctx.fillStyle = getPalColor(11);
-          ctx.fillRect(16, 26, 7, 7); ctx.fillRect(23, 26, 7, 7);
-          ctx.fillRect(16, 33, 7, 7); ctx.fillRect(23, 33, 7, 7);
-          ctx.strokeStyle = getPalColor(3);
-          ctx.strokeRect(16, 26, 7, 7); ctx.strokeRect(23, 26, 7, 7);
+          // 4 individual Type 3 Green gems with crystal bevels
+          drawTutorialGem(ctx, 16, 25, 3, false, 3, 7, 8);
+          drawTutorialGem(ctx, 23, 25, 3, false, 3, 7, 8);
+          drawTutorialGem(ctx, 16, 33, 3, false, 3, 7, 8);
+          drawTutorialGem(ctx, 23, 33, 3, false, 3, 7, 8);
         } else {
           // Giant merged 2x2 Power Gem with pulsing gold border
-          ctx.fillStyle = getPalColor(11);
-          ctx.fillRect(16, 26, 14, 14);
-          ctx.strokeStyle = (Math.floor(globalFrameCount / 6) % 2 === 0) ? getPalColor(10) : getPalColor(7);
-          ctx.lineWidth = 1;
-          ctx.strokeRect(16, 26, 14, 14);
-          printPico('2X2', 18, 31, 0, 1, true);
+          drawTutorialGem(ctx, 16, 25, 3, true, 3, 14, 16, true);
+          printPico('2X2', 18, 32, 0, 1, true);
         }
 
         // Arrow & Uppercut shockwave
         ctx.fillStyle = getPalColor(10);
-        printPico('->', 38, 32, 10, 1, true);
+        printPico('->', 36, 32, 10, 1, true);
 
-        // Giant Uppercut Boxer Animation
-        drawBoxerAvatar(ctx, ROSTER[1], 66, 40, true, false, false);
-        // Heavy counter blocks falling on rival
-        ctx.fillStyle = getPalColor(0); ctx.fillRect(94, 24, 14, 14);
-        ctx.strokeStyle = getPalColor(8); ctx.strokeRect(94, 24, 14, 14);
-        printPico('3', 99, 28, 8, 1, true);
+        // Giant Uppercut Boxer Animation inside box bounds
+        drawBoxerAvatar(ctx, ROSTER[1], 66, 58, true, false, false);
+        // Authentic Stone Counter block falling on rival
+        drawTutorialGem(ctx, 94, 24, 10, false, 3, 14, 16);
 
         printPicoCenter('2X2 FUSION = UPPERCUT!', 56, 10, 1);
 
@@ -4136,7 +4223,7 @@
         // Special move particle blast
         ctx.fillStyle = getPalColor(10);
         ctx.fillRect(84, 22, 28, 20);
-        drawBoxerAvatar(ctx, ROSTER[2], 96, 38, true, false, false);
+        drawBoxerAvatar(ctx, ROSTER[2], 96, 58, true, false, false);
         printPicoCenter('TAP [X] AT 100% SUPER!', 56, 10, 1);
 
       } else if (tutorialPage === 3) {
@@ -4149,8 +4236,8 @@
         printPico('COUNT', 14, 25, 8, 1);
         printPico('7', 22, 33, 10, 2, true);
 
-        // Boxer on Canvas flat
-        drawBoxerAvatar(ctx, ROSTER[0], 60, 42, true, false, true);
+        // Boxer on Canvas flat inside box bounds
+        drawBoxerAvatar(ctx, ROSTER[0], 60, 58, true, false, true);
 
         // Animated Tap Finger & Expanding Ripples
         const tapRip = (Math.floor(globalFrameCount * 0.8) % 14) + 2;
@@ -4187,6 +4274,8 @@
 
         printPicoCenter('READY FOR THE RING!', 56, 10, 1);
       }
+
+      ctx.restore(); // Restore clip region
 
       // ── Text Explanation Box (X: 6..122, Y: 64..110, H: 46) ──
       ctx.fillStyle = getPalColor(1);
@@ -4239,7 +4328,6 @@
         printPico('FIGHT! >', 84, 118, 10, 1, true);
       }
     }
-
     // === 7-STAGE TOURNAMENT LADDER SCREEN ===
     function drawLadderBracketScreen() {
       ctx.fillStyle = getPalColor(0);
