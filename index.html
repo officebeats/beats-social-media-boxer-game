@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>CRASH OUT: RING RUSH (v3.7.0) — 6-Lesson Training Camp with Garbage Mechanics</title>
+  <title>CRASH OUT: RING RUSH (v3.7.1) — 6-Lesson Visual Training Camp</title>
   <style>
     :root {
       --pico-black: #000000;
@@ -3772,7 +3772,7 @@
       'J': ['0011','0001','0001','1001','0110'],
       'K': ['1001','1010','1100','1010','1001'],
       'L': ['1000','1000','1000','1000','1111'],
-      'M': ['1001','1111','1111','1001','1001'],
+      'M': ['1001','1111','1001','1001','1001'],
       'N': ['1001','1101','1011','1001','1001'],
       'O': ['0110','1001','1001','1001','0110'],
       'P': ['1110','1001','1110','1000','1000'],
@@ -3797,10 +3797,8 @@
       '8': ['0110','1001','0110','1001','0110'],
       '9': ['0110','1001','0111','0001','1110'],
       ' ': ['0000','0000','0000','0000','0000'],
-      'W': ['1001','1001','1001','1101','0110'],
       ':': ['0000','0110','0000','0110','0000'],
       '=': ['0000','1111','0000','1111','0000'],
-      '.': ['0000','0000','0000','0000','0110'],
       ',': ['0000','0000','0000','0110','0100'],
       '-': ['0000','0000','1111','0000','0000'],
       '+': ['0000','0100','1110','0100','0000'],
@@ -3975,7 +3973,7 @@
       if (Math.floor(globalFrameCount / 22) % 2 === 0) {
         printPicoCenter('PRESS START / TOUCH', 109, 10, 1, true);
       }
-      printPicoCenter('OBEATS STUDIOS 2026  BUILD 3.7.0', 121, 6, 1);
+      printPicoCenter('OBEATS STUDIOS 2026  BUILD 3.7.1', 121, 6, 1);
     }
 
     // === MODE SELECT RENDERER ===
@@ -4146,178 +4144,158 @@
 
       if (tutorialPage === 0) {
         // ── Lesson 1: Match & Crush (Square Gems vs Round Crash Orbs) ──
-        // 1. Left Column: SQUARE GEM (Passive stacking block)
-        drawTutorialGem(ctx, 15, 21, 2, false, 3, 10, 10); // Large Blue Square Gem
-        printPico('SQUARE', 11, 35, 10, 1);
-        printPico('STACK', 13, 44, 7, 1);
+        // 1. Left: Blue Square Gem
+        drawTutorialGem(ctx, 16, 22, 2, false, 3, 10, 11);
 
-        // 2. Middle Column: ROUND CRASH ORB (Active detonator bomb)
-        drawTutorialGem(ctx, 48, 21, 5, false, 3, 10, 10, true); // Large Red Crash Orb
-        printPico('ROUND', 47, 35, 10, 1);
-        printPico('BOMB!', 47, 44, 8, 1, true);
+        // 2. Middle: Glowing Red Crash Orb (Pulsing)
+        drawTutorialGem(ctx, 50, 22, 5, false, 3, 10, 11, true);
 
-        // 3. Right Column: Orb + Gem Detonation Formula
+        // 3. Right: Detonation Reaction & Boxer Punch
         const isDet = (animT > 25);
         if (!isDet) {
-          // Red Orb landing on Red Gem
-          drawTutorialGem(ctx, 80, 22, 5, false, 3, 8, 8, true);
-          drawTutorialGem(ctx, 80, 31, 1, false, 3, 8, 8);
+          drawTutorialGem(ctx, 82, 22, 5, false, 3, 8, 9, true);
+          drawTutorialGem(ctx, 82, 31, 1, false, 3, 8, 9);
         } else {
-          // Animated explosion sparks
           ctx.fillStyle = getPalColor(10);
-          ctx.fillRect(78, 26, 3, 3); ctx.fillRect(84, 20, 2, 2); ctx.fillRect(76, 34, 2, 2);
+          ctx.fillRect(80, 26, 4, 4); ctx.fillRect(88, 20, 3, 3); ctx.fillRect(78, 34, 3, 3);
           ctx.fillStyle = getPalColor(7);
-          ctx.fillRect(82, 24, 2, 2); ctx.fillRect(80, 32, 2, 2);
+          ctx.fillRect(84, 24, 2, 2); ctx.fillRect(82, 32, 2, 2);
         }
-        // Grounded Boxer Avatar punching inside diorama
-        drawBoxerAvatar(ctx, ROSTER[0], 106, 56, false, false, false);
-        printPico('PUNCH!', 78, 44, 11, 1, true);
+        drawBoxerAvatar(ctx, ROSTER[0], 106, 52, false, false, false);
 
-        printPicoCenter('ORB TOUCHES GEM = BOOM!', 56, 11, 1);
+        printPicoCenter('ORB TOUCHES GEM = BOOM!', 53, 11, 1, true);
 
       } else if (tutorialPage === 1) {
         // ── Lesson 2: Power Gems (Fusion & Heavy Hits) ──
-        const isFused = (animT > 20);
-        if (!isFused) {
-          // 4 individual Type 3 Green gems with crystal bevels
-          drawTutorialGem(ctx, 12, 24, 3, false, 3, 7, 8);
-          drawTutorialGem(ctx, 19, 24, 3, false, 3, 7, 8);
-          drawTutorialGem(ctx, 12, 32, 3, false, 3, 7, 8);
-          drawTutorialGem(ctx, 19, 32, 3, false, 3, 7, 8);
-        } else {
-          // Giant merged 2x2 Power Gem with pulsing gold border
-          drawTutorialGem(ctx, 12, 24, 3, true, 3, 14, 16, true);
-          printPico('2X2', 14, 31, 0, 1, true);
-        }
-        printPico('4 GEMS', 10, 44, 7, 1);
+        // 1. Left: 4 Individual Green Crystal Gems (2x2 Grid)
+        drawTutorialGem(ctx, 12, 22, 3, false, 3, 6, 7);
+        drawTutorialGem(ctx, 19, 22, 3, false, 3, 6, 7);
+        drawTutorialGem(ctx, 12, 30, 3, false, 3, 6, 7);
+        drawTutorialGem(ctx, 19, 30, 3, false, 3, 6, 7);
 
-        // Arrow
+        // 2. Arrow
         ctx.fillStyle = getPalColor(10);
-        printPico('->', 32, 31, 10, 1, true);
+        printPico('->', 30, 27, 10, 1, true);
 
-        // Giant Uppercut Boxer Animation inside box bounds
-        drawBoxerAvatar(ctx, ROSTER[1], 62, 56, true, false, false);
-        printPico('UPPERCUT', 46, 44, 10, 1, true);
+        // 3. Center: Giant Fused 2x2 Power Gem with Pulsing Gold Outline
+        drawTutorialGem(ctx, 44, 21, 3, true, 3, 15, 16, true);
 
-        // Authentic Stone Counter block falling on rival
-        drawTutorialGem(ctx, 96, 22, 10, false, 3, 14, 16);
-        printPico('BLOCKS', 93, 44, 8, 1);
+        // 4. Arrow -> Uppercut & Counter Block
+        ctx.fillStyle = getPalColor(10);
+        printPico('->', 66, 27, 10, 1, true);
+        drawBoxerAvatar(ctx, ROSTER[1], 86, 52, true, false, false);
+        drawTutorialGem(ctx, 104, 22, 10, false, 3, 11, 13);
 
-        printPicoCenter('2X2 FUSE = HEAVY HITS!', 56, 10, 1);
+        printPicoCenter('2X2 FUSE = HEAVY HITS!', 53, 10, 1, true);
 
       } else if (tutorialPage === 2) {
         // ── Lesson 3: Counter Blocks & Garbage Mechanics ──
-        // Left: Incoming warning tray & Stone block with timer 3
+        // 1. Left: Incoming Warning Tray & Stone Block with Timer 3
         ctx.fillStyle = getPalColor(8);
-        ctx.fillRect(12, 22, 12, 3);
-        printPico('!6', 26, 21, 10, 1);
-        drawTutorialGem(ctx, 14, 27, 10, false, 3, 10, 12);
-        printPico('GARBAGE', 8, 44, 8, 1);
+        ctx.fillRect(12, 21, 12, 3);
+        printPico('!6', 26, 20, 10, 1);
+        drawTutorialGem(ctx, 15, 26, 10, false, 3, 10, 12);
 
-        // Center: Timer countdown stepping 3 -> 2 -> 1
-        const stepTimer = (Math.floor(globalFrameCount / 18) % 3) + 1; // 1, 2, 3
-        const displayTimer = (4 - stepTimer); // 3 -> 2 -> 1
-        drawTutorialGem(ctx, 52, 25, 10, false, displayTimer, 10, 12);
-        printPico('COUNTDOWN', 43, 44, 10, 1);
-
-        // Arrow
+        // 2. Arrow
         ctx.fillStyle = getPalColor(10);
-        printPico('->', 70, 30, 10, 1, true);
+        printPico('->', 36, 29, 10, 1, true);
 
-        // Right: Stone turns into usable normal gem!
+        // 3. Center: Timer Countdown stepping 3 -> 2 -> 1
+        const stepTimer = (Math.floor(globalFrameCount / 18) % 3) + 1;
+        const displayTimer = (4 - stepTimer);
+        drawTutorialGem(ctx, 52, 25, 10, false, displayTimer, 10, 12);
+
+        // 4. Arrow
+        ctx.fillStyle = getPalColor(10);
+        printPico('->', 72, 29, 10, 1, true);
+
+        // 5. Right: Stone turns into usable normal red gem!
         drawTutorialGem(ctx, 88, 25, 1, false, 3, 10, 12);
         if (Math.floor(globalFrameCount / 8) % 2 === 0) {
           ctx.fillStyle = getPalColor(10);
           ctx.fillRect(86, 23, 2, 2); ctx.fillRect(100, 23, 2, 2);
-          ctx.fillRect(86, 37, 2, 2); ctx.fillRect(100, 37, 2, 2);
+          ctx.fillRect(86, 38, 2, 2); ctx.fillRect(100, 38, 2, 2);
         }
-        printPico('TURNS GEM', 82, 44, 11, 1, true);
 
-        printPicoCenter('3-2-1 BLOCKS -> GEMS!', 56, 10, 1);
+        printPicoCenter('3-2-1 BLOCKS -> GEMS!', 53, 10, 1, true);
 
       } else if (tutorialPage === 3) {
         // ── Lesson 4: Super Meter & 100% Finisher ──
-        // Full Super Meter Bar
+        // 1. Left: Full Super Meter Bar
         ctx.fillStyle = getPalColor(1);
-        ctx.fillRect(10, 24, 36, 8);
+        ctx.fillRect(10, 25, 34, 8);
         ctx.fillStyle = (Math.floor(globalFrameCount / 6) % 2 === 0) ? getPalColor(10) : getPalColor(7);
-        ctx.fillRect(10, 24, 36, 8);
+        ctx.fillRect(10, 25, 34, 8);
         ctx.strokeStyle = getPalColor(7);
-        ctx.strokeRect(10, 24, 36, 8);
-        printPico('100% READY', 11, 26, 0, 1, true);
-        printPico('METER', 16, 44, 7, 1);
+        ctx.strokeRect(10, 25, 34, 8);
+        printPico('100% READY', 11, 27, 0, 1, true);
 
-        // Pulsing Red [X / SUPER] Action Button
+        // 2. Center: Pulsing Red [X / SUPER] Action Button
         ctx.fillStyle = getPalColor(8);
-        ctx.fillRect(54, 21, 18, 18);
+        ctx.fillRect(54, 20, 18, 18);
         ctx.strokeStyle = (Math.floor(globalFrameCount / 5) % 2 === 0) ? getPalColor(10) : getPalColor(7);
         ctx.lineWidth = 2;
-        ctx.strokeRect(54, 21, 18, 18);
+        ctx.strokeRect(54, 20, 18, 18);
         ctx.lineWidth = 1;
-        printPicoCenter('X', 26, 7, 2, true);
-        printPico('TAP [X]', 51, 44, 10, 1, true);
+        printPicoCenter('X', 25, 7, 2, true);
 
-        // Special move particle blast
+        // 3. Right: Boxer special attack avatar with particle blast
         ctx.fillStyle = getPalColor(10);
         ctx.fillRect(84, 20, 28, 20);
-        drawBoxerAvatar(ctx, ROSTER[2], 96, 56, true, false, false);
-        printPico('KO MOVE!', 84, 44, 11, 1, true);
+        drawBoxerAvatar(ctx, ROSTER[2], 96, 52, true, false, false);
 
-        printPicoCenter('AT 100%: TAP RED [X]!', 56, 10, 1);
+        printPicoCenter('AT 100%: TAP RED [X]!', 53, 10, 1, true);
 
       } else if (tutorialPage === 4) {
         // ── Lesson 5: Knockdown 10-Count Survival ──
-        // Referee Count Box
-        ctx.fillStyle = 'rgba(0,0,0,0.9)';
+        // 1. Left: Referee Count Box
+        ctx.fillStyle = 'rgba(0,0,0,0.92)';
         ctx.fillRect(10, 20, 30, 24);
         ctx.strokeStyle = getPalColor(8);
         ctx.strokeRect(10, 20, 30, 24);
         printPico('COUNT', 13, 23, 8, 1);
         printPico('7', 21, 31, 10, 2, true);
-        printPico('10-COUNT', 8, 46, 8, 1);
 
-        // Boxer on Canvas flat inside box bounds
-        drawBoxerAvatar(ctx, ROSTER[0], 58, 56, true, false, true);
-        printPico('0 HP DOWN', 45, 46, 7, 1);
+        // 2. Center: Boxer flat on canvas (grounded cleanly at Y=50)
+        drawBoxerAvatar(ctx, ROSTER[0], 58, 50, true, false, true);
 
-        // Animated Tap Finger & Expanding Ripples
+        // 3. Right: Animated Tap Finger & Expanding Ripples
         const tapRip = (Math.floor(globalFrameCount * 0.8) % 14) + 2;
         ctx.strokeStyle = `rgba(255, 236, 39, ${Math.max(0, 1 - tapRip / 16)})`;
         ctx.beginPath(); ctx.arc(98, 28, tapRip, 0, Math.PI * 2); ctx.stroke();
         ctx.fillStyle = getPalColor(10);
         ctx.fillRect(96, 26, 4, 6); ctx.fillRect(97, 22, 2, 5);
-        printPico('TAP FAST!', 86, 46, 10, 1, true);
 
-        printPicoCenter('RAPIDLY TAP TO GET UP!', 56, 11, 1);
+        printPicoCenter('RAPIDLY TAP TO GET UP!', 53, 11, 1, true);
 
       } else {
         // ── Lesson 6: Mobile Touch Controls & Ready to Fight ──
-        // Virtual D-Pad Icon
+        // 1. Left: Virtual D-Pad Icon
         ctx.fillStyle = getPalColor(5);
         ctx.fillRect(14, 22, 18, 6);
         ctx.fillRect(20, 16, 6, 18);
-        printPico('D-PAD', 15, 44, 7, 1);
+        printPico('D-PAD', 13, 40, 7, 1);
 
-        // Action Buttons A/B & X
+        // 2. Center: Action Buttons A/B & X
         ctx.fillStyle = getPalColor(8);
         ctx.beginPath(); ctx.arc(54, 24, 6, 0, Math.PI * 2); ctx.fill();
         printPico('A', 52, 22, 7, 1);
         ctx.fillStyle = getPalColor(2);
         ctx.beginPath(); ctx.arc(68, 24, 6, 0, Math.PI * 2); ctx.fill();
         printPico('B', 66, 22, 7, 1);
-        printPico('ROTATE', 49, 44, 7, 1);
+        printPico('ROTATE', 46, 40, 7, 1);
 
-        // Trophy Cup Icon
+        // 3. Right: Gold Trophy
         ctx.fillStyle = getPalColor(10);
         ctx.fillRect(96, 20, 12, 10);
         ctx.fillRect(100, 30, 4, 4);
         ctx.fillRect(97, 34, 10, 2);
-        printPico('READY!', 92, 44, 10, 1, true);
+        printPico('READY!', 86, 40, 10, 1, true);
 
-        printPicoCenter('TAP [X] TO ENTER RING!', 56, 10, 1);
+        printPicoCenter('TAP [X] TO ENTER RING!', 53, 10, 1, true);
       }
 
-      ctx.restore(); // Restore clip region
+      ctx.restore(); // Restore diorama clip region
 
       // ── Text Explanation Box (X: 6..122, Y: 64..110, H: 46) ──
       ctx.fillStyle = getPalColor(1);
