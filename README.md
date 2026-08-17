@@ -1,6 +1,7 @@
 # 🥊 CRASH OUT: RING RUSH — The Ultimate Adrien Broner, Deen The Great & COB (Crash Out Boys) Retro Puzzle Boxing Game
 
-[![Game Version](https://img.shields.io/badge/Version-v3.7.4-FF004D?style=for-the-badge&logo=retro-arch&logoColor=white)](https://officebeats.github.io/beats-social-media-boxer-game/)
+[![Game Version](https://img.shields.io/badge/Version-v3.8.0-FF004D?style=for-the-badge&logo=retro-arch&logoColor=white)](https://officebeats.github.io/beats-social-media-boxer-game/)
+[![Download PICO-8 Cartridge](https://img.shields.io/badge/Cartridge-PICO--8%20.p8-FF004D?style=for-the-badge&logo=pico-8&logoColor=white)](https://raw.githubusercontent.com/officebeats/beats-social-media-boxer-game/main/crash_out.p8)
 [![Engine](https://img.shields.io/badge/Engine-PICO--8%20%2F%20HTML5%20Canvas-00E436?style=for-the-badge&logo=html5&logoColor=white)](https://officebeats.github.io/beats-social-media-boxer-game/)
 [![Frame Rate](https://img.shields.io/badge/Performance-Locked%2060%20FPS-29ADFF?style=for-the-badge&logo=speedtest&logoColor=white)](https://officebeats.github.io/beats-social-media-boxer-game/)
 [![Play Live Online](https://img.shields.io/badge/Play%20Live-GitHub%20Pages-FFEC27?style=for-the-badge&logo=github&logoColor=black)](https://officebeats.github.io/beats-social-media-boxer-game/)
@@ -9,13 +10,15 @@
 
 ---
 
-## ⚡ Play Instantly in Your Browser
+## ⚡ Play Live & Download Cartridge
 
-🎮 **[Click Here to Play CRASH OUT: RING RUSH Live on GitHub Pages](https://officebeats.github.io/beats-social-media-boxer-game/)**  
-*(Optimized for Mobile, Desktop, Touchscreens, Keyboard & Bluetooth Gamepads)*
+🎮 **[Click Here to Play CRASH OUT: RING RUSH Live in Browser (GitHub Pages)](https://officebeats.github.io/beats-social-media-boxer-game/)**  
+*(Optimized for Mobile Touchscreens, Desktop, Keyboard & Bluetooth Gamepads)*
+
+📥 **[Download Latest PICO-8 Cartridge (`crash_out.p8`)](https://raw.githubusercontent.com/officebeats/beats-social-media-boxer-game/main/crash_out.p8)**  
+*(Load natively in PICO-8 with `pico8 -run crash_out.p8` or on Anbernic, Miyoo Mini, Steam Deck, and retro handhelds)*
 
 ---
-
 ## 📖 Overview & Concept
 
 **Crash Out: Ring Rush** is an adrenaline-fueled 8-bit arcade puzzle-fighter built for the **PICO-8 Fantasy Console** and modernized with a high-performance **HTML5 Canvas 60 FPS engine**. 
@@ -257,13 +260,14 @@ python -m http.server 8000
 npx serve .
 ```
 
-### Option 3: Run Native PICO-8 Cartridge
+### Option 3: Run Native PICO-8 Cartridge (.p8)
 ```bash
-# If you have PICO-8 installed:
+# 1. Download the latest cartridge:
+# https://raw.githubusercontent.com/officebeats/beats-social-media-boxer-game/main/crash_out.p8
+
+# 2. Launch in PICO-8:
 pico8 -run crash_out.p8
 ```
-
----
 
 ## 🔍 Search & SEO Keywords
 

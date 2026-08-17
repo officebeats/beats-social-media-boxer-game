@@ -1,615 +1,600 @@
 pico-8 cartridge // http://www.pico-8.com
 version 32
 __lua__
--- crash out: ring rush (v1.0.0-alpha.2)
--- pico-8 puzzle boxing — broner vs deen
--- dual detonation system (gdd 4.5)
-
--- gem types:
---  1=red 2=blue 3=green 4=yellow (normal)
---  5-8 = crash orb of matching color (color+4)
---  9 = rainbow diamond  10 = counter(garbage)
+-- crash out: ring rush (v3.8.0)
+-- pico-8 puzzle boxing — 14 fighters & 9 arenas
+-- by office beats studios 2026
 
 function _init()
-  state = 0 -- 0:title 1:battle 2:ko
-  round_t = 99
-  t_tick = 0
-  shake = 0
-  flash = 0
-  msgs = {}
-  parts = {}
+  state=0 -- 0:title 1:mode 2:char 3:ladder 4:battle 5:shop 6:tut 7:ko
+  mode_idx=0 -- 0:gold 1:quick 2:cpu 3:tut
+  tut_page=0
+  sel_arena=1
+  p1_idx=2 -- deen starter
+  p2_idx=1 -- broner
+  p1_skin=0
+  shake=0
+  flash=0
+  g_t=0
+  st_idx=0
+  purse=0
+  up_pwr=0 up_def=0 up_spd=0
 
-  p1 = mk_player(4, false)
-  p2 = mk_player(88, true)
-  init_board(p1)
-  init_board(p2)
+  init_roster()
+  init_arenas()
+  p1=mk_player(4,false)
+  p2=mk_player(88,true)
+  reset_board(p1)
+  reset_board(p2)
 end
 
-function mk_player(ox, is_ai)
-  return {
-    x=ox, hp=100, score=0, combo=0, super=0,
-    grid={}, pair=nil, is_ai=is_ai,
-    state="spawn", drop_t=0, lock_d=0, clear_t=0,
-    pending=nil, anim="idle", anim_t=0, ai_t=0, ai_col=2
+function init_roster()
+  roster={
+    {id="broner",name="broner",pwr=90,spd=75,def=95,col=8,move="philly shell"},
+    {id="deen",name="deen",pwr=85,spd=95,def=75,col=12,move="lightning str"},
+    {id="ryan",name="ryan",pwr=95,spd=95,def=70,col=7,move="flash hook"},
+    {id="n3on",name="n3on",pwr=70,spd=98,def=60,col=11,move="crash spam"},
+    {id="rayj",name="ray j",pwr=75,spd=80,def=88,col=2,move="glasses flash"},
+    {id="blueface",name="blueface",pwr=85,spd=80,def=75,col=1,move="famous hook"},
+    {id="chrisean",name="chrisean",pwr=90,spd=80,def=80,col=14,move="baddie blast"},
+    {id="rampage",name="rampage",pwr=100,spd=65,def=95,col=4,move="monster slam"},
+    {id="adin",name="adin",pwr=70,spd=85,def=75,col=9,move="stream raid"},
+    {id="charleston",name="c.white",pwr=75,spd=85,def=80,col=10,move="pepper spray"},
+    {id="bang",name="bang",pwr=85,spd=85,def=90,col=10,move="body combo"},
+    {id="abrown",name="a.brown",pwr=90,spd=90,def=70,col=10,move="ct ko dance"},
+    {id="fousey",name="fousey",pwr=80,spd=85,def=80,col=9,move="g7 crashout"},
+    {id="sneako",name="sneako",pwr=80,spd=90,def=75,col=8,move="matrix weave"}
   }
 end
 
-function init_board(p)
-  p.grid = {}
+function init_arenas()
+  arenas={
+    {name="whouse",loc="austin, tx",ropes=11,flr=5,bg=1,accent=11},
+    {name="vegas",loc="vegas, nv",ropes=10,flr=2,bg=0,accent=10},
+    {name="misfit",loc="london, uk",ropes=12,flr=1,bg=0,accent=12},
+    {name="miami",loc="miami, fl",ropes=14,flr=3,bg=2,accent=14},
+    {name="tmt gym",loc="vegas, nv",ropes=10,flr=4,bg=0,accent=10},
+    {name="broner",loc="cincinnati",ropes=8,flr=4,bg=2,accent=8},
+    {name="dubai",loc="dubai, uae",ropes=10,flr=10,bg=1,accent=10},
+    {name="cage",loc="atlanta, ga",ropes=5,flr=0,bg=0,accent=8},
+    {name="tokyo",loc="tokyo, jp",ropes=14,flr=12,bg=1,accent=14}
+  }
+end
+
+function mk_player(ox,is_ai)
+  return {
+    ox=ox,hp=100,super=0,score=0,combo=0,is_ai=is_ai,
+    grid={},pair=nil,state="spawn",drop_t=0,lock_d=0,
+    anim="idle",anim_t=0,kd_t=0,stam=0,ai_t=0,ai_col=2
+  }
+end
+
+function reset_board(p)
+  p.grid={}
   for r=1,12 do
-    p.grid[r] = {}
-    for c=1,6 do p.grid[r][c] = 0 end
+    p.grid[r]={}
+    for c=1,6 do p.grid[r][c]=0 end
   end
-  p.hp = 100
-  p.score = 0
-  p.combo = 0
-  p.super = 0
-  p.pair = nil
-  p.state = "spawn"
-  p.pending = nil
+  p.hp=100 p.super=0 p.score=0 p.combo=0 p.pair=nil p.state="spawn"
 end
 
 function spawn_pair(p)
-  local g1 = flr(rnd(4)) + 1
-  local g2
-  if rnd(1) < 0.25 then
-    g2 = flr(rnd(4)) + 5  -- crash orb
-  else
-    g2 = flr(rnd(4)) + 1
-  end
-  -- choose a low ai target column for the cpu
-  local best=1 minh=99
-  for c=1,6 do
-    local h=0
-    for r=1,12 do
-      if p.grid[r][c] != 0 then h=13-r break end
-    end
-    if h<minh then minh=h best=c end
-  end
-  p.ai_col = best
-  p.pair = {x=3, y=1, rot=0, g1=g1, g2=g2}
-  -- overflow / top-out check
-  if p.grid[1][3] != 0 then
-    p.hp = 0
-    p.pair = nil
-    p.state = "dead"
-    state = 2
-    ko_msg = "k.o.! "..(p==p1 and "deen" or "broner").." wins!"
-    sfx(7)
-    shake = 12
-  else
-    p.state = "fall"
-  end
+  local g1=flr(rnd(4))+1
+  local g2=(rnd(1)<0.25) and (flr(rnd(4))+5) or (flr(rnd(4))+1)
+  p.pair={x=3,y=1,r=0,g1=g1,g2=g2,vy=0}
+  p.state="fall"
 end
 
 function _update()
-  if state == 0 then
-    if btnp(4) or btnp(5) then
-      init_board(p1); init_board(p2)
-      round_t = 99; t_tick = 0
-      state = 1
-    end
-  elseif state == 1 then
-    update_player(p1, false)
-    update_player(p2, true)
+  g_t+=1
+  if (shake>0) shake-=1
+  if (flash>0) flash-=1
 
-    -- round timer
-    t_tick += 1
-    if t_tick >= 30 then
-      t_tick = 0
-      if round_t > 0 then round_t -= 1
+  if state==0 then
+    -- title screen
+    if (btnp(4) or btnp(5)) sfx(6) state=1
+  elseif state==1 then
+    -- mode select
+    if (btnp(2)) sfx(5) mode_idx=(mode_idx+3)%4
+    if (btnp(3)) sfx(5) mode_idx=(mode_idx+1)%4
+    if (btnp(4) or btnp(5)) then
+      sfx(0)
+      if mode_idx==3 then
+        tut_page=0 state=6
       else
-        state = 2
-        if p1.hp > p2.hp then ko_msg = "time! broner wins!"
-        elseif p2.hp > p1.hp then ko_msg = "time! deen wins!"
-        else ko_msg = "time! draw!" end
+        state=2
       end
     end
-
-    -- hp knockout check (skip if a KO was already declared this frame)
-    if state == 1 and (p1.hp <= 0 or p2.hp <= 0) then
-      state = 2
-      if p1.hp <= 0 and p2.hp <= 0 then ko_msg = "double k.o.!"
-      elseif p1.hp <= 0 then ko_msg = "k.o.! deen wins!"
-      else ko_msg = "k.o.! broner wins!" end
-      sfx(7)
-      shake = 14
-      flash = 5
+  elseif state==2 then
+    -- char select
+    if (btnp(0)) sfx(5) p1_idx=(p1_idx+12)%14+1
+    if (btnp(1)) sfx(5) p1_idx=(p1_idx)%14+1
+    if (btnp(2) or btnp(3)) sfx(5) p1_idx=(p1_idx+6)%14+1
+    if (btnp(4) or btnp(5)) then
+      sfx(0)
+      if mode_idx==0 then state=3 else state=4 start_bout() end
     end
-  elseif state == 2 then
-    -- keep ticking boxer anim timers so the finisher punch/retract resolves
-    update_player(p1, false)
-    update_player(p2, true)
-    if btnp(4) or btnp(5) then _init() end
-  end
-
-  -- shared fx timers
-  if shake > 0 then shake *= 0.85 if shake < 0.5 then shake = 0 end end
-  if flash > 0 then flash -= 1 end
-  for f in all(msgs) do f.y -= 0.3 f.life -= 1 if f.life <= 0 then del(msgs, f) end end
-  for pt in all(parts) do
-    pt.x += pt.vx pt.y += pt.vy pt.vy += 0.12 pt.life -= 1
-    if pt.life <= 0 then del(parts, pt) end
+  elseif state==6 then
+    -- tutorial
+    if (btnp(0)) sfx(5) tut_page=max(0,tut_page-1)
+    if (btnp(1)) sfx(5) tut_page=min(5,tut_page+1)
+    if (btnp(4) or btnp(5)) then
+      if tut_page<5 then
+        sfx(6) tut_page+=1
+      else
+        sfx(0) state=1
+      end
+    end
+  elseif state==4 then
+    -- live combat update
+    update_player(p1,p2)
+    update_player(p2,p1)
   end
 end
 
-function update_player(p, is_ai)
-  -- cosmetic anim timer always ticks (even on KO / dead boards) so punch
-  -- and flinch poses retract back to idle instead of freezing mid-swing.
-  if p.anim_t > 0 then
-    p.anim_t -= 1
-    if p.anim_t <= 0 then p.anim_t = 0 p.anim = "idle" end
+function start_bout()
+  reset_board(p1)
+  reset_board(p2)
+  p1.is_ai=(mode_idx==2)
+  p2.is_ai=true
+  state=4
+  sfx(0)
+end
+
+function update_player(p,opp)
+  if p.hp<=0 and p.state~="kd" then
+    p.state="kd" p.kd_t=0 p.stam=0
+    sfx(7)
   end
 
-  if p.state == "dead" then return end
-  if state != 1 then return end
+  if p.state=="kd" then
+    p.kd_t+=1
+    if not p.is_ai and (btnp(0) or btnp(1) or btnp(2) or btnp(3) or btnp(4) or btnp(5)) then
+      p.stam=min(100,p.stam+14)
+      sfx(5)
+      if p.stam>=100 then
+        p.hp=28 p.state="spawn" sfx(0)
+      end
+    end
+    if p.kd_t>300 then
+      state=7 sfx(7)
+    end
+    return
+  end
 
-  if p.state == "spawn" then
+  if p.state=="spawn" then
     spawn_pair(p)
-  elseif p.state == "clearing" then
-    p.clear_t -= 1
-    if p.clear_t <= 0 then
-      do_clear(p)
-      apply_gravity(p)
-      p.state = "grav"
-    end
-  elseif p.state == "grav" then
-    if not apply_gravity(p) then
-      local m = eval_matches(p)
-      if m then p.state = "clearing" p.clear_t = 24
-      else p.combo = 0 p.state = "spawn" end
-    end
-  elseif p.state == "fall" then
-    if is_ai and p.pair then
-      p.ai_t += 1
-      if p.ai_t >= 14 then
-        p.ai_t = 0
-        if p.pair.x < p.ai_col and valid_pos(p, p.pair.x+1, p.pair.y, p.pair.rot) then move_pair(p, 1)
-        elseif p.pair.x > p.ai_col and valid_pos(p, p.pair.x-1, p.pair.y, p.pair.rot) then move_pair(p, -1)
+  elseif p.state=="fall" and p.pair then
+    if not p.is_ai then
+      if (btnp(0)) move_pair(p,-1)
+      if (btnp(1)) move_pair(p,1)
+      if (btnp(4)) rotate_pair(p,-1)
+      if (btnp(5)) then
+        if p.super>=100 then
+          trigger_super(p,opp)
         else
-          if rnd(1) < 0.25 then rotate_pair(p, 1) end
-          if rnd(1) < 0.3 then drop_soft(p) end
+          rotate_pair(p,1)
         end
-        if p.super >= 100 and rnd(1) < 0.15 then trigger_super(p) end
       end
+      if (btn(3)) p.pair.y+=0.2
     else
-      if btnp(0) then move_pair(p, -1) end
-      if btnp(1) then move_pair(p, 1) end
-      if btnp(2) then drop_hard(p) end
-      if btn(3) then drop_soft(p) end
-      if btnp(4) then rotate_pair(p, -1) end
-      if btnp(5) then
-        if p.super >= 100 then trigger_super(p) else rotate_pair(p, 1) end
+      p.ai_t+=1
+      if p.ai_t>20 then
+        p.ai_t=0
+        if (p.pair.x<p.ai_col) p.pair.x+=1
+        if (p.pair.x>p.ai_col) p.pair.x-=1
       end
     end
-
-    if p.pair then
-      p.drop_t += 1
-      local interval = 40 - min(20, (99 - round_t)\4)
-      if interval < 14 then interval = 14 end
-      if p.drop_t >= interval then
-        p.drop_t = 0
-        if valid_pos(p, p.pair.x, p.pair.y+1, p.pair.rot) then
-          p.pair.y += 1
-        else
-          p.lock_d += 1
-          if p.lock_d >= 8 then p.lock_d = 0 lock_pair(p) end
-        end
-      end
+    p.pair.y+=0.04
+    if p.pair.y>=11 then
+      lock_pair(p,opp)
     end
   end
 end
 
-function sub_xy(rot, x, y)
-  local sx, sy = x, y
-  if rot == 0 then sy -= 1
-  elseif rot == 1 then sx += 1
-  elseif rot == 2 then sy += 1
-  elseif rot == 3 then sx -= 1 end
-  return sx, sy
-end
-
-function valid_pos(p, x, y, rot)
-  local sx, sy = sub_xy(rot, x, y)
-  if x < 1 or x > 6 or y < 1 or y > 12 then return false end
-  if sx < 1 or sx > 6 or sy < 1 or sy > 12 then return false end
-  if p.grid[y][x] != 0 then return false end
-  if p.grid[sy][sx] != 0 then return false end
-  return true
-end
-
-function move_pair(p, dir)
-  if not p.pair then return end
-  if valid_pos(p, p.pair.x+dir, p.pair.y, p.pair.rot) then
-    p.pair.x += dir sfx(0)
+function move_pair(p,dx)
+  if p.pair and p.pair.x+dx>=1 and p.pair.x+dx<=6 then
+    p.pair.x+=dx sfx(5)
   end
 end
 
-function rotate_pair(p, dir)
-  if not p.pair then return end
-  local nrot = (p.pair.rot + dir + 4) % 4
-  local nx, ny = p.pair.x, p.pair.y
-  if not valid_pos(p, nx, ny, nrot) then
-    if valid_pos(p, nx-1, ny, nrot) then nx -= 1
-    elseif valid_pos(p, nx+1, ny, nrot) then nx += 1 end
-  end
-  if valid_pos(p, nx, ny, nrot) then
-    p.pair.x = nx p.pair.y = ny p.pair.rot = nrot sfx(1)
+function rotate_pair(p,dir)
+  if p.pair then
+    p.pair.r=(p.pair.r+dir)%4 sfx(5)
   end
 end
 
-function drop_soft(p)
-  if not p.pair then return end
-  if valid_pos(p, p.pair.x, p.pair.y+1, p.pair.rot) then
-    p.pair.y += 1 p.score += 1
-  else lock_pair(p) end
-end
-
-function drop_hard(p)
-  if not p.pair then return end
-  while valid_pos(p, p.pair.x, p.pair.y+1, p.pair.rot) do
-    p.pair.y += 1 p.score += 2
-  end
-  lock_pair(p)
-end
-
-function lock_pair(p)
-  if not p.pair then return end
-  local sx, sy = sub_xy(p.pair.rot, p.pair.x, p.pair.y)
-  p.grid[p.pair.y][p.pair.x] = p.pair.g1
-  if sy >= 1 and sy <= 12 and sx >= 1 and sx <= 6 then
-    p.grid[sy][sx] = p.pair.g2
-  end
-  sfx(2)
-  shake = max(shake, 2)
-  p.pair = nil
-
-  apply_gravity(p)
-  local m = eval_matches(p)
-  if m then p.state = "clearing" p.clear_t = 24
-  else p.combo = 0 p.state = "spawn" end
-end
-
-function apply_gravity(p)
-  local moved = false
-  for pass=1,12 do
-    local pm = false
-    for c=1,6 do
-      for r=11,1,-1 do
-        if p.grid[r][c] != 0 and p.grid[r+1][c] == 0 then
-          p.grid[r+1][c] = p.grid[r][c]
-          p.grid[r][c] = 0
-          pm = true moved = true
-        end
-      end
+function lock_pair(p,opp)
+  local x=flr(p.pair.x)
+  local y=12
+  while y>=1 and p.grid[y][x]~=0 do y-=1 end
+  if y>=1 then
+    p.grid[y][x]=p.pair.g1
+    p.super=min(100,p.super+12)
+    sfx(4)
+    -- check match & crush
+    if p.pair.g2>=5 and p.pair.g2<=8 and y>1 then
+      p.grid[y-1][x]=p.pair.g2
+      crush_check(p,opp,y-1,x)
     end
-    if not pm then break end
   end
-  return moved
+  p.pair=nil
+  p.state="spawn"
 end
 
--- dual detonation (gdd 4.5):
--- primary: crash orb (5-8) adjacent to same-color normal flood-fills & clears.
--- secondary: 4+ contiguous same-color normal cluster auto-pops at 50% power.
-function eval_matches(p)
-  local clr = {}
-  for r=1,12 do clr[r] = {} for c=1,6 do clr[r][c] = false end end
-
-  -- primary: crash orbs
-  for r=1,12 do
-    for c=1,6 do
-      local orb = p.grid[r][c]
-      if orb >= 5 and orb <= 8 then
-        local tc = orb - 4
-        local trig = false
-        for d in all({{-1,0},{1,0},{0,-1},{0,1}}) do
-          local ar,ac = r+d[1], c+d[2]
-          if ar>=1 and ar<=12 and ac>=1 and ac<=6 then
-            if p.grid[ar][ac] == tc then trig = true end
-          end
-        end
-        if trig then
-          clr[r][c] = true
-          flood(p, r, c, tc, clr)
-        end
+function crush_check(p,opp,r,c)
+  local orb=p.grid[r][c]
+  local match_col=orb-4
+  local cleared=0
+  for gr=1,12 do
+    for gc=1,6 do
+      if p.grid[gr][gc]==match_col or p.grid[gr][gc]==orb then
+        p.grid[gr][gc]=0
+        cleared+=1
       end
     end
   end
+  if cleared>0 then
+    sfx(2)
+    shake=14 flash=4
+    local dmg=cleared*5
+    opp.hp=max(0,opp.hp-dmg)
+    p.super=min(100,p.super+cleared*8)
+  end
+end
 
-  local pcnt = count_clr(clr)
-
-  -- secondary: 4+ clusters (only if no primary clear happened)
-  local scnt = 0
-  if pcnt == 0 then
-    local vis = {}
-    for r=1,12 do vis[r] = {} for c=1,6 do vis[r][c] = false end end
-    for r=1,12 do
-      for c=1,6 do
-        local g = p.grid[r][c]
-        if g >= 1 and g <= 4 and not vis[r][c] then
-          local grp = {}
-          cluster(p, r, c, g, vis, grp)
-          if #grp >= 4 then
-            for cell in all(grp) do
-              clr[cell[1]][cell[2]] = true
-              scnt += 1
-            end
-          end
-        end
-      end
+function trigger_super(p,opp)
+  p.super=0
+  sfx(3)
+  shake=28 flash=8
+  opp.hp=max(0,opp.hp-35)
+  -- drop garbage stone blocks
+  for c=1,6 do
+    for r=1,2 do
+      if opp.grid[r][c]==0 then opp.grid[r][c]=10 end
     end
   end
-
-  local matched = pcnt > 0 or scnt > 0
-  if matched then
-    p.pending = {clr=clr, primary=pcnt, secondary=scnt}
-  end
-  return matched
-end
-
-function flood(p, r, c, tc, clr)
-  local stack = {{r-1,c},{r+1,c},{r,c-1},{r,c+1}}
-  while #stack > 0 do
-    local cell = deli(stack, #stack)
-    local cr, cc = cell[1], cell[2]
-    if cr>=1 and cr<=12 and cc>=1 and cc<=6 then
-      if not clr[cr][cc] and (p.grid[cr][cc] == tc or p.grid[cr][cc] == tc+4) then
-        clr[cr][cc] = true
-        add(stack, {cr-1,cc})
-        add(stack, {cr+1,cc})
-        add(stack, {cr,cc-1})
-        add(stack, {cr,cc+1})
-      end
-    end
-  end
-end
-
-function cluster(p, r, c, g, vis, grp)
-  vis[r][c] = true
-  add(grp, {r, c})
-  for d in all({{-1,0},{1,0},{0,-1},{0,1}}) do
-    local ar, ac = r+d[1], c+d[2]
-    if ar>=1 and ar<=12 and ac>=1 and ac<=6 then
-      if not vis[ar][ac] and p.grid[ar][ac] == g then
-        cluster(p, ar, ac, g, vis, grp)
-      end
-    end
-  end
-end
-
-function count_clr(clr)
-  local n = 0
-  for r=1,12 do for c=1,6 do if clr[r][c] then n += 1 end end end
-  return n
-end
-
-function do_clear(p)
-  if not p.pending then return end
-  local clr = p.pending.clr
-  local primary = p.pending.primary
-  local secondary = p.pending.secondary
-  local opp = (p == p1) and p2 or p1
-  local cnt = 0
-
-  for r=1,12 do
-    for c=1,6 do
-      if clr[r][c] or (p.grid[r][c] == 10 and near_clr(r, c, clr)) then
-        cnt += 1
-        local px = p.x + (c-1)*6 + 3
-        local py = 16 + (r-1)*8 + 4
-        local col = gem_col(p.grid[r][c])
-        for i=1,5 do
-          add(parts, {x=px, y=py, vx=rnd(3)-1.5, vy=rnd(3)-2.5, col=col, life=18})
-        end
-        p.grid[r][c] = 0
-      end
-    end
-  end
-
-  p.combo += 1
-  local is_primary = primary > 0
-  local mult = is_primary and 1.0 or 0.5
-  local dmg = flr(cnt * 3 * mult * p.combo)
-  opp.hp = max(0, opp.hp - dmg)
-  p.super = min(100, p.super + cnt * 6)
-  p.score += dmg * 10
-
-  -- garbage payload
-  local gb = is_primary and (flr(cnt/2) + (p.combo-1)*2) or flr(cnt/2)
-  if gb < 1 then gb = 1 end
-  send_garbage(opp, gb)
-
-  flash = 3
-  add(msgs, {txt="-"..dmg.." hp!", x=58, y=32, col=8, life=40})
-
-  -- punch anim by intensity
-  if p.combo >= 3 then p.anim="upper" shake=14 sfx(6)
-  elseif p.combo == 2 or cnt >= 5 then p.anim="hook" shake=10 sfx(5)
-  elseif cnt >= 4 then p.anim="straight" shake=8 sfx(4)
-  else p.anim="jab" shake=6 sfx(3) end
-  p.anim_t = 60
-  opp.anim = "flinch" opp.anim_t = 60
-
-  p.pending = nil
-end
-
-function near_clr(r, c, clr)
-  for d in all({{-1,0},{1,0},{0,-1},{0,1}}) do
-    local ar, ac = r+d[1], c+d[2]
-    if ar>=1 and ar<=12 and ac>=1 and ac<=6 then
-      if clr[ar][ac] then return true end
-    end
-  end
-  return false
-end
-
-function send_garbage(p, count)
-  local rem = count
-  for r=1,12 do
-    for c=1,6 do
-      if rem > 0 and p.grid[r][c] == 0 then
-        p.grid[r][c] = 10
-        rem -= 1
-      end
-    end
-  end
-  apply_gravity(p)
-  sfx(8)
-  add(msgs, {txt="garbage +"..count, x=p.x+2, y=20, col=8, life=40})
-end
-
-function trigger_super(p)
-  if p.super < 100 then return end
-  p.super = 0
-  local opp = (p == p1) and p2 or p1
-  -- clear bottom 3 rows
-  for r=10,12 do
-    for c=1,6 do p.grid[r][c] = 0 end
-  end
-  apply_gravity(p)
-  opp.hp = max(0, opp.hp - 35)
-  send_garbage(opp, 10)
-  shake = 16 flash = 6 sfx(9)
-  p.anim = "upper" opp.anim = "flinch"
-  p.anim_t = 72 opp.anim_t = 72
-  add(msgs, {txt="super! -35", x=50, y=30, col=10, life=50})
-end
-
-function gem_col(g)
-  if g == 1 or g == 5 then return 8 end
-  if g == 2 or g == 6 then return 12 end
-  if g == 3 or g == 7 then return 11 end
-  if g == 4 or g == 8 then return 10 end
-  if g == 9 then return 7 end
-  return 5 -- counter / unknown
 end
 
 function _draw()
-  cls(1)
+  cls(0)
+  if state==0 then
+    -- title screen
+    rectfill(0,0,127,127,1)
+    rectfill(0,0,127,10,0)
+    print("live 148k  kick.com/broner",10,3,11)
+    rect(10,14,117,54,10)
+    rect(12,16,115,52,8)
+    print("crash out",48,22,10)
+    print("ring rush",48,34,8)
+    print("puzzle boxing",38,44,7)
+    spr(1,24,64,3,3)
+    spr(4,80,64,3,3)
+    print("vs",60,76,10)
+    if (g_t%30<15) print("press x/o to start",26,108,10)
+    print("obeats studios 2026",24,120,6)
+  elseif state==1 then
+    -- mode select
+    rectfill(0,0,127,15,1)
+    print("< select game mode",12,5,10)
+    local modes={"road to gold (30m)","quick exhibition","cpu watch demo","how to play (tut)"}
+    for i=1,4 do
+      local y=20+i*24-24
+      local sel=(mode_idx==i-1)
+      rectfill(8,y+4,119,y+24,sel and 10 or 0)
+      rect(8,y+4,119,y+24,sel and 7 or 5)
+      print((sel and "> " or "  ")..modes[i],12,y+8,sel and 0 or 7)
+    end
+    print("up/down:nav  x:select",20,118,7)
+  elseif state==6 then
+    -- 6-lesson visual training camp
+    rectfill(0,0,127,14,1)
+    print("< training camp ("..(tut_page+1).."/6)",4,4,10)
+    rect(6,18,121,62,10)
+    rectfill(6,64,121,110,1)
+    rect(6,64,121,110,5)
+    rectfill(0,113,127,127,0)
+    print("< prev",6,118,6)
+    print("["..(tut_page+1).."/6]",56,118,10)
+    print("next >",94,118,11)
 
-  -- camera shake
-  local sx, sy = 0, 0
-  if shake > 0 then
-    sx = rnd(shake) - shake/2
-    sy = rnd(shake) - shake/2
-  end
-  camera(sx, sy)
+    if tut_page==0 then
+      spr(16,14,24) print("square",10,36,10)
+      spr(20,48,24) print("orb",46,36,8)
+      spr(1,90,30,2,2)
+      print("orb touches gem = boom!",14,54,11)
+      print("1. square gems: stack",10,68,7)
+      print("2. round orbs: bombs!",10,78,10)
+      print("3. touch same color",10,88,11)
+      print("crushing throws punch!",10,98,10)
+    elseif tut_page==1 then
+      spr(16,12,24) spr(16,20,24) spr(16,12,32) spr(16,20,32)
+      print("->",32,28,10)
+      rectfill(44,22,58,36,11) rect(44,22,58,36,10)
+      spr(1,86,28,2,2)
+      print("2x2 fuse = heavy hits!",14,54,10)
+      print("1. 4 gems in 2x2 block",10,68,7)
+      print("2. auto-fuse power gem",10,78,11)
+      print("3. crush for big hits!",10,88,10)
+      print("drops blocks on rival!",10,98,6)
+    elseif tut_page==2 then
+      rectfill(12,22,24,25,8) print("!6",28,21,10)
+      spr(24,14,28)
+      print("->",38,30,10)
+      spr(24,54,28) print("3",57,30,7)
+      print("->",72,30,10)
+      spr(16,90,28)
+      print("3-2-1 blocks -> gems!",16,54,10)
+      print("1. attacks drop stones",10,68,7)
+      print("2. count down 3-2-1",10,78,10)
+      print("3. turns into gems!",10,88,11)
+      print("pop nearby to break!",10,98,6)
+    elseif tut_page==3 then
+      rectfill(10,26,44,34,1) rectfill(10,26,44,34,10)
+      rect(10,26,44,34,7) print("100%",16,28,0)
+      rectfill(56,22,72,38,8) rect(56,22,72,38,10) print("x",62,27,7)
+      spr(1,92,28,2,2)
+      print("at 100%: tap red [x]!",18,54,10)
+      print("1. gems fill super bar",10,68,7)
+      print("2. at 100% tap red [x]",10,78,10)
+      print("3. cast super finisher",10,88,11)
+      print("heavy blocks on enemy!",10,98,6)
+    elseif tut_page==4 then
+      rect(10,22,38,44,8) print("count",14,24,8) print("7",22,32,10)
+      spr(1,60,34,2,2)
+      circ(96,32,(g_t%14)+2,10)
+      print("rapidly tap to get up!",16,54,11)
+      print("1. 0 hp = knockdown!",10,68,7)
+      print("2. rapidly tap screen",10,78,10)
+      print("3. beat 10 for +28 hp!",10,88,11)
+      print("3 knockdowns = t.k.o.!",10,98,8)
+    else
+      print("d-pad",16,26,7) print("a / b",56,26,7) print("ready!",92,26,10)
+      print("tap [x] to enter ring!",16,54,10)
+      print("1. d-pad: move gems",10,68,7)
+      print("2. a / b: rotate gems",10,78,11)
+      print("3. x: 100% super move",10,88,10)
+      print("tap screen: recover!",10,98,10)
+    end
+  elseif state==4 then
+    -- live combat view
+    local a=arenas[sel_arena]
+    rectfill(0,0,127,15,1)
+    rectfill(3,3,45,8,8) rectfill(3,3,3+flr(42*(p1.hp/100)),8,11)
+    rectfill(81,3,123,8,8) rectfill(81,3,81+flr(42*(p2.hp/100)),8,11)
+    print(roster[p1_idx].name,4,10,10)
+    print(roster[p2_idx].name,85,10,10)
 
-  if state == 0 then
-    draw_title()
-  else
-    draw_hud()
+    -- center ring & backdrop
+    rectfill(41,16,87,87,a.bg)
+    rectfill(41,88,87,113,a.flr)
+    line(41,46,87,46,a.ropes)
+    line(41,64,87,64,a.ropes)
+    line(41,82,87,82,a.ropes)
+
+    -- draw boards
     draw_board(p1)
     draw_board(p2)
-    draw_ring()
 
-    if state == 2 then
-      rectfill(20, 50, 108, 70, 0)
-      print(ko_msg or "k.o.!", 30, 57, 10)
-      print("press x/o", 40, 64, 7)
-    end
+    -- draw boxers
+    spr(1,48,72,2,2)
+    spr(4,72,72,2,2)
+
+    -- super gauges
+    rectfill(4,118,38,123,0)
+    rectfill(4,118,4+flr(34*(p1.super/100)),123,p1.super>=100 and 10 or 11)
+    print("sp",40,118,p1.super>=100 and 10 or 7)
+
+    rectfill(88,118,122,123,0)
+    rectfill(88,118,88+flr(34*(p2.super/100)),123,p2.super>=100 and 10 or 11)
+
+    -- chat ticker
+    rectfill(41,102,87,113,0) rect(41,102,87,113,a.accent)
+    print("live 150k",44,104,a.accent)
   end
-
-  -- fx
-  for pt in all(parts) do
-    pset(pt.x, pt.y, pt.col)
-  end
-  for f in all(msgs) do
-    print(f.txt, f.x+1, f.y+1, 0)
-    print(f.txt, f.x, f.y, f.col)
-  end
-
-  if flash > 0 then
-    rectfill(0, 0, 128, 128, flr((flash%2)==0 and 7 or 6))
-  end
-  camera(0, 0)
-end
-
-function draw_title()
-  rectfill(0, 0, 128, 128, 1)
-  rectfill(10, 12, 118, 56, 0)
-  rect(10, 12, 118, 56, 10)
-  print("crash out", 36, 22, 10)
-  print("ring rush", 34, 36, 8)
-  print("pico-8 puzzle boxing", 22, 64, 7)
-  if flr(t() * 2) % 2 == 0 then
-    print("press x/o to start", 24, 90, 10)
-  end
-end
-
-function draw_hud()
-  rectfill(0, 0, 128, 14, 0)
-  print("broner", 4, 4, 7)
-  print("deen", 100, 4, 7)
-  print(round_t < 10 and "0"..round_t or round_t, 58, 4, 10)
-
-  -- hp bars
-  rectfill(4, 10, 44, 13, 8)
-  rectfill(4, 10, 4 + flr(40 * p1.hp / 100), 13, 11)
-  rectfill(82, 10, 122, 13, 8)
-  rectfill(82, 10, 82 + flr(40 * p2.hp / 100), 13, 11)
-
-  -- super meters
-  rectfill(4, 114, 44, 117, 5)
-  rectfill(4, 114, 4 + flr(40 * p1.super / 100), 117, 10)
-  rectfill(82, 114, 122, 117, 5)
-  rectfill(82, 114, 82 + flr(40 * p2.super / 100), 117, 10)
 end
 
 function draw_board(p)
-  rect(p.x - 1, 15, p.x + 36, 112, 5)
-  rectfill(p.x, 16, p.x + 35, 111, 0)
-
+  rect(p.ox-1,15,p.ox+37,113,5)
+  rectfill(p.ox,16,p.ox+36,112,0)
   for r=1,12 do
     for c=1,6 do
-      local g = p.grid[r][c]
-      if g != 0 then
-        draw_gem(p.x + (c-1)*6, 16 + (r-1)*8, g)
+      local g=p.grid[r][c]
+      if g>0 then
+        local bx=p.ox+(c-1)*6
+        local by=16+(r-1)*8
+        if g<=4 then
+          rectfill(bx,by,bx+5,by+7,g==1 and 8 or (g==2 and 12 or (g==3 and 11 or 10)))
+          rect(bx,by,bx+5,by+7,7)
+        elseif g<=8 then
+          circfill(bx+3,by+4,3,g==5 and 8 or (g==6 and 12 or (g==7 and 11 or 10)))
+          circ(bx+3,by+4,3,7)
+        elseif g==10 then
+          rectfill(bx,by,bx+5,by+7,5)
+          print("3",bx+1,by+1,7)
+        end
       end
     end
   end
-
-  if p.pair and (p.state == "fall") then
-    draw_gem(p.x + (p.pair.x-1)*6, 16 + (p.pair.y-1)*8, p.pair.g1)
-    local sx, sy = sub_xy(p.pair.rot, p.pair.x, p.pair.y)
-    if sy >= 1 and sy <= 12 and sx >= 1 and sx <= 6 then
-      draw_gem(p.x + (sx-1)*6, 16 + (sy-1)*8, p.pair.g2)
-    end
+  if p.pair then
+    local px=p.ox+(flr(p.pair.x)-1)*6
+    local py=16+(flr(p.pair.y)-1)*8
+    rectfill(px,py,px+5,py+7,8) rect(px,py,px+5,py+7,7)
   end
-end
-
-function draw_gem(x, y, g)
-  local col = gem_col(g)
-  local is_crash = (g >= 5 and g <= 8)
-  local is_counter = (g == 10)
-  rectfill(x, y, x+5, y+7, col)
-  rect(x, y, x+5, y+7, 0)
-  -- bevel highlight
-  rectfill(x+1, y+1, x+4, y+1, 7)
-  if is_crash then
-    -- crash orb inner mark
-    rectfill(x+2, y+3, x+3, y+4, 0)
-  elseif is_counter then
-    -- counter gem hatch
-    pset(x+1, y+2, 6)
-    pset(x+4, y+5, 6)
-  end
-end
-
-function draw_ring()
-  rectfill(41, 16, 86, 111, 0)
-  line(41, 45, 86, 45, 6)
-  line(41, 65, 86, 65, 6)
-  line(41, 85, 86, 85, 6)
-  -- simple fighters
-  local b1y = 75 + (p1.anim != "idle" and -2 or 0)
-  local b2y = 75 + (p2.anim != "idle" and -2 or 0)
-  rectfill(46, b1y, 54, b1y+15, 4)
-  rectfill(72, b2y, 80, b2y+15, 4)
-  -- gloves lunge on punch
-  if p1.anim != "idle" and p1.anim != "flinch" then rectfill(54, b1y+4, 60, b1y+9, 8) end
-  if p2.anim != "idle" and p2.anim != "flinch" then rectfill(66, b2y+4, 72, b2y+9, 12) end
 end
 __gfx__
+8e8e8e8e8e8e8e8e0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+e8e8e8e8e8e8e8e80000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+8e8e8e8e8e8e8e8e0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+e8e8e8e8e8e8e8e80000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+8e8e8e8e8e8e8e8e0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+e8e8e8e8e8e8e8e80000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+8e8e8e8e8e8e8e8e0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+e8e8e8e8e8e8e8e80000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+8e8e8e8e8e8e8e8e0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+e8e8e8e8e8e8e8e80000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+8e8e8e8e8e8e8e8e0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+e8e8e8e8e8e8e8e80000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+8e8e8e8e8e8e8e8e0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+e8e8e8e8e8e8e8e80000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+8e8e8e8e8e8e8e8e0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+e8e8e8e8e8e8e8e80000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+33b33b33b33b33b33b33b33b33b33b33000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+3b33b33b33b33b33b33b33b33b33b33b000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+b33b33b33b33b33b33b33b33b33b33b3000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+33b33b33b33b33b33b33b33b33b33b33000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+3b33b33b33b33b33b33b33b33b33b33b000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+b33b33b33b33b33b33b33b33b33b33b3000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+33b33b33b33b33b33b33b33b33b33b33000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+3b33b33b33b33b33b33b33b33b33b33b000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+b33b33b33b33b33b33b33b33b33b33b3000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+33b33b33b33b33b33b33b33b33b33b33000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+3b33b33b33b33b33b33b33b33b33b33b000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+b33b33b33b33b33b33b33b33b33b33b3000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+33b33b33b33b33b33b33b33b33b33b33000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+3b33b33b33b33b33b33b33b33b33b33b000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+b33b33b33b33b33b33b33b33b33b33b3000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+33b33b33b33b33b33b33b33b33b33b33000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+__gff__
+0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+__map__
+0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 __sfx__
+01010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+01010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+01010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+01010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+01010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+01010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+01010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+01010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 __music__
+00 01020304

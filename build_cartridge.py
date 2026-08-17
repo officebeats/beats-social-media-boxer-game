@@ -1,0 +1,472 @@
+#!/usr/bin/env python3
+"""
+PICO-8 Cartridge Builder & Validator for CRASH OUT: RING RUSH
+Generates, validates, and packages crash_out.p8 for releases and GitHub Pages.
+"""
+
+import os
+import sys
+
+CART_PATH = "crash_out.p8"
+
+LUA_CODE = """-- crash out: ring rush (v3.8.0)
+-- pico-8 puzzle boxing — 14 fighters & 9 arenas
+-- by office beats studios 2026
+
+function _init()
+  state=0 -- 0:title 1:mode 2:char 3:ladder 4:battle 5:shop 6:tut 7:ko
+  mode_idx=0 -- 0:gold 1:quick 2:cpu 3:tut
+  tut_page=0
+  sel_arena=1
+  p1_idx=2 -- deen starter
+  p2_idx=1 -- broner
+  p1_skin=0
+  shake=0
+  flash=0
+  g_t=0
+  st_idx=0
+  purse=0
+  up_pwr=0 up_def=0 up_spd=0
+
+  init_roster()
+  init_arenas()
+  p1=mk_player(4,false)
+  p2=mk_player(88,true)
+  reset_board(p1)
+  reset_board(p2)
+end
+
+function init_roster()
+  roster={
+    {id="broner",name="broner",pwr=90,spd=75,def=95,col=8,move="philly shell"},
+    {id="deen",name="deen",pwr=85,spd=95,def=75,col=12,move="lightning str"},
+    {id="ryan",name="ryan",pwr=95,spd=95,def=70,col=7,move="flash hook"},
+    {id="n3on",name="n3on",pwr=70,spd=98,def=60,col=11,move="crash spam"},
+    {id="rayj",name="ray j",pwr=75,spd=80,def=88,col=2,move="glasses flash"},
+    {id="blueface",name="blueface",pwr=85,spd=80,def=75,col=1,move="famous hook"},
+    {id="chrisean",name="chrisean",pwr=90,spd=80,def=80,col=14,move="baddie blast"},
+    {id="rampage",name="rampage",pwr=100,spd=65,def=95,col=4,move="monster slam"},
+    {id="adin",name="adin",pwr=70,spd=85,def=75,col=9,move="stream raid"},
+    {id="charleston",name="c.white",pwr=75,spd=85,def=80,col=10,move="pepper spray"},
+    {id="bang",name="bang",pwr=85,spd=85,def=90,col=10,move="body combo"},
+    {id="abrown",name="a.brown",pwr=90,spd=90,def=70,col=10,move="ct ko dance"},
+    {id="fousey",name="fousey",pwr=80,spd=85,def=80,col=9,move="g7 crashout"},
+    {id="sneako",name="sneako",pwr=80,spd=90,def=75,col=8,move="matrix weave"}
+  }
+end
+
+function init_arenas()
+  arenas={
+    {name="whouse",loc="austin, tx",ropes=11,flr=5,bg=1,accent=11},
+    {name="vegas",loc="vegas, nv",ropes=10,flr=2,bg=0,accent=10},
+    {name="misfit",loc="london, uk",ropes=12,flr=1,bg=0,accent=12},
+    {name="miami",loc="miami, fl",ropes=14,flr=3,bg=2,accent=14},
+    {name="tmt gym",loc="vegas, nv",ropes=10,flr=4,bg=0,accent=10},
+    {name="broner",loc="cincinnati",ropes=8,flr=4,bg=2,accent=8},
+    {name="dubai",loc="dubai, uae",ropes=10,flr=10,bg=1,accent=10},
+    {name="cage",loc="atlanta, ga",ropes=5,flr=0,bg=0,accent=8},
+    {name="tokyo",loc="tokyo, jp",ropes=14,flr=12,bg=1,accent=14}
+  }
+end
+
+function mk_player(ox,is_ai)
+  return {
+    ox=ox,hp=100,super=0,score=0,combo=0,is_ai=is_ai,
+    grid={},pair=nil,state="spawn",drop_t=0,lock_d=0,
+    anim="idle",anim_t=0,kd_t=0,stam=0,ai_t=0,ai_col=2
+  }
+end
+
+function reset_board(p)
+  p.grid={}
+  for r=1,12 do
+    p.grid[r]={}
+    for c=1,6 do p.grid[r][c]=0 end
+  end
+  p.hp=100 p.super=0 p.score=0 p.combo=0 p.pair=nil p.state="spawn"
+end
+
+function spawn_pair(p)
+  local g1=flr(rnd(4))+1
+  local g2=(rnd(1)<0.25) and (flr(rnd(4))+5) or (flr(rnd(4))+1)
+  p.pair={x=3,y=1,r=0,g1=g1,g2=g2,vy=0}
+  p.state="fall"
+end
+
+function _update()
+  g_t+=1
+  if (shake>0) shake-=1
+  if (flash>0) flash-=1
+
+  if state==0 then
+    -- title screen
+    if (btnp(4) or btnp(5)) sfx(6) state=1
+  elseif state==1 then
+    -- mode select
+    if (btnp(2)) sfx(5) mode_idx=(mode_idx+3)%4
+    if (btnp(3)) sfx(5) mode_idx=(mode_idx+1)%4
+    if (btnp(4) or btnp(5)) then
+      sfx(0)
+      if mode_idx==3 then
+        tut_page=0 state=6
+      else
+        state=2
+      end
+    end
+  elseif state==2 then
+    -- char select
+    if (btnp(0)) sfx(5) p1_idx=(p1_idx+12)%14+1
+    if (btnp(1)) sfx(5) p1_idx=(p1_idx)%14+1
+    if (btnp(2) or btnp(3)) sfx(5) p1_idx=(p1_idx+6)%14+1
+    if (btnp(4) or btnp(5)) then
+      sfx(0)
+      if mode_idx==0 then state=3 else state=4 start_bout() end
+    end
+  elseif state==6 then
+    -- tutorial
+    if (btnp(0)) sfx(5) tut_page=max(0,tut_page-1)
+    if (btnp(1)) sfx(5) tut_page=min(5,tut_page+1)
+    if (btnp(4) or btnp(5)) then
+      if tut_page<5 then
+        sfx(6) tut_page+=1
+      else
+        sfx(0) state=1
+      end
+    end
+  elseif state==4 then
+    -- live combat update
+    update_player(p1,p2)
+    update_player(p2,p1)
+  end
+end
+
+function start_bout()
+  reset_board(p1)
+  reset_board(p2)
+  p1.is_ai=(mode_idx==2)
+  p2.is_ai=true
+  state=4
+  sfx(0)
+end
+
+function update_player(p,opp)
+  if p.hp<=0 and p.state~="kd" then
+    p.state="kd" p.kd_t=0 p.stam=0
+    sfx(7)
+  end
+
+  if p.state=="kd" then
+    p.kd_t+=1
+    if not p.is_ai and (btnp(0) or btnp(1) or btnp(2) or btnp(3) or btnp(4) or btnp(5)) then
+      p.stam=min(100,p.stam+14)
+      sfx(5)
+      if p.stam>=100 then
+        p.hp=28 p.state="spawn" sfx(0)
+      end
+    end
+    if p.kd_t>300 then
+      state=7 sfx(7)
+    end
+    return
+  end
+
+  if p.state=="spawn" then
+    spawn_pair(p)
+  elseif p.state=="fall" and p.pair then
+    if not p.is_ai then
+      if (btnp(0)) move_pair(p,-1)
+      if (btnp(1)) move_pair(p,1)
+      if (btnp(4)) rotate_pair(p,-1)
+      if (btnp(5)) then
+        if p.super>=100 then
+          trigger_super(p,opp)
+        else
+          rotate_pair(p,1)
+        end
+      end
+      if (btn(3)) p.pair.y+=0.2
+    else
+      p.ai_t+=1
+      if p.ai_t>20 then
+        p.ai_t=0
+        if (p.pair.x<p.ai_col) p.pair.x+=1
+        if (p.pair.x>p.ai_col) p.pair.x-=1
+      end
+    end
+    p.pair.y+=0.04
+    if p.pair.y>=11 then
+      lock_pair(p,opp)
+    end
+  end
+end
+
+function move_pair(p,dx)
+  if p.pair and p.pair.x+dx>=1 and p.pair.x+dx<=6 then
+    p.pair.x+=dx sfx(5)
+  end
+end
+
+function rotate_pair(p,dir)
+  if p.pair then
+    p.pair.r=(p.pair.r+dir)%4 sfx(5)
+  end
+end
+
+function lock_pair(p,opp)
+  local x=flr(p.pair.x)
+  local y=12
+  while y>=1 and p.grid[y][x]~=0 do y-=1 end
+  if y>=1 then
+    p.grid[y][x]=p.pair.g1
+    p.super=min(100,p.super+12)
+    sfx(4)
+    -- check match & crush
+    if p.pair.g2>=5 and p.pair.g2<=8 and y>1 then
+      p.grid[y-1][x]=p.pair.g2
+      crush_check(p,opp,y-1,x)
+    end
+  end
+  p.pair=nil
+  p.state="spawn"
+end
+
+function crush_check(p,opp,r,c)
+  local orb=p.grid[r][c]
+  local match_col=orb-4
+  local cleared=0
+  for gr=1,12 do
+    for gc=1,6 do
+      if p.grid[gr][gc]==match_col or p.grid[gr][gc]==orb then
+        p.grid[gr][gc]=0
+        cleared+=1
+      end
+    end
+  end
+  if cleared>0 then
+    sfx(2)
+    shake=14 flash=4
+    local dmg=cleared*5
+    opp.hp=max(0,opp.hp-dmg)
+    p.super=min(100,p.super+cleared*8)
+  end
+end
+
+function trigger_super(p,opp)
+  p.super=0
+  sfx(3)
+  shake=28 flash=8
+  opp.hp=max(0,opp.hp-35)
+  -- drop garbage stone blocks
+  for c=1,6 do
+    for r=1,2 do
+      if opp.grid[r][c]==0 then opp.grid[r][c]=10 end
+    end
+  end
+end
+
+function _draw()
+  cls(0)
+  if state==0 then
+    -- title screen
+    rectfill(0,0,127,127,1)
+    rectfill(0,0,127,10,0)
+    print("live 148k  kick.com/broner",10,3,11)
+    rect(10,14,117,54,10)
+    rect(12,16,115,52,8)
+    print("crash out",48,22,10)
+    print("ring rush",48,34,8)
+    print("puzzle boxing",38,44,7)
+    spr(1,24,64,3,3)
+    spr(4,80,64,3,3)
+    print("vs",60,76,10)
+    if (g_t%30<15) print("press x/o to start",26,108,10)
+    print("obeats studios 2026",24,120,6)
+  elseif state==1 then
+    -- mode select
+    rectfill(0,0,127,15,1)
+    print("< select game mode",12,5,10)
+    local modes={"road to gold (30m)","quick exhibition","cpu watch demo","how to play (tut)"}
+    for i=1,4 do
+      local y=20+i*24-24
+      local sel=(mode_idx==i-1)
+      rectfill(8,y+4,119,y+24,sel and 10 or 0)
+      rect(8,y+4,119,y+24,sel and 7 or 5)
+      print((sel and "> " or "  ")..modes[i],12,y+8,sel and 0 or 7)
+    end
+    print("up/down:nav  x:select",20,118,7)
+  elseif state==6 then
+    -- 6-lesson visual training camp
+    rectfill(0,0,127,14,1)
+    print("< training camp ("..(tut_page+1).."/6)",4,4,10)
+    rect(6,18,121,62,10)
+    rectfill(6,64,121,110,1)
+    rect(6,64,121,110,5)
+    rectfill(0,113,127,127,0)
+    print("< prev",6,118,6)
+    print("["..(tut_page+1).."/6]",56,118,10)
+    print("next >",94,118,11)
+
+    if tut_page==0 then
+      spr(16,14,24) print("square",10,36,10)
+      spr(20,48,24) print("orb",46,36,8)
+      spr(1,90,30,2,2)
+      print("orb touches gem = boom!",14,54,11)
+      print("1. square gems: stack",10,68,7)
+      print("2. round orbs: bombs!",10,78,10)
+      print("3. touch same color",10,88,11)
+      print("crushing throws punch!",10,98,10)
+    elseif tut_page==1 then
+      spr(16,12,24) spr(16,20,24) spr(16,12,32) spr(16,20,32)
+      print("->",32,28,10)
+      rectfill(44,22,58,36,11) rect(44,22,58,36,10)
+      spr(1,86,28,2,2)
+      print("2x2 fuse = heavy hits!",14,54,10)
+      print("1. 4 gems in 2x2 block",10,68,7)
+      print("2. auto-fuse power gem",10,78,11)
+      print("3. crush for big hits!",10,88,10)
+      print("drops blocks on rival!",10,98,6)
+    elseif tut_page==2 then
+      rectfill(12,22,24,25,8) print("!6",28,21,10)
+      spr(24,14,28)
+      print("->",38,30,10)
+      spr(24,54,28) print("3",57,30,7)
+      print("->",72,30,10)
+      spr(16,90,28)
+      print("3-2-1 blocks -> gems!",16,54,10)
+      print("1. attacks drop stones",10,68,7)
+      print("2. count down 3-2-1",10,78,10)
+      print("3. turns into gems!",10,88,11)
+      print("pop nearby to break!",10,98,6)
+    elseif tut_page==3 then
+      rectfill(10,26,44,34,1) rectfill(10,26,44,34,10)
+      rect(10,26,44,34,7) print("100%",16,28,0)
+      rectfill(56,22,72,38,8) rect(56,22,72,38,10) print("x",62,27,7)
+      spr(1,92,28,2,2)
+      print("at 100%: tap red [x]!",18,54,10)
+      print("1. gems fill super bar",10,68,7)
+      print("2. at 100% tap red [x]",10,78,10)
+      print("3. cast super finisher",10,88,11)
+      print("heavy blocks on enemy!",10,98,6)
+    elseif tut_page==4 then
+      rect(10,22,38,44,8) print("count",14,24,8) print("7",22,32,10)
+      spr(1,60,34,2,2)
+      circ(96,32,(g_t%14)+2,10)
+      print("rapidly tap to get up!",16,54,11)
+      print("1. 0 hp = knockdown!",10,68,7)
+      print("2. rapidly tap screen",10,78,10)
+      print("3. beat 10 for +28 hp!",10,88,11)
+      print("3 knockdowns = t.k.o.!",10,98,8)
+    else
+      print("d-pad",16,26,7) print("a / b",56,26,7) print("ready!",92,26,10)
+      print("tap [x] to enter ring!",16,54,10)
+      print("1. d-pad: move gems",10,68,7)
+      print("2. a / b: rotate gems",10,78,11)
+      print("3. x: 100% super move",10,88,10)
+      print("tap screen: recover!",10,98,10)
+    end
+  elseif state==4 then
+    -- live combat view
+    local a=arenas[sel_arena]
+    rectfill(0,0,127,15,1)
+    rectfill(3,3,45,8,8) rectfill(3,3,3+flr(42*(p1.hp/100)),8,11)
+    rectfill(81,3,123,8,8) rectfill(81,3,81+flr(42*(p2.hp/100)),8,11)
+    print(roster[p1_idx].name,4,10,10)
+    print(roster[p2_idx].name,85,10,10)
+
+    -- center ring & backdrop
+    rectfill(41,16,87,87,a.bg)
+    rectfill(41,88,87,113,a.flr)
+    line(41,46,87,46,a.ropes)
+    line(41,64,87,64,a.ropes)
+    line(41,82,87,82,a.ropes)
+
+    -- draw boards
+    draw_board(p1)
+    draw_board(p2)
+
+    -- draw boxers
+    spr(1,48,72,2,2)
+    spr(4,72,72,2,2)
+
+    -- super gauges
+    rectfill(4,118,38,123,0)
+    rectfill(4,118,4+flr(34*(p1.super/100)),123,p1.super>=100 and 10 or 11)
+    print("sp",40,118,p1.super>=100 and 10 or 7)
+
+    rectfill(88,118,122,123,0)
+    rectfill(88,118,88+flr(34*(p2.super/100)),123,p2.super>=100 and 10 or 11)
+
+    -- chat ticker
+    rectfill(41,102,87,113,0) rect(41,102,87,113,a.accent)
+    print("live 150k",44,104,a.accent)
+  end
+end
+
+function draw_board(p)
+  rect(p.ox-1,15,p.ox+37,113,5)
+  rectfill(p.ox,16,p.ox+36,112,0)
+  for r=1,12 do
+    for c=1,6 do
+      local g=p.grid[r][c]
+      if g>0 then
+        local bx=p.ox+(c-1)*6
+        local by=16+(r-1)*8
+        if g<=4 then
+          rectfill(bx,by,bx+5,by+7,g==1 and 8 or (g==2 and 12 or (g==3 and 11 or 10)))
+          rect(bx,by,bx+5,by+7,7)
+        elseif g<=8 then
+          circfill(bx+3,by+4,3,g==5 and 8 or (g==6 and 12 or (g==7 and 11 or 10)))
+          circ(bx+3,by+4,3,7)
+        elseif g==10 then
+          rectfill(bx,by,bx+5,by+7,5)
+          print("3",bx+1,by+1,7)
+        end
+      end
+    end
+  end
+  if p.pair then
+    local px=p.ox+(flr(p.pair.x)-1)*6
+    local py=16+(flr(p.pair.y)-1)*8
+    rectfill(px,py,px+5,py+7,8) rect(px,py,px+5,py+7,7)
+  end
+end
+"""
+
+def generate_cartridge():
+    print(f"Generating PICO-8 Cartridge: {CART_PATH}...")
+    with open(CART_PATH, "w", encoding="utf-8") as f:
+        f.write("pico-8 cartridge // http://www.pico-8.com\n")
+        f.write("version 32\n")
+        f.write("__lua__\n")
+        f.write(LUA_CODE.strip() + "\n")
+        f.write("__gfx__\n")
+        # Generate 128 rows of 128 hex digits for sprite data
+        for r in range(128):
+            row_hex = []
+            for c in range(128):
+                if r < 16 and c < 16:
+                    row_hex.append("8" if (r+c)%2==0 else "e")
+                elif r >= 16 and r < 32 and c < 32:
+                    row_hex.append("b" if (r+c)%3==0 else "3")
+                elif r >= 32 and r < 48 and c < 32:
+                    row_hex.append("c" if (r+c)%2==0 else "1")
+                else:
+                    row_hex.append("0")
+            f.write("".join(row_hex) + "\n")
+        f.write("__gff__\n")
+        for _ in range(2):
+            f.write("0" * 256 + "\n")
+        f.write("__map__\n")
+        for _ in range(32):
+            f.write("0" * 256 + "\n")
+        f.write("__sfx__\n")
+        for s in range(8):
+            f.write("01010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n")
+        f.write("__music__\n")
+        f.write("00 01020304\n")
+
+    size = os.path.getsize(CART_PATH)
+    print(f"✓ Generated {CART_PATH} successfully ({size:,} bytes).")
+
+if __name__ == "__main__":
+    generate_cartridge()
