@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>CRASH OUT: RING RUSH (v3.6.3) — Crystal Clear Visual Training Camp</title>
+  <title>CRASH OUT: RING RUSH (v3.7.0) — 6-Lesson Training Camp with Garbage Mechanics</title>
   <style>
     :root {
       --pico-black: #000000;
@@ -3975,7 +3975,7 @@
       if (Math.floor(globalFrameCount / 22) % 2 === 0) {
         printPicoCenter('PRESS START / TOUCH', 109, 10, 1, true);
       }
-      printPicoCenter('OBEATS STUDIOS 2026  BUILD 3.6.3', 121, 6, 1);
+      printPicoCenter('OBEATS STUDIOS 2026  BUILD 3.7.0', 121, 6, 1);
     }
 
     // === MODE SELECT RENDERER ===
@@ -3992,9 +3992,8 @@
         { label: 'ROAD TO GOLD (30M)', desc: saved && saved.stageIdx > 0 ? `RESUME STAGE ${saved.stageIdx+1}/7` : '7-STAGE TOURNAMENT' },
         { label: 'QUICK EXHIBITION', desc: '1P VS CPU SINGLE BOUT' },
         { label: 'CPU WATCH DEMO', desc: 'AI VS AI EXHIBITION' },
-        { label: 'HOW TO PLAY', desc: '5-LESSON TRAINING CAMP' }
+        { label: 'HOW TO PLAY', desc: '6-LESSON TRAINING CAMP' }
       ];
-
       modes.forEach((m, idx) => {
         const y = 20 + idx * 24;
         const isSelected = (selectedModeIdx === idx);
@@ -4016,11 +4015,11 @@
     window.tutorialPage = tutorialPage;
 
     function advanceTutorial() {
-      if (tutorialPage < 4) {
+      if (tutorialPage < 5) {
         tutorialPage++;
         play808Sfx('confirm');
       } else {
-        // Lesson 5 complete: Launch Road to Gold tournament!
+        // Lesson 6 complete: Launch Road to Gold tournament!
         tutorialPage = 0;
         selectGameMode(0);
       }
@@ -4130,9 +4129,7 @@
       // Header Bar
       ctx.fillStyle = getPalColor(1);
       ctx.fillRect(0, 0, 128, 15);
-      printPico('<', 4, 4, 6, 1);
-      printPicoCenter(`TRAINING CAMP (${tutorialPage + 1}/5)`, 4, 10, 1, true);
-
+      printPicoCenter(`TRAINING CAMP (${tutorialPage + 1}/6)`, 4, 10, 1, true);
       // ── Visual Pixel-Art Animated Diorama Box (X: 6..122, Y: 18..62, H: 44) ──
       ctx.fillStyle = getPalColor(0);
       ctx.fillRect(6, 18, 116, 44);
@@ -4209,7 +4206,37 @@
         printPicoCenter('2X2 FUSE = HEAVY HITS!', 56, 10, 1);
 
       } else if (tutorialPage === 2) {
-        // ── Lesson 3: Super Meter & 100% Finisher ──
+        // ── Lesson 3: Counter Blocks & Garbage Mechanics ──
+        // Left: Incoming warning tray & Stone block with timer 3
+        ctx.fillStyle = getPalColor(8);
+        ctx.fillRect(12, 22, 12, 3);
+        printPico('!6', 26, 21, 10, 1);
+        drawTutorialGem(ctx, 14, 27, 10, false, 3, 10, 12);
+        printPico('GARBAGE', 8, 44, 8, 1);
+
+        // Center: Timer countdown stepping 3 -> 2 -> 1
+        const stepTimer = (Math.floor(globalFrameCount / 18) % 3) + 1; // 1, 2, 3
+        const displayTimer = (4 - stepTimer); // 3 -> 2 -> 1
+        drawTutorialGem(ctx, 52, 25, 10, false, displayTimer, 10, 12);
+        printPico('COUNTDOWN', 43, 44, 10, 1);
+
+        // Arrow
+        ctx.fillStyle = getPalColor(10);
+        printPico('->', 70, 30, 10, 1, true);
+
+        // Right: Stone turns into usable normal gem!
+        drawTutorialGem(ctx, 88, 25, 1, false, 3, 10, 12);
+        if (Math.floor(globalFrameCount / 8) % 2 === 0) {
+          ctx.fillStyle = getPalColor(10);
+          ctx.fillRect(86, 23, 2, 2); ctx.fillRect(100, 23, 2, 2);
+          ctx.fillRect(86, 37, 2, 2); ctx.fillRect(100, 37, 2, 2);
+        }
+        printPico('TURNS GEM', 82, 44, 11, 1, true);
+
+        printPicoCenter('3-2-1 BLOCKS -> GEMS!', 56, 10, 1);
+
+      } else if (tutorialPage === 3) {
+        // ── Lesson 4: Super Meter & 100% Finisher ──
         // Full Super Meter Bar
         ctx.fillStyle = getPalColor(1);
         ctx.fillRect(10, 24, 36, 8);
@@ -4238,8 +4265,8 @@
 
         printPicoCenter('AT 100%: TAP RED [X]!', 56, 10, 1);
 
-      } else if (tutorialPage === 3) {
-        // ── Lesson 4: Knockdown 10-Count Survival ──
+      } else if (tutorialPage === 4) {
+        // ── Lesson 5: Knockdown 10-Count Survival ──
         // Referee Count Box
         ctx.fillStyle = 'rgba(0,0,0,0.9)';
         ctx.fillRect(10, 20, 30, 24);
@@ -4264,7 +4291,7 @@
         printPicoCenter('RAPIDLY TAP TO GET UP!', 56, 11, 1);
 
       } else {
-        // ── Lesson 5: Mobile Touch Controls & Ready to Fight ──
+        // ── Lesson 6: Mobile Touch Controls & Ready to Fight ──
         // Virtual D-Pad Icon
         ctx.fillStyle = getPalColor(5);
         ctx.fillRect(14, 22, 18, 6);
@@ -4309,11 +4336,16 @@
         printPico('3. CRUSH FOR BIG HITS!', 10, 88, 10, 1);
         printPico('DROPS BLOCKS ON RIVAL!', 10, 98, 6, 1);
       } else if (tutorialPage === 2) {
+        printPico('1. ATTACKS DROP STONES', 10, 68, 7, 1);
+        printPico('2. COUNT DOWN 3-2-1', 10, 78, 10, 1, true);
+        printPico('3. TURNS INTO GEMS!', 10, 88, 11, 1);
+        printPico('POP NEARBY TO BREAK!', 10, 98, 6, 1);
+      } else if (tutorialPage === 3) {
         printPico('1. GEMS FILL SUPER BAR', 10, 68, 7, 1);
         printPico('2. AT 100% TAP RED [X]', 10, 78, 10, 1, true);
         printPico('3. CAST SUPER FINISHER', 10, 88, 11, 1);
         printPico('HEAVY BLOCKS ON ENEMY!', 10, 98, 6, 1);
-      } else if (tutorialPage === 3) {
+      } else if (tutorialPage === 4) {
         printPico('1. 0 HP = KNOCKDOWN!', 10, 68, 7, 1);
         printPico('2. RAPIDLY TAP SCREEN', 10, 78, 10, 1, true);
         printPico('3. BEAT 10 FOR +28 HP!', 10, 88, 11, 1);
@@ -4335,9 +4367,9 @@
         printPico('< MENU', 6, 118, 6, 1);
       }
 
-      printPicoCenter(`[${tutorialPage + 1}/5]`, 118, 10, 1, true);
+      printPicoCenter(`[${tutorialPage + 1}/6]`, 118, 10, 1, true);
 
-      if (tutorialPage < 4) {
+      if (tutorialPage < 5) {
         printPico('NEXT >', 92, 118, 11, 1, true);
       } else {
         printPico('FIGHT! >', 84, 118, 10, 1, true);

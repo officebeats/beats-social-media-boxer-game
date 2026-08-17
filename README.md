@@ -1,6 +1,6 @@
 # 🥊 CRASH OUT: RING RUSH — The Ultimate Adrien Broner, Deen The Great & COB (Crash Out Boys) Retro Puzzle Boxing Game
 
-[![Game Version](https://img.shields.io/badge/Version-v3.6.3-FF004D?style=for-the-badge&logo=retro-arch&logoColor=white)](https://officebeats.github.io/beats-social-media-boxer-game/)
+[![Game Version](https://img.shields.io/badge/Version-v3.7.0-FF004D?style=for-the-badge&logo=retro-arch&logoColor=white)](https://officebeats.github.io/beats-social-media-boxer-game/)
 [![Engine](https://img.shields.io/badge/Engine-PICO--8%20%2F%20HTML5%20Canvas-00E436?style=for-the-badge&logo=html5&logoColor=white)](https://officebeats.github.io/beats-social-media-boxer-game/)
 [![Frame Rate](https://img.shields.io/badge/Performance-Locked%2060%20FPS-29ADFF?style=for-the-badge&logo=speedtest&logoColor=white)](https://officebeats.github.io/beats-social-media-boxer-game/)
 [![Play Live Online](https://img.shields.io/badge/Play%20Live-GitHub%20Pages-FFEC27?style=for-the-badge&logo=github&logoColor=black)](https://officebeats.github.io/beats-social-media-boxer-game/)
@@ -48,16 +48,17 @@ Experience the retro arcade presentation with authentic 16-bit boxer sprites, an
 
 ---
 
-### 3. 📚 Interactive 5-Lesson Training Camp (How to Play)
+### 3. 📚 Interactive 6-Lesson Training Camp (How to Play)
 *Visual-first, casual-friendly tutorial with animated pixel dioramas designed specifically for non-gamers and mobile touchscreen players.*
 
-![All 5 Tutorial Lessons Contact Sheet](docs/screenshots/tutorial/all_5_tutorial_lessons_contact_sheet.png)
+![All 6 Tutorial Lessons Contact Sheet](docs/screenshots/tutorial/all_6_tutorial_lessons_contact_sheet.png)
 
-1. **Lesson 1: Match & Crush (Puzzles $\rightarrow$ Punches)**: Learn how dropping 2-gem pairs and hitting them with glowing round Crash Orbs detonates gems into boxing strikes!
+1. **Lesson 1: Match & Crush (Square Gems vs Round Orbs)**: Understand that Square Gems are passive stacking blocks and Round Orbs are active detonators that trigger boxing punches when touching matching colors!
 2. **Lesson 2: Power Gems (Fusion & Heavy Hits)**: Connect 4 matching gems into a $2\times 2$ square to auto-fuse giant Power Gems for heavy uppercuts and counter blocks!
-3. **Lesson 3: 100% Super Finisher**: Fill the bottom Super Gauge to 100%, tap the pulsing red `[X / SUPER]` button, and unleash your fighter's cinematic finisher!
-4. **Lesson 4: Knockdown 10-Count Survival**: 0 HP is a knockdown, not game over! Rapidly tap/mash anywhere on the mobile screen to fill your stamina bar and rise with a **+28 HP Second Wind**!
-5. **Lesson 5: Mobile Touch Controls & Ready to Fight**: Complete cheat-sheet for virtual D-Pad, rotation buttons, and tournament entry.
+3. **Lesson 3: Counter Blocks & Garbage Mechanics**: Attacks drop stone timer blocks on the opponent that count down $3 \rightarrow 2 \rightarrow 1$ with each drop, turning into usable normal gems or breaking when adjacent gems pop!
+4. **Lesson 4: 100% Super Finisher**: Fill the bottom Super Gauge to 100%, tap the pulsing red `[X / SUPER]` button, and unleash your fighter's cinematic finisher!
+5. **Lesson 5: Knockdown 10-Count Survival**: 0 HP is a knockdown, not game over! Rapidly tap/mash anywhere on the mobile screen to fill your stamina bar and rise with a **+28 HP Second Wind**!
+6. **Lesson 6: Mobile Touch Controls & Ready to Fight**: Complete cheat-sheet for virtual D-Pad, rotation buttons, and tournament entry.
 ---
 
 ### 4. 🥊 Boxer Selection (14-Fighter COB Roster)
@@ -165,8 +166,8 @@ Jump straight into a single bout against any unlocked fighter in any of the 9 ve
 ### 3. 📺 CPU Watch Demo (AI vs AI)
 Sit back and watch high-level CPU AI bots battle it out in real-time with full gem matching and super meter execution.
 
-### 4. 📚 How to Play / 5-Lesson Training Camp
-A visual-first interactive tutorial engineered for casual players, non-gamers, and mobile touchscreens. Features animated pixel-art demonstrations explaining gem matching, power gem fusion, 100% super moves, and the referee 10-count knockdown mashing recovery.
+### 4. 📚 How to Play / 6-Lesson Training Camp
+A visual-first interactive tutorial engineered for casual players, non-gamers, and mobile touchscreens. Features animated pixel-art demonstrations explaining gem matching vs round crash orbs, power gem fusion, stone counter block timers & garbage clearing, 100% super moves, and the referee 10-count knockdown mashing recovery.
 ---
 
 ## 🕹️ Controls & Navigation
