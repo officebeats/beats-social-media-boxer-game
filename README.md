@@ -1,6 +1,6 @@
 # 🥊 CRASH OUT: RING RUSH — The Ultimate Adrien Broner, Deen The Great & COB (Crash Out Boys) Retro Puzzle Boxing Game
 
-[![Game Version](https://img.shields.io/badge/Version-v3.8.0-FF004D?style=for-the-badge&logo=retro-arch&logoColor=white)](https://officebeats.github.io/beats-social-media-boxer-game/)
+[![Game Version](https://img.shields.io/badge/Version-v3.8.1-FF004D?style=for-the-badge&logo=retro-arch&logoColor=white)](https://officebeats.github.io/beats-social-media-boxer-game/)
 [![Download PICO-8 Cartridge](https://img.shields.io/badge/Cartridge-PICO--8%20.p8-FF004D?style=for-the-badge&logo=pico-8&logoColor=white)](https://raw.githubusercontent.com/officebeats/beats-social-media-boxer-game/main/crash_out.p8)
 [![Engine](https://img.shields.io/badge/Engine-PICO--8%20%2F%20HTML5%20Canvas-00E436?style=for-the-badge&logo=html5&logoColor=white)](https://officebeats.github.io/beats-social-media-boxer-game/)
 [![Frame Rate](https://img.shields.io/badge/Performance-Locked%2060%20FPS-29ADFF?style=for-the-badge&logo=speedtest&logoColor=white)](https://officebeats.github.io/beats-social-media-boxer-game/)
@@ -13,270 +13,268 @@
 ## ⚡ Play Live & Download Cartridge
 
 🎮 **[Click Here to Play CRASH OUT: RING RUSH Live in Browser (GitHub Pages)](https://officebeats.github.io/beats-social-media-boxer-game/)**  
-*(Optimized for Mobile Touchscreens, Desktop, Keyboard & Bluetooth Gamepads)*
+*(Optimized for Mobile Touchscreens, iOS/Android, Desktop Browsers, Keyboards & Bluetooth Gamepads)*
 
-📥 **[Download Latest PICO-8 Cartridge (`crash_out.p8`)](https://raw.githubusercontent.com/officebeats/beats-social-media-boxer-game/main/crash_out.p8)**  
-*(Load natively in PICO-8 with `pico8 -run crash_out.p8` or on Anbernic, Miyoo Mini, Steam Deck, and retro handhelds)*
+📥 **[Download Latest Native PICO-8 Cartridge (`crash_out.p8`)](https://raw.githubusercontent.com/officebeats/beats-social-media-boxer-game/main/crash_out.p8)**  
+*(Load natively in PICO-8 using `pico8 -run crash_out.p8` or on Anbernic RG35XX, Miyoo Mini Plus, Steam Deck, and retro handhelds)*
 
 ---
+
 ## 📖 Overview & Concept
 
-**Crash Out: Ring Rush** is an adrenaline-fueled 8-bit arcade puzzle-fighter built for the **PICO-8 Fantasy Console** and modernized with a high-performance **HTML5 Canvas 60 FPS engine**. 
+**Crash Out: Ring Rush** is an adrenaline-fueled 8-bit arcade puzzle-fighter engineered for the **PICO-8 Fantasy Console** and modernized with a high-performance **HTML5 Canvas 60 FPS engine**.
 
-The game combines the legendary competitive match-and-crush mechanics of Capcom's *Super Puzzle Fighter II Turbo* with the viral high-stakes culture of the **Kick warehouse boxing streams**, hosted by 4-division World Champion **Adrien "The Problem" Broner** and influencer boxing world champion **Deen The Great**, alongside the broader **Crash Out Boys (COB)** universe.
+The game combines the legendary competitive match-and-crush mechanics of Capcom's *Super Puzzle Fighter II Turbo* with the viral, high-stakes culture of the **Kick warehouse boxing streams**, hosted by 4-division World Champion **Adrien "The Problem" Broner** and influencer boxing world champion **Deen The Great**, alongside the broader **Crash Out Boys (COB)** universe.
 
-Step into the squared circle as your favorite social media boxers, YouTube & Kick streamers, and world-class champions. Clear colored gems, trigger massive combo cascades, execute signature special punches, survive dramatic 10-count knockdowns, and climb the 7-Stage **Road to Gold** tournament ladder to claim the 50-0 Championship Belt!
+Step into the squared circle as your favorite social media boxers, YouTube & Kick streamers, and world-class champions. Clear colored gems, trigger massive combo cascades, execute signature cinematic special punches, survive dramatic 10-count knockdowns, and climb the 7-Stage **Road to Gold** tournament ladder to claim the 50-0 Championship Belt!
+
+```
+═══════════════════════════════════════════════════════════════════════════
+  🥊 CRASH OUT: RING RUSH — CORE FEATURE MATRIX (v3.8.1)
+═══════════════════════════════════════════════════════════════════════════
+  ⭐ 14 Playable Fighters     • Adrien Broner, Deen The Great & 12 Viral Guests
+  ⭐ 9 Dynamic Arenas         • Kick Warehouse, Vegas Title Bout, Tokyo Dojo, etc.
+  ⭐ 4 Distinct Game Modes     • 30-Min Road to Gold, 1P vs CPU, CPU Demo, Training
+  ⭐ 6-Lesson Training Camp   • Full interactive visual guide & combat cheat sheet
+  ⭐ Grounded Lock Engine     • Anti-spin lock-in physics & instant responsive drops
+  ⭐ 10-Count KD Survival     • Button mashing second-wind recovery & 3-KD TKO rule
+  ⭐ Super Move Finishers     • 100% meter activation with unique cinematic FX
+  ⭐ 12 GBA Console Skins     • Classic Indigo, Glacier, Atomic Purple, Gold, etc.
+  ⭐ Universal Controller API • Pocket Taco Bluetooth Gamepad, Keyboard & Touch
+═══════════════════════════════════════════════════════════════════════════
+```
 
 ---
 
-## 📸 Screenshots Showcase
+## 📸 In-Game Screenshots & Visual Showcase
 
-Experience the retro arcade presentation with authentic 16-bit boxer sprites, animated arenas, and responsive GBA handheld aesthetics:
+Experience authentic retro arcade gameplay with handcrafted 16-color pixel art, 4-frame idle bouncing animations, dynamic venue lighting, and responsive handheld chassis:
 
-### 1. 🏠 Home Screen (Title & Exhibition)
-*Live Kick broadcast ticker (`LIVE 148K KICK.COM/BRONER`), title logo, and dynamic center-ring exhibition featuring animated 4-frame idle bouncing Adrien Broner and Deen The Great.*
+### 1. 🏠 Home Title Screen (Exhibition Match)
+*Live Kick broadcast banner (`LIVE 148K KICK.COM/BRONER`), retro arcade typography, and animated center-ring exhibition featuring Adrien Broner and Deen The Great in desynchronized idle stances.*
 
-| Crisp PICO-8 Direct View | Full GBA Handheld Console Experience |
-| :---: | :---: |
-| ![Crash Out Ring Rush Home Screen](docs/screenshots/gameplay/01_home_screen_canvas.png) | ![Crash Out Ring Rush GBA Title Screen](docs/screenshots/gameplay/01_home_screen_gba.png) |
+<p align="center">
+  <img src="docs/screenshots/gameplay/01_home_screen.png" alt="Crash Out Ring Rush Home Screen - Adrien Broner vs Deen The Great Title Exhibition" width="480">
+</p>
 
 ---
 
 ### 2. 🕹️ Game Mode Selection
-*Choose between the deep 30-minute 7-Stage Road to Gold Tournament Campaign, single Quick Exhibition (1P vs CPU), CPU Watch Demo, or the 5-Lesson Interactive Training Camp.*
+*Select between the deep 30-minute 7-Stage Road to Gold Tournament Campaign, single Quick Exhibition (1P vs CPU), CPU Watch Demo (AI vs AI), or the 6-Lesson Interactive Training Camp.*
 
-| Mode Selection Screen | GBA Mode Navigation |
-| :---: | :---: |
-| ![Crash Out Ring Rush Game Mode Selection](docs/screenshots/gameplay/02_game_mode_selection_canvas.png) | ![Crash Out Ring Rush Game Mode GBA View](docs/screenshots/gameplay/02_game_mode_selection_gba.png) |
-
----
-
-### 3. 📚 Interactive 6-Lesson Training Camp (How to Play)
-*Visual-first, casual-friendly tutorial with animated pixel dioramas designed specifically for non-gamers and mobile touchscreen players.*
-
-![All 6 Tutorial Lessons Contact Sheet](docs/screenshots/tutorial/all_6_tutorial_lessons_contact_sheet.png)
-
-1. **Lesson 1: Match & Crush (Square Gems vs Round Orbs)**: Understand that Square Gems are passive stacking blocks and Round Orbs are active detonators that trigger boxing punches when touching matching colors!
-2. **Lesson 2: Power Gems (Fusion & Heavy Hits)**: Connect 4 matching gems into a $2\times 2$ square to auto-fuse giant Power Gems for heavy uppercuts and counter blocks!
-3. **Lesson 3: Counter Blocks & Garbage Mechanics**: Attacks drop stone timer blocks on the opponent that count down $3 \rightarrow 2 \rightarrow 1$ with each drop, turning into usable normal gems or breaking when adjacent gems pop!
-4. **Lesson 4: 100% Super Finisher**: Fill the bottom Super Gauge to 100%, tap the pulsing red `[X / SUPER]` button, and unleash your fighter's cinematic finisher!
-5. **Lesson 5: Knockdown 10-Count Survival**: 0 HP is a knockdown, not game over! Rapidly tap/mash anywhere on the mobile screen to fill your stamina bar and rise with a **+28 HP Second Wind**!
-6. **Lesson 6: Mobile Touch Controls & Ready to Fight**: Complete cheat-sheet for virtual D-Pad, rotation buttons, and tournament entry.
----
-
-### 4. 🥊 Boxer Selection (14-Fighter COB Roster)
-*2x7 character grid showcasing 14 viral stream stars with animated idle portraits, Power/Speed/Defense stat bars, special moves, unlock status, and Drip/Alt Outfit toggle.*
-
-| Fighter Select (Adrien Broner & Deen The Great) | Fighter Select (Alt Viral Stream Outfit) |
-| :---: | :---: |
-| ![Adrien Broner Character Select](docs/screenshots/gameplay/03_boxer_selection_canvas.png) | ![Deen The Great Viral Drip Skin](docs/screenshots/gameplay/03b_boxer_selection_deen_canvas.png) |
+<p align="center">
+  <img src="docs/screenshots/gameplay/02_game_mode_selection.png" alt="Crash Out Ring Rush Game Mode Selection - Road to Gold, Quick Exhibition, CPU Watch Demo, Training Camp" width="480">
+</p>
 
 ---
 
-### 5. 🏟️ Stage Selection (9 Dynamic Venues & Tournament Bracket)
-*Fight across 9 global stream locations ranging from the Austin Kick Warehouse to the Tokyo Cyber Dome, or navigate the 7-Stage Tournament Ladder.*
+### 3. 🥊 Boxer Selection & Fighter Bio
+*Browse 14 celebrity stream fighters with animated 4-frame sprites, stat radar meters (Power, Defense, Speed, Stamina), bio cards, and toggleable Classic vs Alt Viral skins.*
 
-| 9 Dynamic Stream Arenas | 7-Stage Tournament Bracket |
-| :---: | :---: |
-| ![Stage Selection 9 Arenas](docs/screenshots/gameplay/04_stage_selection_arenas_canvas.png) | ![Tournament Ladder Bracket](docs/screenshots/gameplay/04b_stage_ladder_bracket_canvas.png) |
-
----
-
-### 6. 💥 Live Boxing Match Gameplay in Action
-*Fast-paced dual-board puzzle combat with falling gem pairs, power gem fusions, floating combo banners (`COMBO X3!`), super meter bursts, grounded in-ring boxers, live chat ticker, and animated crowd.*
-
-| In-Ring Combat & Puzzle Playfields | GBA Battle View |
-| :---: | :---: |
-| ![Adrien Broner vs Deen The Great Boxing Match Gameplay](docs/screenshots/gameplay/05_gameplay_boxing_match_canvas.png) | ![Live Boxing Match Gameplay GBA](docs/screenshots/gameplay/05_gameplay_boxing_match_gba.png) |
+<p align="center">
+  <img src="docs/screenshots/gameplay/03_boxer_selection.png" alt="Crash Out Ring Rush Boxer Selection - Deen The Great Roster Grid and Stat Radars" width="480">
+</p>
 
 ---
 
-### 7. ⏱️ Knockdown 10-Count Puzzle Survival
-*Authentic boxing knockdown system: Dropping to 0 HP triggers the referee 10-count overlay with pulsing red vignette, fallen boxer on canvas, and rapid button mashing / gem clearing for a +28 HP second-wind recovery.*
+### 4. 🏟️ Stage & Arena Selection
+*Battle across 9 dynamic venues with custom crowd density, flashing broadcast lighting, warehouse ring ropes, and arena-specific background atmospheres.*
 
-| Referee 10-Count Survival Overlay | Knockdown Scene in GBA View |
-| :---: | :---: |
-| ![Referee 10-Count Knockdown Screen](docs/screenshots/gameplay/06_knockdown_count_canvas.png) | ![Knockdown Screen Handheld View](docs/screenshots/gameplay/06_knockdown_count_gba.png) |
-
----
-
-### 8. 🏪 Trainer Gym Upgrade Shop & Press Conference Cutscenes
-*Earn purse money from each bout, attend post-fight press conferences, and upgrade Power, Defense, Speed, and Perks at the Gym Shop.*
-
-| Trainer Gym Upgrade Shop | Post-Fight Press Conference Cutscene |
-| :---: | :---: |
-| ![Trainer Gym Upgrade Shop](docs/screenshots/gameplay/07_gym_upgrade_shop_canvas.png) | ![Post Fight Press Conference Victory](docs/screenshots/gameplay/08_press_conference_victory_canvas.png) |
+<p align="center">
+  <img src="docs/screenshots/gameplay/04_stage_selection.png" alt="Crash Out Ring Rush Stage Selection - 9 Dynamic Venues and Kick Stream Warehouse" width="480">
+</p>
 
 ---
 
-## 🌟 The Complete 14-Fighter COB & Boxing Roster
+### 5. ⚡ Live Boxing Match Gameplay
+*Real-time puzzle boxing in action: falling colored gem pairs, 2x2 fused giant Power Gems, 3-turn countdown counter blocks, live health bars, Super Meters, and simultaneous sprite punches.*
 
-Every character in **Crash Out: Ring Rush** represents a real-life host, streamer, or guest from the **2026 Kick warehouse boxing streams** and **Crash Out Boys (COB)** events, each featuring custom stats, signature special moves, 4-frame athletic boxing idle animations, and unlockable alternate viral outfits:
-
-| Fighter Name | Boxing Alias / Persona | Signature Move | PWR | SPD | DEF | Classic Outfit | Alt Viral Drip Skin |
-| :--- | :--- | :--- | :---: | :---: | :---: | :--- | :--- |
-| **Adrien Broner** | *"The Problem"* (4-Div Champ) | Philly Shell Counter | 90 | 85 | 95 | Gold Trunks & Headband | Bleached Blonde Wave & Neon Trunks |
-| **Deen The Great** | *"Misfits Champ"* (Starter) | Southpaw Lightning Straight | 85 | 95 | 80 | Black Afro & Gold Trunks | Bleached Afro & Hot Pink Drip |
-| **Ryan Garcia** | *"King Ry"* (WBC Star) | Flash Left Hook | 95 | 95 | 75 | Black Quiff & Red Trunks | Golden Crown & Silk Stream Robe |
-| **N3ON** | *"Warehouse Streamer"* | Crashout Spam | 60 | 90 | 65 | Crashout Blue Hoodie | Padded Headgear & Neon Gym Gear |
-| **Ray J** | *"Tech Mogul / Host"* | Glasses Flash Counter | 75 | 80 | 85 | Emerald Silk Trunks | Gold Aviators & Platinum Silk Robe |
-| **Blueface** | *"Famous Cryp"* | Famous Overhand Hook | 85 | 80 | 75 | Famous Blue Bandana | Street Brawl Cash Bandana & Chinos |
-| **Chrisean Rock** | *"Baddie Brawler"* | Baddie Power Overhand | 90 | 80 | 80 | Baddie Pink Top & Trunks | Braided Crown & Camo Combat Trunks |
-| **Rampage Jackson** | *"MMA Heavyweight Icon"* | Rampage Monster Slam | 100 | 65 | 95 | Heavyweight Tank Black | Pride FC Camo & Monster Chain |
-| **Adin Ross** | *"Kick Stream Kingpin"* | Stream Raid Bomb | 70 | 85 | 75 | 777 Black Hoodie | Designer White Tee & Vegas Gold |
-| **Charleston White** | *"Viral Commentator"* | Microphone Pepper Rant | 75 | 85 | 80 | Iconic Brown Fedora | Cowboy Hat & Southern Leather Vest |
-| **Coach Bang** | *"Warehouse Head Trainer"* | Bang Body Hook Combo | 85 | 85 | 90 | Coach Grey Tracksuit | Corner Tracksuit & Digital Stopwatch |
-| **Antonio Brown (AB)** | *"CT Football Star"* | CT KO Showboat Dance | 90 | 90 | 70 | CT Gold Showboat Gear | Retro Jersey & Platinum Helmet Cap |
-| **Fousey** | *"G7 Commander"* | G7 Spiritual Crash Out | 80 | 85 | 80 | G7 Red Headband | Mala Meditation Beads & Black Tank |
-| **Sneako** | *"Matrix Sparrer"* | Red Pill Weave Counter | 80 | 90 | 75 | Matrix Black Sparring Gear | Red Pill Crimson Hoodie & Stealth Gear |
+<p align="center">
+  <img src="docs/screenshots/gameplay/05_boxing_match_gameplay.png" alt="Crash Out Ring Rush Live Boxing Match Gameplay - Adrien Broner vs Deen The Great Puzzle Fight" width="480">
+</p>
 
 ---
 
-## 🏟️ 9 Dynamic Animated Arenas (Full Pixel-Art Showcase)
+### 6. ⏱️ Knockdown 10-Count Puzzle Survival
+*When a fighter hits 0 HP, the referee initiates a dramatic 10-count! Rapidly mash punch buttons or tap the screen to fill the Stamina meter and score a +28 HP Second Wind before count 10.*
 
-Battle across 9 unique animated venues inspired directly by real-life Kick streams and viral boxing events. Every arena features custom multi-layer pixel art, dynamic lighting, ambient beam sweeps, flashing paparazzi cameras, and live stream chat tickers:
+<p align="center">
+  <img src="docs/screenshots/gameplay/06_knockdown_count.png" alt="Crash Out Ring Rush Knockdown 10-Count Survival - Referee Count, Mash Stamina Recovery, Second Wind" width="480">
+</p>
 
-![All 9 Dynamic Arenas Showcase](docs/screenshots/arenas/all_9_arenas_contact_sheet.png)
+---
 
-1. 🏭 **Kick Warehouse (Austin, TX)**: The home base of the Crash Out Boys featuring dark industrial corrugated steel walls, glowing neon **KICK** sign with electric green aura, yellow/black forklift with a rotating amber strobe beacon, overhead halogen studio lighting cones, and ringside VIP tripod camera with blinking red `REC` LED.
-2. 🎰 **Vegas Casino Arena (Las Vegas, NV)**: Midnight purple skyline with glowing casino skyscraper towers, sweeping golden Luxor searchlight beam, glowing **777 VIP** marquee with chasing gold perimeter bulbs, green cash bundles, and drifting gold coin sparkles.
-3. 🇬🇧 **Misfits London Arena (London, UK)**: Massive London stadium rigging with Big Ben clock tower glowing golden in the distance, dual intersecting cyan & magenta stadium laser beams, animated Jumbotron display with live sound visualizer waveform bars, and ringside paparazzi flashbulbs.
-4. 🌴 **Miami Stream Mansion (Miami, FL)**: 4-layer tropical sunset gradient (purple $\rightarrow$ hot pink $\rightarrow$ orange $\rightarrow$ gold), two swaying neon green palm trees, turquoise swimming pool with animated moving water ripples, luxury white yacht silhouette in the bay, and bobbing neon pink inflatable flamingo.
-5. 💰 **TMT Vegas Gym (Las Vegas, NV)**: Floyd Mayweather's luxury black & 24K gold training gym with massive illuminated **THE MONEY TEAM 50-0** championship banner, hanging solid gold heavy bag with chain sway, vibrating wall-mounted speed bag, and stacks of $100 banknotes.
-6. 🚨 **Cincinnati Problem Gym (Cincinnati, OH)**: Adrien Broner's authentic weathered red brick gym with realistic mortar seams, bold spray-painted **A.B. ABOUT BILLIONS** graffiti street mural, dual spinning red emergency beacon sirens with dynamic red wall light wash, heavy truck tire stacks, and gritty canvas mat.
-7. 🏙️ **Dubai Penthouse Helipad (Dubai, UAE)**: Ultra-luxury rooftop helipad overlooking the Dubai skyline with detailed Burj Khalifa spire, rotating summit aerial beacon light, animated fireworks bursts in the night sky, twinkling highway traffic lights, and circular **H** helipad floor with sequential LED runway lights.
-8. ⛓️ **Underground Fight Cage (Atlanta, GA)**: High-density diamond steel chainlink fence, flickering yellow sodium vapor street lamp with electrical hum, rising sewer steam plumes, and fiery 55-gallon oil drum burn barrel with animated flickering orange flames.
-9. 🗼 **Tokyo Neon Dome (Tokyo, JP)**: Cyber coliseum dome with pulsing magenta perspective wireframe gridlines, dual high-speed scrolling LED tickers (`TOKYO RUSH // 東京ラッシュ // CRASH OUT`), vertical matrix digital rain streaks, and high-voltage neon cyan ropes with glowing LED floor borders.
+### 7. 🏆 7-Stage Tournament Ladder Bracket
+*Climb the Road to Gold tournament bracket, earn purse prize money after every knockout victory, and face the legendary 50-0 Boss Floyd in the Grand Finale!*
+
+<p align="center">
+  <img src="docs/screenshots/gameplay/07_ladder_bracket.png" alt="Crash Out Ring Rush 7-Stage Tournament Ladder - Road to Gold Campaign Bracket" width="480">
+</p>
+
+---
+
+### 8. 🏋️ Coach Gym Upgrade Shop
+*Visit the Gym between tournament bouts to invest purse cash into permanent RPG stat boosts (Power Punching, Steel Chin Defense, Fast Drop Speed, and Diamond Seeds).*
+
+<p align="center">
+  <img src="docs/screenshots/gameplay/08_gym_upgrade_shop.png" alt="Crash Out Ring Rush Coach Gym Upgrade Shop - RPG Stat Modifiers and Shop Upgrades" width="480">
+</p>
+
+---
+
+### 9. 📜 First-Fight Quick Rules Guide
+*Session-aware quick overlay appearing before Round 1 to give first-time players an instant 4-rule summary of matching, power gem fusing, super moves, and knockdown recovery.*
+
+<p align="center">
+  <img src="docs/screenshots/gameplay/09_first_fight_quick_rules.png" alt="Crash Out Ring Rush First Fight Quick Rules Overlay" width="480">
+</p>
+
+---
+
+## 🥊 The Complete 14-Fighter Roster
+
+Every fighter in **Crash Out: Ring Rush** features custom 48×48 pixel art sprites, authentic 4-frame idle animation cadences, signature punch animations, and bespoke cinematic **Super Moves**:
+
+| # | Fighter | Role & Identity | Signature Punch | Super Finisher (100% Meter) |
+|---|---|---|---|---|
+| **01** | **Adrien "The Problem" Broner** | Host / 4-Division World Champion | Philly Shell Counter | **ABOUT BILLIONS!** (Shatters all counter blocks into Gold Power Gems, +35 HP, drops 14 blocks) |
+| **02** | **Deen The Great** | Host / Influencer Boxing Champion | Lightning Straight | **LIGHTNING STRAIGHT!** (Clears board center columns 2 & 3, drops Red/Blue Crash Orbs, +36 HP, drops 13 blocks) |
+| **03** | **Ryan Garcia** | Social Media & Boxing Superstar | Flash Left Hook | **FLASH LEFT HOOK!** (Clears bottom 4 rows with flash hook wave, +38 HP, drops 15 blocks) |
+| **04** | **N3on** | Kick Streamer / Crash Out King | Crashout Spam | **CRASH OUT SPAM!** (Detonates 8 random crash orbs with rapid-fire garbage, +28 HP, drops 16 blocks) |
+| **05** | **Ray J** | Tech Entrepreneur & Stream Icon | Glasses Flash | **CRASH OUT SPAM!** (Spawns a massive Rainbow Diamond on board, +30 HP, drops 12 blocks) |
+| **06** | **Blueface** | Rap Superstar & Exhibition Boxer | Famous Hook | **FAMOUS HOOK!** (Smashes outer columns 0 & 5 with wall slam, +35 HP, drops 14 blocks) |
+| **07** | **Chrisean Rock** | Viral Star & Tough Fighter | Baddie Overhand | **BADDIE OVERHAND!** (Clears top 4 rows with wild right hook, +32 HP, drops 14 blocks) |
+| **08** | **Rampage Jackson** | MMA Legend & Warehouse Enforcer | Rampage Slam | **RAMPAGE SLAM!** (Ground-pound shockwave shatters bottom 2 rows, +34 HP, drops 13 blocks) |
+| **09** | **Adin Ross** | Kick Stream Host / Warehouse Boss | Stream Raid Nuke | **STREAM RAID NUKE!** (Chat bomb explodes opponent's bottom 2 rows, +28 HP, drops 12 blocks) |
+| **10** | **Charleston White** | Viral Stream Guest & Agitator | Pepper Spray Rant | **PEPPER SPRAY RANT!** (Blinds opponent's bottom row with stone blocks, +30 HP, drops 14 blocks) |
+| **11** | **Coach Bang** | Veteran Warehouse Head Trainer | Bang Body Combo | **BANG BODY COMBO!** (4-hit rapid body combination clearing 3 rows, +36 HP, drops 14 blocks) |
+| **12** | **Antonio Brown (AB)** | NFL Superstar & Stream Guest | CT KO Touchdown | **CT KO TOUCHDOWN!** (Football spike converting all Blue gems to Gold, +33 HP, drops 15 blocks) |
+| **13** | **Fousey** | G7 Stream Pioneer | G7 Crash Out | **G7 CRASH OUT!** (G7 rage shockwave infecting top rows with stone blocks, +38 HP, drops 16 blocks) |
+| **14** | **Sneako** | Creative Stream Commentator | Red Pill Counter | **RED PILL COUNTER!** (Matrix bullet-time counter weave: absorbs pending garbage & heals +20 HP, drops 14 blocks) |
+
+---
+
+## 🏟️ 9 Dynamic Arenas
+
+Fight in authentic environments with distinct color palettes, dithered crowd animations, and atmospheric backdrops:
+
+1. **Kick Stream Warehouse**: The iconic underground stream venue with yellow hazard ropes, production lights, and chaotic livestream chat energy.
+2. **Underground Street Fight**: Raw asphalt battleground with chain-link fences, graffiti, and gritty nighttime street crowds.
+3. **Vegas Title Bout**: Glamorous neon-lit arena with golden championship ropes and VIP celebrity crowds.
+4. **Miami Rooftop Gym**: Golden hour sunset skyline with palm trees and ocean breeze aesthetic.
+5. **Tokyo Underground Dojo**: Atmospheric cyberpunk alley arena with glowing paper lanterns and retro neon signage.
+6. **London O2 Arena**: Grand international championship stage with high-intensity floodlights.
+7. **Brooklyn Fight Club**: Raw industrial brick warehouse with exposed pipes and localized fight fans.
+8. **Riyadh Mega Stadium**: Luxurious gold-and-purple super-stadium venue for mega-fight spectacles.
+9. **Gym Training Dojo**: Wooden floor sparring gym with punching bags and speedbag stations.
+
 ---
 
 ## 🎮 Game Modes
 
-### 1. 🏆 Road to Gold Campaign (30-Minute 7-Stage Tournament)
-Start with **Deen The Great** as your default contender and embark on a 7-stage gauntlet against increasingly dangerous rivals:
-- **Stage 1**: N3ON *(The Warmup Brawl)*
-- **Stage 2**: Adin Ross *(Miami Stream Raid)*
-- **Stage 3**: Blueface *(Street Brawl Grudge)*
-- **Stage 4**: Coach Bang *(Problem Gym Brawl)*
-- **Stage 5**: Ryan Garcia *(London Contender Bout)*
-- **Stage 6**: Rampage Jackson *(Semi-Final Boss: Heavyweight Tank)*
-- **Stage 7**: Floyd Mayweather *(World Championship Boss: 50-0 Legend)*
+### 1. 🏆 Road to Gold Campaign (30-Minute Tournament)
+- **7-Stage Progression**: Fight through an escalating ladder of contenders leading up to the 50-0 Grand Champion Boss fight!
+- **Purse Earnings**: Earn purse money for every knockout victory, plus sweep bonuses and remaining HP multipliers.
+- **Gym Upgrade Shop**: Spend your winnings on Power, Defense, Drop Speed, and Diamond Seeds.
+- **Post-Fight Press Conferences**: Experience animated post-bout interviews and Punch-Out style ranking ladder climbs.
+- **State Persistence**: Automatic `localStorage` campaign saving allows you to pause and resume anytime.
 
-*Features strict anti-skip progression, post-fight press conference cutscenes with fighter dialogue, and the Trainer Gym Upgrade Shop to buy Power, Defense, Speed, and Special Perks with your fight purse!*
+### 2. ⚡ Quick Exhibition (1P vs CPU)
+- Jump directly into a single-round or best-of-3 exhibition match.
+- Choose any unlocked fighter from the 14-boxer roster.
+- Select from all 9 dynamic arenas.
 
-### 2. 🥊 Quick Exhibition (1P vs CPU)
-Jump straight into a single bout against any unlocked fighter in any of the 9 venues with custom AI difficulty.
+### 3. 🤖 CPU Watch Demo (AI vs AI)
+- Relax and watch automated AI vs AI exhibition matches.
+- High-level heuristic AI algorithms demonstrate advanced 2x2 gem fusion and combo cascade strategies.
 
-### 3. 📺 CPU Watch Demo (AI vs AI)
-Sit back and watch high-level CPU AI bots battle it out in real-time with full gem matching and super meter execution.
+### 4. 📚 6-Lesson Training Camp & Visual Guide
+- **Lesson 1**: Match & Crush (Stack 2 identical colors with a Crash Orb to pop).
+- **Lesson 2**: Power Gems (Fuse 2×2, 2×3, or 3×3 square blocks into giant fused gems).
+- **Lesson 3**: Counter Blocks (Manage incoming garbage stones with 3-turn countdown timers).
+- **Lesson 4**: 100% Super Move Finishers (Execute cinematic character-specific Super Punches).
+- **Lesson 5**: Knockdown 10-Count Survival (Rapid button-mashing recovery mechanics).
+- **Lesson 6**: Complete Controls & Combat Cheat Sheet.
 
-### 4. 📚 How to Play / 6-Lesson Training Camp
-A visual-first interactive tutorial engineered for casual players, non-gamers, and mobile touchscreens. Features animated pixel-art demonstrations explaining gem matching vs round crash orbs, power gem fusion, stone counter block timers & garbage clearing, 100% super moves, and the referee 10-count knockdown mashing recovery.
----
-
-## 🕹️ Controls & Navigation
-
-### Desktop Keyboard Controls
-| Action | Key 1 | Key 2 | Alternative / Numpad |
-| :--- | :---: | :---: | :---: |
-| **Move Gem Left / Right** | `Arrow Left` / `Arrow Right` | `A` / `D` | `Numpad 4` / `Numpad 6` |
-| **Soft Drop** | `Arrow Down` | `S` | `Numpad 2` |
-| **Hard Drop (Instant Lock)** | `Arrow Up` | `W` | `Numpad 8` |
-| **Rotate Counter-Clockwise (CCW)** | `Z` | `K` | `Numpad 1` |
-| **Rotate Clockwise (CW) / Confirm** | `X` | `J` | `Numpad 3` / `Enter` |
-| **Trigger 100% SUPER Finisher** | `X` | `J` | `Space` |
-| **Mash Recovery (Knockdown 10-Count)** | `Z` / `X` (Mash) | `Space` / `Enter` | Any Action Key |
-| **Switch Fighter Outfit (Drip/Alt Skin)** | `Y` | `C` | Touch Outfit Badge |
-| **View Fighter Bio** | `B` | `V` | — |
-| **Pause / Back / Main Menu** | `Escape` | `Backspace` | `<` Icon |
-
-### Mobile Touch & Gamepad Controls
-- **Virtual 3D Cross D-Pad**: Smooth thumb touch navigation for moving and dropping gems.
-- **Action Buttons (A & B / X & O)**: Tactile rubber buttons for rotating and triggering super moves.
-- **On-Screen Mash Area**: Tap anywhere on the game screen during a knockdown to pump the Get-Up Stamina meter.
-- **Bluetooth Controller Support**: Fully compatible with standard Bluetooth Gamepads, Xbox / PlayStation controllers, and Pocket Taco micro-gamepads via the Gamepad API.
+<p align="center">
+  <img src="docs/screenshots/tutorial/all_6_tutorial_lessons_contact_sheet.png" alt="Crash Out Ring Rush 6-Lesson Training Camp and Combat Guide" width="600">
+</p>
 
 ---
 
-## 🎨 12 Retro GBA Handheld Console Skins
+## 🕹️ Controls & Hardware Compatibility
 
-Personalize your retro gaming experience by cycling through 12 collectible GBA chassis skins (click the top-right **SKIN** pill on the console):
+**Crash Out: Ring Rush** supports every modern input method seamlessly:
 
-1. 🟣 **Classic Indigo**: Original 2001 GBA Indigo with maroon buttons.
-2. 🟡 **Gold SP**: Special Edition metallic gold with crimson buttons.
-3. 🍇 **Atomic Purple**: Translucent 90s retro purple chassis.
-4. 🟢 **Kick Stealth**: Matte black casing with fluorescent Kick neon green buttons.
-5. ⚪ **Arctic White**: Clean snow white body with slate blue accents.
-6. 🔴 **Flame Red**: Gloss cherry red with metallic gold D-Pad.
-7. 🔵 **Cobalt Blue**: Deep metallic royal blue with yellow action buttons.
-8. 🪙 **Platinum Silver**: Brushed aluminium metal with crimson accents.
-9. 🌆 **Cyber Neon**: Miami synthwave magenta with electric cyan trim.
-10. 🕹️ **Retro DMG 1989**: Classic Game Boy pebble-gray with burgundy buttons.
-11. 🐯 **Tiger Orange**: Cincinnati Problem edition vibrant amber and gold.
-12. 🐲 **Emerald Jade**: Rayquaza-inspired forest green with gold trim.
+### ⌨️ Desktop Keyboard Controls
+| Action | Primary Key | Alternative Key |
+|---|---|---|
+| **Move Gem Left / Right** | `←` / `→` | `A` / `D` |
+| **Soft Drop** | `↓` | `S` |
+| **Hard Drop (Instant Lock)** | `↑` | `W` / `Space` |
+| **Rotate Counter-Clockwise** | `Z` | `K` |
+| **Rotate Clockwise / Confirm** | `X` | `J` / `Enter` |
+| **Trigger 100% Super Move** | `X` (at 100%) | `C` / `V` |
+| **Switch Fighter Outfit** | `Y` | `C` |
+| **View Fighter Bio** | `B` | `V` |
+| **Pause / Menu** | `Enter` | `Escape` |
 
----
+### 📱 Mobile Touch Controls
+- **On-Screen GBA D-Pad**: Tap or slide left/right/down to maneuver falling gems.
+- **Action Buttons (`A` / `B`)**: Large responsive tactile buttons with subtle haptic vibration feedback.
+- **Direct Canvas Tap**: Tap directly on the game screen to dismiss overlays, advance dialogues, or trigger quick recovery.
 
-## 🥊 Advanced Puzzle Combat Mechanics
-
-- **Gem Pairs & Colors**: 4 vibrant gem colors (Red, Green, Blue, Yellow) drop in dual pairs.
-- **Power Gem Fusion**: Adjacent matching gems automatically fuse into large rectangular **Power Gems** ($2\times 2$, $2\times 3$, $3\times 3$), multiplying damage output exponentially when crushed.
-- **Trigger Crash Gems**: Glowing circular crash gems detonate all connected gems of the same color, triggering massive chain-reaction explosions.
-- **Counter Countdown Blocks**: Damaging your opponent drops heavy stone timer blocks on their playfield (counting down $3 \rightarrow 2 \rightarrow 1$ with each gem clear).
-- **100% Super Move Bar**: Landing combos fills the bottom Super Meter. At 100%, pressing `X` releases a devastating screen-shaking 360° radial particle blast that drops massive counter blocks on your opponent!
-- **Knockdown 10-Count Survival**: Dropping to 0 HP initiates the referee count. Rapidly mash action keys or clear gems to boost your stamina bar to 100% and rise with a **+28 HP Second Wind**!
-- **Three-Knockdown Rule**: Landing 3 knockdowns on an opponent within the same round results in an instant Technical Knockout (**T.K.O.**)!
+### 🎮 Pocket Taco & Bluetooth Gamepads
+- Plug in any standard Bluetooth, Xbox, PlayStation, or **Pocket Taco** controller.
+- Automatic gamepad detection with instant button mapping.
 
 ---
 
-## 💻 Tech Stack & Architecture
+## ⚙️ Technical Architecture & PICO-8 Specs
 
-- **Engine**: PICO-8 Fantasy Console Lua / Standalone HTML5 Canvas ES6 Engine.
-- **Resolution**: 128 × 128 Pixels native virtual resolution scaled dynamically with crisp integer nearest-neighbor sampling.
-- **Graphics**: Custom $192\times 48\text{px}$ linear 4-frame athletic boxing idle animation strips playing at 7.5 FPS, grounded at mat line $Y=90$.
-- **Performance**: Fixed 60 FPS timestep accumulator with sub-millisecond draw cycle and pre-rendered 48px sprite canvases (99.8% texture bandwidth reduction).
-- **Sound**: Procedural chiptune 808 synthesizer with retro punch impacts, bell chimes, countdown ticks, and referee whistles.
-- **State Storage**: Automatic `localStorage` campaign saving, tracking purse earnings, stage progression, and RPG gym upgrades.
+- **Fantasy Console**: PICO-8 (8,192 Lua Tokens, 32 KB compressed cartridge footprint).
+- **Native Resolution**: 128 × 128 Pixels (scaled to crisp 256×256 2x high-DPI on HTML5 canvas).
+- **Palette**: PICO-8 16-Color Palette (Hex-accurate shading).
+- **Frame Rate**: Locked 60 FPS update loop (`_update60()`).
+- **Audio Engine**: 4-channel retro chiptune synthesizer with authentic 808 sub-bass kicks, referee counts, and punch sound effects.
+- **Zero External Dependencies**: Pure native JavaScript and HTML5 Canvas with no heavy frameworks.
 
 ---
 
-## 🚀 How to Run Locally
+## 🛠️ Local Development & Build Instructions
 
-### Option 1: Run with Python Web Server
+### Run Locally in Browser
 ```bash
-# Clone the repository
+# 1. Clone the repository
 git clone https://github.com/officebeats/beats-social-media-boxer-game.git
 cd beats-social-media-boxer-game
 
-# Start a local web server
+# 2. Start a lightweight local HTTP server
 python -m http.server 8000
-
-# Open in your web browser
-# Navigate to: http://localhost:8000
-```
-
-### Option 2: Run with Node.js
-```bash
-# Using npx serve
+# or with Node.js:
 npx serve .
+
+# 3. Open in browser
+open http://localhost:8000/index.html
 ```
 
-### Option 3: Run Native PICO-8 Cartridge (.p8)
+### Build & Validate PICO-8 Cartridge
 ```bash
-# 1. Download the latest cartridge:
-# https://raw.githubusercontent.com/officebeats/beats-social-media-boxer-game/main/crash_out.p8
-
-# 2. Launch in PICO-8:
-pico8 -run crash_out.p8
+# Generate and validate crash_out.p8
+python build_cartridge.py
 ```
 
-## 🔍 Search & SEO Keywords
+---
 
-*Adrien Broner Game, Adrien Broner Boxing Game, Deen The Great Game, Deen The Great Boxing Game, COB Game, Crash Out Boys Game, Crash Out Ring Rush, Kick Boxing Stream Game, Influencer Boxing Game, Super Puzzle Fighter Boxing, PICO-8 Boxing Game, Retro Arcade Boxing Puzzle, Adrien Broner vs Deen The Great, Ryan Garcia Boxing Game, N3ON Boxing Game, Adin Ross Boxing Game, Blueface Boxing Game, Chrisean Rock Boxing Game, Rampage Jackson Game, Floyd Mayweather 50-0 Boss Fight, 8-bit Handheld Boxing Game.*
+## 🔍 SEO & Search Keywords
+
+*Find this game online by searching:*  
+**Adrien Broner Game**, **Deen The Great Boxing Game**, **COB Game**, **Crash Out Boys Game**, **Crash Out Ring Rush**, **Kick Boxing Stream Game**, **Influencer Boxing Game**, **Super Puzzle Fighter Boxing**, **PICO-8 Boxing Game**, **Retro Arcade Boxing**, **Adrien Broner vs Deen The Great**, **Ryan Garcia Boxing Game**, **N3on Boxing Game**, **Adin Ross Boxing Game**, **Blueface Boxing Game**, **Chrisean Rock Boxing Game**, **Rampage Jackson Boxing Game**, **Floyd Mayweather 50-0 Boss Fight**, **8-Bit Retro Boxing**.
 
 ---
 
 ## 📜 License & Credits
 
-- **Game Design & Development**: © 2026 **Office Beats Studios**
+- **Game Design & Development**: © 2026 Office Beats Studios
 - **Inspiration**: Capcom's *Super Puzzle Fighter II Turbo*, Nintendo's *Punch-Out!!*, and the Kick stream boxing culture.
 - **Distribution**: Open-source web edition hosted on GitHub Pages.

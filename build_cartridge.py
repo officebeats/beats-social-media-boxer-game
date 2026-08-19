@@ -9,7 +9,7 @@ import sys
 
 CART_PATH = "crash_out.p8"
 
-LUA_CODE = """-- crash out: ring rush (v3.8.0)
+LUA_CODE = """-- crash out: ring rush (v3.8.1)
 -- pico-8 puzzle boxing — 14 fighters & 9 arenas
 -- by office beats studios 2026
 

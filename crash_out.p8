@@ -1,7 +1,7 @@
 pico-8 cartridge // http://www.pico-8.com
 version 32
 __lua__
--- crash out: ring rush (v3.8.0)
+-- crash out: ring rush (v3.8.1)
 -- pico-8 puzzle boxing — 14 fighters & 9 arenas
 -- by office beats studios 2026
 

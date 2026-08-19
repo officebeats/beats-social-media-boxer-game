@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>CRASH OUT: RING RUSH (v3.8.0) — PICO-8 Cartridge & 6-Lesson Training Camp</title>
+  <title>CRASH OUT: RING RUSH (v3.8.1) — PICO-8 Cartridge, Gameplay Screenshots & SEO Polish</title>
   <style>
     :root {
       --pico-black: #000000;
@@ -1429,6 +1429,10 @@
         this.dropTimer = 0;
         this.dropInterval = 45;
         this.lockDelay = 0;
+        this.groundedTimer = 0;
+        this.groundedRotations = 0;
+        this.maxGroundedRotations = 6;
+        this.maxGroundedTimer = 28; // ~0.46s max lock delay on ground
 
         this.anim = 'IDLE';
         this.animTimer = 0;
@@ -1454,6 +1458,8 @@
         this.pityBreakerCount++;
         this.dropTimer = 0;
         this.lockDelay = 0;
+        this.groundedTimer = 0;
+        this.groundedRotations = 0;
 
         // AI target column logic
         const colHeights = Array(COLS).fill(0);
@@ -1800,6 +1806,16 @@
 
       rotate(dir) {
         if (!this.pair || this.state !== 'FALLING') return;
+        const isCurrentlyGrounded = !this.isValid(this.pair.x, this.pair.y + 1, this.pair.rot);
+        if (isCurrentlyGrounded) {
+          this.groundedRotations++;
+          if (this.groundedRotations >= this.maxGroundedRotations) {
+            // Exceeded max rotations while on the ground -> Force immediate lock-in!
+            this.lockPair();
+            return;
+          }
+        }
+
         let newRot = (this.pair.rot + dir + 4) % 4;
         let newX = this.pair.x;
         let newY = this.pair.y;
@@ -1808,7 +1824,7 @@
           // Authentic Puzzle Fighter Wall-Kick & Floor-Kick Priority
           if (this.isValid(newX - 1, newY, newRot)) newX -= 1;
           else if (this.isValid(newX + 1, newY, newRot)) newX += 1;
-          else if (this.isValid(newX, newY - 1, newRot)) newY -= 1;
+          else if (this.groundedRotations < 4 && this.isValid(newX, newY - 1, newRot)) newY -= 1;
           else if (this.isValid(newX - 2, newY, newRot)) newX -= 2;
           else if (this.isValid(newX + 2, newY, newRot)) newX += 2;
         }
@@ -1819,6 +1835,9 @@
           this.pair.rot = newRot;
           play808Sfx('rotate');
           triggerHaptic(15);
+          if (!this.isValid(this.pair.x, this.pair.y + 1, this.pair.rot)) {
+            this.groundedTimer = Math.max(this.groundedTimer, 10);
+          }
         }
       }
 
@@ -2390,6 +2409,19 @@
           }
 
           if (this.pair) {
+            const isGrounded = !this.isValid(this.pair.x, this.pair.y + 1, this.pair.rot);
+            if (isGrounded) {
+              this.groundedTimer++;
+              if (this.groundedTimer >= this.maxGroundedTimer || this.groundedRotations >= this.maxGroundedRotations) {
+                this.groundedTimer = 0;
+                this.groundedRotations = 0;
+                this.lockPair();
+                return;
+              }
+            } else {
+              if (this.groundedTimer > 0) this.groundedTimer--;
+            }
+
             this.dropTimer++;
             const targetInterval = this.getDropInterval();
             if (this.dropTimer >= targetInterval) {
@@ -2397,11 +2429,7 @@
               if (this.isValid(this.pair.x, this.pair.y + 1, this.pair.rot)) {
                 this.pair.y++;
               } else {
-                this.lockDelay++;
-                if (this.lockDelay >= 8) {
-                  this.lockDelay = 0;
-                  this.lockPair();
-                }
+                this.lockPair();
               }
             }
           }
@@ -4013,7 +4041,7 @@
       if (Math.floor(globalFrameCount / 22) % 2 === 0) {
         printPicoCenter('PRESS START / TOUCH', 109, 10, 1, true);
       }
-      printPicoCenter('OBEATS STUDIOS 2026  BUILD 3.8.0', 121, 6, 1);
+      printPicoCenter('OBEATS STUDIOS 2026  BUILD 3.8.1', 121, 6, 1);
     }
 
     // === MODE SELECT RENDERER ===
@@ -4463,6 +4491,60 @@
         printPico('NEXT >', 92, 118, 11, 1, true);
       } else {
         printPico('FIGHT! >', 84, 118, 10, 1, true);
+      }
+    }
+    // === ONE-SCREEN FIRST-FIGHT QUICK RULES OVERLAY ===
+    function drawFirstFightTutorialOverlay() {
+      ctx.fillStyle = getPalColor(0);
+      ctx.fillRect(0, 0, 128, 128);
+
+      // Outer gold modal border
+      ctx.fillStyle = getPalColor(0);
+      ctx.fillRect(4, 4, 120, 120);
+      ctx.strokeStyle = getPalColor(10);
+      ctx.strokeRect(4, 4, 120, 120);
+
+      // Top Header
+      ctx.fillStyle = getPalColor(1);
+      ctx.fillRect(4, 4, 120, 14);
+      printPicoCenter('HOW TO PLAY: 4 RULES', 8, 10, 1, true);
+
+      // ── Rule 1: MATCH & CRUSH (PUNCHES) ──
+      drawTutorialGem(ctx, 10, 22, 2, false, 3, 7, 8); // Blue gem
+      drawTutorialGem(ctx, 18, 22, 5, false, 3, 7, 8, true); // Red crash orb
+      printPico('1. GEMS STACK UP', 28, 22, 7, 1);
+      printPico('ORBS DETONATE GEMS', 28, 30, 10, 1);
+
+      // ── Rule 2: POWER GEMS (HEAVY HITS) ──
+      drawTutorialGem(ctx, 10, 42, 3, true, 3, 14, 14, true); // Power gem
+      printPico('2. 4 GEMS IN 2X2', 28, 43, 7, 1);
+      printPico('FUSES POWER GEM!', 28, 51, 11, 1);
+
+      // ── Rule 3: 100% SUPER MOVE ──
+      ctx.fillStyle = getPalColor(8);
+      ctx.fillRect(10, 63, 14, 14);
+      ctx.strokeStyle = getPalColor(10);
+      ctx.strokeRect(10, 63, 14, 14);
+      printPicoCenter('X', 66, 7, 1, true);
+      printPico('3. AT 100% SUPER', 28, 64, 10, 1, true);
+      printPico('TAP [X] FOR SUPER', 28, 72, 7, 1);
+
+      // ── Rule 4: KNOCKDOWN RECOVERY ──
+      const rip = (Math.floor(globalFrameCount * 0.8) % 10) + 2;
+      ctx.strokeStyle = `rgba(255, 236, 39, ${Math.max(0, 1 - rip / 12)})`;
+      ctx.beginPath(); ctx.arc(17, 89, rip, 0, Math.PI * 2); ctx.stroke();
+      ctx.fillStyle = getPalColor(10);
+      ctx.fillRect(15, 87, 4, 6);
+      printPico('4. 0 HP = DOWN!', 28, 85, 8, 1);
+      printPico('TAP FAST TO HEAL!', 28, 93, 11, 1);
+
+      // ── Bottom Action Prompt ──
+      ctx.fillStyle = getPalColor(1);
+      ctx.fillRect(4, 107, 120, 17);
+      ctx.strokeStyle = getPalColor(10);
+      ctx.strokeRect(4, 107, 120, 17);
+      if (Math.floor(globalFrameCount / 18) % 2 === 0) {
+        printPicoCenter('PRESS [X] TO FIGHT!', 112, 10, 1, true);
       }
     }
     // === 7-STAGE TOURNAMENT LADDER SCREEN ===
@@ -6103,8 +6185,9 @@
         drawArenaSelectScreen();
       } else if (appState === 'TUTORIAL') {
         drawTutorialScreen();
+      } else if (appState === 'FIRST_FIGHT_TUTORIAL') {
+        drawFirstFightTutorialOverlay();
       } else {
-        drawBattleScreen();
         if (appState === 'KNOCKDOWN') {
           drawKnockdownOverlay();
         }
@@ -6126,10 +6209,10 @@
         appState = 'TITLE';
         play808Sfx('nav');
       } else if (appState === 'TUTORIAL') {
+      } else if (appState === 'TUTORIAL' || appState === 'FIRST_FIGHT_TUTORIAL') {
         appState = 'MODE_SELECT';
         play808Sfx('nav');
       } else if (appState === 'CHAR_SELECT') {
-        p1Locked = false;
         p2Locked = false;
         lockCountdown = -1;
         appState = 'MODE_SELECT';
@@ -6178,7 +6261,7 @@
     function selectGameMode(idx = selectedModeIdx) {
       selectedModeIdx = (idx >= 0 && idx < 4) ? idx : 0;
       if (selectedModeIdx === 3) {
-        // Mode 3: 5-Lesson Training Camp & Visual Guide
+        // Mode 3: 6-Lesson Training Camp & Visual Guide
         tutorialPage = 0;
         appState = 'TUTORIAL';
         play808Sfx('confirm');
@@ -6223,6 +6306,8 @@
         selectGameMode(selectedModeIdx);
       } else if (appState === 'TUTORIAL') {
         advanceTutorial();
+      } else if (appState === 'FIRST_FIGHT_TUTORIAL') {
+        startMatch(true);
       } else if (appState === 'CHAR_SELECT') {
         if (isFighterUnlocked(ROSTER[p1SelectIdx].id)) {
           p1Locked = true;
@@ -6269,7 +6354,18 @@
         rematchToCharSelect();
       }
     }
-    function startMatch() {
+
+    var sessionTutorialShown = false;
+    try { sessionTutorialShown = !!sessionStorage.getItem('ringrush_first_fight_tut_seen'); } catch(e) {}
+
+    function startMatch(bypassTutorial = false) {
+      if (!bypassTutorial && !sessionTutorialShown && (selectedModeIdx === 0 || selectedModeIdx === 1)) {
+        sessionTutorialShown = true;
+        try { sessionStorage.setItem('ringrush_first_fight_tut_seen', '1'); } catch(e) {}
+        appState = 'FIRST_FIGHT_TUTORIAL';
+        play808Sfx('nav');
+        return;
+      }
       switchMusicTrack();
 
       const f1 = ROSTER[p1SelectIdx] || ROSTER[0];
@@ -6283,13 +6379,11 @@
         p2SelectIdx = (f2Idx >= 0) ? f2Idx : 1;
         const arenaIdx = ARENAS.findIndex(a => a.id === st.arenaId);
         selectedArenaIdx = (arenaIdx >= 0) ? arenaIdx : 0;
-      } else if (selectedModeIdx === 1 || selectedModeIdx === 3) {
-        // Quick 1P vs CPU or CPU Watch Demo
+      } else {
+        // Quick 1P vs CPU (mode 1) or CPU Watch Demo (mode 2)
         campaignState.active = false;
         do { p2SelectIdx = Math.floor(Math.random() * ROSTER.length); }
         while (p2SelectIdx === p1SelectIdx);
-      } else {
-        campaignState.active = false;
       }
 
       p1RoundsWon = 0;
@@ -6334,38 +6428,20 @@
       p1.squish = Array(ROWS).fill(null).map(() => Array(COLS).fill(0));
       p2.squish = Array(ROWS).fill(null).map(() => Array(COLS).fill(0));
 
-      p1.state = 'SPAWN';
-      p2.state = 'SPAWN';
-      p1.pair = null;
-      p2.pair = null;
+      p1.dropTimer = 0;
+      p2.dropTimer = 0;
+      p1.aiTimer = 0;
+      p2.aiTimer = 0;
 
-      for (const p of [p1, p2]) {
-        p.anim = 'IDLE';
-        p.animTimer = 0;
-        p.dropTimer = 0;
-        p.lockDelay = 0;
-        p.aiTimer = 0;
-        p.clearTimer = 0;
-        p.superActive = false;
-        p.superTimer = 0;
-      }
-
-      impactTriggeredP1 = false;
-      impactTriggeredP2 = false;
-      impactFxTimer = 0;
-      cameraShake = 0;
-      flashFrames = 0;
-      for (let i = 0; i < MAX_PARTICLES; i++) particlePool[i].active = false;
-      for (let i = 0; i < MAX_FLOATING_TEXTS; i++) floatingTextPool[i].active = false;
-
+      appState = 'PLAYING';
+      gameState = 'PLAYING';
       roundTimer = 99;
       timerFrameCounter = 0;
-      gameState = 'PLAYING';
-      appState = 'PLAYING';
+      for (let i = 0; i < MAX_PARTICLES; i++) particlePool[i].active = false;
+      for (let i = 0; i < MAX_FLOATING_TEXTS; i++) floatingTextPool[i].active = false;
       play808Sfx('bell');
     }
 
-    
     // =========================================================================
     // 🌮 POCKET TACO & STANDARD HTML5 GAMEPAD API DRIVER
     // =========================================================================
@@ -6395,15 +6471,6 @@
         gamepadConnected = true;
         document.body.classList.add('gamepad-active');
       }
-
-      initAudio();
-
-      const isDown = (idx) => gp.buttons[idx] && (gp.buttons[idx].pressed || gp.buttons[idx].value > 0.5);
-      const isJustPressed = (idx) => {
-        const pressed = isDown(idx);
-        const wasPressed = !!lastGpButtons[idx];
-        return pressed && !wasPressed;
-      };
 
       const axisX = gp.axes[0] !== undefined ? gp.axes[0] : (gp.axes[6] || 0);
       const axisY = gp.axes[1] !== undefined ? gp.axes[1] : (gp.axes[7] || 0);
@@ -6674,6 +6741,13 @@
         }
         return;
       }
+      if (appState === 'FIRST_FIGHT_TUTORIAL') {
+        if (isStartKey(e.key)) {
+          startMatch(true);
+        }
+        return;
+      }
+
 
       if (appState === 'LADDER_BRACKET') {
         if (isStartKey(e.key)) {
@@ -6949,12 +7023,9 @@
         else p1.dropHard();
       } else if (appState === 'KNOCKDOWN') {
         playerMashStamina();
+      } else if (appState === 'FIRST_FIGHT_TUTORIAL') {
+        startMatch(true);
       }
-    });
-
-    bindBtn('btnAudio', () => {
-      audioEnabled = !audioEnabled;
-      document.getElementById('btnAudio').innerText = audioEnabled ? 'AUDIO: TRAP ON' : 'AUDIO: OFF';
     });
 
     // Direct Canvas Click Navigation for Desktop / Mobile

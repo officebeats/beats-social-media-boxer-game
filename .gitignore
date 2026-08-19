@@ -28,3 +28,7 @@ android/
 .omx/logs/
 .omx/notepad.md
 .omx/project-memory.json
+
+# Chrome CDP temp directories
+.chrome_debug/
+.chrome_shots/
