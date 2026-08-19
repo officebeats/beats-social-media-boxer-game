@@ -4509,78 +4509,91 @@
       ctx.fillRect(4, 4, 120, 14);
       ctx.strokeStyle = getPalColor(10);
       ctx.strokeRect(4, 4, 120, 14);
-      printPicoCenter('HOW TO PLAY (3 RULES)', 8, 10, 1, true);
+      printPicoCenter('HOW TO PLAY: 3 RULES', 8, 10, 1, true);
 
-      // ── Rule 1: GEMS & ORBS THROW PUNCHES (Y: 22..48) ──
+      // ── Rule 1: SQUARE GEM + ROUND CRASH ORB (Y: 22..49) ──
       ctx.fillStyle = getPalColor(1);
-      ctx.fillRect(8, 22, 17, 26);
+      ctx.fillRect(7, 21, 25, 27);
       ctx.strokeStyle = getPalColor(5);
-      ctx.strokeRect(8, 22, 17, 26);
+      ctx.strokeRect(7, 21, 25, 27);
 
-      // Green Square Gem (Bottom) + Green Round Crash Orb (Top)
-      drawTutorialGem(ctx, 12, 36, 3, false, 3, 9, 9);
-      drawTutorialGem(ctx, 12, 25, 3, false, 3, 9, 9, true);
+      // Blue Square Gem (Left) vs Blue Round Crash Orb (Right)
+      drawTutorialGem(ctx, 9, 23, 2, false, 3, 9, 10); // Type 2 = Square Blue Gem
+      printPico('GEM', 9, 36, 12, 1);
       
-      printPico('1. MATCH & PUNCH', 28, 22, 10, 1, true);
-      printPico('ORB POPS SAME GEM', 28, 31, 7, 1);
-      printPico('THROWS PUNCHES!', 28, 40, 11, 1);
+      drawTutorialGem(ctx, 20, 23, 6, false, 3, 9, 10, true); // Type 6 = Round Blue Crash Orb
+      printPico('ORB', 20, 36, 7, 1, true);
+      
+      printPico('1. GEMS & ORBS', 35, 22, 10, 1, true);
+      printPico('ORB POPS SAME GEM', 35, 31, 7, 1);
+      printPico('THROWS PUNCHES!', 35, 40, 11, 1);
 
       // Separator Line 1
       ctx.fillStyle = getPalColor(5);
-      ctx.fillRect(8, 51, 112, 1);
+      ctx.fillRect(7, 50, 114, 1);
 
-      // ── Rule 2: HEALTH METER (HP) (Y: 55..79) ──
+      // ── Rule 2: IN-GAME HEALTH BAR (HP) (Y: 53..79) ──
       ctx.fillStyle = getPalColor(1);
-      ctx.fillRect(8, 55, 17, 24);
+      ctx.fillRect(7, 53, 29, 26);
       ctx.strokeStyle = getPalColor(5);
-      ctx.strokeRect(8, 55, 17, 24);
+      ctx.strokeRect(7, 53, 29, 26);
 
-      // Mini Health Bar Widget
+      // Exact In-Game Health Bar Replica (Black container, red damage bar, pulsing green HP, white highlight)
       ctx.fillStyle = getPalColor(0);
-      ctx.fillRect(10, 59, 13, 16);
-      ctx.strokeStyle = getPalColor(8);
-      ctx.strokeRect(10, 59, 13, 16);
+      ctx.fillRect(9, 56, 25, 6);
+      ctx.fillStyle = getPalColor(8); // Red background damage
+      ctx.fillRect(10, 57, 23, 4);
       
-      // Dynamic pulsing HP fill
-      ctx.fillStyle = getPalColor(11);
-      ctx.fillRect(11, 65, 11, 9);
-      printPico('HP', 12, 60, 10, 1);
+      // Dynamic draining HP bar
+      const hpW = 14 + Math.floor(Math.sin(globalFrameCount * 0.12) * 5);
+      ctx.fillStyle = getPalColor(11); // Green active HP
+      ctx.fillRect(10, 57, hpW, 4);
+      ctx.fillStyle = getPalColor(7);  // White top highlight line
+      ctx.fillRect(10, 57, hpW, 1);
+      ctx.strokeStyle = getPalColor(5); // Dark gray border
+      ctx.strokeRect(9, 56, 25, 6);
+      
+      // In-game Fighter Name + Round stars
+      printPico('P1 HP', 9, 64, 10, 1);
+      ctx.fillStyle = getPalColor(10);
+      ctx.fillRect(9, 71, 3, 3);
+      ctx.fillRect(14, 71, 3, 3);
 
-      printPico('2. HEALTH BAR (HP)', 28, 54, 10, 1, true);
-      printPico('HITS DRAIN ENEMY', 28, 63, 7, 1);
-      printPico('0 HP = KNOCKDOWN!', 28, 72, 8, 1);
+      printPico('2. HEALTH (HP)', 39, 54, 10, 1, true);
+      printPico('HITS DRAIN HP', 39, 63, 7, 1);
+      printPico('0 HP = KNOCKDOWN', 39, 72, 8, 1);
 
       // Separator Line 2
       ctx.fillStyle = getPalColor(5);
-      ctx.fillRect(8, 82, 112, 1);
+      ctx.fillRect(7, 81, 114, 1);
 
-      // ── Rule 3: PRESS UP TO DROP FASTER (Y: 85..107) ──
+      // ── Rule 3: PRESS UP TO DROP FASTER (Y: 84..107) ──
       ctx.fillStyle = getPalColor(1);
-      ctx.fillRect(8, 85, 17, 22);
+      ctx.fillRect(7, 84, 25, 22);
       ctx.strokeStyle = getPalColor(5);
-      ctx.strokeRect(8, 85, 17, 22);
+      ctx.strokeRect(7, 84, 25, 22);
 
-      // Up Arrow Icon
+      // Up Arrow Icon with speed lines
       ctx.fillStyle = getPalColor(10);
       ctx.beginPath();
-      ctx.moveTo(16, 88);
-      ctx.lineTo(21, 94);
-      ctx.lineTo(18, 94);
-      ctx.lineTo(18, 101);
-      ctx.lineTo(14, 101);
-      ctx.lineTo(14, 94);
-      ctx.lineTo(11, 94);
+      ctx.moveTo(19, 87);
+      ctx.lineTo(24, 93);
+      ctx.lineTo(21, 93);
+      ctx.lineTo(21, 100);
+      ctx.lineTo(17, 100);
+      ctx.lineTo(17, 93);
+      ctx.lineTo(14, 93);
       ctx.closePath();
       ctx.fill();
 
       // Speed lines
       ctx.fillStyle = getPalColor(7);
-      ctx.fillRect(10, 97, 1, 6);
-      ctx.fillRect(22, 97, 1, 6);
+      ctx.fillRect(10, 95, 1, 6);
+      ctx.fillRect(28, 95, 1, 6);
 
-      printPico('3. FAST HARD DROP', 28, 84, 10, 1, true);
-      printPico('PRESS [UP] OR [W]', 28, 93, 7, 1);
-      printPico('DROPS ITEM FAST!', 28, 101, 11, 1);
+      printPico('3. FAST HARD DROP', 35, 84, 10, 1, true);
+      printPico('PRESS [UP] OR [W]', 35, 93, 7, 1);
+      printPico('DROPS ITEM FAST!', 35, 101, 11, 1);
 
       // ── Bottom Action Prompt (Y: 109..124) ──
       ctx.fillStyle = getPalColor(1);
@@ -4588,7 +4601,7 @@
       ctx.strokeStyle = getPalColor(10);
       ctx.strokeRect(4, 109, 120, 15);
       if (Math.floor(globalFrameCount / 18) % 2 === 0) {
-        printPicoCenter('PRESS [X] TO FIGHT!', 114, 10, 1, true);
+        printPicoCenter('PRESS ANY KEY OR TAP!', 114, 10, 1, true);
       }
     }
     // === 7-STAGE TOURNAMENT LADDER SCREEN ===
