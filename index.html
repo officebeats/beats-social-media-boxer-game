@@ -3747,7 +3747,7 @@
           if (Array.isArray(list) && list.length > 0) return list;
         }
       } catch (e) {}
-      return ['deen']; // Default starter: Deen The Great
+      return ['broner', 'deen']; // Default starters: Adrien Broner & Deen The Great
     }
 
     var unlockedFighters = loadUnlockedFighters();
@@ -6489,11 +6489,18 @@
       p1.squish = Array(ROWS).fill(null).map(() => Array(COLS).fill(0));
       p2.squish = Array(ROWS).fill(null).map(() => Array(COLS).fill(0));
 
+      p1.state = 'SPAWN';
+      p2.state = 'SPAWN';
+      p1.pair = null;
+      p2.pair = null;
+      p1.anim = 'IDLE';
+      p2.anim = 'IDLE';
+      p1.animTimer = 0;
+      p2.animTimer = 0;
       p1.dropTimer = 0;
       p2.dropTimer = 0;
       p1.aiTimer = 0;
       p2.aiTimer = 0;
-
       appState = 'PLAYING';
       gameState = 'PLAYING';
       roundTimer = 99;
