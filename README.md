@@ -123,10 +123,10 @@ Experience authentic retro arcade gameplay with handcrafted 16-color pixel art, 
 ---
 
 ### 9. 📜 First-Fight Quick Rules Guide
-*Session-aware quick overlay appearing before Round 1 to give first-time players an instant 4-rule summary of matching, power gem fusing, super moves, and knockdown recovery.*
+*Session-aware quick overlay appearing before Round 1 to give first-time players an instant 3-step guide: (1) Match square gems with round crash orbs to throw punches, (2) Monitor and deplete the opponent's Health Bar (HP) for knockdowns, and (3) Press [UP] (or [W]) to hard-drop falling items fast!*
 
 <p align="center">
-  <img src="docs/screenshots/gameplay/09_first_fight_quick_rules.png" alt="Crash Out Ring Rush First Fight Quick Rules Overlay" width="480">
+  <img src="docs/screenshots/gameplay/09_first_fight_quick_rules.png" alt="Crash Out Ring Rush First Fight Quick Rules Overlay - Gems and Orbs Punch, HP Meter, Up Arrow Fast Drop" width="480">
 </p>
 
 ---

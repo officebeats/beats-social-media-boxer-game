@@ -4504,47 +4504,91 @@
       ctx.strokeStyle = getPalColor(10);
       ctx.strokeRect(4, 4, 120, 120);
 
-      // Top Header
+      // Top Header Box
       ctx.fillStyle = getPalColor(1);
       ctx.fillRect(4, 4, 120, 14);
-      printPicoCenter('HOW TO PLAY: 4 RULES', 8, 10, 1, true);
-
-      // ── Rule 1: MATCH & CRUSH (PUNCHES) ──
-      drawTutorialGem(ctx, 10, 22, 2, false, 3, 7, 8); // Blue gem
-      drawTutorialGem(ctx, 18, 22, 5, false, 3, 7, 8, true); // Red crash orb
-      printPico('1. GEMS STACK UP', 28, 22, 7, 1);
-      printPico('ORBS DETONATE GEMS', 28, 30, 10, 1);
-
-      // ── Rule 2: POWER GEMS (HEAVY HITS) ──
-      drawTutorialGem(ctx, 10, 42, 3, true, 3, 14, 14, true); // Power gem
-      printPico('2. 4 GEMS IN 2X2', 28, 43, 7, 1);
-      printPico('FUSES POWER GEM!', 28, 51, 11, 1);
-
-      // ── Rule 3: 100% SUPER MOVE ──
-      ctx.fillStyle = getPalColor(8);
-      ctx.fillRect(10, 63, 14, 14);
       ctx.strokeStyle = getPalColor(10);
-      ctx.strokeRect(10, 63, 14, 14);
-      printPicoCenter('X', 66, 7, 1, true);
-      printPico('3. AT 100% SUPER', 28, 64, 10, 1, true);
-      printPico('TAP [X] FOR SUPER', 28, 72, 7, 1);
+      ctx.strokeRect(4, 4, 120, 14);
+      printPicoCenter('HOW TO PLAY (3 RULES)', 8, 10, 1, true);
 
-      // ── Rule 4: KNOCKDOWN RECOVERY ──
-      const rip = (Math.floor(globalFrameCount * 0.8) % 10) + 2;
-      ctx.strokeStyle = `rgba(255, 236, 39, ${Math.max(0, 1 - rip / 12)})`;
-      ctx.beginPath(); ctx.arc(17, 89, rip, 0, Math.PI * 2); ctx.stroke();
-      ctx.fillStyle = getPalColor(10);
-      ctx.fillRect(15, 87, 4, 6);
-      printPico('4. 0 HP = DOWN!', 28, 85, 8, 1);
-      printPico('TAP FAST TO HEAL!', 28, 93, 11, 1);
-
-      // ── Bottom Action Prompt ──
+      // ── Rule 1: GEMS & ORBS THROW PUNCHES (Y: 22..48) ──
       ctx.fillStyle = getPalColor(1);
-      ctx.fillRect(4, 107, 120, 17);
+      ctx.fillRect(8, 22, 17, 26);
+      ctx.strokeStyle = getPalColor(5);
+      ctx.strokeRect(8, 22, 17, 26);
+
+      // Green Square Gem (Bottom) + Green Round Crash Orb (Top)
+      drawTutorialGem(ctx, 12, 36, 3, false, 3, 9, 9);
+      drawTutorialGem(ctx, 12, 25, 3, false, 3, 9, 9, true);
+      
+      printPico('1. MATCH & PUNCH', 28, 22, 10, 1, true);
+      printPico('ORB POPS SAME GEM', 28, 31, 7, 1);
+      printPico('THROWS PUNCHES!', 28, 40, 11, 1);
+
+      // Separator Line 1
+      ctx.fillStyle = getPalColor(5);
+      ctx.fillRect(8, 51, 112, 1);
+
+      // ── Rule 2: HEALTH METER (HP) (Y: 55..79) ──
+      ctx.fillStyle = getPalColor(1);
+      ctx.fillRect(8, 55, 17, 24);
+      ctx.strokeStyle = getPalColor(5);
+      ctx.strokeRect(8, 55, 17, 24);
+
+      // Mini Health Bar Widget
+      ctx.fillStyle = getPalColor(0);
+      ctx.fillRect(10, 59, 13, 16);
+      ctx.strokeStyle = getPalColor(8);
+      ctx.strokeRect(10, 59, 13, 16);
+      
+      // Dynamic pulsing HP fill
+      ctx.fillStyle = getPalColor(11);
+      ctx.fillRect(11, 65, 11, 9);
+      printPico('HP', 12, 60, 10, 1);
+
+      printPico('2. HEALTH BAR (HP)', 28, 54, 10, 1, true);
+      printPico('HITS DRAIN ENEMY', 28, 63, 7, 1);
+      printPico('0 HP = KNOCKDOWN!', 28, 72, 8, 1);
+
+      // Separator Line 2
+      ctx.fillStyle = getPalColor(5);
+      ctx.fillRect(8, 82, 112, 1);
+
+      // ── Rule 3: PRESS UP TO DROP FASTER (Y: 85..107) ──
+      ctx.fillStyle = getPalColor(1);
+      ctx.fillRect(8, 85, 17, 22);
+      ctx.strokeStyle = getPalColor(5);
+      ctx.strokeRect(8, 85, 17, 22);
+
+      // Up Arrow Icon
+      ctx.fillStyle = getPalColor(10);
+      ctx.beginPath();
+      ctx.moveTo(16, 88);
+      ctx.lineTo(21, 94);
+      ctx.lineTo(18, 94);
+      ctx.lineTo(18, 101);
+      ctx.lineTo(14, 101);
+      ctx.lineTo(14, 94);
+      ctx.lineTo(11, 94);
+      ctx.closePath();
+      ctx.fill();
+
+      // Speed lines
+      ctx.fillStyle = getPalColor(7);
+      ctx.fillRect(10, 97, 1, 6);
+      ctx.fillRect(22, 97, 1, 6);
+
+      printPico('3. FAST HARD DROP', 28, 84, 10, 1, true);
+      printPico('PRESS [UP] OR [W]', 28, 93, 7, 1);
+      printPico('DROPS ITEM FAST!', 28, 101, 11, 1);
+
+      // ── Bottom Action Prompt (Y: 109..124) ──
+      ctx.fillStyle = getPalColor(1);
+      ctx.fillRect(4, 109, 120, 15);
       ctx.strokeStyle = getPalColor(10);
-      ctx.strokeRect(4, 107, 120, 17);
+      ctx.strokeRect(4, 109, 120, 15);
       if (Math.floor(globalFrameCount / 18) % 2 === 0) {
-        printPicoCenter('PRESS [X] TO FIGHT!', 112, 10, 1, true);
+        printPicoCenter('PRESS [X] TO FIGHT!', 114, 10, 1, true);
       }
     }
     // === 7-STAGE TOURNAMENT LADDER SCREEN ===
@@ -6205,14 +6249,18 @@
     }
 
     function goBack() {
+      if (appState === 'FIRST_FIGHT_TUTORIAL') {
+        startMatch(true);
+        return;
+      }
       if (appState === 'MODE_SELECT') {
         appState = 'TITLE';
         play808Sfx('nav');
       } else if (appState === 'TUTORIAL') {
-      } else if (appState === 'TUTORIAL' || appState === 'FIRST_FIGHT_TUTORIAL') {
         appState = 'MODE_SELECT';
         play808Sfx('nav');
       } else if (appState === 'CHAR_SELECT') {
+        p1Locked = false;
         p2Locked = false;
         lockCountdown = -1;
         appState = 'MODE_SELECT';
@@ -6512,6 +6560,14 @@
           playerMashStamina();
         }
       }
+      // In FIRST_FIGHT_TUTORIAL: any gamepad action button or D-pad starts match
+      if (appState === 'FIRST_FIGHT_TUTORIAL') {
+        if (btnA || btnB || btnX || btnY || btnL || btnR || btnStart || btnSelect || dpadLeft || dpadRight || dpadUp || dpadDown) {
+          startMatch(true);
+          gpNavDebounce = 15;
+          return;
+        }
+      }
 
       // Menu Navigation via D-Pad & Action Buttons
       if (gpNavDebounce === 0) {
@@ -6700,6 +6756,12 @@
     window.addEventListener('keydown', (e) => {
       initAudio();
 
+      if (appState === 'FIRST_FIGHT_TUTORIAL') {
+        e.preventDefault();
+        startMatch(true);
+        return;
+      }
+
       if (e.key === 'Escape' || e.key === 'Backspace') {
         if (appState !== 'TITLE') {
           e.preventDefault();
@@ -6741,14 +6803,6 @@
         }
         return;
       }
-      if (appState === 'FIRST_FIGHT_TUTORIAL') {
-        if (isStartKey(e.key)) {
-          startMatch(true);
-        }
-        return;
-      }
-
-
       if (appState === 'LADDER_BRACKET') {
         if (isStartKey(e.key)) {
           handleConfirmAction();
@@ -6934,6 +6988,7 @@
     };
 
     bindBtn('btnLeft', () => { triggerHaptic(18);
+      if (appState === 'FIRST_FIGHT_TUTORIAL') { startMatch(true); return; }
       if (appState === 'MODE_SELECT') selectedModeIdx = (selectedModeIdx + 3) % 4;
       else if (appState === 'TUTORIAL') prevTutorial();
       else if (appState === 'CHAR_SELECT' && !p1Locked) { p1SelectIdx = (p1SelectIdx + 13) % 14; play808Sfx('nav'); }
@@ -6943,6 +6998,7 @@
     });
 
     bindBtn('btnRight', () => { triggerHaptic(18);
+      if (appState === 'FIRST_FIGHT_TUTORIAL') { startMatch(true); return; }
       if (appState === 'MODE_SELECT') selectedModeIdx = (selectedModeIdx + 1) % 4;
       else if (appState === 'TUTORIAL') advanceTutorial();
       else if (appState === 'CHAR_SELECT' && !p1Locked) { p1SelectIdx = (p1SelectIdx + 1) % 14; play808Sfx('nav'); }
@@ -6952,6 +7008,7 @@
     });
 
     bindBtn('btnDown', () => { triggerHaptic(18);
+      if (appState === 'FIRST_FIGHT_TUTORIAL') { startMatch(true); return; }
       if (appState === 'MODE_SELECT') selectedModeIdx = (selectedModeIdx + 1) % 4;
       else if (appState === 'CHAR_SELECT' && !p1Locked) { p1SelectIdx = (p1SelectIdx + 7) % 14; play808Sfx('nav'); }
       else if (appState === 'ARENA_SELECT') { selectedArenaIdx = (selectedArenaIdx + 3) % 9; play808Sfx('nav'); }
@@ -6959,6 +7016,7 @@
     });
 
     bindBtn('btnUp', () => { triggerHaptic(18);
+      if (appState === 'FIRST_FIGHT_TUTORIAL') { startMatch(true); return; }
       if (appState === 'MODE_SELECT') selectedModeIdx = (selectedModeIdx + 3) % 4;
       else if (appState === 'CHAR_SELECT' && !p1Locked) { p1SelectIdx = (p1SelectIdx + 7) % 14; play808Sfx('nav'); }
       else if (appState === 'ARENA_SELECT') { selectedArenaIdx = (selectedArenaIdx + 6) % 9; play808Sfx('nav'); }
@@ -7033,11 +7091,14 @@
     if (canvasEl) {
       const handleCanvasTap = (e) => {
         initAudio();
+        if (appState === 'FIRST_FIGHT_TUTORIAL') {
+          startMatch(true);
+          return;
+        }
         if (appState === 'KNOCKDOWN') {
           playerMashStamina();
           return;
         }
-        const rect = canvasEl.getBoundingClientRect();
         const clientX = e.touches && e.touches[0] ? e.touches[0].clientX : e.clientX;
         const clientY = e.touches && e.touches[0] ? e.touches[0].clientY : e.clientY;
         if (clientX === undefined || clientY === undefined) return;
@@ -7205,12 +7266,18 @@
       };
       canvasEl.addEventListener('click', handleCanvasTap);
       canvasEl.addEventListener('touchstart', (e) => {
-        if (appState === 'KNOCKDOWN') {
+        if (appState === 'KNOCKDOWN' || appState === 'FIRST_FIGHT_TUTORIAL') {
           e.preventDefault();
           handleCanvasTap(e);
         }
       }, { passive: false });
     }
+
+    window.addEventListener('pointerdown', (e) => {
+      if (appState === 'FIRST_FIGHT_TUTORIAL') {
+        startMatch(true);
+      }
+    });
     let lastLoopTime = performance.now();
     let loopAccumulator = 0;
     const TIME_PER_FRAME = 1000 / 60; // Exactly 16.666ms per update
