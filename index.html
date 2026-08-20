@@ -4493,115 +4493,129 @@
         printPico('FIGHT! >', 84, 118, 10, 1, true);
       }
     }
-    // === ONE-SCREEN FIRST-FIGHT QUICK RULES OVERLAY ===
+    // === ONE-SCREEN FIRST-FIGHT QUICK RULES OVERLAY (4 RULES) ===
     function drawFirstFightTutorialOverlay() {
       ctx.fillStyle = getPalColor(0);
       ctx.fillRect(0, 0, 128, 128);
 
       // Outer gold modal border
       ctx.fillStyle = getPalColor(0);
-      ctx.fillRect(4, 4, 120, 120);
+      ctx.fillRect(4, 3, 120, 122);
       ctx.strokeStyle = getPalColor(10);
-      ctx.strokeRect(4, 4, 120, 120);
+      ctx.strokeRect(4, 3, 120, 122);
 
       // Top Header Box
       ctx.fillStyle = getPalColor(1);
-      ctx.fillRect(4, 4, 120, 14);
+      ctx.fillRect(4, 3, 120, 13);
       ctx.strokeStyle = getPalColor(10);
-      ctx.strokeRect(4, 4, 120, 14);
-      printPicoCenter('HOW TO PLAY: 3 RULES', 8, 10, 1, true);
+      ctx.strokeRect(4, 3, 120, 13);
+      printPicoCenter('HOW TO PLAY: 4 RULES', 6, 10, 1, true);
 
-      // ── Rule 1: SQUARE GEM + ROUND CRASH ORB (Y: 22..48) ──
+      // ── Rule 1: SQUARE GEM + ROUND CRASH ORB (Y: 18..38) ──
       ctx.fillStyle = getPalColor(1);
-      ctx.fillRect(8, 21, 24, 26);
+      ctx.fillRect(8, 18, 24, 20);
       ctx.strokeStyle = getPalColor(5);
-      ctx.strokeRect(8, 21, 24, 26);
+      ctx.strokeRect(8, 18, 24, 20);
 
       // Blue Square Gem (Left) vs Blue Round Crash Orb (Right)
-      drawTutorialGem(ctx, 10, 24, 2, false, 3, 9, 10); // Type 2 = Square Blue Gem
-      drawTutorialGem(ctx, 21, 24, 6, false, 3, 9, 10, true); // Type 6 = Round Blue Crash Orb
+      drawTutorialGem(ctx, 10, 20, 2, false, 3, 8, 8); // Square Blue Gem
+      drawTutorialGem(ctx, 21, 20, 6, false, 3, 8, 8, true); // Round Blue Crash Orb
       
-      // Impact spark between them
       if (Math.floor(globalFrameCount / 6) % 2 === 0) {
         ctx.fillStyle = getPalColor(10);
-        ctx.fillRect(19, 28, 2, 2);
+        ctx.fillRect(19, 23, 2, 2);
       }
       
-      printPico('1. GEMS & ORBS', 36, 22, 10, 1, true);
-      printPico('MATCH ORB + GEM', 36, 30, 7, 1);
-      printPico('SHATTERS TO PUNCH', 36, 38, 11, 1);
+      printPico('1. GEMS & ORBS', 36, 19, 10, 1, true);
+      printPico('ORB POPS TO PUNCH', 36, 28, 7, 1);
 
       // Separator Line 1
       ctx.fillStyle = getPalColor(5);
-      ctx.fillRect(8, 49, 112, 1);
+      ctx.fillRect(8, 40, 112, 1);
 
-      // ── Rule 2: IN-GAME HEALTH BAR (HP) (Y: 52..78) ──
+      // ── Rule 2: GARBAGE COUNTER STONES (Y: 42..62) ──
       ctx.fillStyle = getPalColor(1);
-      ctx.fillRect(8, 52, 24, 26);
+      ctx.fillRect(8, 42, 24, 20);
       ctx.strokeStyle = getPalColor(5);
-      ctx.strokeRect(8, 52, 24, 26);
+      ctx.strokeRect(8, 42, 24, 20);
 
-      // Exact In-Game Health Bar Replica (Black frame, red damage, pulsing green HP, white highlight)
+      // Authentic Countdown Stone Block (3..2..1 timer cycling)
+      const stepTimer = Math.floor((globalFrameCount % 90) / 30);
+      const displayTimer = (3 - stepTimer);
+      drawTutorialGem(ctx, 15, 44, 10, false, displayTimer, 10, 12);
+
+      printPico('2. GARBAGE STONES', 36, 43, 10, 1, true);
+      printPico('HITS DROP 3-2-1', 36, 52, 7, 1);
+
+      // Separator Line 2
+      ctx.fillStyle = getPalColor(5);
+      ctx.fillRect(8, 64, 112, 1);
+
+      // ── Rule 3: IN-GAME HEALTH BAR (HP) (Y: 66..86) ──
+      ctx.fillStyle = getPalColor(1);
+      ctx.fillRect(8, 66, 24, 20);
+      ctx.strokeStyle = getPalColor(5);
+      ctx.strokeRect(8, 66, 24, 20);
+
+      // Exact In-Game Health Bar Replica
       ctx.fillStyle = getPalColor(0);
-      ctx.fillRect(9, 56, 22, 6);
-      ctx.fillStyle = getPalColor(8); // Red background damage
-      ctx.fillRect(10, 57, 20, 4);
+      ctx.fillRect(9, 69, 22, 6);
+      ctx.fillStyle = getPalColor(8); // Red damage background
+      ctx.fillRect(10, 70, 20, 4);
       
       // Dynamic draining HP bar
       const hpW = 12 + Math.floor(Math.sin(globalFrameCount * 0.12) * 5);
       ctx.fillStyle = getPalColor(11); // Green active HP
-      ctx.fillRect(10, 57, hpW, 4);
+      ctx.fillRect(10, 70, hpW, 4);
       ctx.fillStyle = getPalColor(7);  // White top highlight line
-      ctx.fillRect(10, 57, hpW, 1);
+      ctx.fillRect(10, 70, hpW, 1);
       ctx.strokeStyle = getPalColor(5); // Dark gray border
-      ctx.strokeRect(9, 56, 22, 6);
+      ctx.strokeRect(9, 69, 22, 6);
       
       // HP text below bar
-      printPico('HP', 16, 66, 10, 1, true);
+      printPico('HP', 16, 77, 10, 1, true);
 
-      printPico('2. HEALTH (HP)', 36, 52, 10, 1, true);
-      printPico('HITS DRAIN HP', 36, 60, 7, 1);
-      printPico('0 HP = KNOCKDOWN', 36, 68, 8, 1);
+      printPico('3. HEALTH (HP)', 36, 67, 10, 1, true);
+      printPico('0 HP = KNOCKDOWN!', 36, 76, 8, 1);
 
-      // Separator Line 2
+      // Separator Line 3
       ctx.fillStyle = getPalColor(5);
-      ctx.fillRect(8, 80, 112, 1);
+      ctx.fillRect(8, 88, 112, 1);
 
-      // ── Rule 3: PRESS UP TO DROP FASTER (Y: 83..105) ──
+      // ── Rule 4: PRESS UP TO DROP FASTER (Y: 90..108) ──
       ctx.fillStyle = getPalColor(1);
-      ctx.fillRect(8, 83, 24, 22);
+      ctx.fillRect(8, 90, 24, 18);
       ctx.strokeStyle = getPalColor(5);
-      ctx.strokeRect(8, 83, 24, 22);
+      ctx.strokeRect(8, 90, 24, 18);
 
       // Up Arrow Icon with speed lines
       ctx.fillStyle = getPalColor(10);
       ctx.beginPath();
-      ctx.moveTo(19, 86);
-      ctx.lineTo(24, 92);
-      ctx.lineTo(21, 92);
-      ctx.lineTo(21, 99);
-      ctx.lineTo(17, 99);
-      ctx.lineTo(17, 92);
-      ctx.lineTo(14, 92);
+      ctx.moveTo(19, 92);
+      ctx.lineTo(24, 97);
+      ctx.lineTo(21, 97);
+      ctx.lineTo(21, 103);
+      ctx.lineTo(17, 103);
+      ctx.lineTo(17, 97);
+      ctx.lineTo(14, 97);
       ctx.closePath();
       ctx.fill();
 
       // Speed lines
       ctx.fillStyle = getPalColor(7);
-      ctx.fillRect(11, 94, 1, 6);
-      ctx.fillRect(27, 94, 1, 6);
+      ctx.fillRect(11, 98, 1, 5);
+      ctx.fillRect(27, 98, 1, 5);
 
-      printPico('3. FAST HARD DROP', 36, 83, 10, 1, true);
-      printPico('PRESS [UP] OR [W]', 36, 91, 7, 1);
-      printPico('DROPS ITEM FAST!', 36, 99, 11, 1);
+      printPico('4. FAST HARD DROP', 36, 90, 10, 1, true);
+      printPico('PRESS [UP] OR [W]', 36, 98, 7, 1);
 
-      // ── Bottom Action Prompt (Y: 108..122) ──
+      // ── Bottom Action Prompt (Y: 110..122) ──
       ctx.fillStyle = getPalColor(1);
-      ctx.fillRect(6, 108, 116, 14);
+      ctx.fillRect(6, 110, 116, 13);
       ctx.strokeStyle = getPalColor(10);
-      ctx.strokeRect(6, 108, 116, 14);
+      ctx.strokeRect(6, 110, 116, 13);
       if (Math.floor(globalFrameCount / 18) % 2 === 0) {
-        printPicoCenter('PRESS ANY KEY OR TAP!', 112, 10, 1, true);
+        printPicoCenter('PRESS ANY KEY OR TAP!', 113, 10, 1, true);
       }
     }
     // === 7-STAGE TOURNAMENT LADDER SCREEN ===
