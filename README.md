@@ -113,22 +113,12 @@ Experience authentic retro arcade gameplay with handcrafted 16-color pixel art, 
 
 ---
 
-### 8. 🏋️ Coach Gym Upgrade Shop
-*Visit the Gym between tournament bouts to invest purse cash into permanent RPG stat boosts (Power Punching, Steel Chin Defense, Fast Drop Speed, and Diamond Seeds).*
+### 8. 📜 Quick Combat Guide
+*Session-aware quick overlay appearing before Round 1 to give first-time players an instant combat summary: (1) Match square gems with round crash orbs to throw punches, (2) Manage incoming 3-2-1 garbage counter stones dropped by rival punches, (3) Deplete the opponent's Health Bar (HP) down to 0 for a knockdown, and (4) Press [UP] (or [W]) to hard-drop falling items fast!*
 
 <p align="center">
-  <img src="docs/screenshots/gameplay/08_gym_upgrade_shop.png" alt="Crash Out Ring Rush Coach Gym Upgrade Shop - RPG Stat Modifiers and Shop Upgrades" width="480">
+  <img src="docs/screenshots/gameplay/09_first_fight_quick_rules.png" alt="Crash Out Ring Rush Quick Combat Guide - Gems and Orbs, Garbage Counter Stones, HP Meter, Up Arrow Fast Drop" width="480">
 </p>
-
----
-
-### 9. 📜 First-Fight Quick Rules Guide
-*Session-aware quick overlay appearing before Round 1 to give first-time players an instant 4-rule combat guide: (1) Match square gems with round crash orbs to throw punches, (2) Manage incoming 3-2-1 garbage counter stones dropped by rival punches, (3) Deplete the opponent's Health Bar (HP) down to 0 for a knockdown, and (4) Press [UP] (or [W]) to hard-drop falling items fast!*
-
-<p align="center">
-  <img src="docs/screenshots/gameplay/09_first_fight_quick_rules.png" alt="Crash Out Ring Rush First Fight Quick Rules Overlay - Gems and Orbs, Garbage Counter Stones, HP Meter, Up Arrow Fast Drop" width="480">
-</p>
-
 ---
 
 ## 🥊 The Complete 14-Fighter Roster
@@ -175,7 +165,6 @@ Fight in authentic environments with distinct color palettes, dithered crowd ani
 ### 1. 🏆 Road to Gold Campaign (30-Minute Tournament)
 - **7-Stage Progression**: Fight through an escalating ladder of contenders leading up to the 50-0 Grand Champion Boss fight!
 - **Purse Earnings**: Earn purse money for every knockout victory, plus sweep bonuses and remaining HP multipliers.
-- **Gym Upgrade Shop**: Spend your winnings on Power, Defense, Drop Speed, and Diamond Seeds.
 - **Post-Fight Press Conferences**: Experience animated post-bout interviews and Punch-Out style ranking ladder climbs.
 - **State Persistence**: Automatic `localStorage` campaign saving allows you to pause and resume anytime.
 

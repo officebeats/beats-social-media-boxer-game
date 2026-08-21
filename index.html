@@ -4509,7 +4509,7 @@
       ctx.fillRect(4, 3, 120, 13);
       ctx.strokeStyle = getPalColor(10);
       ctx.strokeRect(4, 3, 120, 13);
-      printPicoCenter('HOW TO PLAY: 4 RULES', 6, 10, 1, true);
+      printPicoCenter('QUICK COMBAT GUIDE', 6, 10, 1, true);
 
       // ── Rule 1: SQUARE GEM + ROUND CRASH ORB (Y: 18..38) ──
       ctx.fillStyle = getPalColor(1);
@@ -4526,7 +4526,7 @@
         ctx.fillRect(19, 23, 2, 2);
       }
       
-      printPico('1. GEMS & ORBS', 36, 19, 10, 1, true);
+      printPico('GEMS & CRASH ORBS', 36, 19, 10, 1, true);
       printPico('ORB POPS TO PUNCH', 36, 28, 7, 1);
 
       // Separator Line 1
@@ -4544,7 +4544,7 @@
       const displayTimer = (3 - stepTimer);
       drawTutorialGem(ctx, 15, 44, 10, false, displayTimer, 10, 12);
 
-      printPico('2. GARBAGE STONES', 36, 43, 10, 1, true);
+      printPico('GARBAGE STONES', 36, 43, 10, 1, true);
       printPico('HITS DROP 3-2-1', 36, 52, 7, 1);
 
       // Separator Line 2
@@ -4575,7 +4575,7 @@
       // HP text below bar
       printPico('HP', 16, 77, 10, 1, true);
 
-      printPico('3. HEALTH (HP)', 36, 67, 10, 1, true);
+      printPico('HEALTH BAR (HP)', 36, 67, 10, 1, true);
       printPico('0 HP = KNOCKDOWN!', 36, 76, 8, 1);
 
       // Separator Line 3
@@ -4606,7 +4606,7 @@
       ctx.fillRect(11, 98, 1, 5);
       ctx.fillRect(27, 98, 1, 5);
 
-      printPico('4. FAST HARD DROP', 36, 90, 10, 1, true);
+      printPico('FAST HARD DROP', 36, 90, 10, 1, true);
       printPico('PRESS [UP] OR [W]', 36, 98, 7, 1);
 
       // ── Bottom Action Prompt (Y: 110..122) ──
@@ -4801,152 +4801,7 @@
       }
     }
 
-    // === TRAINER GYM UPGRADE SHOP ===
-    function buyShopItem(idx) {
-      if (idx === 5) {
-        advanceCampaignStage();
-        appState = 'LADDER_BRACKET';
-        play808Sfx('confirm');
-        return;
-      }
-      if (idx === 0) {
-        if (campaignState.upgrades.pwr >= 3) {
-          globalFloatingTexts.push(new FloatingText('POWER MAXED!', 42, 40, 10));
-          play808Sfx('nav');
-          return;
-        }
-        const cost = CAMPAIGN_UPGRADE_TIERS.pwr[campaignState.upgrades.pwr].cost;
-        if (campaignState.purse >= cost) {
-          campaignState.purse -= cost;
-          campaignState.upgrades.pwr++;
-          saveCampaign();
-          play808Sfx('fuse');
-          globalFloatingTexts.push(new FloatingText('POWER UPGRADED!', 36, 40, 10));
-        } else {
-          globalFloatingTexts.push(new FloatingText('NEED $' + cost + ' CASH!', 36, 40, 8));
-          play808Sfx('nav');
-        }
-      } else if (idx === 1) {
-        if (campaignState.upgrades.def >= 3) {
-          globalFloatingTexts.push(new FloatingText('DEFENSE MAXED!', 36, 40, 10));
-          play808Sfx('nav');
-          return;
-        }
-        const cost = CAMPAIGN_UPGRADE_TIERS.def[campaignState.upgrades.def].cost;
-        if (campaignState.purse >= cost) {
-          campaignState.purse -= cost;
-          campaignState.upgrades.def++;
-          saveCampaign();
-          play808Sfx('fuse');
-          globalFloatingTexts.push(new FloatingText('DEFENSE UPGRADED!', 34, 40, 10));
-        } else {
-          globalFloatingTexts.push(new FloatingText('NEED $' + cost + ' CASH!', 36, 40, 8));
-          play808Sfx('nav');
-        }
-      } else if (idx === 2) {
-        if (campaignState.upgrades.spd >= 3) {
-          globalFloatingTexts.push(new FloatingText('SPEED MAXED!', 42, 40, 10));
-          play808Sfx('nav');
-          return;
-        }
-        const cost = CAMPAIGN_UPGRADE_TIERS.spd[campaignState.upgrades.spd].cost;
-        if (campaignState.purse >= cost) {
-          campaignState.purse -= cost;
-          campaignState.upgrades.spd++;
-          saveCampaign();
-          play808Sfx('fuse');
-          globalFloatingTexts.push(new FloatingText('SPEED UPGRADED!', 36, 40, 10));
-        } else {
-          globalFloatingTexts.push(new FloatingText('NEED $' + cost + ' CASH!', 36, 40, 8));
-          play808Sfx('nav');
-        }
-      } else if (idx === 3) {
-        if (campaignState.upgrades.diamondSeed) {
-          globalFloatingTexts.push(new FloatingText('ALREADY OWNED!', 36, 40, 10));
-          play808Sfx('nav');
-          return;
-        }
-        const cost = 1500;
-        if (campaignState.purse >= cost) {
-          campaignState.purse -= cost;
-          campaignState.upgrades.diamondSeed = true;
-          saveCampaign();
-          play808Sfx('fuse');
-          globalFloatingTexts.push(new FloatingText('DIAMOND SEED!', 38, 40, 10));
-        } else {
-          globalFloatingTexts.push(new FloatingText('NEED $' + cost + ' CASH!', 36, 40, 8));
-          play808Sfx('nav');
-        }
-      } else if (idx === 4) {
-        if (campaignState.upgrades.superRush) {
-          globalFloatingTexts.push(new FloatingText('ALREADY OWNED!', 36, 40, 10));
-          play808Sfx('nav');
-          return;
-        }
-        const cost = 1200;
-        if (campaignState.purse >= cost) {
-          campaignState.purse -= cost;
-          campaignState.upgrades.superRush = true;
-          saveCampaign();
-          play808Sfx('fuse');
-          globalFloatingTexts.push(new FloatingText('SUPER RUSH!', 42, 40, 10));
-        } else {
-          globalFloatingTexts.push(new FloatingText('NEED $' + cost + ' CASH!', 36, 40, 8));
-          play808Sfx('nav');
-        }
-      }
-    }
 
-    // === TRAINER GYM UPGRADE SHOP ===
-    function drawLadderShopScreen() {
-      ctx.fillStyle = getPalColor(1);
-      ctx.fillRect(0, 0, 128, 128);
-
-      ctx.fillStyle = getPalColor(0);
-      ctx.fillRect(0, 0, 128, 18);
-      printPico('<', 4, 3, 6, 1); printPicoCenter('TRAINER GYM UPGRADE SHOP', 3, 10, 1, true);
-      printPicoCenter(`PURSE: $${campaignState.purse}`, 10, 11, 1);
-
-      const items = [
-        { key: 'pwr', name: '1. POWER', lv: campaignState.upgrades.pwr, tiers: CAMPAIGN_UPGRADE_TIERS.pwr },
-        { key: 'def', name: '2. DEFENSE', lv: campaignState.upgrades.def, tiers: CAMPAIGN_UPGRADE_TIERS.def },
-        { key: 'spd', name: '3. SPEED', lv: campaignState.upgrades.spd, tiers: CAMPAIGN_UPGRADE_TIERS.spd },
-        { key: 'diamondSeed', name: '4. DIAMOND GEM', owned: campaignState.upgrades.diamondSeed, cost: 1500 },
-        { key: 'superRush', name: '5. SUPER RUSH', owned: campaignState.upgrades.superRush, cost: 1200 },
-        { key: 'next', name: `>> NEXT BOUT (STG ${campaignState.stageIdx+2}/7) <<`, isAction: true }
-      ];
-
-      items.forEach((item, idx) => {
-        const y = 22 + idx * 15;
-        const isSel = (shopSelectedIdx === idx);
-
-        ctx.fillStyle = isSel ? getPalColor(10) : getPalColor(0);
-        ctx.fillRect(6, y, 116, 13);
-        ctx.strokeStyle = isSel ? getPalColor(7) : getPalColor(5);
-        ctx.strokeRect(6, y, 116, 13);
-
-        if (item.isAction) {
-          printPicoCenter(item.name, y + 3, isSel ? 0 : 10, 1, false);
-        } else if (item.tiers) {
-          const curLv = item.lv;
-          const nextTier = item.tiers[curLv];
-          const leftStr = `${item.name} LV${curLv}`;
-          const rightStr = nextTier ? `$${nextTier.cost}` : 'MAXED';
-          printPico(leftStr, 10, y + 3, isSel ? 0 : 7, 1);
-          const rightX = 120 - (rightStr.length * 5 - 1);
-          printPico(rightStr, rightX, y + 3, isSel ? 0 : (nextTier ? 11 : 6), 1);
-        } else {
-          const rightStr = item.owned ? 'OWNED' : `$${item.cost}`;
-          printPico(item.name, 10, y + 3, isSel ? 0 : 7, 1);
-          const rightX = 120 - (rightStr.length * 5 - 1);
-          printPico(rightStr, rightX, y + 3, isSel ? 0 : (item.owned ? 6 : 11), 1);
-        }
-      });
-
-      if (Math.floor(globalFrameCount / 20) % 2 === 0) {
-        printPicoCenter('UP/DOWN: NAV  X: SELECT', 118, 7, 1, true);
-      }
-    }
     // === KNOCKDOWN REFEREE COUNTDOWN OVERLAY ===
     function drawKnockdownOverlay() {
       if (!knockdownData) return;
@@ -6246,8 +6101,6 @@
         drawStageIntroScreen();
       } else if (appState === 'STAGE_VICTORY_CUTSCENE') {
         drawStageVictoryCutsceneScreen();
-      } else if (appState === 'LADDER_SHOP') {
-        drawLadderShopScreen();
       } else if (appState === 'VICTORY_END') {
         drawVictoryEndScreen();
       } else if (appState === 'CONTINUE_SCREEN') {
@@ -6307,16 +6160,13 @@
         appState = (selectedModeIdx === 0 ? 'LADDER_BRACKET' : 'CHAR_SELECT');
         play808Sfx('nav');
       } else if (appState === 'STAGE_VICTORY_CUTSCENE') {
-        appState = 'LADDER_SHOP';
+        advanceCampaignStage();
+        appState = 'LADDER_BRACKET';
         play808Sfx('nav');
       } else if (appState === 'ARENA_SELECT') {
         p2Locked = false;
         lockCountdown = -1;
         appState = 'CHAR_SELECT';
-        play808Sfx('nav');
-      } else if (appState === 'LADDER_SHOP') {
-        saveCampaign();
-        appState = 'MODE_SELECT';
         play808Sfx('nav');
       } else if (appState === 'VICTORY_END' || appState === 'CONTINUE_SCREEN' || appState === 'KO') {
         campaignState.active = false;
@@ -6407,12 +6257,10 @@
           play808Sfx('confirm');
         } else {
           victoryCutscenePhase = 0;
-          shopSelectedIdx = 5; // Default cursor to >> NEXT BOUT <<
-          appState = 'LADDER_SHOP';
+          advanceCampaignStage();
+          appState = 'LADDER_BRACKET';
           play808Sfx('confirm');
         }
-      } else if (appState === 'LADDER_SHOP') {
-        buyShopItem(shopSelectedIdx);
       } else if (appState === 'ARENA_SELECT') {
         play808Sfx('confirm');
         startMatch();
@@ -6640,10 +6488,6 @@
           if (dpadUp) { selectedArenaIdx = (selectedArenaIdx + 6) % 9; gpNavDebounce = 12; play808Sfx('nav'); }
           if (dpadDown) { selectedArenaIdx = (selectedArenaIdx + 3) % 9; gpNavDebounce = 12; play808Sfx('nav'); }
           if (btnA || btnX) { handleConfirmAction(); gpNavDebounce = 15; }
-        } else if (appState === 'LADDER_SHOP') {
-          if (dpadUp) { shopSelectedIdx = (shopSelectedIdx + 5) % 6; gpNavDebounce = 12; play808Sfx('nav'); }
-          if (dpadDown) { shopSelectedIdx = (shopSelectedIdx + 1) % 6; gpNavDebounce = 12; play808Sfx('nav'); }
-          if (btnA || btnX) { handleConfirmAction(); gpNavDebounce = 15; }
         } else if (appState === 'STAGE_VICTORY_CUTSCENE' || appState === 'VICTORY_END' || appState === 'CONTINUE_SCREEN' || appState === 'KO') {
           if (btnA || btnX) { handleConfirmAction(); gpNavDebounce = 15; }
         }
@@ -6853,14 +6697,6 @@
       }
 
       if (appState === 'STAGE_INTRO') {
-        if (isStartKey(e.key)) {
-          handleConfirmAction();
-        }
-        return;
-      }
-      if (appState === 'LADDER_SHOP') {
-        if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') { shopSelectedIdx = (shopSelectedIdx + 5) % 6; play808Sfx('nav'); }
-        if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') { shopSelectedIdx = (shopSelectedIdx + 1) % 6; play808Sfx('nav'); }
         if (isStartKey(e.key)) {
           handleConfirmAction();
         }
@@ -7184,7 +7020,8 @@
             play808Sfx('confirm');
           } else {
             victoryCutscenePhase = 0;
-            appState = 'LADDER_SHOP';
+            advanceCampaignStage();
+            appState = 'LADDER_BRACKET';
             play808Sfx('confirm');
           }
           return;
@@ -7194,18 +7031,6 @@
           startMatch();
           return;
         }
-        if (appState === 'LADDER_SHOP') {
-          for (let s = 0; s < 6; s++) {
-            const sy = 22 + s * 15;
-            if (clickY >= sy && clickY <= sy + 13 && clickX >= 6 && clickX <= 122) {
-              shopSelectedIdx = s;
-              buyShopItem(s);
-              return;
-            }
-          }
-          return;
-        }
-
         if (appState === 'VICTORY_END') {
           campaignState.active = false;
           campaignState.stageIdx = 0;
@@ -7336,7 +7161,6 @@
     window.p2SelectIdx = p2SelectIdx;
     window.p1Locked = p1Locked;
     window.p2Locked = p2Locked;
-    window.shopSelectedIdx = shopSelectedIdx;
     window.selectedArenaIdx = selectedArenaIdx;
     window.victoryCutscenePhase = victoryCutscenePhase;
     window.particlePool = particlePool;
@@ -7367,7 +7191,6 @@
     window.unlockedFighters = unlockedFighters;
     window.unlockFighter = unlockFighter;
     window.isFighterUnlocked = isFighterUnlocked;
-    window.buyShopItem = buyShopItem;
 
     requestAnimationFrame((time) => { lastLoopTime = time; gameLoop(time); });
   </script>
