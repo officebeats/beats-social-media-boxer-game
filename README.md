@@ -1,6 +1,6 @@
 # 🥊 CRASH OUT: RING RUSH — The Ultimate Adrien Broner, Deen The Great & COB (Crash Out Boys) Retro Puzzle Boxing Game
 
-[![Game Version](https://img.shields.io/badge/Version-v3.8.1-FF004D?style=for-the-badge&logo=retro-arch&logoColor=white)](https://officebeats.github.io/beats-social-media-boxer-game/)
+[![Game Version](https://img.shields.io/badge/Version-v3.9.0-FF004D?style=for-the-badge&logo=retro-arch&logoColor=white)](https://officebeats.github.io/beats-social-media-boxer-game/)
 [![Download PICO-8 Cartridge](https://img.shields.io/badge/Cartridge-PICO--8%20.p8-FF004D?style=for-the-badge&logo=pico-8&logoColor=white)](https://raw.githubusercontent.com/officebeats/beats-social-media-boxer-game/main/crash_out.p8)
 [![Engine](https://img.shields.io/badge/Engine-PICO--8%20%2F%20HTML5%20Canvas-00E436?style=for-the-badge&logo=html5&logoColor=white)](https://officebeats.github.io/beats-social-media-boxer-game/)
 [![Frame Rate](https://img.shields.io/badge/Performance-Locked%2060%20FPS-29ADFF?style=for-the-badge&logo=speedtest&logoColor=white)](https://officebeats.github.io/beats-social-media-boxer-game/)
@@ -30,7 +30,7 @@ Step into the squared circle as your favorite social media boxers, YouTube & Kic
 
 ```
 ═══════════════════════════════════════════════════════════════════════════
-  🥊 CRASH OUT: RING RUSH — CORE FEATURE MATRIX (v3.8.1)
+  🥊 CRASH OUT: RING RUSH — CORE FEATURE MATRIX (v3.9.0)
 ═══════════════════════════════════════════════════════════════════════════
   ⭐ 14 Playable Fighters     • Adrien Broner, Deen The Great & 12 Viral Guests
   ⭐ 9 Dynamic Arenas         • Kick Warehouse, Vegas Title Bout, Tokyo Dojo, etc.
@@ -114,10 +114,10 @@ Experience authentic retro arcade gameplay with handcrafted 16-color pixel art, 
 ---
 
 ### 8. 📜 Quick Combat Guide
-*Session-aware quick overlay appearing before Round 1 to give first-time players an instant combat summary: (1) Match square gems with round crash orbs to throw punches, (2) Manage incoming 3-2-1 garbage counter stones dropped by rival punches, (3) Deplete the opponent's Health Bar (HP) down to 0 for a knockdown, and (4) Press [UP] (or [W]) to hard-drop falling items fast!*
+*Session-aware quick overlay appearing before Round 1 to give first-time players an instant combat summary: (1) Match square gems with round crash orbs to throw punches with your boxer, (2) Deplete the opponent's Health Bar (HP) down to 0 for a knockdown, and (3) Use intuitive controls to move left/right, spin, and drop blocks fast!*
 
 <p align="center">
-  <img src="docs/screenshots/gameplay/09_first_fight_quick_rules.png" alt="Crash Out Ring Rush Quick Combat Guide - Gems and Orbs, Garbage Counter Stones, HP Meter, Up Arrow Fast Drop" width="480">
+  <img src="docs/screenshots/gameplay/09_first_fight_quick_rules.png" alt="Crash Out Ring Rush Quick Combat Guide - Gems and Crash Orbs, Boxer Punches, Health Bar Knockdown, Controls" width="480">
 </p>
 ---
 
